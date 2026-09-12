@@ -308,3 +308,60 @@ body:not(.planet-observer) .home-cosmos .coordinates{transform:translate(24px,28
 
 /* Strengthen main clock and countdown numerals. */
 .home-flip .digit,.home-flip .focus-unit-card{font-weight:500}
+.rain-date-piece{display:inline-block;margin-inline:3px}.rain-calendar-host{display:block}
+#rain-field .rain-drop.physical-rain{position:absolute;left:0;top:0;width:40px;height:40px;display:grid;place-items:center;font-size:28px;line-height:1;animation:none!important;opacity:.55;will-change:transform}
+/* Shared ground line for falling seconds and the assembled date/time. */
+.home-rain .rain-field{bottom:0}
+.home-rain .rain-landed{align-items:flex-end;padding-bottom:0}
+.home-rain .rain-date{align-self:flex-end;margin-bottom:0}
+.home-rain .rain-date>small{position:absolute;top:100%;left:0;right:0}
+.home-rain .rain-cycle-ghost{pointer-events:none;border-color:transparent!important;z-index:3}
+.home-rain .rain-landed:not(.rain-cycle-ghost){z-index:2;pointer-events:none}
+.home-rain .rain-dissolving{pointer-events:none}
+.rain-calendar-host{display:flex;align-items:flex-end;justify-content:center;gap:8px}
+.rain-date-piece{font-size:18px;line-height:1.4;white-space:nowrap;margin:0}
+.rain-date-piece:nth-child(2),.rain-date-piece:nth-child(3){font-size:24px}
+@media(max-width:760px){.rain-calendar-host{gap:5px}.rain-date-piece{font-size:13px}.rain-date-piece:nth-child(2),.rain-date-piece:nth-child(3){font-size:18px}}
+.home-rain .rain-hour,.home-rain .rain-minute{font-size:clamp(110px,11vw,180px)}
+.home-rain .rain-date-piece:nth-child(2){color:color-mix(in srgb,var(--accent) 78%,var(--ink))}
+.home-rain .rain-date-piece:nth-child(3){color:color-mix(in srgb,var(--accent) 48%,var(--ink))}
+@media(max-width:760px){.home-rain .rain-hour,.home-rain .rain-minute{font-size:clamp(78px,20vw,110px)}}
+/* The ground clips outgoing components as they fall below it. */
+.home-rain .rain-landed{clip-path:inset(-1500px -500px 0 -500px)}
+.home-rain .rain-hour,.home-rain .rain-minute{font-size:clamp(165px,16.5vw,270px)}
+@media(max-width:760px){.home-rain .rain-hour,.home-rain .rain-minute{font-size:clamp(117px,30vw,165px)}}
+.home-rain .rain-date-piece:nth-child(1),.home-rain .rain-date-piece:nth-child(2){color:#bd892f}
+.home-rain .rain-date-piece:nth-child(3){color:#3d9eac}
+.home-rain .rain-date-piece:nth-child(4){color:#9272c8}
+body[data-dark=true] .home-rain .rain-date-piece:nth-child(1),body[data-dark=true] .home-rain .rain-date-piece:nth-child(2){color:#efc46d}
+body[data-dark=true] .home-rain .rain-date-piece:nth-child(3){color:#87d9e0}
+body[data-dark=true] .home-rain .rain-date-piece:nth-child(4){color:#c6a5f2}
+
+.home-rain .rain-value .rain-time-unit{display:inline-block;position:static;font-size:28px;font-weight:inherit;line-height:1;margin-left:6px;vertical-align:baseline;letter-spacing:0;color:inherit;animation:none;transform:none}
+
+.home-rain .rain-minute .rain-value .rain-time-unit{color:var(--muted);opacity:.55;text-shadow:none}
+
+.home-rain .rain-value .rain-time-unit{font-size:28px;color:var(--muted);opacity:.55;text-shadow:none}
+/* Keep both time units quiet and extend the shared physical ground. */
+.home-rain .rain-value .rain-time-unit{font-weight:400;color:var(--muted);opacity:.55}
+.home-rain .rain-composition{width:min(1240px,100%)}
+.home-rain .rain-field,.home-rain .rain-landed{bottom:-24px}
+.mode-pull-cord{position:fixed;top:0;right:22px;width:32px;height:139px;padding:0;z-index:25;color:var(--ink);background:none;border:0;touch-action:none;cursor:grab;display:flex;align-items:center;flex-direction:column;transform-origin:top center}
+.mode-pull-cord:active{cursor:grabbing}.mode-cord-line{position:absolute;bottom:31px;width:1px;height:calc(108px + var(--pull,0px));background:currentColor;opacity:.35;pointer-events:none}
+.mode-cord-handle{position:absolute;bottom:0;display:grid;place-items:center;width:28px;height:34px;border-radius:14px;background:var(--surface);box-shadow:0 2px 7px #00000012;pointer-events:none}.mode-cord-handle svg{width:19px;height:19px}.mode-pull-cord:hover .mode-cord-handle{background:var(--soft)}
+body:not([data-view=home]) .mode-pull-cord{display:none}
+@media(max-width:760px){.mode-pull-cord{right:5px;height:116px}.mode-cord-line{height:calc(85px + var(--pull,0px))}}
+@media(prefers-reduced-motion:reduce){.mode-pull-cord{animation:none!important}}
+/* The pull cord replaces the original header mode shortcut. */
+header .header-right [data-v5="mode"]{display:none!important}
+/* Pull cord uses neutral contrast independent of the selected accent. */
+body[data-dark=false] .mode-pull-cord{color:#000}
+body[data-dark=true] .mode-pull-cord{color:#fff}
+.mode-pull-cord .mode-cord-line{opacity:1;background:currentColor}
+.mode-pull-cord .mode-cord-handle,.mode-pull-cord:hover .mode-cord-handle{background:transparent;border:1px solid currentColor;box-shadow:none}
+.mode-pull-cord .mode-cord-handle svg{color:inherit;stroke:currentColor}
+/* A fine cord with a small sculpted pull, retaining the larger hit area. */
+.mode-pull-cord .mode-cord-line{width:.5px;bottom:23px;height:calc(116px + var(--pull,0px))}
+.mode-pull-cord .mode-cord-handle,.mode-pull-cord:hover .mode-cord-handle{width:11px;height:23px;bottom:0;border:0;border-radius:50% 50% 46% 46% / 72% 72% 28% 28%;background:currentColor;box-shadow:none}
+.mode-pull-cord .mode-cord-handle svg{display:none}
+@media(max-width:760px){.mode-pull-cord .mode-cord-line{height:calc(93px + var(--pull,0px))}}

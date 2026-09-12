@@ -751,3 +751,144 @@ document.addEventListener('pointermove',e=>{const state=solarSpaceDrag;if(!state
 document.addEventListener('pointerup',()=>finishSolarSpaceDrag(true),true);
 document.addEventListener('pointercancel',()=>finishSolarSpaceDrag(false),true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&solarSpaceDrag)finishSolarSpaceDrag(false)},true);
+function elasticRainEntry(el,delay=0){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;el.animate([{transform:'translate(45px,-440px) rotate(-32deg)',opacity:0},{transform:'translate(-18px,12px) rotate(12deg)',opacity:1,offset:.46},{transform:'translate(12px,-65px) rotate(-8deg)',offset:.64},{transform:'translate(-5px,5px) rotate(3deg)',offset:.8},{transform:'translate(2px,-15px) rotate(-1deg)',offset:.9},{transform:'translate(0,0) rotate(0)',opacity:1}],{duration:2300,delay,easing:'ease-out',fill:'backwards'})}
+updateRainPart=function(el,value,key){if(!el)return;if(el.dataset.elasticValue===value)return;el.dataset.elasticValue=value;rainPrevious[key]=value;el.innerHTML='<span class="rain-value">'+esc(value)+'</span>';el.setAttribute('aria-label',(key==='hour'?'小时':'分钟')+' '+value);elasticRainEntry(el.firstChild,key==='minute'?200:0)};
+updateRainDate=function(){const el=$('.rain-date');if(!el)return;const target=el.querySelector('[data-live-date],.rain-calendar-host');if(!target)return;target.removeAttribute('data-live-date');target.classList.add('rain-calendar-host');const value=dateText();if(target.dataset.date===value)return;target.dataset.date=value;rainDateSeen=value;const now=new Date(),parts=[now.getFullYear()+'年',now.getMonth()+1+'月',now.getDate()+'日','星期'+'日一二三四五六'[now.getDay()]];target.replaceChildren(...parts.map((part,i)=>{const span=document.createElement('span');span.className='rain-date-piece';span.textContent=part;elasticRainEntry(span,i*150);return span}))};
+const homeBeforeElasticRain=home;home=function(){homeBeforeElasticRain();const field=$('#rain-field');if(!field)return;updateRainDate();const h=$('[data-rain-hour]'),m=$('[data-rain-minute]');updateRainPart(h,timeText().split(':')[0],'hour');updateRainPart(m,timeText().split(':')[1],'minute');if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const particles=[];const rainStarted=performance.now();let last=rainStarted;function frame(now){if(!field.isConnected)return;const w=field.clientWidth,height=field.clientHeight,dt=Math.min((now-last)/1000,.025);last=now;field.querySelectorAll('.rain-drop:not(.physical-rain)').forEach(el=>{if(now-rainStarted<750){el.style.visibility='hidden';return}el.style.visibility='';el.classList.add('physical-rain');const r=20;particles.push({el,r,mass:1,gravity:620,bounce:.45,x:r+Math.random()*Math.max(1,w-2*r),y:-35,vx:(Math.random()-.5)*75,vy:0,angle:0});if(particles.length>65){const old=particles.shift();old.el.remove()}});document.querySelectorAll('.rain-date-piece:not(.physical-calendar),.rain-value:not(.physical-calendar)').forEach(el=>{if(el.classList.contains('rain-date-piece')&&now-rainStarted<350){el.style.visibility='hidden';return}el.style.visibility='';el.classList.add('physical-calendar');el.getAnimations({subtree:true}).forEach(a=>a.cancel());const child=el.firstElementChild;if(child)child.style.transform='none';const rect=el.getBoundingClientRect(),fr=field.getBoundingClientRect(),r=Math.max(rect.width,rect.height)/2;particles.push({el,r,width:rect.width,height:rect.height,kind:el.closest('[data-rain-hour]')?'hour':el.closest('[data-rain-minute]')?'minute':'date',mass:el.classList.contains('rain-value')?8:3,gravity:el.classList.contains('rain-value')?1500:950,bounce:el.classList.contains('rain-value')?.86:.66,x:el.closest('[data-rain-hour]')?w*.25:el.closest('[data-rain-minute]')?w*.75:w*(.44+Math.random()*.12),y:-Math.max(rect.width,rect.height)-40,vx:(Math.random()-.5)*75,vy:el.classList.contains('rain-value')?420:180,angle:0,calendarValue:el.dataset.rainComponent,baseX:rect.left-fr.left,baseY:rect.top-fr.top})});for(let sub=0;sub<3;sub++){const step=dt/3;for(let i=particles.length-1;i>=0;i--)if(!particles[i].el.isConnected||particles[i].el.classList.contains('rain-dissolving')||(particles[i].calendarValue&&particles[i].calendarValue!==particles[i].el.dataset.rainComponent))particles.splice(i,1);for(const a of particles){a.vy+=(a.gravity||620)*step;a.x+=a.vx*step;a.y+=a.vy*step;if(a.x<a.r||a.x>w-a.r){a.x=Math.max(a.r,Math.min(w-a.r,a.x));a.vx*=-.55}if(a.y>height-a.r){a.y=height-a.r;a.vy=Math.abs(a.vy)>22?-Math.abs(a.vy)*(a.bounce||.45):0;a.vx*=.94}}resolveRainGlyphContacts(particles,field);
+}
+for(const a of particles){a.angle+=(a.vx*.7+(a.spin||0))*dt;a.spin=(a.spin||0)*Math.exp(-dt*.8);}
+for(let pass=0;pass<24;pass++){
+ for(const a of particles){const angle=a.angle*Math.PI/180;a.hx=(Math.abs(Math.cos(angle))*(a.width||40)+Math.abs(Math.sin(angle))*(a.height||40))/2+1;a.hy=(Math.abs(Math.sin(angle))*(a.width||40)+Math.abs(Math.cos(angle))*(a.height||40))/2+1;const low=a.kind==='minute'?w/2+a.hx:a.hx,high=a.kind==='hour'?w/2-a.hx:w-a.hx;if(a.x<low||a.x>high){a.x=Math.max(low,Math.min(high,a.x));a.vx*=-.5}if(a.y>height-a.hy){a.y=height-a.hy;if(a.vy>0)a.vy=a.vy>22?-a.vy*(a.bounce||.45):0}}
+ for(let i=0;i<particles.length;i++)for(let j=i+1;j<particles.length;j++){
+ const a=particles[i],b=particles[j],aa=a.angle*Math.PI/180,ba=b.angle*Math.PI/180;
+ const ax=[Math.cos(aa),Math.sin(aa)],ay=[-ax[1],ax[0]],bx=[Math.cos(ba),Math.sin(ba)],by=[-bx[1],bx[0]];
+ const dx=b.x-a.x,dy=b.y-a.y;let depth=Infinity,nx=0,ny=0;
+ for(const axis of [ax,ay,bx,by]){const [x,y]=axis,ra=Math.abs(x*ax[0]+y*ax[1])*(a.width||40)/2+Math.abs(x*ay[0]+y*ay[1])*(a.height||40)/2,rb=Math.abs(x*bx[0]+y*bx[1])*(b.width||40)/2+Math.abs(x*by[0]+y*by[1])*(b.height||40)/2,d=dx*x+dy*y,over=ra+rb-Math.abs(d);if(over<=0){depth=0;break}if(over<depth){depth=over;const sign=d<0?-1:1;nx=x*sign;ny=y*sign}}
+ if(!depth)continue;
+ const ia=1/(a.mass||1),ib=1/(b.mass||1),total=ia+ib,over=depth+.05;
+ a.x-=nx*over*ia/total;a.y-=ny*over*ia/total;b.x+=nx*over*ib/total;b.y+=ny*over*ib/total;
+ const relative=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
+ if(relative<0){const impulse=-relative*1.8/total;a.vx-=impulse*nx*ia;a.vy-=impulse*ny*ia;b.vx+=impulse*nx*ib;b.vy+=impulse*ny*ib;
+ const tangent=dx*(-ny)+dy*nx,spin=Math.max(-90,Math.min(90,tangent*impulse*.0008));a.spin=(a.spin||0)-spin*ia;b.spin=(b.spin||0)+spin*ib;}
+ }
+}
+for(const a of particles){a.el.style.transform='translate('+(a.x-(a.width||40)/2-(a.baseX||0))+'px,'+(a.y-(a.height||40)/2-(a.baseY||0))+'px) rotate('+a.angle+'deg)'}
+requestAnimationFrame(frame)}requestAnimationFrame(frame)};
+if(view==='home'&&effective().theme==='rain')home();
+
+function dissolveRainCycle(){
+ const field=$('#rain-field'),landed=$('.rain-landed');if(!field||!landed)return;
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ field.querySelectorAll('.rain-drop').forEach(el=>{el.classList.add('rain-dissolving');const animation=el.animate([{opacity:.55,filter:'blur(0)'},{opacity:0,filter:'blur(12px)'}],{duration:reduced?0:1500,easing:'ease-in',fill:'forwards'});animation.onfinish=()=>el.remove()});
+ const ghost=landed.cloneNode(true);ghost.classList.add('rain-cycle-ghost');ghost.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));ghost.querySelectorAll('[data-rain-hour],[data-rain-minute]').forEach(e=>{e.removeAttribute('data-rain-hour');e.removeAttribute('data-rain-minute')});ghost.setAttribute('aria-hidden','true');landed.parentElement.append(ghost);const animation=ghost.animate([{opacity:1,filter:'blur(0)'},{opacity:0,filter:'blur(14px)'}],{duration:reduced?0:1500,fill:'forwards'});animation.onfinish=()=>ghost.remove();
+ landed.querySelectorAll('[data-rain-hour],[data-rain-minute]').forEach(e=>delete e.dataset.elasticValue);const date=landed.querySelector('.rain-calendar-host');if(date)delete date.dataset.date;updateRainDate();
+}
+
+// Each calendar/time component updates only when its own value changes.
+function replaceRainComponent(el,value,delay=0){if(el.dataset.rainComponent===value)return;const old=el.textContent;el.dataset.rainComponent=value;el.style.position='relative';if(old){const ghost=document.createElement('span');ghost.textContent=old;ghost.style.cssText='position:absolute;inset:0;pointer-events:none;white-space:nowrap';el.textContent=value;el.append(ghost);const fade=ghost.animate([{transform:'translateY(0)'},{transform:'translateY(220px)'}],{duration:900,easing:'cubic-bezier(.45,0,.85,.5)',fill:'forwards'});fade.onfinish=()=>ghost.remove()}else el.textContent=value;const fresh=document.createElement('span');fresh.textContent=value;el.firstChild.replaceWith(fresh);fresh.style.display='inline-block';elasticRainEntry(fresh,old?900+delay:delay)}
+updateRainPart=function(el,value,key){if(!el)return;let span=el.querySelector('.rain-value');if(!span){el.replaceChildren();span=document.createElement('span');span.className='rain-value';el.append(span)}replaceRainComponent(span,value);rainPrevious[key]=value;el.setAttribute('aria-label',(key==='hour'?'小时':'分钟')+' '+value)};
+updateRainDate=function(){const host=$('.rain-date [data-live-date],.rain-date .rain-calendar-host');if(!host)return;host.removeAttribute('data-live-date');host.classList.add('rain-calendar-host');const now=new Date(),parts=[now.getFullYear()+'年',String(now.getMonth()+1).padStart(2,'0')+'月',String(now.getDate()).padStart(2,'0')+'日','星期'+'日一二三四五六'[now.getDay()]];if(host.children.length!==4||!host.dataset.componentCalendar){host.replaceChildren(...parts.map(()=>{const el=document.createElement('span');el.className='rain-date-piece';return el}));host.dataset.componentCalendar='true'}parts.forEach((value,i)=>replaceRainComponent(host.children[i],value,i*130));rainDateSeen=dateText()};
+dissolveRainCycle=function(){const field=$('#rain-field');if(!field)return;field.querySelectorAll('.rain-drop:not(.rain-dissolving)').forEach(el=>{el.classList.add('rain-dissolving');const animation=el.animate([{opacity:.55,filter:'blur(0)'},{opacity:0,filter:'blur(12px)'}],{duration:1500,fill:'forwards'});animation.onfinish=()=>el.remove()});updateRainDate()};
+if(view==='home'&&effective().theme==='rain')home();
+
+elasticRainEntry=function(el,delay=0){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;el.animate([
+ {transform:'translate(65px,-480px) rotate(-20deg)',opacity:0},
+ {transform:'translate(-22px,0) rotate(8deg)',opacity:1,offset:.35},
+ {transform:'translate(26px,-140px) rotate(-9deg)',opacity:1,offset:.51},
+ {transform:'translate(-12px,0) rotate(4deg)',opacity:1,offset:.68},
+ {transform:'translate(10px,-58px) rotate(-4deg)',opacity:1,offset:.79},
+ {transform:'translate(-3px,0) rotate(1deg)',opacity:1,offset:.9},
+ {transform:'translate(2px,-14px) rotate(-1deg)',opacity:1,offset:.95},
+ {transform:'translate(0,0) rotate(0)',opacity:1}
+ ],{duration:3100,delay,easing:'ease-out',fill:'backwards'})};
+// A long diminishing bounce, followed by a gentle roll back into alignment.
+elasticRainEntry=function(el,delay=0){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const direction=Math.random()<.5?-1:1;
+ const poses=[[0,65,-480,-28,0],[.18,-32,0,17,1],[.32,45,-185,-23,1],[.45,-26,0,14,1],[.56,28,-100,-16,1],[.65,-18,0,11,1],[.73,18,-48,-10,1],[.8,-11,0,8,1],[.86,10,-21,-6,1],[.9,-6,0,5,1],[.94,5,-6,-3,1],[.97,2,0,2,1],[1,0,0,0,1]];
+ el.animate(poses.map(([offset,x,y,angle,opacity])=>({offset,transform:'translate('+(x*direction)+'px,'+y+'px) rotate('+(angle*direction)+'deg)',opacity,easing:offset<.9?'cubic-bezier(.25,.1,.3,1)':'ease-in-out'})),{duration:6200,delay,fill:'backwards'});
+};
+
+dissolveRainCycle=function(){const field=$('#rain-field');if(!field)return;field.querySelectorAll('.rain-drop:not(.rain-dissolving)').forEach(el=>{el.classList.add('rain-dissolving');const current=getComputedStyle(el).transform;const animation=el.animate([{transform:current},{transform:'translateY('+(field.clientHeight+80)+'px) '+current}],{duration:1400,easing:'cubic-bezier(.45,0,.85,.5)',fill:'forwards'});animation.onfinish=()=>el.remove()});updateRainDate()};
+const elasticBeforeFreeTime=elasticRainEntry;
+elasticRainEntry=function(el,delay=0){const time=el.closest('[data-rain-hour],[data-rain-minute]');if(!time)return elasticBeforeFreeTime(el,delay);if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ requestAnimationFrame(()=>{if(!el.isConnected)return;const field=el.closest('.rain-composition')||el.closest('.rain-landed'),area=field.getBoundingClientRect(),box=el.getBoundingClientRect(),hour=time.hasAttribute('data-rain-hour'),middle=area.left+area.width/2;
+ // Reserve half the diagonal so even tilted numerals stay in their own half.
+ const radius=Math.hypot(box.width,box.height)/2,center=box.left+box.width/2,left=(hour?area.left:middle)+radius+8,right=(hour?middle:area.right)-radius-8;
+ const pick=()=>left<=right?(left+Math.random()*(right-left)-center):((hour?(area.left+middle)/2:(middle+area.right)/2)-center);
+ const angle=(Math.random()<.5?-1:1)*(15+Math.random()*30),end=pick();const frames=[[0,pick(),-480,0],[.2,pick(),0,angle],[.35,pick(),-240,-angle],[.5,pick(),0,angle*.8],[.64,pick(),-115,-angle*.7],[.76,end,0,angle*.8],[.85,end,-25,angle*.9],[.92,end,0,angle],[.97,end,-7,angle],[1,end,0,angle]];
+ el.animate(frames.map(([offset,x,y,a])=>({offset,transform:'translate('+x+'px,'+y+'px) rotate('+a+'deg)',transformOrigin:'center center',easing:'ease-out'})),{duration:6500,delay,fill:'both'});
+ });
+};
+
+const rainGlyphCache=new WeakMap();
+function resolveRainGlyphContacts(particles,field){const fieldRect=field.getBoundingClientRect();for(const el of document.querySelectorAll('.rain-landed:not(.rain-cycle-ghost) .rain-value:not(.physical-calendar)>span:not([style*=absolute]),.rain-landed:not(.rain-cycle-ghost) .rain-date-piece:not(.physical-calendar)>span:not([style*=absolute])')){
+ const style=getComputedStyle(el),w=el.offsetWidth,h=el.offsetHeight;if(!w||!h)continue;const key=el.textContent+style.font+w+h;let cache=rainGlyphCache.get(el);if(!cache||cache.key!==key){const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.font=style.font;ctx.textBaseline='alphabetic';ctx.fillStyle='#fff';const metrics=ctx.measureText(el.textContent),baseline=(h-parseFloat(style.fontSize))/2+parseFloat(style.fontSize)*.8;ctx.fillText(el.textContent,0,baseline);const pixels=ctx.getImageData(0,0,w,h).data,points=[];for(let y=0;y<h;y+=4)for(let x=0;x<w;x+=4)if(pixels[(y*w+x)*4+3]>100)points.push([x-w/2,y-h/2]);cache={key,points};rainGlyphCache.set(el,cache)}
+ const rect=el.getBoundingClientRect(),matrix=new DOMMatrix(style.transform==='none'?undefined:style.transform),cx=rect.left+rect.width/2-fieldRect.left,cy=rect.top+rect.height/2-fieldRect.top;
+ for(const a of particles){if(a.x+a.r<rect.left-fieldRect.left||a.x-a.r>rect.right-fieldRect.left||a.y+a.r<rect.top-fieldRect.top||a.y-a.r>rect.bottom-fieldRect.top)continue;let nearest=null,best=Infinity;for(const [x,y]of cache.points){const dx=a.x-(cx+matrix.a*x+matrix.c*y),dy=a.y-(cy+matrix.b*x+matrix.d*y),distance=dx*dx+dy*dy;if(distance<best){best=distance;nearest=[dx,dy]}}const distance=Math.sqrt(best),radius=14;if(nearest&&distance<radius){const nx=distance?nearest[0]/distance:0,ny=distance?nearest[1]/distance:-1;a.x+=nx*(radius-distance);a.y+=ny*(radius-distance);const velocity=a.vx*nx+a.vy*ny;if(velocity<0){a.vx-=1.55*velocity*nx;a.vy-=1.55*velocity*ny}}}
+ }}
+
+const replaceBeforeFreeCalendar=replaceRainComponent;
+replaceRainComponent=function(el,value,delay=0){if(!el.classList.contains('rain-date-piece'))return replaceBeforeFreeCalendar(el,value,delay);if(el.dataset.rainComponent===value)return;el.dataset.rainComponent=value;el.textContent=value;el.classList.remove('physical-calendar');el.style.transform='none'};
+
+updateRainPart=function(el,value,key){if(!el)return;let span=el.querySelector('.rain-value');if(!span){el.replaceChildren();span=document.createElement('span');span.className='rain-value';el.append(span)}if(span.dataset.rainComponent===value&&span.querySelector('.rain-time-unit'))return;span.dataset.rainComponent=value;const unit=document.createElement('small');unit.className='rain-time-unit';unit.textContent=key==='hour'?'时':'分';span.replaceChildren(document.createTextNode(value),unit);span.classList.remove('physical-calendar');span.style.transform='none';rainPrevious[key]=value;el.setAttribute('aria-label',(key==='hour'?'小时':'分钟')+' '+value)};
+
+// Initialize the rain view after the final time renderer is installed.
+if(view==='home'&&effective().theme==='rain')home();
+// Open the film style in its immersive angle; the reel still toggles both views.
+const changeThemeBeforeImmersiveDefault=changeTheme;
+changeTheme=function(id){return changeThemeBeforeImmersiveDefault(id==='projection'?'wallfilm':id)};
+if(prefs.theme==='projection'){prefs.theme='wallfilm';persist();if(view==='home')render()}
+// Six living landscapes. Playback pauses both the landscape and its celestial clock.
+const natureNames=['山间来信','潮汐之间','森林呼吸','沙海流金','湖畔清风','雪岭微光'];
+let natureElapsed=0,natureClock=Date.now();
+const homeBeforeNatureCinema=home;
+home=function(){homeBeforeNatureCinema();if(!['projection','wallfilm'].includes(effective().theme))return;
+ const landscape=document.querySelector('.projection-landscape');if(!landscape)return;
+ landscape.classList.add('nature-landscape');landscape.replaceChildren();
+ const canvas=document.createElement('canvas');canvas.style.cssText='width:100%;height:100%;display:block';landscape.append(canvas);
+ const next=document.querySelector('.screen-next');if(next){next.title='下一幕 · '+natureNames[(projectionScene+1)%6];next.onclick=e=>{e.stopPropagation();projectionScene=(projectionScene+1)%6;home()}}
+ canvas.setAttribute('aria-label',natureNames[projectionScene]);
+ const ctx=canvas.getContext('2d');let last=performance.now();
+ function frame(now){if(!canvas.isConnected)return;const dt=Math.min((now-last)/1000,.1);last=now;if(projectionRunning)natureElapsed+=dt;
+ const w=1000,h=620;if(canvas.width!==w){canvas.width=w;canvas.height=h}const t=natureElapsed,kind=projectionScene;
+ const date=new Date(natureClock+t*1000),hour=date.getHours()+date.getMinutes()/60+date.getSeconds()/3600,day=hour>=8&&hour<20,phase=((hour-(day?8:20)+24)%24)/12;
+ const sky=ctx.createLinearGradient(0,0,0,h);sky.addColorStop(0,day?'#76a9c8':'#081225');sky.addColorStop(1,day?'#eee0bd':'#263953');ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
+ if(!day){ctx.fillStyle='#e4e7ef';for(let i=0;i<65;i++){ctx.globalAlpha=.35+.3*Math.sin(t*.7+i);ctx.fillRect((i*173)%1000,(i*79)%340,1.5,1.5)}ctx.globalAlpha=1}
+ const cx=70+860*phase,cy=225-165*Math.sin(phase*Math.PI);ctx.fillStyle=day?'#f5d58a':'#eef1e3';ctx.beginPath();ctx.arc(cx,cy,day?28:24,0,Math.PI*2);ctx.fill();if(!day){ctx.fillStyle='#bdc7cf';for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(cx-10+i*5,cy-8+i%2*13,3+i%2,0,7);ctx.fill()}}
+ // Clouds drift independently of the twelve-hour celestial arc.
+ for(let i=0;i<5;i++){const x=((i*250+t*(9+i))%1250)-180,y=100+i%3*48;ctx.fillStyle=day?'#ffffff55':'#b4c7df16';ctx.beginPath();ctx.ellipse(x,y,85,12,0,0,7);ctx.ellipse(x+35,y-9,45,17,0,0,7);ctx.fill()}
+ const palettes=[['#79958e','#486e64','#284d47'],['#87bbc7','#408b9f','#246c83'],['#658a71','#365f4c','#204535'],['#dbb37a','#be8d52','#91653e'],['#8ca897','#547c72','#335e59'],['#c8d5db','#91abb9','#647f94']];
+ const colors=day?palettes[kind]:['#273542','#192936','#101f2c'];
+ function hill(y,amp,layer){ctx.beginPath();ctx.moveTo(0,h);for(let x=0;x<=1000;x+=5){const yy=y+Math.sin(x*.007+layer*2)*amp+Math.sin(x*.018+layer)*amp*.24;ctx.lineTo(x,yy)}ctx.lineTo(w,h);ctx.fillStyle=colors[layer];ctx.fill()}
+ for(let i=0;i<3;i++)hill(340+i*75,kind===1?12:kind===3?36:60,i);
+ if(kind===2){for(let i=0;i<34;i++){const x=(i*79)%1050,y=370+(i%5)*38,size=35+i%4*12;ctx.fillStyle=colors[i%3];ctx.fillRect(x-3,y,6,80);ctx.beginPath();ctx.moveTo(x,y-size);ctx.lineTo(x-size*.5,y+45);ctx.lineTo(x+size*.5,y+45);ctx.fill()}}
+ if(kind===1||kind===4){ctx.fillStyle=day?(kind===1?'#478fa7':'#598f96'):'#172f43';ctx.fillRect(0,440,w,180);for(let i=0;i<30;i++){ctx.strokeStyle=day?'#d4eef044':'#adc3dd22';ctx.lineWidth=1.5;ctx.beginPath();const x=(i*93+t*(12+i%4))%1100-100,y=453+i%12*13;ctx.moveTo(x,y);ctx.quadraticCurveTo(x+28,y-4,x+60,y);ctx.stroke()}}
+ if(kind===1){for(let i=0;i<4;i++){const q=(t*.22+i*.26)%1,x=140+i*210+q*65,y=475-Math.sin(q*Math.PI)*80;ctx.save();ctx.translate(x,y);ctx.rotate(Math.cos(q*Math.PI)*-.8);ctx.fillStyle=day?'#dce3d2':'#7f9dac';ctx.beginPath();ctx.ellipse(0,0,10,4,0,0,7);ctx.moveTo(-7,0);ctx.lineTo(-16,-6);ctx.lineTo(-16,6);ctx.fill();ctx.restore()}}
+ if(kind===0||kind===3){for(let i=0;i<3;i++){const x=(t*13+i*290)%1100-40,y=kind===3?515:355+Math.sin(x*.007)*60+Math.sin(x*.018)*14;ctx.save();ctx.translate(x,y-7);ctx.strokeStyle=day?'#393f36':'#93a4af';ctx.fillStyle=ctx.strokeStyle;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,9,5,0,0,7);ctx.ellipse(10,-5,4,4,0,0,7);ctx.fill();for(let j=0;j<4;j++){ctx.beginPath();ctx.moveTo(j*4-7,3);ctx.lineTo(j*4-7+Math.sin(t*8+j)*3,11);ctx.stroke()}ctx.restore()}}
+ if(kind===2||kind===4||kind===0){for(let i=0;i<6;i++){const x=(t*30+i*170)%1150-75,y=210+i%3*27+Math.sin(t+i)*9;ctx.strokeStyle=day?'#354f51':'#a3b6c9';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-7,y-Math.sin(t*7+i)*5);ctx.lineTo(x,y);ctx.lineTo(x+7,y-Math.sin(t*7+i)*5);ctx.stroke()}}
+ if(kind===5){ctx.fillStyle='#eff8ff99';for(let i=0;i<65;i++){const x=(i*127+Math.sin(t+i)*14)%1000,y=(i*57+t*24)%620;ctx.beginPath();ctx.arc(x,y,1.5+i%2,0,7);ctx.fill()}}
+ requestAnimationFrame(frame)}requestAnimationFrame(frame);
+};
+const natureStyle=document.createElement('style');natureStyle.textContent='.projection-landscape.nature-landscape{background:none!important;animation:none!important;overflow:hidden}.projection-landscape.nature-landscape:before,.projection-landscape.nature-landscape:after{display:none!important}';document.head.append(natureStyle);
+if(view==='home'&&['projection','wallfilm'].includes(effective().theme))home();
+
+// Cover-only pull cord; existing mode controls remain available.
+function mountModeCord(){
+ let button=document.querySelector('.mode-pull-cord');
+ if(view!=='home'||new URLSearchParams(location.search).has('page')){button?.remove();return}
+ if(button)return;
+ button=document.createElement('button');button.className='mode-pull-cord';button.type='button';button.innerHTML='<span class="mode-cord-line"></span><span class="mode-cord-handle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 16h6m-5 3h4M8 12a5 5 0 1 1 8 0c-1 1-1 2-1 3H9c0-1 0-2-1-3Z"/></svg></span>';document.body.append(button);
+ const labels={light:'日间模式',dark:'夜间模式',system:'跟随系统'};
+ function label(){button.setAttribute('aria-label','拉动切换模式，当前'+labels[prefs.mode||'system']);button.title='点击或下拉切换明暗模式'}label();
+ let origin=null,pull=0,busy=false,suppress=false;
+ function release(change){if(busy)return;busy=true;const distance=pull||20;button.animate([{transform:'translateY('+distance+'px)'},{transform:'translateY(-5px)',offset:.45},{transform:'translateY(3px)',offset:.7},{transform:'translateY(0)'}],{duration:550,easing:'ease-out'});button.style.transform='';button.style.setProperty('--pull','0px');pull=0;
+ if(change){prefs.mode={light:'dark',dark:'system',system:'light'}[prefs.mode||'system'];for(const o of Object.values(overrides))if(o&&o.mode)o.mode=prefs.mode;persist();apply();label();toast('已切换为'+labels[prefs.mode]);}setTimeout(()=>busy=false,550)}
+ button.onpointerdown=e=>{if(busy||e.button!==0)return;origin=e.clientY;pull=0;button.setPointerCapture(e.pointerId)};
+ button.onpointermove=e=>{if(origin===null)return;pull=Math.min(70,Math.max(0,(e.clientY-origin)*.65));button.style.transform='translateY('+pull+'px)';button.style.setProperty('--pull',pull+'px')};
+ button.onpointerup=e=>{if(origin===null)return;const moved=e.clientY-origin;origin=null;suppress=true;release(moved>=24||Math.abs(moved)<6);setTimeout(()=>suppress=false,0)};
+ button.onpointercancel=()=>{origin=null;release(false)};
+ button.onclick=()=>{if(!suppress&&!busy)release(true)};
+}
+const renderBeforeModeCord=render;render=function(){renderBeforeModeCord();mountModeCord()};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(prefs.mode==='system')apply()});
+mountModeCord();
