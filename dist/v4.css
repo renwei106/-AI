@@ -369,12 +369,23 @@ body[data-dark=true] .mode-pull-cord{color:#fff}
 .mode-pull-cord[data-next-mode=dark] .mode-cord-handle{background:#111;outline:1px solid #ffffff80}
 .mode-pull-cord[data-next-mode=light] .mode-cord-handle{background:#fff;outline:1px solid #00000050}
 .mode-pull-cord[data-next-mode=system] .mode-cord-handle{background:linear-gradient(135deg,#fff 0 49%,#151515 51% 100%);outline:1px solid #8888}
+.color-pull-cord{position:fixed;top:0;right:52px;width:34px;height:112px;padding:0;z-index:24;background:none;border:0;touch-action:none;cursor:grab;display:flex;align-items:center;flex-direction:column;transform-origin:top center;color:var(--ink)}
+.color-pull-cord:active{cursor:grabbing}.color-cord-line{position:absolute;bottom:24px;width:.5px;height:calc(87px + var(--pull,0px));background:currentColor;opacity:.48;pointer-events:none}.color-cord-handle{position:absolute;bottom:0;display:grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--cord-color);outline:1px solid color-mix(in srgb,currentColor 35%,transparent);box-shadow:0 0 0 4px color-mix(in srgb,var(--cord-color) 18%,transparent);pointer-events:none}.color-cord-handle i{display:block;width:6px;height:6px;border-radius:50%;background:var(--next-color);box-shadow:0 0 0 1px #ffffff80}
+.color-pull-cord:hover .color-cord-handle{box-shadow:0 0 0 5px color-mix(in srgb,var(--cord-color) 25%,transparent),0 4px 14px #00000018}
+body:not([data-view=home]) .color-pull-cord{display:none}
+body[data-dark=false] .color-pull-cord{color:#000}
+body[data-dark=true] .color-pull-cord{color:#fff}
+@media(max-width:760px){.color-pull-cord{right:32px;height:94px}.color-cord-line{height:calc(68px + var(--pull,0px))}}
+@media(prefers-reduced-motion:reduce){.color-pull-cord{animation:none!important}}
 .inherited-settings-link{display:inline-flex;align-items:center;margin-left:12px;padding:3px 5px;font:inherit;color:var(--ink);text-decoration:underline;text-underline-offset:4px;opacity:.8}.inherited-settings-link:hover{opacity:1}
 /* Keep fullscreen header controls faint but discoverable, including idle state. */
 body.is-fullscreen>header{opacity:1!important;pointer-events:auto!important}
 body.is-fullscreen>header>.brand-discovery,body.is-fullscreen>header>.brand,body.is-fullscreen>header>.header-right{opacity:.08;transition:opacity .25s ease}
 body.is-fullscreen>header>.brand-discovery:hover,body.is-fullscreen>header>.brand-discovery:focus-within,body.is-fullscreen>header>.brand:hover,body.is-fullscreen>header>.brand:focus-visible,body.is-fullscreen>header>.header-right:hover,body.is-fullscreen>header>.header-right:focus-within{opacity:1}
+body.is-fullscreen .mode-pull-cord,body.is-fullscreen .color-pull-cord{opacity:.08;transition:opacity .25s ease}
+body.is-fullscreen .mode-pull-cord:hover,body.is-fullscreen .mode-pull-cord:focus-visible,body.is-fullscreen .color-pull-cord:hover,body.is-fullscreen .color-pull-cord:focus-visible{opacity:1}
 .paper-editing [contenteditable]{outline:1px dashed var(--line);outline-offset:4px;cursor:text;min-height:1em}.paper-editing [contenteditable]:focus{outline-color:var(--ink)}
+body:not(.app-ready) #main,body:not(.app-ready) #dock,body:not(.app-ready) .header-right{visibility:hidden}
 .paper-inline-upload{position:relative;display:grid;place-items:center;min-height:100px;flex:1;border:1px dashed var(--muted);background-size:cover;background-position:center;cursor:pointer;margin:8px 0 14px}.paper-inline-upload>span{padding:10px 14px;background:var(--surface);font-size:13px;color:var(--ink)}.paper-inline-upload small{display:block;font-size:10px;margin-top:6px;color:var(--muted)}
 .paper-inline-actions{position:fixed;right:7%;top:90px;z-index:40;display:flex;gap:10px;padding:6px;background:var(--surface);border-radius:8px}.paper-inline-actions button{padding:9px 15px;font-size:12px}.paper-inline-actions [data-paper-save]{background:var(--ink);color:var(--bg);border-radius:5px}
 .paper-inline-choices{overflow:auto;max-height:250px;padding:8px 2px}.paper-inline-choices>small{display:block;margin-bottom:12px;color:var(--muted)}.paper-inline-choices label{display:flex;align-items:center;gap:8px;padding:8px 2px;font-size:12px;cursor:pointer}.paper-inline-choices input{width:14px;height:14px;flex-shrink:0;accent-color:var(--ink)}
