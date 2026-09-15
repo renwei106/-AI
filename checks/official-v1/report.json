@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "desktop": "1440x900",
+  "mobile": "390x844",
+  "checks": [
+    "pinned-scroll-scenes",
+    "all-image-assets",
+    "collection-search",
+    "empty-search",
+    "web-tab",
+    "6-theme-switches",
+    "keyboard-theme-tabs",
+    "modal-Escape-focus-restoration",
+    "desktop-horizontal-gallery",
+    "mobile-native-gallery",
+    "anchor-navigation",
+    "product-entry",
+    "reduced-motion",
+    "no-js-readable",
+    "no-horizontal-overflow"
+  ],
+  "errors": [],
+  "failedRequests": []
+}

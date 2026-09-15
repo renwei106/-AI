@@ -1,0 +1,83 @@
+const { chromium } = require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const sharp = require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/sharp');
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const output = __dirname;
+const url = 'http://127.0.0.1:4320/official/';
+(async () => {
+  const browser = await chromium.launch({channel:'msedge',headless:true});
+  const page = await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
+  const errors = [], failedRequests = [];
+  page.on('pageerror',e=>errors.push(e.message));
+  page.on('response',r=>{if(r.status()>=400)failedRequests.push({url:r.url(),status:r.status()});});
+  await page.goto(url,{waitUntil:'networkidle'});
+  await page.waitForTimeout(350);
+  const frames=[];
+  async function shot(name,selector,ratio=0){
+    await page.evaluate(({selector,ratio})=>{const e=document.querySelector(selector);window.scrollTo({top:e.offsetTop+Math.max(0,e.offsetHeight-innerHeight)*ratio,behavior:'instant'});},{selector,ratio});
+    await page.waitForTimeout(1000);
+    const file=path.join(output,name+'.png');await page.screenshot({path:file});frames.push(file);
+    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1);assert(!overflow,`${name}: no horizontal page overflow`);
+  }
+  await shot('desktop-01-hero','#home');
+  await shot('desktop-02-immersive','#home',.82);
+  await shot('desktop-03-collection','#collection',.6);
+  await shot('desktop-04-search','#search');
+  assert.equal(await page.locator('.search-result').count(),2);
+  await page.locator('#demo-search').fill('阅读');
+  assert.equal(await page.locator('.search-result').count(),3);
+  await page.locator('#demo-search').fill('<script>');
+  assert.equal(await page.locator('.search-result').count(),0);
+  assert(await page.locator('.result-empty').isVisible());
+  await page.locator('#web-tab').click();
+  assert.equal(await page.locator('#web-tab').getAttribute('aria-selected'),'true');
+  await page.locator('#saved-tab').click();
+  await page.locator('#demo-search').fill('设计');
+  await shot('desktop-05-discover','#discover',.12);
+  await shot('desktop-06-discover-end','#discover',1);
+  const lastCard=await page.locator('.discovery-card').last().boundingBox();assert(lastCard.x+lastCard.width<1441,'Last discovery card revealed');
+  await shot('desktop-07-themes','#themes',.5);
+  for(const theme of ['music','paper','cosmos','flip','base','cinema']){
+    await page.locator(`[data-theme="${theme}"]`).click();await page.waitForTimeout(450);
+    assert((await page.locator('#theme-image').getAttribute('src')).endsWith(`${theme}.webp`));
+  }
+  await page.locator('#theme-cinema').focus();await page.keyboard.press('ArrowRight');await page.waitForTimeout(450);
+  assert.equal(await page.locator('#theme-music').getAttribute('aria-selected'),'true');
+  await page.locator('.expand-theme').click();assert(await page.locator('.theme-dialog').isVisible());
+  await page.screenshot({path:path.join(output,'desktop-theme-expanded.png')});
+  await page.keyboard.press('Escape');assert(!(await page.locator('.theme-dialog').isVisible()));
+  assert(await page.locator('.expand-theme').evaluate(e=>document.activeElement===e));
+  await shot('desktop-08-closing','#begin');
+  const imageState=await page.locator('img').evaluateAll(imgs=>imgs.map(i=>({src:i.getAttribute('src'),ok:i.complete&&i.naturalWidth>0})));assert(imageState.every(i=>i.ok),JSON.stringify(imageState));
+  await page.locator('.footer-brand').click();await page.waitForFunction(()=>scrollY<10,{},{timeout:7000});
+  const productResponse=await page.request.get('http://127.0.0.1:4320/');assert(productResponse.ok());assert(productResponse.url().startsWith('http://127.0.0.1:4318/'));
+  const mobile=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true,hasTouch:true});
+  mobile.on('pageerror',e=>errors.push(e.message));
+  await mobile.goto(url,{waitUntil:'networkidle'});await mobile.waitForTimeout(450);
+  const mobileFrames=[];
+  for(const id of ['home','collection','search','discover','themes','begin']){
+    await mobile.evaluate(id=>window.scrollTo({top:document.getElementById(id).offsetTop,behavior:'instant'}),id);await mobile.waitForTimeout(1000);
+    const file=path.join(output,`mobile-${id}.png`);await mobile.screenshot({path:file});mobileFrames.push(file);
+    assert(await mobile.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`mobile ${id} overflow`);
+    if(id==='search')assert(await mobile.locator('.search-demo').evaluate(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth}), 'mobile search is fully visible');
+  }
+  await mobile.locator('.theme-tabs').scrollIntoViewIfNeeded();
+  await mobile.locator('#theme-music').click();await mobile.waitForTimeout(450);assert.equal(await mobile.locator('#theme-music').getAttribute('aria-selected'),'true');
+  assert((await mobile.locator('#theme-image').evaluate(e=>e.currentSrc)).endsWith('music-mobile.webp'),'Actual mobile screenshot selected');
+  const touchGallery=await mobile.locator('.discovery-viewport').evaluate(e=>({scroll:e.scrollWidth,client:e.clientWidth}));assert(touchGallery.scroll>touchGallery.client);
+  const reduced=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'});
+  await reduced.goto(url,{waitUntil:'networkidle'});
+  assert(await reduced.locator('.hero').evaluate(e=>e.offsetHeight<=innerHeight+1));
+  assert.equal(await reduced.locator('.discover-stage').evaluate(e=>getComputedStyle(e).position),'relative');
+  assert.equal(await reduced.locator('.reveal').first().evaluate(e=>getComputedStyle(e).opacity),'1');
+  const nojs=await browser.newPage({viewport:{width:1440,height:900},javaScriptEnabled:false});await nojs.goto(url);
+  assert(await nojs.locator('#hero-title').isVisible());assert.equal(await nojs.locator('.reveal').first().evaluate(e=>getComputedStyle(e).opacity),'1');
+  const thumbs=await Promise.all(frames.map(file=>sharp(file).resize(480,300).toBuffer()));
+  await sharp({create:{width:1440,height:900,channels:3,background:'#e5e8dc'}}).composite(thumbs.map((input,i)=>({input,left:(i%3)*480,top:Math.floor(i/3)*300}))).png().toFile(path.join(output,'desktop-contact.png'));
+  const mobileThumbs=await Promise.all(mobileFrames.map(file=>sharp(file).resize(260,563).toBuffer()));
+  await sharp({create:{width:1560,height:563,channels:3,background:'#e5e8dc'}}).composite(mobileThumbs.map((input,i)=>({input,left:i*260,top:0}))).png().toFile(path.join(output,'mobile-contact.png'));
+  assert.deepEqual(errors,[]);assert.deepEqual(failedRequests,[]);
+  fs.writeFileSync(path.join(output,'report.json'),JSON.stringify({passed:true,desktop:'1440x900',mobile:'390x844',checks:['pinned-scroll-scenes','all-image-assets','collection-search','empty-search','web-tab','6-theme-switches','keyboard-theme-tabs','modal-Escape-focus-restoration','desktop-horizontal-gallery','mobile-native-gallery','anchor-navigation','product-entry','reduced-motion','no-js-readable','no-horizontal-overflow'],errors,failedRequests},null,2));
+  await browser.close();console.log('PASS official page: desktop, mobile, reduced motion, search, themes, modal, anchors, assets, product entry');
+})().catch(error=>{console.error(error);process.exit(1)});
