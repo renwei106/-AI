@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050706">
+  <title>拾隅 · 万千世界，始于一点喜欢</title>
+  <meta name="description" content="世界很大，留一隅给自己。拾隅，用一段沉浸式光影，讲述喜欢、内心与从容。">
+  <link rel="icon" type="image/svg+xml" href="./assets/mark.svg">
+  <link rel="preload" as="image" href="./assets/sanctuary-depth-v2.webp" fetchpriority="high">
+  <link rel="stylesheet" href="./official.css?v=20260916">
+  <script defer src="./official.js?v=20260916"></script>
+</head>
+<body>
+  <div class="experience" id="experience">
+    <div class="visual-world" aria-hidden="true">
+      <div class="depth-image media-layer"></div>
+      <div class="sea-image media-layer"></div>
+      <div class="night-image media-layer"></div>
+      <div class="final-haze"></div>
+
+      <div class="memory-world">
+        <figure class="memory memory-one"><img src="./assets/sea.webp" width="1600" height="900" alt=""></figure>
+        <figure class="memory memory-two"><img src="./assets/road.webp" width="1600" height="900" alt=""></figure>
+        <figure class="memory memory-three"><img src="./assets/night.webp" width="1600" height="900" alt=""></figure>
+      </div>
+
+      <div class="light-column"></div>
+      <div class="light-source"><span></span></div>
+      <canvas id="atmosphere"></canvas>
+      <div class="quiet-frame"></div>
+      <div class="vignette"></div>
+      <div class="grain"></div>
+    </div>
+
+    <header class="topline">
+      <a class="brand" href="#top" aria-label="拾隅，回到开篇">
+        <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="4" y="4" width="23" height="23" rx="7"/><path d="M4 18h10a8 8 0 0 0 8-8V4M17 17l10 10"/></svg>
+        <span>拾隅</span>
+      </a>
+      <p>YOUR WORLD&nbsp;&nbsp;·&nbsp;&nbsp;YOUR PACE</p>
+    </header>
+
+    <main class="narrative" id="top" aria-label="拾隅品牌叙事">
+      <section class="scene scene-origin" data-scene="0" aria-labelledby="origin-title">
+        <div class="scene-copy centered-copy">
+          <p class="eyebrow">A LITTLE LIGHT. A WORLD OF YOUR OWN.</p>
+          <h1 id="origin-title">万千世界，<br>始于一点<span>喜欢。</span></h1>
+          <p class="whisper">在纷繁之中，遇见心之所向。</p>
+        </div>
+      </section>
+
+      <section class="scene scene-corner" data-scene="1" aria-labelledby="corner-title" aria-hidden="true" inert>
+        <div class="scene-copy centered-copy">
+          <p class="eyebrow">01 / 给自己</p>
+          <h2 id="corner-title">世界很大，<br>留一隅，<span>给自己。</span></h2>
+          <p class="whisper">不必赶赴所有热闹。<br>此刻，只听见自己的呼吸。</p>
+        </div>
+      </section>
+
+      <section class="scene scene-becoming" data-scene="2" aria-labelledby="becoming-title" aria-hidden="true" inert>
+        <div class="scene-copy centered-copy">
+          <p class="eyebrow">02 / 心有所往</p>
+          <h2 id="becoming-title">所见，所爱，<br>慢慢<span>成为你。</span></h2>
+          <p class="whisper">那些被目光停留过的瞬间，<br>终会长成生活的纹理。</p>
+        </div>
+      </section>
+
+      <section class="scene scene-inward" data-scene="3" aria-labelledby="inward-title" aria-hidden="true" inert>
+        <div class="scene-copy split-copy">
+          <p class="eyebrow">03 / 一隅之间</p>
+          <h2 id="inward-title"><span class="line-left">向外，是世界。</span><span class="line-right">向内，是自己。</span></h2>
+          <p class="whisper">在万千声音之间，仍能听见心里的声音。</p>
+        </div>
+      </section>
+
+      <section class="scene scene-home" data-scene="4" aria-labelledby="home-title" aria-hidden="true" inert>
+        <div class="scene-copy home-copy">
+          <p class="eyebrow">04 / 心有归处</p>
+          <h2 id="home-title">世界不断向前。<br>你可以，<span>从容一点。</span></h2>
+          <p class="whisper">拾起喜欢，安放日常。<br>你的一隅，自有光。</p>
+          <a class="enter-link" href="/">进入拾隅 <span aria-hidden="true">↗</span></a>
+        </div>
+      </section>
+    </main>
+
+    <div class="scroll-cue" aria-hidden="true">
+      <span class="cue-label">向下滚动</span>
+      <span class="cue-line"><i></i></span>
+    </div>
+
+    <div class="journey-progress" aria-hidden="true">
+      <span class="progress-count"><b id="scene-number">00</b><i>/ 04</i></span>
+      <span class="progress-line"><i id="progress-fill"></i></span>
+    </div>
+  </div>
+
+  <div class="scroll-track" aria-hidden="true"></div>
+
+  <noscript>
+    <div class="no-script"><p>拾隅</p><h1>世界很大，留一隅给自己。</h1><a href="/">进入拾隅 ↗</a></div>
+  </noscript>
+</body>
+</html>
