@@ -1,0 +1,1 @@
+const fs=require('fs');let s=fs.readFileSync('dist/v4.js','utf8');s=s.replace("$('.record-calibration').textContent=`33⅓ · ${userName()}`","$('.record-calibration').textContent='演唱者 · 赵红';$('.record-calibration').removeAttribute('aria-hidden')");fs.writeFileSync('dist/v4.js',s);

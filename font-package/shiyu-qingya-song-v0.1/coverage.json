@@ -1,0 +1,42 @@
+{
+  "family": "Shiyu Qingya Song Preview",
+  "display_name": "拾隅清雅宋",
+  "version": "Version 0.1",
+  "total_codepoints": 30762,
+  "han_codepoints": 27938,
+  "cjk_unified": 20992,
+  "cjk_extension_a": 6592,
+  "svg_symbols": 30762,
+  "sample_svg_paths": 27,
+  "files": {
+    "ShiyuQingyaSong-Preview-Regular.ttf": {
+      "bytes": 15126248,
+      "sha256": "33d6a18cd8bd63ef13e2d32c58ed1aa14fee3f4b1faea2dde09585e64b6ffecd"
+    },
+    "ShiyuQingyaSong-Preview-Regular.woff2": {
+      "bytes": 5753036,
+      "sha256": "6356a5211faa7db947fac4dacb517687822cf06d0c2f37bbfde41ac4eb5581a0"
+    },
+    "ShiyuQingyaSong-Preview-glyphs.svg": {
+      "bytes": 55539410,
+      "sha256": "fe1702b8d745cb7fa602afa0936710daa198b244cf33293f2708bd633af95589"
+    },
+    "ShiyuQingyaSong-Preview-brand-samples.svg": {
+      "bytes": 23237,
+      "sha256": "3a3633154f32c1d1efadfc29737e1acde6ef0dfff894b037f3a1c64104275f79"
+    }
+  },
+  "sources": [
+    {
+      "family": "Noto Serif SC",
+      "role": "Simplified Chinese glyph outlines",
+      "license": "SIL OFL 1.1"
+    },
+    {
+      "family": "Cormorant Garamond",
+      "role": "Latin letters, numbers and non-CJK punctuation",
+      "license": "SIL OFL 1.1"
+    }
+  ],
+  "coverage_note": "Preview package; not complete Unicode Han coverage."
+}

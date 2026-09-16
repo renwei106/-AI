@@ -1,0 +1,41 @@
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const assert=require('node:assert/strict');
+let browser;
+(async()=>{
+ browser=await chromium.launch({channel:'msedge',headless:true});
+ const context=await browser.newContext({viewport:{width:1288,height:1041}}),page=await context.newPage(),errors=[],assets=[];
+ page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().includes('/assets/reading/'))assets.push(r.url())});
+ await page.goto('http://127.0.0.1:4318/?theme=reading',{waitUntil:'networkidle'});
+ await page.evaluate(()=>{signed=true;document.querySelector('.brand-guide')?.remove()});
+ const gallery=page.locator('.reading-gallery'),hit=page.locator('.reading-turn-hit'),turn=page.locator('.reading-turn-action');
+ assert.equal(await page.locator('.reading-landscape,.reading-still-life,.reading-heading').count(),0);
+ assert.equal(await gallery.getAttribute('data-chapter'),'0');assert.deepEqual(assets,[],'scene is vector and loads no old landscapes');
+ const dataBefore=await page.evaluate(()=>JSON.stringify(data));
+ for(const [name,width,height]of [['light',1288,1041],['wide',2560,1440],['short',1288,650],['mobile',390,844],['small',360,640]]){
+   await page.setViewportSize({width,height});await page.waitForTimeout(450);await page.mouse.move(5,300);
+   assert.deepEqual(await gallery.boundingBox(),{x:0,y:0,width,height});
+   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'no horizontal overflow: '+name);
+   const nav=await page.locator('.reading-gallery-nav').boundingBox(),dock=await page.locator('.dock-trigger').boundingBox(),header=await page.locator('header').boundingBox();
+   assert(!(nav.x<dock.x+dock.width&&nav.x+nav.width>dock.x&&nav.y<dock.y+dock.height&&nav.y+nav.height>dock.y),'gallery controls stay clear of the space entry: '+name);
+   const h=await hit.boundingBox();assert(h.y>=header.height,'gallery hit area does not cover the header: '+name);
+   await page.screenshot({path:`checks/reading-page-world-${name}.png`});
+ }
+ await page.setViewportSize({width:1288,height:1041});await page.waitForTimeout(450);await hit.click();
+ assert.equal(await gallery.getAttribute('data-chapter'),'1');assert.equal(await page.locator('.reading-flip-sheet.is-active').count(),1);
+ await turn.click();assert.equal(await gallery.getAttribute('data-chapter'),'1','repeated clicks during flip do not skip pages');
+ await page.waitForTimeout(1350);assert.equal(await page.locator('.reading-flip-sheet.is-active').count(),0);await page.mouse.move(5,300);await page.screenshot({path:'checks/reading-page-world-sun.png'});
+ await turn.focus();await page.keyboard.press('Enter');await page.waitForTimeout(1400);assert.equal(await gallery.getAttribute('data-chapter'),'2');await page.screenshot({path:'checks/reading-page-world-dream.png'});
+ await page.keyboard.press('Space');await page.waitForTimeout(1400);assert.equal(await gallery.getAttribute('data-chapter'),'0','chapters loop');
+ await page.locator('[data-reading-chapter="2"]').click();await page.waitForTimeout(1400);assert.equal(await gallery.getAttribute('data-chapter'),'2');assert.equal(await page.locator('[data-reading-chapter="2"]').getAttribute('aria-pressed'),'true');
+ await page.keyboard.press('Slash');await page.locator('#quick-search[open]').waitFor();await page.keyboard.press('Escape');
+ await page.locator('[data-action=settings]').click();await page.locator('#settings[open]').waitFor();await page.keyboard.press('Escape');
+ await page.evaluate(()=>{prefs.mode='dark';persist();render();document.querySelector('.brand-guide')?.remove()});assert.equal(await gallery.getAttribute('data-chapter'),'2','theme controls preserve the page');assert.equal(await page.locator('.reading-page-left .reading-page-number').textContent(),'03');await page.mouse.move(5,300);await page.waitForTimeout(450);await page.screenshot({path:'checks/reading-page-world-dark.png'});
+ await page.emulateMedia({reducedMotion:'reduce'});await turn.click();assert.equal(await gallery.getAttribute('data-chapter'),'0');assert.equal(await page.locator('.reading-flip-sheet.is-active').count(),0,'reduced motion skips flip');
+ await page.emulateMedia({reducedMotion:'no-preference'});await turn.click();await page.emulateMedia({reducedMotion:'reduce'});await page.locator('.reading-flip-sheet.is-active').waitFor({state:'hidden',timeout:500});assert.equal(await page.locator('.reading-flip-sheet.is-active').count(),0,'changing the motion preference finishes an active turn');
+ await page.locator('.scroll-invitation').click();await page.locator('.workspace').waitFor();assert.equal(await gallery.count(),0);assert.equal(await page.evaluate(()=>JSON.stringify(data)),dataBefore);
+ await page.evaluate(()=>{view='home';render()});await page.emulateMedia({reducedMotion:'no-preference'});await turn.click();await page.evaluate(()=>{scope='global';changeTheme('poly')});await page.waitForTimeout(1800);assert.equal(await gallery.count(),0);assert.deepEqual(errors,[]);
+ await context.close();
+ const mobile=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});await mobile.goto('http://127.0.0.1:4318/?theme=reading',{waitUntil:'networkidle'});await mobile.locator('.reading-turn-hit').tap();await mobile.waitForTimeout(1400);assert.equal(await mobile.locator('.reading-gallery').getAttribute('data-chapter'),'1');await mobile.close();
+ const local=await browser.newPage();await local.goto('file:///D:/系统文件/文档/ChatGPT/导航站/dist/index.html?theme=reading');await local.locator('.reading-gallery').waitFor();await local.locator('.reading-turn-action').click();await local.waitForTimeout(1400);assert.equal(await local.locator('.reading-gallery').getAttribute('data-chapter'),'1');await local.close();
+ console.log('PASS: 5 viewports, 3 vector pages, real page turn/cycling/direct selection, rapid-click protection, keyboard/touch, reduced motion, local file, search/settings, space entry and data isolation, cleanup mid-animation.');
+})().catch(e=>{console.error(e);process.exitCode=1}).finally(async()=>browser?.close());

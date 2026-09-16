@@ -1,0 +1,41 @@
+{
+  "family": "Shiyu Youfeng Preview",
+  "version": "Version 0.1",
+  "total_codepoints": 8136,
+  "cjk_unified": 6763,
+  "cjk_extension_a": 0,
+  "latin_and_symbols_below_2e80": 1250,
+  "svg_symbols": 8136,
+  "files": {
+    "ShiyuYoufeng-Preview-Regular.ttf": {
+      "bytes": 6013768,
+      "sha256": "3fbe2deb18d11e10ed01bb18048cc30d2d711761d37731c75bc3638e55fc11ae"
+    },
+    "ShiyuYoufeng-Preview-Regular.woff2": {
+      "bytes": 3317948,
+      "sha256": "150988239bf6d2e79592636d78e6a63ead09fa5bbc4fa337ce1bafd35b6bb3fd"
+    },
+    "ShiyuYoufeng-Preview-glyphs.svg": {
+      "bytes": 24562407,
+      "sha256": "edaf5f1d0155cd66184cea1d455c56d220f6ec5a3e71f6ca9a6424bb9cfd820b"
+    },
+    "ShiyuYoufeng-Preview-brand-samples.svg": {
+      "bytes": 41409,
+      "sha256": "98c08f71acffeb3b2cea391cedabb3d7b372243b81cf454fe77432fd2f41713f"
+    }
+  },
+  "sources": [
+    {
+      "family": "Ma Shan Zheng",
+      "role": "Simplified Chinese glyph outlines",
+      "license": "SIL OFL 1.1"
+    },
+    {
+      "family": "Alegreya",
+      "instance": "weight 500",
+      "role": "Latin letters, numbers and non-CJK punctuation",
+      "license": "SIL OFL 1.1"
+    }
+  ],
+  "coverage_note": "Preview package: common Simplified Chinese scale, not complete GB 18030-2022 Han coverage."
+}

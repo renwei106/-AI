@@ -1,0 +1,1 @@
+const fs=require('fs');let s=fs.readFileSync('dist/v4.js','utf8');const from=s.indexOf(" overlay.querySelector('.vinyl-label')?.classList.remove('vinyl-label');"),to=s.indexOf(' sleeve.append(overlay);',from);if(from<0||to<0)throw Error('label section missing');s=s.slice(0,from)+s.slice(to);fs.writeFileSync('dist/v4.js',s);

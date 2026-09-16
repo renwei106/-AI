@@ -120,7 +120,7 @@
   const copyBefore=applyHomeCopy;
   applyHomeCopy=function(){copyBefore();if(view==='home'&&effective().theme==='reading')applyReadingCopy();};
   const dockBefore=dock;
-  dock=function(){dockBefore();if(effective().theme!=='reading')return;const trigger=$('.dock-trigger');if(!trigger)return;const label=trigger.querySelector('.dock-label')?.outerHTML||'';trigger.innerHTML=`<span class="reading-dock-book" aria-hidden="true">${bookIcon}</span>${label}`;};
+  dock=function(){dockBefore();if(dockTheme()!=='reading')return;const trigger=$('.dock-trigger');if(!trigger)return;const label=trigger.querySelector('.dock-label')?.outerHTML||'';trigger.innerHTML=`<span class="reading-dock-book" aria-hidden="true">${bookIcon}</span>${label}`;};
 
   const settingsBefore=openLinkSettings;
   openLinkSettings=function(){settingsBefore();const panel=$('#link-view-settings'),choice=panel?.querySelector('[data-link-view=shelf]'),main=panel?.querySelector('.style-scroll-body>.link-view-grid');if(!choice||!main)return;choice.innerHTML=`<span>${bookIcon}</span>藏书架`;choice.title='书脊朝外，把收藏摞成一架好书';const after=main.querySelector('[data-link-view=poly]')||main.querySelector('[data-link-view=cards]');if(after)after.after(choice);else main.append(choice);};

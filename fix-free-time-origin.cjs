@@ -1,0 +1,1 @@
+const fs=require('fs');let s=fs.readFileSync('dist/v4.js','utf8');s=s.replace("transformOrigin:'center bottom',easing:'ease-out'","transformOrigin:'center center',easing:'ease-out'");fs.writeFileSync('dist/v4.js',s);

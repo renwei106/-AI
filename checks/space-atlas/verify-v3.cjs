@@ -1,0 +1,59 @@
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');const {pathToFileURL}=require('node:url');const fixture=require('./baseline.json');
+const errors=[],report=[];
+const wait=p=>p.waitForTimeout(420);
+async function mode(p,id){await p.locator(id==='atlas'?'.workspace .space-mode-entry':'#space-atlas .space-mode-entry').hover();await p.locator('[data-space-mode='+id+']').click();await wait(p)}
+async function layout(p,id){await p.locator('[data-at=layouts]').click();await p.locator('[data-at-layout='+id+']').click();await wait(p)}
+async function node(p,key){await p.locator('.at-node-main[data-at-focus="'+key+'"]').click();await wait(p)}
+async function details(p,key){const el=p.locator('.at-node[data-key="'+key+'"]');await el.hover();await el.locator('[data-at-details]').click()}
+const rect=p=>p.evaluate(()=>Object.fromEntries(['.workspace .space-mode-entry','#space-atlas .space-mode-entry','.workspace .space-top-actions','.at-header-actions','.at-canvas','.at-controls','.dock'].map(s=>{const e=document.querySelector(s);return[s,e?{...e.getBoundingClientRect().toJSON(),font:getComputedStyle(e).font}:null]})));
+(async()=>{
+ const browser=await chromium.launch({channel:'msedge',headless:true});const context=await browser.newContext({viewport:{width:1573,height:1041}});
+ await context.addInitScript(value=>{if(!localStorage.getItem('atlas-v3-seeded')){localStorage.setItem('yiyu-prototype-v1',JSON.stringify({...value,signed:true}));localStorage.setItem('atlas-v3-seeded','1')}},fixture);
+ const p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto('http://127.0.0.1:4318');await p.evaluate(()=>{prefs.mode='light';goSpace('create')});await wait(p);
+ const before=await p.evaluate(()=>({data:JSON.stringify(data),top:document.querySelector('.workspace-top').innerHTML,scenes:document.querySelector('.scene-scroll').innerHTML}));
+ assert.equal(await p.locator('.heading-space-menu').count(),0);assert.equal(await p.locator('.workspace .space-mode-entry .space-detail-icon').count(),1);
+ assert(await p.locator('.mode-pull-cord').isVisible());assert(await p.locator('.color-pull-cord').isVisible());
+ await mode(p,'atlas');const boxes=await rect(p);
+ for(const pair of [['.workspace .space-mode-entry','#space-atlas .space-mode-entry'],['.workspace .space-top-actions','.at-header-actions']])for(const k of ['x','y','width','height'])assert(Math.abs(boxes[pair[0]][k]-boxes[pair[1]][k])<1,pair.join(' vs ')+' '+k);
+ assert.equal(boxes['.workspace .space-mode-entry'].font,boxes['#space-atlas .space-mode-entry'].font);
+ assert.equal(boxes['.at-canvas'].height,1041);assert.equal(await p.locator('[data-at=depth],[data-at-arrangement],.at-site,.at-site-grid').count(),0);
+ assert.equal(await p.locator('.at-node[data-kind=scene]').count(),6);assert.equal(await p.locator('.at-node[data-kind=group]').count(),28);
+ assert.equal(await p.locator('.at-node[data-kind=link]').count(),0);report.push('Radial: all six scenes and 28 groups; no list/depth controls; exact desktop heading and actions');
+ for(const id of ['organization','mindmap']){await layout(p,id);const positions=await p.evaluate(()=>[...document.querySelectorAll('.at-node')].filter(e=>Number(e.dataset.level)>=0).map(e=>({level:Number(e.dataset.level),rect:e.getBoundingClientRect().toJSON()})));
+  const axis=id==='organization'?'y':'x',root=positions.find(e=>e.level===0);for(const item of positions.filter(e=>e.level===1))assert(item.rect[axis]>root.rect[axis],id+' preserves hierarchy direction');
+  assert.equal(await p.locator('.at-node[data-kind=scene]').count(),6);
+ }
+ await layout(p,'radial');await node(p,'c:mock-inspiration-v1-0');assert.equal(await p.locator('.at-node[data-kind=group]').count(),5);assert.equal(await p.locator('.at-node.is-parent').count(),1);assert.equal(await p.locator('.at-peer').count(),6);
+ const group='g:mock-inspiration-v1-0-g0';await node(p,'b:'+group+':link');assert.equal(await p.locator('.at-node[data-kind=group]').count(),1);assert.equal(await p.locator('.at-node[data-kind=link]').count(),18);
+ await node(p,'b:'+group+':link');assert.equal(await p.locator('.at-node[data-kind=link]').count(),30);assert.equal(await p.locator('.at-node[data-kind=bundle]').count(),0);
+ const logoFit=await p.locator('.at-node[data-kind=link] .at-logo').evaluateAll(es=>es.every(e=>{const a=e.getBoundingClientRect(),b=e.parentElement.getBoundingClientRect();return a.left>=b.left&&a.right<=b.right&&a.top>=b.top&&a.bottom<=b.bottom}));assert(logoFit);
+ const link=p.locator('.at-node[data-kind=link] a').first();assert.equal(await link.getAttribute('target'),'_blank');const popupPromise=context.waitForEvent('page');await link.click();const popup=await popupPromise;await popup.close();assert.match(await p.locator('.at-path').innerText(),/界面设计/);
+ report.push('More focuses its group, 18 then 30 URL nodes; URLs open directly; logos stay inside cards');
+ await p.locator('.at-node[data-level="0"] .at-node-main').hover();assert(await p.locator('.at-flow.is-flowing').count()>0);assert(await p.locator('.at-flow.is-flowing.is-upstream').count()>0);
+ assert.equal(await p.locator('.at-flow.is-flowing').first().evaluate(e=>getComputedStyle(e).animationName),'atlas-flow');await p.mouse.move(20,300);assert.equal(await p.locator('.at-flow.is-flowing').count(),0);
+ await p.locator('[data-at-mode="3d"]').click();await wait(p);assert.equal(await p.locator('[data-at=layouts]').count(),0);
+ const depths=await p.locator('.at-node').evaluateAll(es=>es.map(e=>Number(e.dataset.depth)));assert(Math.min(...depths)<-20&&Math.max(...depths)>20);
+ const transforms=()=>p.locator('.at-node').evaluateAll(es=>es.map(e=>e.style.transform));const stable=await transforms();await p.waitForTimeout(650);assert.deepEqual(await transforms(),stable,'3D is stable before roaming');
+ await p.mouse.move(60,450);await p.mouse.down();await p.mouse.move(1250,580,{steps:25});await p.mouse.up();await wait(p);assert.notDeepEqual(await transforms(),stable,'3D camera rotates');
+ await p.locator('[data-at=fit]').click();await wait(p);await p.mouse.move(20,300);await p.locator('[data-at=motion]').click();await p.mouse.move(20,300);await p.waitForTimeout(80);
+ const motion=await p.evaluate(async()=>{const el=document.querySelector('.at-node[data-kind=link]'),frames=[];for(let i=0;i<30;i++){await new Promise(requestAnimationFrame);const r=el.getBoundingClientRect();frames.push({x:r.x,y:r.y,t:performance.now()})}return frames});
+ const jumps=motion.slice(1).map((v,i)=>Math.hypot(v.x-motion[i].x,v.y-motion[i].y));assert(Math.max(...jumps)<5,'camera motion has no collision jumps');assert(Math.max(...jumps)>.001,'roaming actually moves');await p.locator('[data-at=motion]').click();report.push({case:'3D real depth and smooth roaming',maxFrameDisplacement:Math.max(...jumps)});
+ await p.locator('.dock-trigger').hover();await p.locator('.space-option[data-space="life"]').click();await wait(p);assert(await p.locator('#space-atlas').isVisible());assert.match(await p.locator('.at-mode-host').innerText(),/生活空间/);report.push('Original bottom dock switches space without leaving graph');
+ await mode(p,'daily');await p.evaluate(()=>goSpace('create'));assert.equal(await p.evaluate(()=>JSON.stringify(data)),before.data);assert.equal(await p.locator('.workspace-top').innerHTML(),before.top);assert.equal(await p.locator('.scene-scroll').innerHTML(),before.scenes);
+ await mode(p,'atlas');
+ await p.evaluate(()=>{prefs.membership={expiresAt:Date.now()+86400000};render()});
+ for(const [action,dialog] of [['share','#space-share-dialog'],['settings','#display-scope-dialog'],['add','#add']]){await p.locator('[data-at-header='+action+']').click();assert(await p.locator(dialog).isVisible(),action+' original dialog');await p.locator(dialog).evaluate(e=>e.close());await wait(p)}
+ report.push('Original share, settings and add dialogs accessible; browsing does not change data/daily content');
+ await p.evaluate(()=>{prefs.membership={expiresAt:Date.now()+86400000};render()});
+ await node(p,'c:ai');await node(p,'g:assistants');await details(p,'u:assistants:0');await p.locator('[data-at-manage=edit]').click();await p.locator('#bookmark-editor-form [name=name]').fill('图谱编辑验证');await p.locator('#bookmark-editor-form [type=submit]').click();await wait(p);assert.match(await p.locator('.at-node[data-key="u:assistants:0"]').innerText(),/图谱编辑验证/);
+ await details(p,'u:assistants:0');await p.locator('[data-at-manage=move]').click();await p.locator('.at-drawer input').fill('界面设计');await p.locator('[data-at-destination]').first().click();await wait(p);assert.equal(await p.locator('.at-node[data-kind=link]').count(),2);await p.locator('[data-at=undo]').click();await wait(p);assert.equal(await p.locator('.at-node[data-kind=link]').count(),3);
+ await node(p,'c:ai');await details(p,'c:ai');await p.locator('[data-at-manage=add]').click();await p.locator('#organization .inline-create input').fill('图谱新增分组');await p.locator('#organization .inline-create input').press('Enter');await p.locator('#organization').evaluate(e=>e.close());await wait(p);assert.match(await p.locator('.at-canvas').innerText(),/图谱新增分组/);report.push('Existing edit and create dialogs, move with undo, refresh after saving');
+ const modeBefore=await p.evaluate(()=>prefs.mode);await p.locator('.mode-pull-cord').click();await p.mouse.move(20,300);await p.waitForTimeout(650);assert.notEqual(await p.evaluate(()=>prefs.mode),modeBefore);const colorBefore=await p.evaluate(()=>prefs.color);await p.locator('.color-pull-cord').click();await p.waitForTimeout(650);assert.notEqual(await p.evaluate(()=>prefs.color),colorBefore);await p.mouse.move(20,300);await p.waitForTimeout(300);assert(Number(await p.locator('.mode-pull-cord').evaluate(e=>getComputedStyle(e).opacity))<.2);await p.locator('.mode-pull-cord').hover();await p.waitForTimeout(300);assert(Number(await p.locator('.mode-pull-cord').evaluate(e=>getComputedStyle(e).opacity))>.9);
+ await p.locator('[data-at-mode="2d"]').click();await layout(p,'mindmap');await mode(p,'daily');await p.reload();await p.evaluate(()=>goSpace('create'));await mode(p,'atlas');assert.match(await p.locator('[data-at=layouts]').innerText(),/脑图布局/);report.push('Cord click changes global theme/mode; hover restores opacity; graph layout persists');
+ for(const viewport of [{width:1280,height:800},{width:390,height:844},{width:2560,height:1440}]){await p.setViewportSize(viewport);await wait(p);const b=await rect(p);for(const k of ['x','y','width','height'])assert(Math.abs(b['.workspace .space-mode-entry'][k]-b['#space-atlas .space-mode-entry'][k])<1,'heading matches at '+viewport.width+' '+k);const a=b['.at-controls'],d=b['.dock'];assert(Math.min(a.right,d.right)-Math.max(a.left,d.left)<=0||Math.min(a.bottom,d.bottom)-Math.max(a.top,d.top)<=0,'dock does not obstruct controls');assert.equal(b['.at-canvas'].height,viewport.height)}
+ report.push('1280, 390 and 2560 viewport heading parity, full-height canvas, no dock-control overlap');
+ await p.close();await context.close();
+ const filePage=await browser.newPage();filePage.on('pageerror',e=>errors.push(e.message));await filePage.goto(pathToFileURL(path.resolve('dist/index.html')).href);await filePage.evaluate(()=>goSpace('life'));await mode(filePage,'atlas');assert(await filePage.locator('.at-node').count()>0);await filePage.close();report.push('Direct file preview works');
+ fs.writeFileSync('checks/space-atlas/v3-report.json',JSON.stringify({report,errors},null,2));console.log(JSON.stringify({report,errors},null,2));assert.deepEqual(errors,[]);await browser.close();console.log('PASS');
+})().catch(e=>{console.error(e);process.exit(1)});

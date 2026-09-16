@@ -1,0 +1,3 @@
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {pathToFileURL}=require('node:url');const path=require('node:path');
+(async()=>{const b=await chromium.launch({channel:'msedge',headless:true});const p=await b.newPage({viewport:{width:1200,height:720},deviceScaleFactor:1});const file=path.resolve('font-package/shiyu-youfeng-v0.1/ShiyuYoufeng-Preview-brand-samples.svg');await p.goto(pathToFileURL(file).href);await p.screenshot({path:'checks/youfeng-brand-samples.png'});await b.close()})().catch(e=>{console.error(e);process.exit(1)})

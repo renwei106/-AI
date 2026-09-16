@@ -1,0 +1,9 @@
+const fs=require('fs');let s=fs.readFileSync('dist/v4.js','utf8');s=s.replace("const w=field.clientWidth,height=field.clientHeight,dt=","const w=field.clientWidth,height=field.clientHeight,dt=");s=s.replace("const step=dt/3;for(const a of particles){a.vy", "const step=dt/3;for(let i=particles.length-1;i>=0;i--)if(!particles[i].el.isConnected)particles.splice(i,1);for(const a of particles){a.vy");s+=`
+function dissolveRainCycle(){
+ const field=$('#rain-field'),landed=$('.rain-landed');if(!field||!landed)return;
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ field.querySelectorAll('.rain-drop').forEach(el=>{el.classList.add('rain-dissolving');const animation=el.animate([{opacity:.55,filter:'blur(0)'},{opacity:0,filter:'blur(12px)'}],{duration:reduced?0:1500,easing:'ease-in',fill:'forwards'});animation.onfinish=()=>el.remove()});
+ const ghost=landed.cloneNode(true);ghost.classList.add('rain-cycle-ghost');ghost.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));ghost.querySelectorAll('[data-rain-hour],[data-rain-minute]').forEach(e=>{e.removeAttribute('data-rain-hour');e.removeAttribute('data-rain-minute')});ghost.setAttribute('aria-hidden','true');landed.parentElement.append(ghost);const animation=ghost.animate([{opacity:1,filter:'blur(0)'},{opacity:0,filter:'blur(14px)'}],{duration:reduced?0:1500,fill:'forwards'});animation.onfinish=()=>ghost.remove();
+ landed.querySelectorAll('[data-rain-hour],[data-rain-minute]').forEach(e=>delete e.dataset.elasticValue);const date=landed.querySelector('.rain-calendar-host');if(date)delete date.dataset.date;updateRainDate();
+}
+`;fs.writeFileSync('dist/v4.js',s);let a=fs.readFileSync('dist/app.js','utf8');a=a.replace('if(lastRainMinute!==minute){lastRainMinute=minute;',"if(lastRainMinute!==minute){if(lastRainMinute&&typeof dissolveRainCycle==='function')dissolveRainCycle();lastRainMinute=minute;");fs.writeFileSync('dist/app.js',a);

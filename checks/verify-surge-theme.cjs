@@ -1,0 +1,20 @@
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const assert=require('node:assert/strict');
+let browser;
+(async()=>{
+  browser=await chromium.launch({channel:'msedge',headless:true});
+  const page=await browser.newPage({viewport:{width:1288,height:1041}}),errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  await page.goto('http://127.0.0.1:4318/?theme=surge',{waitUntil:'networkidle'});
+  await page.evaluate(()=>{signed=true;document.querySelector('.brand-guide')?.remove()});
+  const canvas=page.locator('.flow-canvas'),cover=page.locator('.flow-cover'),canvasHandle=await canvas.elementHandle();
+  assert.equal(await canvas.getAttribute('data-mode'),'snow','the legacy surge link opens the unified snow controller');
+  assert.equal(await page.locator('.inspiration-style-label>span').first().innerText(),'灵感落雪');
+  const earlyTarget=Number(await canvas.getAttribute('data-snow-target-depth'));await page.waitForTimeout(5200);const laterTarget=Number(await canvas.getAttribute('data-snow-target-depth')),settled=Number(await canvas.getAttribute('data-snow-settled'));
+  assert(laterTarget>earlyTarget,'the snow layer deepens gradually');assert(settled>50,'falling pieces build a real settled layer');
+  const before=await cover.evaluate(e=>e.__inspirationSnapshot().particles.slice(0,100));await page.evaluate(()=>document.querySelector('.flow-cover').__setInspirationMode('tide'));const after=await cover.evaluate(e=>e.__inspirationSnapshot().particles.slice(0,100));
+  const handoff=after.reduce((sum,p,index)=>sum+Math.hypot(p.x-before[index].x,p.y-before[index].y),0)/after.length;assert(handoff<.015,'snow and tide keep the same particle positions');assert(await page.evaluate(handle=>handle===document.querySelector('.flow-canvas'),canvasHandle),'snow and tide share one canvas');
+  await page.mouse.move(120,720);await page.mouse.move(1120,580,{steps:24});await page.waitForTimeout(80);assert(Number(await canvas.getAttribute('data-ripples'))>8,'pointer movement leaves separate water drops');assert.equal(await canvas.getAttribute('data-ripple-layers'),'2','every water drop has two expanding rings');assert.equal(await page.locator('.inspiration-style-label>span').first().innerText(),'潮汐涌动');
+  await page.screenshot({path:'checks/flow-mode-tide.png'});assert.deepEqual(errors,[]);
+  console.log('PASS: legacy snow entry, growing and melting snow layer, one-canvas controller handoff, and two-ring tide drops.');
+})().catch(error=>{console.error(error);process.exitCode=1}).finally(async()=>browser?.close());

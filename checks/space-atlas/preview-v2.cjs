@@ -1,0 +1,21 @@
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const fixture=require('./baseline.json');
+const fs=require('node:fs');
+(async()=>{
+ const b=await chromium.launch({channel:'msedge',headless:true});const p=await b.newPage({viewport:{width:1573,height:1041},reducedMotion:'reduce'});const errors=[];p.on('pageerror',e=>errors.push(e.message));
+ await p.addInitScript(value=>localStorage.setItem('yiyu-prototype-v1',JSON.stringify({...value,signed:true})),fixture);
+ await p.goto('http://127.0.0.1:4318');await p.evaluate(()=>goSpace('create'));
+ await p.locator('.workspace .space-mode-entry').hover();await p.screenshot({path:'checks/space-atlas/v2-entry.png'});await p.locator('[data-space-mode=atlas]').click();await p.waitForTimeout(500);
+ await p.locator('[data-at-mode="2d"]').click();await p.waitForTimeout(500);await p.screenshot({path:'checks/space-atlas/v2-orbit-2d.png'});
+ await p.locator('[data-at-focus="c:ai"]').first().click();await p.waitForTimeout(500);await p.screenshot({path:'checks/space-atlas/v2-scene.png'});
+ await p.locator('[data-at-focus="g:assistants"]').first().click();await p.waitForTimeout(500);await p.screenshot({path:'checks/space-atlas/v2-links.png'});
+ await p.locator('[data-at-mode="3d"]').click();await p.waitForTimeout(500);await p.screenshot({path:'checks/space-atlas/v2-links-3d.png'});
+ await p.evaluate(()=>goSpace('work'));await p.waitForTimeout(600);console.log('dock switch',await p.locator('.at-mode-host').innerText());
+ await p.screenshot({path:'checks/space-atlas/v2-work.png'});await p.locator('[data-at-focus="c:daily"]').first().click();await p.waitForTimeout(600);
+ console.log('real link nodes',await p.locator('.at-node[data-kind=link]').count());await p.screenshot({path:'checks/space-atlas/v2-many-links.png'});
+ await p.locator('.at-node-main[data-at-focus="g:tools"]').click();await p.waitForTimeout(400);
+ await p.locator('.dock-trigger').hover();await p.screenshot({path:'checks/space-atlas/v2-dock.png'});
+ await p.mouse.move(80,70);await p.evaluate(()=>{prefs.mode='dark';prefs.color='#9270c2';render()});await p.waitForTimeout(500);await p.screenshot({path:'checks/space-atlas/v2-dark.png'});
+ await p.setViewportSize({width:390,height:844});await p.waitForTimeout(500);await p.screenshot({path:'checks/space-atlas/v2-mobile.png'});
+ fs.writeFileSync('checks/space-atlas/v2-errors.json',JSON.stringify(errors));console.log('errors',errors);await b.close();
+})().catch(e=>{console.error(e);process.exit(1)});

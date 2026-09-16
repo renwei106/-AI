@@ -1,0 +1,1 @@
+const fs=require('fs');let s=fs.readFileSync('dist/v4.js','utf8');s=s.replace(' sleeve.append(overlay);',' sleeve.append(overlay);\n disc.classList.add("record-switching");');s=s.replace('back.onfinish=()=>overlay.remove()','back.onfinish=()=>{overlay.remove();disc.classList.remove("record-switching")}');fs.writeFileSync('dist/v4.js',s);

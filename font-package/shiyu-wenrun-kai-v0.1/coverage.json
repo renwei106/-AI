@@ -1,0 +1,42 @@
+{
+  "family": "Shiyu Wenrun Kai Preview",
+  "display_name": "拾隅温润楷",
+  "version": "Version 0.1",
+  "total_codepoints": 44695,
+  "han_codepoints": 30558,
+  "cjk_unified": 20992,
+  "cjk_extension_a": 6592,
+  "svg_symbols": 44695,
+  "sample_svg_paths": 27,
+  "files": {
+    "ShiyuWenrunKai-Preview-Regular.ttf": {
+      "bytes": 24708132,
+      "sha256": "498259713a8fec567948aa91f91e0950a0cbf911207d84231419c18d22deec39"
+    },
+    "ShiyuWenrunKai-Preview-Regular.woff2": {
+      "bytes": 7828136,
+      "sha256": "e99318e06bd9672e9ec166b5782185f8b6fa7deaab96d1668b2965b7dd17bd57"
+    },
+    "ShiyuWenrunKai-Preview-glyphs.svg": {
+      "bytes": 100531362,
+      "sha256": "c33b57456316824b3309a3a6670529b864ad007eb570d5b4e70020a5802adc64"
+    },
+    "ShiyuWenrunKai-Preview-brand-samples.svg": {
+      "bytes": 26100,
+      "sha256": "b5112e6173d19fa144c2506d5073925b82eaa15380f38f94a3b363d861bc19d1"
+    }
+  },
+  "sources": [
+    {
+      "family": "LXGW WenKai",
+      "role": "Simplified Chinese glyph outlines",
+      "license": "SIL OFL 1.1"
+    },
+    {
+      "family": "Lora",
+      "role": "Latin letters, numbers and non-CJK punctuation",
+      "license": "SIL OFL 1.1"
+    }
+  ],
+  "coverage_note": "Preview package; not complete Unicode Han coverage."
+}

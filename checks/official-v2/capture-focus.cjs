@@ -1,0 +1,4 @@
+const{chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const sharp=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/sharp');
+const path=require('node:path');
+(async()=>{const b=await chromium.launch({channel:'msedge',headless:true});const p=await b.newPage({viewport:{width:1440,height:900}});await p.goto('http://127.0.0.1:4318/',{waitUntil:'networkidle'});await p.evaluate(()=>{document.querySelector('[data-dismiss-guide]')?.click();view='home';scope='global';changeTheme('cosmos');prefs.mode='dark';render()});await p.waitForTimeout(800);await sharp(await p.screenshot({clip:{x:535,y:90,width:905,height:640}})).webp({quality:93}).toFile(path.resolve(__dirname,'../../dist/official/v2/assets/cosmos-focus.webp'));await b.close();console.log('Captured product cosmos focal detail')})().catch(e=>{console.error(e);process.exit(1)});

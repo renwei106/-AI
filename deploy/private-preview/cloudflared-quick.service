@@ -1,0 +1,15 @@
+[Unit]
+Description=Shiyu public preview tunnel
+After=network-online.target shiyu-preview.service
+Wants=network-online.target
+Requires=shiyu-preview.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/cloudflared tunnel --no-autoupdate --protocol http2 --url http://127.0.0.1:4318
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

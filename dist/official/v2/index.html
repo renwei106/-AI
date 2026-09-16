@@ -7,28 +7,17 @@
   <title>拾隅 · 万千世界，始于一点喜欢</title>
   <meta name="description" content="世界很大，留一隅给自己。拾隅，用一段沉浸式光影，讲述喜欢、内心与从容。">
   <link rel="icon" type="image/svg+xml" href="./assets/mark.svg">
-  <link rel="preload" as="image" href="./assets/sanctuary-depth-v2.webp" fetchpriority="high">
-  <link rel="stylesheet" href="./official.css?v=20260916">
-  <script defer src="./official.js?v=20260916"></script>
+  <link rel="stylesheet" href="./official.css?v=particles-15">
+  <script defer src="./assets/land-outline.js"></script>
+  <script defer src="./particle-world.js?v=particles-15"></script>
+  <script defer src="./official.js?v=particles-11"></script>
 </head>
 <body>
   <div class="experience" id="experience">
     <div class="visual-world" aria-hidden="true">
-      <div class="depth-image media-layer"></div>
-      <div class="sea-image media-layer"></div>
-      <div class="night-image media-layer"></div>
-      <div class="final-haze"></div>
-
-      <div class="memory-world">
-        <figure class="memory memory-one"><img src="./assets/sea.webp" width="1600" height="900" alt=""></figure>
-        <figure class="memory memory-two"><img src="./assets/road.webp" width="1600" height="900" alt=""></figure>
-        <figure class="memory memory-three"><img src="./assets/night.webp" width="1600" height="900" alt=""></figure>
-      </div>
-
-      <div class="light-column"></div>
+      <div class="ambient-wash"></div>
       <div class="light-source"><span></span></div>
       <canvas id="atmosphere"></canvas>
-      <div class="quiet-frame"></div>
       <div class="vignette"></div>
       <div class="grain"></div>
     </div>
@@ -50,11 +39,11 @@
         </div>
       </section>
 
-      <section class="scene scene-corner" data-scene="1" aria-labelledby="corner-title" aria-hidden="true" inert>
+      <section class="scene scene-melody" data-scene="1" aria-labelledby="melody-title" aria-hidden="true" inert>
         <div class="scene-copy centered-copy">
-          <p class="eyebrow">01 / 给自己</p>
-          <h2 id="corner-title">世界很大，<br>留一隅，<span>给自己。</span></h2>
-          <p class="whisper">不必赶赴所有热闹。<br>此刻，只听见自己的呼吸。</p>
+          <p class="eyebrow">01 / 如歌</p>
+          <h2 id="melody-title">慢一点。<br>听见<span>自己的节奏。</span></h2>
+          <p class="whisper">像旋律，像呼吸。<br>让日子，回到喜欢的频率。</p>
         </div>
       </section>
 
@@ -66,21 +55,37 @@
         </div>
       </section>
 
-      <section class="scene scene-inward" data-scene="3" aria-labelledby="inward-title" aria-hidden="true" inert>
+      <section class="scene scene-corner" data-scene="3" aria-labelledby="corner-title" aria-hidden="true" inert>
+        <div class="scene-copy centered-copy">
+          <p class="eyebrow">03 / 给自己</p>
+          <h2 id="corner-title">世界很大，<br>留一隅，<span>给自己。</span></h2>
+          <p class="whisper">不必赶赴所有热闹。<br>此刻，只听见自己的呼吸。</p>
+        </div>
+      </section>
+
+      <section class="scene scene-orbits" data-scene="4" aria-labelledby="orbits-title" aria-hidden="true" inert>
+        <div class="scene-copy centered-copy">
+          <p class="eyebrow">04 / 自有节奏</p>
+          <h2 id="orbits-title">各有轨迹，<br><span>自有节奏。</span></h2>
+          <p class="whisper">不必追赶同一种速度。<br>按自己的步调，向前。</p>
+        </div>
+      </section>
+
+      <section class="scene scene-inward" data-scene="5" aria-labelledby="inward-title" aria-hidden="true" inert>
         <div class="scene-copy split-copy">
-          <p class="eyebrow">03 / 一隅之间</p>
+          <p class="eyebrow">05 / 一隅之间</p>
           <h2 id="inward-title"><span class="line-left">向外，是世界。</span><span class="line-right">向内，是自己。</span></h2>
           <p class="whisper">在万千声音之间，仍能听见心里的声音。</p>
         </div>
       </section>
 
-      <section class="scene scene-home" data-scene="4" aria-labelledby="home-title" aria-hidden="true" inert>
+      <section class="scene scene-home" data-scene="6" aria-labelledby="home-title" aria-hidden="true" inert>
+        <a class="portal-link" href="/" aria-label="进入拾隅"></a>
         <div class="scene-copy home-copy">
-          <p class="eyebrow">04 / 心有归处</p>
-          <h2 id="home-title">世界不断向前。<br>你可以，<span>从容一点。</span></h2>
-          <p class="whisper">拾起喜欢，安放日常。<br>你的一隅，自有光。</p>
-          <a class="enter-link" href="/">进入拾隅 <span aria-hidden="true">↗</span></a>
+          <h2 id="home-title">万千世界，<br>终归<span>拾隅。</span></h2>
+          <p class="whisper">拾起喜欢，安放日常。<br>你的世界，自有节奏。</p>
         </div>
+        <a class="entry-link" href="/"><span class="entry-label">进入拾隅</span><span class="entry-arrow" aria-hidden="true">↗</span></a>
       </section>
     </main>
 
@@ -90,7 +95,7 @@
     </div>
 
     <div class="journey-progress" aria-hidden="true">
-      <span class="progress-count"><b id="scene-number">00</b><i>/ 04</i></span>
+      <span class="progress-count"><b id="scene-number">00</b><i>/ 06</i></span>
       <span class="progress-line"><i id="progress-fill"></i></span>
     </div>
   </div>

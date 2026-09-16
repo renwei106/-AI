@@ -1,0 +1,1 @@
+const fs=require('fs');fs.mkdirSync('baselines/v162-rain-initial-units',{recursive:true});fs.copyFileSync('dist/v4.js','baselines/v162-rain-initial-units/v4.js');fs.appendFileSync('dist/v4.js',"\n// Initialize the rain view after the final time renderer is installed.\nif(view==='home'&&effective().theme==='rain')home();\n");

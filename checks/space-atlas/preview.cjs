@@ -1,0 +1,28 @@
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const fs=require('node:fs');
+(async()=>{
+ const browser=await chromium.launch({channel:'msedge',headless:true});
+ const page=await browser.newPage({viewport:{width:1573,height:1041}});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:4318');
+ await page.evaluate(()=>{prefs.theme='base';prefs.mode='light';prefs.color='#48614c';signed=true;goSpace(data[0].id)});
+ await page.locator('.space-atlas-entry').click();await page.waitForTimeout(500);
+ await page.screenshot({path:'checks/space-atlas/large-light.png'});
+ console.log('large',await page.locator('.at-node').count(),await page.locator('.at-node[data-kind=bundle]').count());
+ await page.locator('[data-at=daily]').click();
+ await page.evaluate(()=>goSpace('create'));await page.locator('.space-atlas-entry').click();await page.waitForTimeout(500);
+ await page.screenshot({path:'checks/space-atlas/atlas-light.png'});
+ await page.locator('[data-at-focus="c:ai"]').first().hover({force:true});await page.locator('[data-at-focus="c:ai"]').first().click();await page.waitForTimeout(400);
+ await page.screenshot({path:'checks/space-atlas/scene-light.png'});
+ await page.locator('[data-at-focus="g:assistants"]').first().click();await page.waitForTimeout(400);
+ await page.screenshot({path:'checks/space-atlas/group-light.png'});
+ await page.locator('[data-at=daily]').click();
+ await page.evaluate(()=>{prefs.mode='dark';prefs.color='#9270c2';render()});await page.locator('.space-atlas-entry').click();await page.waitForTimeout(400);
+ await page.screenshot({path:'checks/space-atlas/atlas-dark.png'});
+ await page.locator('[data-at-mode="2d"]').click();await page.waitForTimeout(300);
+ await page.screenshot({path:'checks/space-atlas/atlas-2d.png'});
+ await page.setViewportSize({width:390,height:844});await page.waitForTimeout(400);
+ await page.screenshot({path:'checks/space-atlas/atlas-mobile.png'});
+ console.log('errors',errors);fs.writeFileSync('checks/space-atlas/errors.json',JSON.stringify(errors));
+ await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});

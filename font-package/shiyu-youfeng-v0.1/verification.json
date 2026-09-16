@@ -1,0 +1,25 @@
+{
+  "family": "Shiyu Youfeng Preview",
+  "ttf_loads": true,
+  "woff2_loads": true,
+  "total_codepoints": 8136,
+  "cjk_unified": 6763,
+  "svg_symbols": 8136,
+  "sample_svg_paths": 27,
+  "required_phrase_missing": [],
+  "app_unique_hanzi": 951,
+  "app_missing_hanzi": [],
+  "zip_valid": true,
+  "zip_files": [
+    "FONTLOG.md",
+    "OFL-Alegreya.txt",
+    "OFL-Ma-Shan-Zheng.txt",
+    "README.md",
+    "ShiyuYoufeng-Preview-Regular.ttf",
+    "ShiyuYoufeng-Preview-Regular.woff2",
+    "ShiyuYoufeng-Preview-brand-samples.svg",
+    "ShiyuYoufeng-Preview-glyphs.svg",
+    "coverage.json",
+    "shiyu-youfeng.css"
+  ]
+}

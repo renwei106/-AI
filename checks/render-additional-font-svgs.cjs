@@ -1,0 +1,4 @@
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {pathToFileURL}=require('node:url');const path=require('node:path');
+const samples=[['qingya','font-package/shiyu-qingya-song-v0.1/ShiyuQingyaSong-Preview-brand-samples.svg'],['wenrun','font-package/shiyu-wenrun-kai-v0.1/ShiyuWenrunKai-Preview-brand-samples.svg']];
+(async()=>{const b=await chromium.launch({channel:'msedge',headless:true});for(const [name,file] of samples){const p=await b.newPage({viewport:{width:1200,height:720},deviceScaleFactor:1});await p.goto(pathToFileURL(path.resolve(file)).href);await p.screenshot({path:path.resolve('checks',name+'-brand-samples.png')});await p.close()}await b.close()})().catch(e=>{console.error(e);process.exit(1)})
