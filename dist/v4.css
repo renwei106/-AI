@@ -405,8 +405,7 @@ body[data-view=space] .mode-pull-cord,body[data-view=space] .color-pull-cord{dis
 body[data-view=space].is-fullscreen .mode-pull-cord,body[data-view=space].is-fullscreen .color-pull-cord{opacity:.08}
 body[data-view=space] .mode-pull-cord:hover,body[data-view=space] .mode-pull-cord:focus-visible,body[data-view=space] .mode-pull-cord:active,body[data-view=space] .color-pull-cord:hover,body[data-view=space] .color-pull-cord:focus-visible,body[data-view=space] .color-pull-cord:active{opacity:1}
 body:has(dialog[open]:not(#space-atlas)) .mode-pull-cord,body:has(dialog[open]:not(#space-atlas)) .color-pull-cord,
-body:has(#space-atlas[open] .at-drawer:not([hidden])) .mode-pull-cord,body:has(#space-atlas[open] .at-drawer:not([hidden])) .color-pull-cord,
-body[data-view=home]:has(.account-menu-wrap:is(:hover,:focus-within,.menu-pinned)) .mode-pull-cord,body[data-view=home]:has(.account-menu-wrap:is(:hover,:focus-within,.menu-pinned)) .color-pull-cord{visibility:hidden;pointer-events:none;opacity:0;transition:none}
+body:has(#space-atlas[open] .at-drawer:not([hidden])) .mode-pull-cord,body:has(#space-atlas[open] .at-drawer:not([hidden])) .color-pull-cord{visibility:hidden;pointer-events:none;opacity:0;transition:none}
 .paper-editing [contenteditable]{outline:1px dashed var(--line);outline-offset:4px;cursor:text;min-height:1em}.paper-editing [contenteditable]:focus{outline-color:var(--ink)}
 body:not(.app-ready) #main,body:not(.app-ready) #dock,body:not(.app-ready) .header-right{visibility:hidden}
 .paper-inline-upload{position:relative;display:grid;place-items:center;min-height:100px;flex:1;border:1px dashed var(--muted);background-size:cover;background-position:center;cursor:pointer;margin:8px 0 14px}.paper-inline-upload>span{padding:10px 14px;background:var(--surface);font-size:13px;color:var(--ink)}.paper-inline-upload small{display:block;font-size:10px;margin-top:6px;color:var(--muted)}

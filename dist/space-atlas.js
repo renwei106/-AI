@@ -204,7 +204,7 @@
     dialog.innerHTML=`<div class="at-shell at-full-page${orbital()?' at-orbital':''}${galaxy()?' at-galaxy':''}" data-mode="${state.mode}" data-layout="${state.layout}" data-presentation="${state.mode==='3d'?state.scene3d:'spatial'}">
       <button class="at-cover-return" data-at="home" aria-label="返回首页"><span>首页</span><span>点击返回首页</span></button><div class="at-header-actions space-top-actions"></div>
       <div class="at-canvas" aria-label="${esc(n.name)}关系图" tabindex="0"></div>
-      <div class="at-footer"><div class="at-legend"><span><i></i>空间</span><span><i></i>场景</span><span><i></i>分组</span><span>${icons.link}网址</span><span class="at-parent-legend">┄ 上级</span><span class="at-child-legend">─ 下级</span></div><p class="at-hint" role="status"></p><div class="at-view-tools"><button class="at-focus-scene" data-at="focus-scene" aria-label="聚焦场景" title="聚焦场景：恢复当前节点的默认视角">${icons.locate}</button>${layoutPicker()}</div></div>
+      <div class="at-footer"><div class="at-legend"><span><i></i>空间</span><span><i></i>场景</span><span><i></i>分组</span><span>${icons.link}网址</span><span class="at-parent-legend">┄ 上级</span><span class="at-child-legend">─ 下级</span></div><div class="at-view-tools"><button class="at-focus-scene" data-at="focus-scene" aria-label="聚焦场景" title="聚焦场景：恢复当前节点的默认视角">${icons.locate}</button>${layoutPicker()}</div></div>
       <aside class="at-drawer" hidden aria-label="图谱管理"></aside><div class="at-notice" hidden role="status"></div></div>`;
     mountEntry();mountAtlasHeaderActions();query('.at-search')?.remove();positionChrome();
     resizeObserver?.disconnect();const observedCanvas=query('.at-canvas');let observedWidth=observedCanvas.clientWidth,observedHeight=observedCanvas.clientHeight;
@@ -302,7 +302,6 @@
       if(parent){const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.classList.add('at-line');if(parent.isParent)path.classList.add('is-upstream');if(r.kind==='link')path.classList.add('at-link-line');path.dataset.from=parent.key;path.dataset.to=r.key;path.dataset.level=r.level;lines.append(path);const flow=document.createElementNS('http://www.w3.org/2000/svg','g');flow.classList.add('at-packet');flow.innerHTML='<circle class="at-packet-head" r="1.65"/>';flow.dataset.from=parent.key;flow.dataset.to=r.key;flows.append(flow);edgeEls.push({el:path,flow,from:parent,to:r})}
     }
     const aggregated=visible.some(x=>x.kind==='bundle');
-    query('.at-hint').textContent=state.mode==='3d'?'拖动排序 · 空白处旋转 · 滚轮缩放':'拖动排序 · 空白处移动 · 滚轮缩放';
     layout(true);
     if(!reduceMotion.matches)canvas.animate([{opacity:.25},{opacity:1}],{duration:340,easing:'ease-out'});
   }
