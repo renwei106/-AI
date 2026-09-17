@@ -57,7 +57,7 @@
   const shapes=makeShapes();
   const FORM_START=10000,FORM_END=30000;
   const FORM_NAMES=['城堡','鲨影','远行','地球','银河','太阳系','玫瑰','奔马','飞鸟','帆船','埃菲尔铁塔','飞机','上海天际线','东方明珠','金字塔','蒲公英','参天大树','蒙娜丽莎','一字雁阵','人字雁阵','天鹅左岸','天鹅右岸'];
-  const FORM_ORDER=[9,20,19,10,16,17,0,1,2,3,4,5,6,7,8,11,12,13,14,15];
+  const FORM_ORDER=[9,19,10,16,17,0,1,2,3,4,5,6,7,8,11,12,13,14,15];
   const MODE_KEYS=['form','snow','tide','chaos'];
   const STYLE_NAMES={chaos:'混沌漫游',form:'万象成形',snow:'灵感落雪',tide:'潮汐涌动'};
   const FLOW_DOCK_ICON='<span class="flow-dock-gateway" aria-hidden="true"><svg viewBox="0 0 52 42" fill="none"><path class="flow-dock-gate" d="M26 2.5 44 12.7v16.6L26 39.5 8 29.3V12.7Z" stroke="currentColor" stroke-width="1.35"/><g class="flow-dock-enter" fill="currentColor"><circle cx="20.5" cy="16.5" r="2.5"/><rect x="27.5" y="14" width="5" height="5" rx="1"/><path d="m21 23.5 3.4 5.7h-6.8Z"/><path d="M28.9 22.7h2.2v2.2h2.2v2.2h-2.2v2.2h-2.2v-2.2h-2.2v-2.2h2.2Z"/></g></svg></span>';
@@ -209,7 +209,7 @@
     let placementScale=heightScale,centerX=width*.5;
     if((kind===20||kind===21)&&textBox&&width>=760){const maximum=Math.min((shapeBottom-height*.14)/(maxY-minY),width*.93/(maxX-minX));outer:for(let scale=maximum;scale>=heightScale;scale*=.96){for(const shift of [0,-.06,.06,-.12,.12]){const cx=width*(.5+shift),left=cx-(maxX-minX)*scale*.5,right=cx+(maxX-minX)*scale*.5;if(left<16||right>width-16)continue;const collision=points.some(p=>{const x=cx+(p[0]-(minX+maxX)*.5)*scale,y=shapeBottom-(maxY-p[1])*scale;return x>textBox.left-24&&x<textBox.right+24&&y>textBox.top-24&&y<textBox.bottom+24});if(!collision){placementScale=scale;centerX=cx;break outer}}}}
     const offsetY=kind===18?(availableHeight-(maxY-minY)*heightScale)*.5:0;
-    const place=p=>({x:centerX+(p[0]-(minX+maxX)*.5)*placementScale,y:shapeBottom-offsetY-(maxY-p[1])*placementScale,shade:typeof p[2]==='number'&&p[2]<175?'light':'dark'});
+    const place=p=>({x:centerX+(p[0]-(minX+maxX)*.5)*placementScale,y:shapeBottom-offsetY-(maxY-p[1])*placementScale,motionU:p[0]/mw,motionV:p[1]/mh,shade:typeof p[2]==='number'&&p[2]<175?'light':'dark'});
     // Evenly spread samples preserve small windows and petal seams; contours get extra density.
     const edgeCount=Math.min(Math.round(count*.32),edges.length),fillCount=count-edgeCount,targets=[];
     for(const [pool,n]of [[edges,edgeCount],[points,fillCount]])for(let i=0;i<n;i++){const index=Math.min(pool.length-1,Math.floor((i+.2+pick()*.6)*pool.length/n));targets.push(place(pool[index]||[mw*.5,mh*.7,255]))}
@@ -242,6 +242,8 @@
     const reduce=matchMedia('(prefers-reduced-motion: reduce)'),rand=random(94176);
     let width=0,height=0,dpr=1,field,blocks=[],head,next,hashCols,frame=0,last=0,clock=0,disposed=false,previous=null,ink='#fff',tone='#d9e1ff',detailInk='#142154',modalOpen=false;
     let formation=activeMode==='form'?1:0,formationIndex=activeMode==='form'?FORM_ORDER[0]:-1,formationTargets=[],formationCenter={x:0,y:0},formationAssignedClock=0,solarOrbits=[],lastStir=performance.now()-(activeMode==='form'?FORM_END:0),lastGesture=-Infinity,morphStep=0,inherited=transition?.particles||null,modeStartedAt=0,handoffUntil=0;
+    let pendingForm=null;
+    function previewForm(){if(pendingForm===null){const candidates=FORM_ORDER.filter(index=>index!==formationIndex);pendingForm=candidates[Math.floor(Math.random()*candidates.length)];}return pendingForm;}
     let ripples=[],lastRipple=0,lastRipplePoint=null,traces=[],lastTracePoint=null,lastTrace=0;
     const firefly={x:0,y:0,time:0,hold:0,attack:0,target:null,ready:false};
     const cell=24,pixel=document.createElement('canvas');pixel.width=pixel.height=1;const pixelContext=pixel.getContext('2d',{willReadFrequently:true});
@@ -282,7 +284,7 @@
     }
     function setMode(nextMode){
       firefly.hold=0;firefly.attack=0;firefly.target=null;
-      nextMode=normalizeMode(nextMode);if(nextMode===activeMode)return;
+      nextMode=normalizeMode(nextMode);if(nextMode===activeMode)return;pendingForm=null;
       if(activeMode==='form')bakeFormationMotion();
       activeMode=nextMode;prefs.flowStyle=nextMode;persist();previous=null;ripples=[];lastRipplePoint=null;traces=[];lastTracePoint=null;formation=0;morphStep=0;solarOrbits=[];formationTargets=[];formationIndex=activeMode==='form'?FORM_ORDER[0]:-1;lastStir=performance.now()-(activeMode==='form'?FORM_END:0);lastGesture=-Infinity;modeStartedAt=clock;handoffUntil=performance.now()+160;
       resetSnowBed();syncParticleCount();blocks.forEach(resetParticleForMode);updateModeUI();if(activeMode==='form'){blocks=blocks.filter(p=>!p.retiring);next=new Int32Array(blocks.length);formation=1;}if(formationIndex>=0&&width){assignFormation();settleEntryForm();}draw();
@@ -294,8 +296,8 @@
       const coverBox=cover.getBoundingClientRect(),copyBottom=(cover.querySelector('.flow-copy')?.getBoundingClientRect().bottom||coverBox.top+height*.5)-coverBox.top,safeTop=Math.min(height-40,copyBottom+(width<760?20:28));
       const activeBlocks=blocks.filter(p=>!p.retiring);blocks.forEach(p=>{p.tx=p.ty=p.gx=p.gy=undefined;p.formFeature='';p.formShade='';p.solar=null;});
       const result=formationIndex===5?solarSystemFormation(activeBlocks.length,width,height,safeTop):{targets:formationPoints(formationIndex,activeBlocks.length,width,height,safeTop,(()=>{const rects=[...cover.querySelectorAll('.flow-copy h1,.flow-copy p,.inspiration-style-switch')].map(el=>{const r=document.createRange();r.selectNodeContents(el);return r.getBoundingClientRect()});return {left:Math.min(...rects.map(r=>r.left))-coverBox.left,right:Math.max(...rects.map(r=>r.right))-coverBox.left,top:Math.min(...rects.map(r=>r.top))-coverBox.top,bottom:Math.max(...rects.map(r=>r.bottom))-coverBox.top}})()),orbits:[]};formationTargets=result.targets;solarOrbits=result.orbits||[];formationAssignedClock=clock;
-      const minX=Math.min(...formationTargets.map(target=>target.x)),maxX=Math.max(...formationTargets.map(target=>target.x)),minY=Math.min(...formationTargets.map(target=>target.y)),maxY=Math.max(...formationTargets.map(target=>target.y));formationCenter=result.center||{x:(minX+maxX)/2,y:(minY+maxY)/2};
-      activeBlocks.forEach((p,i)=>{const target=formationTargets[i];p.gx=p.x;p.gy=p.y;p.tx=target.x;p.ty=target.y;p.formFeature=target.feature||'';p.formShade=target.shade||'';p.solar=target.solar||null;});
+      const minX=Math.min(...formationTargets.map(target=>target.x)),maxX=Math.max(...formationTargets.map(target=>target.x)),minY=Math.min(...formationTargets.map(target=>target.y)),maxY=Math.max(...formationTargets.map(target=>target.y));formationCenter=result.center||{x:(minX+maxX)/2,y:(minY+maxY)/2};formationCenter.halfWidth=Math.max(1,(maxX-minX)/2);formationCenter.halfHeight=Math.max(1,(maxY-minY)/2);
+      activeBlocks.forEach((p,i)=>{const target=formationTargets[i];p.gx=p.x;p.gy=p.y;p.tx=target.x;p.ty=target.y;p.formFeature=target.feature||'';p.formShade=target.shade||'';p.solar=target.solar||null;p.motionU=target.motionU;p.motionV=target.motionV;});
       canvas.dataset.targetParticles=String(formationTargets.length);
       canvas.dataset.formationName=FORM_NAMES[formationIndex];
       canvas.dataset.formationTop=String(Math.round(safeTop));
@@ -357,7 +359,27 @@
         return{x:p.x+(desiredX-p.tx)+floatX,y:p.y+(desiredY-p.ty)+floatY};
       }
       const rotating=formationIndex===3||formationIndex===4,angle=rotating?elapsed*(formationIndex===3?.085:.052)*amount:Math.sin(clock*.29+formationIndex)*.016*amount,c=Math.cos(angle),s=Math.sin(angle),dx=p.tx-formationCenter.x,dy=p.ty-formationCenter.y;
-      return{x:p.x+(dx*c-dy*s+formationCenter.x-p.tx)+floatX+Math.sin(clock*.43+index*.19)*.65*amount,y:p.y+(dx*s+dy*c+formationCenter.y-p.ty)+floatY+Math.cos(clock*.37+index*.13)*.45*amount};
+      if(formationIndex===4){const flatten=.66/1.65;return{x:p.x+dx*c-dy/flatten*s-dx+floatX,y:p.y+(dx*s+dy/flatten*c)*flatten-dy+floatY};}
+      if(formationIndex===3)return{x:p.x+dx*c-dy*s-dx+floatX,y:p.y+dx*s+dy*c-dy+floatY};
+      const nx=dx/formationCenter.halfWidth,ny=dy/formationCenter.halfHeight,unit=Math.min(formationCenter.halfHeight,formationCenter.halfWidth),t=elapsed;
+      let turn=0,shiftX=0,shiftY=0,bendX=0,bendY=0;
+      switch(formationIndex){
+        case 1: // A swimming body wave grows toward the tail.
+          shiftX=Math.sin(t*.55)*unit*.018;bendY=Math.sin(t*1.65-nx*2.2)*unit*.028*(.25+.75*clamp(-nx,0,1));break;
+        case 2: turn=Math.sin(t*2.1)*.003;shiftY=Math.sin(t*4.2)*unit*.012;break;
+        case 6: case 15: // Rooted stem, softly swaying flower or seed head.
+          bendX=Math.sin(t*.85+ny*.4)*unit*.026*((1-ny)/2)**2;break;
+        case 7: shiftY=Math.sin(t*3.4)*unit*.022;turn=Math.sin(t*1.7)*.007;bendX=Math.sin(t*3.4+nx*2.5)*unit*.025*clamp((ny-.15)/.85,0,1);break;
+        case 8: bendY=Math.sin(t*2.1)*unit*.085*Math.abs(nx)**1.4;shiftY=Math.sin(t*.65)*unit*.018;break;
+        case 9: turn=Math.sin(t*.95)*.017;shiftY=Math.sin(t*1.3)*unit*.014;shiftX=Math.sin(t*.55)*unit*.012;break;
+        case 11: turn=Math.sin(t*.65)*.013;shiftY=Math.sin(t*.9)*unit*.016;break;
+        case 16: bendX=Math.sin(t*.75+ny*.55)*unit*.021*((1-ny)/2)**2;bendY=Math.sin(t*1.1+nx*2)*unit*.005*clamp(-ny,0,1);break;
+        case 17: shiftY=Math.sin(t*.65)*unit*.002;break;
+        case 19: {let bird=0,nearest=Infinity;for(let j=0;j<9;j++){const rank=Math.ceil(j/2),side=j%2?-1:1,x=.5+side*rank*.096,y=.28+rank*.105,d=(p.motionU-x)**2+(p.motionV-y)**2;if(d<nearest){nearest=d;bird=j;}}const rank=Math.ceil(bird/2),side=bird%2?-1:1,wing=clamp(Math.abs(p.motionU-(.5+side*rank*.096))/.061,0,1);bendY=Math.sin(t*2.05-rank*.27)*unit*.026*wing**1.3;shiftY=Math.sin(t*.6)*unit*.008;break;}
+        default: shiftY=Math.sin(t*.5)*Math.min(1,unit*.003);break;
+      }
+      const ca=Math.cos(turn*amount),sa=Math.sin(turn*amount);
+      return{x:p.x+dx*ca-dy*sa-dx+(shiftX+bendX)*amount,y:p.y+dx*sa+dy*ca-dy+(shiftY+bendY)*amount};
     }
     function bakeFormationMotion(){if(formation<=.35)return;const positions=blocks.map(displayPosition);blocks.forEach((p,index)=>{p.x=positions[index].x;p.y=positions[index].y;p.renderX=p.x;p.renderY=p.y;});}
     function formationHit(ax,ay,bx,by){
@@ -369,7 +391,7 @@
       if(activeMode!=='form'||formation<.98)return false;
       if(now-lastGesture>700){
         bakeFormationMotion();
-        formationIndex=FORM_ORDER[(FORM_ORDER.indexOf(formationIndex)+1)%FORM_ORDER.length];
+        formationIndex=previewForm();pendingForm=null;
         assignFormation();
         cover.dataset.nextForm=FORM_NAMES[formationIndex];
       }else return false;
@@ -406,7 +428,7 @@
     }
     function drawFirefly(){
       if(activeMode!=='form'||!firefly.ready)return;ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.translate(firefly.x,firefly.y);
-      const pulse=.22+.08*Math.sin(firefly.time*2.3),glow=ctx.createRadialGradient(0,0,0,0,0,11);glow.addColorStop(0,'rgba(240,238,179,.45)');glow.addColorStop(.3,'rgba(230,234,168,.16)');glow.addColorStop(1,'rgba(230,234,168,0)');ctx.globalAlpha=.7;ctx.fillStyle=glow;ctx.fillRect(-11,-11,22,22);
+      const attacking=!!firefly.target,pulse=attacking?.95:.22+.08*Math.sin(firefly.time*2.3),radius=attacking?19:11,glow=ctx.createRadialGradient(0,0,0,0,0,radius);glow.addColorStop(0,attacking?'rgba(255,247,180,.95)':'rgba(240,238,179,.45)');glow.addColorStop(.3,attacking?'rgba(250,233,133,.48)':'rgba(230,234,168,.16)');glow.addColorStop(1,'rgba(230,234,168,0)');ctx.globalAlpha=attacking?1:.7;ctx.fillStyle=glow;ctx.fillRect(-radius,-radius,radius*2,radius*2);
       ctx.globalAlpha=pulse;ctx.fillStyle='#f3efc1';ctx.beginPath();ctx.ellipse(0,0,1.7,2.3,.3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=.12;ctx.fillStyle=ink;const wing=1.4+Math.abs(Math.sin(firefly.time*18))*1.3;for(const side of [-1,1]){ctx.beginPath();ctx.ellipse(side*2,-1,wing,1,side*.45,0,Math.PI*2);ctx.fill();}ctx.restore();
     }
     // Accumulation is a persistent raster plus a compact height map, not an ever-growing particle list.
@@ -657,7 +679,7 @@
     }
     function dropTrace(x,y,vx=0,vy=0,now=performance.now(),force=false){
       if(activeMode==='tide')return;const spacing=activeMode==='chaos'?34:activeMode==='form'?44:39,distance=lastTracePoint?Math.hypot(x-lastTracePoint.x,y-lastTracePoint.y):Infinity;
-      if(!force&&distance<spacing&&now-lastTrace<58)return;traces.push({x,y,age:0,mode:activeMode,formIndex:formationIndex,angle:Math.atan2(vy,vx)+(rand()-.5)*.42,driftX:(rand()-.5)*(activeMode==='snow'?15:20),driftY:activeMode==='snow'?18+rand()*18:(rand()-.5)*11,spin:(rand()-.5)*(activeMode==='form'?1.2:2.4),seed:rand()*Math.PI*2});traces=traces.slice(-40);lastTrace=now;lastTracePoint={x,y};canvas.dataset.traces=String(traces.length);if(activeMode==='form')canvas.dataset.traceGlyph=FORM_NAMES[formationIndex];
+      if(!force&&distance<spacing&&now-lastTrace<58)return;const traceForm=activeMode==='form'&&formation>=.98?previewForm():formationIndex;traces.push({x,y,age:0,mode:activeMode,formIndex:traceForm,angle:Math.atan2(vy,vx)+(rand()-.5)*.42,driftX:(rand()-.5)*(activeMode==='snow'?15:20),driftY:activeMode==='snow'?18+rand()*18:(rand()-.5)*11,spin:(rand()-.5)*(activeMode==='form'?1.2:2.4),seed:rand()*Math.PI*2});traces=traces.slice(-40);lastTrace=now;lastTracePoint={x,y};canvas.dataset.traces=String(traces.length);if(activeMode==='form')canvas.dataset.traceGlyph=FORM_NAMES[traceForm];
     }
     function move(event){
       if(!inputAllowed(event)){previous=null;return;}
@@ -666,7 +688,7 @@
       if(previous&&previous.id===event.pointerId){
          const dt=clamp((now-previous.time)/1000,.008,.05),dx=x-previous.x,dy=y-previous.y,distance=Math.hypot(dx,dy),steps=clamp(Math.ceil(distance/24),1,18),vx=clamp(dx/dt,-2200,2200),vy=clamp(dy/dt,-2200,2200);
          if(distance>3&&distance<Math.max(width,height)*.65){
-          const formed=activeMode==='form'&&formation>=.98,crossedForm=formed&&formationHit(previous.x,previous.y,x,y);if(formed&&!crossedForm){canvas.dataset.formHit='false';previous={x,y,time:now,id:event.pointerId};return;}if(crossedForm){canvas.dataset.formHit='true';beginCycle(now);}
+          const formed=activeMode==='form'&&formation>=.98,crossedForm=formed&&formationHit(previous.x,previous.y,x,y);if(formed&&!crossedForm){canvas.dataset.formHit='false';for(let k=1;k<=steps;k++)dropTrace(previous.x+dx*k/steps,previous.y+dy*k/steps,vx,vy,now+k*.2);previous={x,y,time:now,id:event.pointerId};return;}if(crossedForm){canvas.dataset.formHit='true';beginCycle(now);}
            const force=activeMode==='tide'?.82:activeMode==='snow'?.48:.38,radius=activeMode==='tide'?(width<600?118:172):(width<600?86:122);
           for(let k=1;k<=steps;k++){const px=previous.x+dx*k/steps,py=previous.y+dy*k/steps;field.stir(px,py,vx*force/steps,vy*force/steps-(activeMode==='tide'?135:0),radius,activeMode==='tide'?(dx>=0?480:-480):0);if(activeMode==='tide')dropRipple(px,py,Math.hypot(vx,vy)/1700,now+k*.2);else dropTrace(px,py,vx,vy,now+k*.2);}
           if(activeMode==='tide'){const turn=dx>=0?1:-1;for(const p of blocks){const ox=p.x-x,oy=p.y-y,d=Math.hypot(ox,oy);if(d<radius*1.15){const falloff=(1-d/(radius*1.15))**1.4;p.vx+=(vx*.045-oy*2.15*turn)*falloff;p.vy+=(vy*.035+ox*1.7*turn-210)*falloff;p.spin+=turn*2.8*falloff;}}}
