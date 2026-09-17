@@ -11,7 +11,10 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const light = $('.light-source'), cue = $('.scroll-cue'), fill = $('#progress-fill');
   const experience = $('.experience'), wash = $('.ambient-wash'), count = $('#scene-number');
+  const progressTrack = $('#progress-track');
+  const chapterButtons = [...document.querySelectorAll('[data-chapter-jump]')];
   const world = window.createShiyuWorld($('#atmosphere'));
+  const audio = window.createShiyuAudio?.($('.sound-toggle'));
   const sceneNames = ['point', 'melody', 'birds', 'earth', 'solar-system', 'galaxy', 'atom'];
   let maxScroll = 1, progress = 0, target = 0, active = -1, raf = 0, previous = 0;
   let ambientTime = 0;
@@ -24,6 +27,10 @@
       scene.setAttribute('aria-hidden', String(i !== index));
     });
     count.textContent = String(index).padStart(2, '0');
+    chapterButtons.forEach((button, i) => {
+      if (i === index) button.setAttribute('aria-current', 'step');
+      else button.removeAttribute('aria-current');
+    });
     experience.dataset.chapter = String(index);
     experience.dataset.form = sceneNames[index];
   }
@@ -54,6 +61,7 @@
     cue.style.opacity = String(Math.max((.55 + opening * .45) * (1 - closing), returnBlend * .75));
     const fillProgress = progress <= last ? progress / last : 1 - (progress - last);
     fill.style.transform = 'scaleX(' + clamp(fillProgress) + ')';
+    audio?.setProgress(clamp(fillProgress));
     world.paint(base, next, morph, reduced.matches ? 0 : ambientTime);
   }
   function tick(now) {
@@ -78,14 +86,25 @@
     maxScroll = Math.max(1, document.documentElement.scrollHeight - innerHeight);
     world.resize(innerWidth, innerHeight); readScroll();
   }
+  function jumpTo(index) {
+    const chapter = Math.max(0, Math.min(last, index));
+    scrollTo({ top: maxScroll * chapter / loopLength, behavior: reduced.matches ? 'instant' : 'smooth' });
+  }
   history.scrollRestoration = 'manual';
   scrollTo({ top: 0, behavior: 'instant' });
   addEventListener('scroll', readScroll, { passive: true });
   let resizeFrame;
   addEventListener('resize', () => { cancelAnimationFrame(resizeFrame); resizeFrame = requestAnimationFrame(measure); }, { passive: true });
   addEventListener('pageshow', event => { if (event.persisted) { measure(); progress = target; requestFrame(); } });
-  $('.brand').addEventListener('click', event => {
-    event.preventDefault(); scrollTo({ top: 0, behavior: reduced.matches ? 'instant' : 'smooth' });
+  progressTrack.addEventListener('click', event => {
+    const button = event.target.closest('[data-chapter-jump]');
+    if (button) {
+      jumpTo(Number(button.dataset.chapterJump));
+      return;
+    }
+    const bounds = progressTrack.getBoundingClientRect();
+    const position = clamp((event.clientX - bounds.left) / bounds.width);
+    jumpTo(Math.round(position * last));
   });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }

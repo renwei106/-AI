@@ -7,10 +7,11 @@
   <title>拾隅 · 万千世界，始于一点喜欢</title>
   <meta name="description" content="世界很大，留一隅给自己。拾隅，用一段沉浸式光影，讲述喜欢、内心与从容。">
   <link rel="icon" type="image/svg+xml" href="./assets/mark.svg">
-  <link rel="stylesheet" href="./official.css?v=particles-15">
+  <link rel="stylesheet" href="./official.css?v=particles-16">
   <script defer src="./assets/land-outline.js"></script>
   <script defer src="./particle-world.js?v=particles-15"></script>
-  <script defer src="./official.js?v=particles-11"></script>
+  <script defer src="./ambient-audio.js?v=1"></script>
+  <script defer src="./official.js?v=particles-13"></script>
 </head>
 <body>
   <div class="experience" id="experience">
@@ -23,7 +24,7 @@
     </div>
 
     <header class="topline">
-      <a class="brand" href="#top" aria-label="拾隅，回到开篇">
+      <a class="brand" href="/" aria-label="进入拾隅主题页">
         <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="4" y="4" width="23" height="23" rx="7"/><path d="M4 18h10a8 8 0 0 0 8-8V4M17 17l10 10"/></svg>
         <span>拾隅</span>
       </a>
@@ -94,10 +95,24 @@
       <span class="cue-line"><i></i></span>
     </div>
 
-    <div class="journey-progress" aria-hidden="true">
+    <button class="sound-toggle" type="button" aria-label="开启背景音乐" aria-pressed="false" data-audio-state="ready">
+      <span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span class="sound-label">声音</span>
+    </button>
+
+    <nav class="journey-progress" aria-label="章节导航">
       <span class="progress-count"><b id="scene-number">00</b><i>/ 06</i></span>
-      <span class="progress-line"><i id="progress-fill"></i></span>
-    </div>
+      <div class="progress-track" id="progress-track">
+        <span class="progress-line" aria-hidden="true"><i id="progress-fill"></i></span>
+        <button class="chapter-jump" type="button" data-chapter-jump="0" style="--stop: 0" aria-label="跳到开篇"></button>
+        <button class="chapter-jump" type="button" data-chapter-jump="1" style="--stop: .1667" aria-label="跳到如歌"></button>
+        <button class="chapter-jump" type="button" data-chapter-jump="2" style="--stop: .3333" aria-label="跳到心有所往"></button>
+        <button class="chapter-jump" type="button" data-chapter-jump="3" style="--stop: .5" aria-label="跳到给自己"></button>
+        <button class="chapter-jump" type="button" data-chapter-jump="4" style="--stop: .6667" aria-label="跳到自有节奏"></button>
+        <button class="chapter-jump" type="button" data-chapter-jump="5" style="--stop: .8333" aria-label="跳到一隅之间"></button>
+        <button class="chapter-jump" type="button" data-chapter-jump="6" style="--stop: 1" aria-label="跳到回到一隅"></button>
+      </div>
+    </nav>
   </div>
 
   <div class="scroll-track" aria-hidden="true"></div>

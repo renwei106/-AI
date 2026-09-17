@@ -53,6 +53,10 @@ body[data-view=space] .space-inbox-drawer b:after{background:var(--surface)}
 #space-later-drawer .later-heading{display:flex;align-items:center;gap:12px;margin:4px 0 24px;flex:none}
 #space-later-drawer .later-heading>svg{width:30px;height:30px;color:var(--accent)}
 #space-later-drawer .later-heading h2{margin:0;font-size:25px;font-weight:500;letter-spacing:1px}
+#space-later-drawer .later-extension-entry{margin-left:auto;display:inline-flex;align-items:center;gap:7px;padding:9px 12px;border-radius:10px;background:color-mix(in srgb,var(--accent) 13%,var(--surface));color:var(--ink);font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;transition:background .2s ease,color .2s ease,transform .2s ease}
+#space-later-drawer .later-extension-entry svg{width:17px;height:17px;flex:none;color:var(--accent)}
+#space-later-drawer .later-extension-entry:hover{background:var(--accent);color:var(--selection-contrast,#fff);transform:translateY(-1px)}
+#space-later-drawer .later-extension-entry:hover svg{color:currentColor}
 .space-inbox-entry .space-inbox-drawer i,.space-inbox-entry .space-inbox-drawer b{transition:transform .3s ease}
 .space-inbox-entry:hover .space-inbox-drawer i:first-child{transform:translate(-1px,-4px) rotate(-13deg)}
 .space-inbox-entry:hover .space-inbox-drawer i:nth-child(2){transform:translate(1px,-6px) rotate(13deg)}

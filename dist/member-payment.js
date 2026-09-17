@@ -23,6 +23,10 @@
    button.style.minWidth = button.getBoundingClientRect().width + 'px';
    button.dataset.paymentWidth = 'preserved';
   }
+  const available = ['alipay','wechat'].filter(id => status?.providers?.[id] && status.providers[id].enabled !== false);
+  if (available.length && !available.includes(memberPayment)) { memberPayment=available[0]; originalCenter(); decorate(); return; }
+  const methods=d.querySelector('.checkout-methods');
+  if(methods){ methods.hidden=!available.length; methods.querySelectorAll('[data-method-choice],[data-footer-pay]').forEach(item=>{if(!available.includes(item.dataset.methodChoice||item.dataset.footerPay))item.remove();}); }
   const plan = MEMBER_CONFIG.plans[selectedMemberPlan], recurring = plan?.auto || plan?.autoRenew;
   button.disabled = freeMemberSelected || recurring || !status?.providers?.[memberPayment]?.ready || submitting;
   button.textContent = freeMemberSelected ? '免费使用' : recurring ? '连续订阅暂未开放' : !status?.providers?.[memberPayment]?.ready ? '支付暂未开放' : submitting ? '正在创建订单…' : '立即支付';
@@ -39,7 +43,7 @@
    if (memberStatus) memberStatus.textContent = account.memberExpiresAt > Date.now() ? '会员有效至 ' + new Date(account.memberExpiresAt).toLocaleDateString() : '免费账户';
   }
  }
- openMemberCenter = function () { originalCenter(); decorate(); };
+ openMemberCenter = function () { originalCenter(); decorate(); void refreshStatus(); };
  isMember = function () { return status?.enabled ? !!account && account.memberExpiresAt > Date.now() : originalMember(); };
  async function refreshAccount() {
   if (!status?.enabled) return;
@@ -148,6 +152,8 @@
    try { const data = await request('/orders/' + id); showOrder(data.order); } catch (error) { toast(error.message); }
   }
  }
- window.addEventListener('focus', refreshAccount);
+ async function refreshStatus(){const before=JSON.stringify(status);try{status=await request('/status');}catch{status={enabled:false,providers:{}};}if(before!==JSON.stringify(status)&&document.querySelector('#member-center')?.open){originalCenter();decorate();}}
+ window.addEventListener('focus',()=>{refreshStatus();refreshAccount();});
+ setInterval(()=>{if(!document.hidden)refreshStatus();},5000);
  initialize();
 })();

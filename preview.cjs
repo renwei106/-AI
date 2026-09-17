@@ -31,6 +31,7 @@ const routes={
   '/assets/poly/delaunator.min.js':'assets/poly/delaunator.min.js','/poster-sea.png':'poster-sea.png','/poster-night.png':'poster-night.png','/poster-road.png':'poster-road.png'
 }
 http.createServer(async(req,res)=>{
+  if(await require('./theme-access/server.cjs').handler(req,res))return
   if(await handlePayment(req,res))return
   if(await feedbackHandler(req,res))return
   if(shiyuUserProxy(req,res))return

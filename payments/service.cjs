@@ -13,6 +13,7 @@ class PaymentService {
     if (!input || input.accepted !== true) reject('请先阅读并同意会员服务协议', 'AGREEMENT_REQUIRED');
     if (!['alipay', 'wechat'].includes(input.provider)) reject('请选择支付方式', 'INVALID_PROVIDER');
     if (!/^[A-Za-z0-9_-]{16,80}$/.test(input.requestId || '') || typeof input.planId !== 'string') reject('下单参数无效', 'INVALID_INPUT');
+    if (this.config[input.provider]?.enabled === false) reject('该支付方式已关闭，请选择其他方式', 'PROVIDER_DISABLED', 409);
     const key = user.id + ':' + input.requestId;
     if (this.creating.has(key)) { await this.creating.get(key); return this.existing(user, input); }
     const promise = this.createOnce(user, input);

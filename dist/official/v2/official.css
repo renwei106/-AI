@@ -16,7 +16,8 @@ body { margin: 0; background: #050706; color: var(--ivory); font: 14px/1.8 var(-
 body::-webkit-scrollbar { display: none; }
 h1, h2, p, figure { margin: 0; }
 a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
-a:focus-visible { outline: 1px solid #e8d3ae; outline-offset: 8px; }
+a:focus-visible, button:focus-visible { outline: 1px solid #e8d3ae; outline-offset: 7px; }
+button { color: inherit; font: inherit; -webkit-tap-highlight-color: transparent; }
 ::selection { background: #a99979; color: #060a08; }
 
 /* Native scrolling drives a fixed stage. There is no click gate or scroll snap. */
@@ -89,12 +90,34 @@ a:focus-visible { outline: 1px solid #e8d3ae; outline-offset: 8px; }
   78% { opacity: .45; }
   100% { opacity: 0; background-position: -105% 0; }
 }
-.journey-progress { position: absolute; bottom: 39px; right: var(--edge); display: flex; align-items: center; gap: 17px; z-index: 5; pointer-events: none; }
+.sound-toggle { position: absolute; bottom: max(39px, calc(env(safe-area-inset-bottom) + 22px)); left: var(--edge); z-index: 6; display: inline-flex; align-items: center; gap: 10px; min-width: 70px; padding: 8px 0; border: 0; background: transparent; opacity: .62; cursor: pointer; transition: opacity .8s ease, transform .8s cubic-bezier(.16,.84,.24,1); }
+.sound-toggle:hover, .sound-toggle:focus-visible { opacity: 1; transform: translateY(-2px); }
+.sound-toggle:disabled { opacity: .28; cursor: default; }
+.sound-bars { position: relative; width: 15px; height: 13px; display: flex; align-items: center; justify-content: space-between; }
+.sound-bars i { display: block; width: 1px; height: 32%; border-radius: 1px; background: #d5d8c6; transform-origin: center; }
+.sound-bars i:nth-child(2) { height: 72%; }
+.sound-bars i:nth-child(3) { height: 100%; }
+.sound-bars i:nth-child(4) { height: 52%; }
+.sound-toggle[data-audio-state="playing"] .sound-bars i { animation: sound-breathe 2.8s ease-in-out infinite alternate; }
+.sound-toggle[data-audio-state="playing"] .sound-bars i:nth-child(2) { animation-delay: -.8s; }
+.sound-toggle[data-audio-state="playing"] .sound-bars i:nth-child(3) { animation-delay: -1.6s; }
+.sound-toggle[data-audio-state="playing"] .sound-bars i:nth-child(4) { animation-delay: -2.2s; }
+.sound-toggle[data-audio-state="muted"] .sound-bars { opacity: .46; }
+.sound-toggle[data-audio-state="muted"] .sound-bars:after { content: ""; position: absolute; left: -1px; top: 6px; width: 17px; height: 1px; background: #aeb3a4; transform: rotate(-34deg); transform-origin: center; }
+.sound-label { color: #aab1a2; font-size: 8px; line-height: 1; letter-spacing: .18em; white-space: nowrap; }
+@keyframes sound-breathe { 0% { transform: scaleY(.42); opacity: .55; } 100% { transform: scaleY(1); opacity: 1; } }
+
+.journey-progress { position: absolute; bottom: max(39px, calc(env(safe-area-inset-bottom) + 22px)); right: var(--edge); display: flex; align-items: center; gap: 15px; z-index: 6; }
 .progress-count { display: flex; gap: 9px; font-size: 9px; letter-spacing: .12em; }
 .progress-count b { color: #d4d8c8; font-weight: 400; }
 .progress-count i { color: #777f74; font-style: normal; }
-.progress-line { display: block; height: 1px; width: 80px; background: #cbd0b826; }
+.progress-track { position: relative; width: 132px; height: 22px; cursor: pointer; touch-action: manipulation; }
+.progress-line { position: absolute; left: 0; right: 0; top: 50%; display: block; height: 1px; background: #cbd0b826; transform: translateY(-50%); }
 .progress-line i { display: block; height: 100%; background: #d2ccb0; transform: scaleX(0); transform-origin: left; }
+.chapter-jump { position: absolute; left: calc(var(--stop) * 100%); top: 50%; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: transparent; transform: translate(-50%, -50%); cursor: pointer; }
+.chapter-jump:before { content: ""; position: absolute; left: 50%; top: 50%; width: 3px; height: 3px; border-radius: 50%; background: #777f74; transform: translate(-50%, -50%); transition: width .7s ease, height .7s ease, background .7s ease, box-shadow .7s ease; }
+.chapter-jump:hover:before, .chapter-jump:focus-visible:before { width: 5px; height: 5px; background: #e0dcc6; }
+.chapter-jump[aria-current="step"]:before { width: 6px; height: 6px; background: #ece7d0; box-shadow: 0 0 0 4px #d6ccaa12, 0 0 15px #e5dab15e; }
 .no-script { position: fixed; inset: 0; z-index: 20; background: #09100d; display: flex; gap: 28px; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 24px; }
 .no-script h1 { font: 400 36px/1.6 var(--serif); }
 .no-script a { border-bottom: 1px solid #b5b995; padding: 10px; }
@@ -120,8 +143,10 @@ a:focus-visible { outline: 1px solid #e8d3ae; outline-offset: 8px; }
   .light-source { top: 32%; }
   .portal-link { top: 32%; width: 154px; height: 154px; }
   .entry-link { bottom: max(70px, calc(env(safe-area-inset-bottom) + 46px)); min-width: 160px; min-height: 46px; font-size: 11px; }
-  .journey-progress { bottom: 34px; gap: 10px; }
-  .progress-line { width: 30px; }
+  .sound-toggle { bottom: max(22px, calc(env(safe-area-inset-bottom) + 17px)); }
+  .journey-progress { bottom: max(20px, calc(env(safe-area-inset-bottom) + 15px)); flex-direction: column; align-items: flex-end; gap: 2px; }
+  .progress-track { width: 92px; height: 18px; }
+  .chapter-jump { width: 18px; height: 18px; }
   .progress-count { font-size: 8px; gap: 5px; }
   .scroll-cue { bottom: 27px; gap: 11px; }
   .cue-label { font-size: 8px; }
@@ -138,7 +163,7 @@ a:focus-visible { outline: 1px solid #e8d3ae; outline-offset: 8px; }
   .entry-link { bottom: max(22px, env(safe-area-inset-bottom)); min-height: 38px; min-width: 152px; padding: 6px 21px; font-size: 10px; }
   .scroll-cue { bottom: 16px; gap: 7px; }
   .cue-line { height: 18px; }
-  .journey-progress { bottom: 25px; }
+  .sound-toggle, .journey-progress { bottom: max(25px, env(safe-area-inset-bottom)); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *:before, *:after { animation: none !important; transition: none !important; }

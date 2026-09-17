@@ -469,9 +469,10 @@ body.atlas-active[data-dark=true] #space-mode-menu{--ink:#efefea;--muted:#b0b0b8
 #space-atlas [data-presentation=systems] .at-node[data-level="2"][data-kind=bundle] .at-node-main{display:flex;background:transparent}
 #space-atlas [data-presentation=systems] .at-node[data-level="2"][data-kind=bundle] .at-node-main>strong{text-align:center}
 #space-atlas [data-mode="3d"] .at-node[data-level="0"] .at-orb{filter:none;background:radial-gradient(circle at 28% 22%,color-mix(in srgb,var(--at-accent) 12%,white),color-mix(in srgb,var(--at-accent) 52%,var(--surface)) 42%,color-mix(in srgb,var(--at-accent) 88%,#17241c));color:#fff;box-shadow:inset -5px -6px 13px #0002,inset 2px 2px 5px #fff6,0 0 30px color-mix(in srgb,var(--at-accent) 15%,transparent)}
-/* Both space presentations use the original action bar and body-level cords. */
+/* Atlas keeps its own stable action bar above the draggable canvas. */
 body:is(.atlas-active,.atlas-transitioning) #main>.workspace{z-index:auto}
 body:is(.atlas-active,.atlas-transitioning) .workspace .space-top-actions{position:relative;z-index:90;visibility:visible}
+body:is(.atlas-active,.atlas-transitioning):has(#space-atlas[open]) .workspace .space-top-actions{visibility:hidden}
 body:is(.atlas-active,.atlas-transitioning) .workspace .sidebar{z-index:90}
 body:is(.atlas-active,.atlas-transitioning) .workspace .space-heading-controls{visibility:visible}
 @media(min-width:761px){

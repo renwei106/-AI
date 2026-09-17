@@ -61,11 +61,5 @@ body[data-view=home].global-chrome-idle .dock-trigger { opacity:.02; }
 @media(hover:none) { .flow-touch-hint { display:block; } }
 @media(prefers-reduced-motion:reduce) { .flow-touch-hint { display:none; } }
 
-/* Formation alone uses a compact heading; side silhouettes reserve room around the copy. */
-.flow-cover[data-particle-mode=form] .flow-copy { top:25%; }
-.flow-cover[data-particle-mode=form] .flow-copy h1 { font-size:clamp(30px,6vw,90px); }
-.flow-cover[data-particle-mode=form][data-form-layout=side] .flow-copy h1 { font-size:clamp(28px,4vw,62px); }
-@media(max-width:760px){.flow-cover[data-particle-mode=form] .flow-copy h1 {font-size:clamp(24px,7.4vw,48px);}.flow-cover[data-particle-mode=form] .flow-copy{top:25%;}}
-
 /* The fifth mode keeps its water visible down to the viewport edge. */
 .flow-cover[data-particle-mode="water"] .flow-canvas-back{mask-image:none;-webkit-mask-image:none;}

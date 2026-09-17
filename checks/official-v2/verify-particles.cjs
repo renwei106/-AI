@@ -15,7 +15,11 @@ fs.mkdirSync(out, { recursive: true });
   await page.goto(url, { waitUntil: 'networkidle' });
   await page.waitForTimeout(700);
   assert.equal(await page.locator('.scene').count(), 7);
-  assert.equal(await page.locator('img,button').count(), 0);
+  assert.equal(await page.locator('img').count(), 0);
+  assert.equal(await page.locator('.chapter-jump').count(), 7);
+  assert.equal(await page.locator('.sound-toggle').count(), 1);
+  assert.equal(await page.locator('.brand').getAttribute('href'), '/');
+  assert.equal(await page.locator('.brand').getAttribute('aria-label'), '进入拾隅主题页');
   assert.equal(await page.locator('#atmosphere').getAttribute('data-renderer'), 'webgl');
   const travel = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
   assert(travel >= 15000 * .9);
@@ -26,6 +30,7 @@ fs.mkdirSync(out, { recursive: true });
     await page.waitForTimeout(1200);
     assert.equal(await page.locator('.experience').getAttribute('data-chapter'), String(i));
     assert.equal(await page.locator('.experience').getAttribute('data-form'), forms[i]);
+    assert.equal(await page.locator('.chapter-jump[aria-current="step"]').getAttribute('data-chapter-jump'), String(i));
     const top = await page.locator('.experience').evaluate(n => n.getBoundingClientRect().top);
     assert.equal(top, 0);
     const copy = await page.locator('.scene:not([inert]) .scene-copy').boundingBox();
@@ -39,7 +44,42 @@ fs.mkdirSync(out, { recursive: true });
   await page.mouse.wheel(0, -2300); await page.waitForTimeout(1200);
   assert.equal(await page.locator('.experience').getAttribute('data-chapter'), '0');
   report.wheelAndReverse = true;
+  await page.locator('[data-chapter-jump="4"]').click();
+  await page.waitForTimeout(1500);
+  assert.equal(await page.locator('.experience').getAttribute('data-chapter'), '4');
+  assert.equal(await page.locator('.chapter-jump[aria-current="step"]').getAttribute('data-chapter-jump'), '4');
+  await page.screenshot({ path: path.join(out, 'desktop-controls.png') });
+  await page.evaluate(() => document.activeElement.blur());
+  report.chapterJump = true;
   assert(!requested.some(r => /\.(webp|png|jpe?g)(\?|$)/.test(r)), 'raster image requested');
+  assert(!requested.some(r => /\.(mp3|m4a|aac|ogg|wav|flac)(\?|$)/.test(r)), 'external audio requested');
+
+  const audioPage = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  audioPage.on('pageerror', e => errors.push(e.message));
+  await audioPage.goto(url, { waitUntil: 'networkidle' });
+  const sound = audioPage.locator('.sound-toggle');
+  assert.equal(await sound.getAttribute('data-audio-state'), 'ready');
+  await sound.click();
+  await audioPage.waitForTimeout(450);
+  assert.equal(await sound.getAttribute('data-audio-state'), 'playing');
+  assert.equal(await sound.getAttribute('aria-pressed'), 'true');
+  await sound.click();
+  await audioPage.waitForTimeout(100);
+  assert.equal(await sound.getAttribute('data-audio-state'), 'muted');
+  assert.equal(await sound.getAttribute('aria-pressed'), 'false');
+  await audioPage.screenshot({ path: path.join(out, 'desktop-audio-muted.png') });
+  await audioPage.close();
+  report.ambientAudio = true;
+
+  const brandEntry = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await brandEntry.goto(url, { waitUntil: 'networkidle' });
+  await Promise.all([
+    brandEntry.waitForURL(location => location.origin === 'http://127.0.0.1:4318'),
+    brandEntry.locator('.brand').click()
+  ]);
+  assert.equal(new URL(brandEntry.url()).origin, 'http://127.0.0.1:4318');
+  await brandEntry.close();
+  report.brandThemeEntry = true;
 
   const movingForms = [[1, 'melody'], [2, 'birds'], [3, 'earth'], [4, 'solar-system'], [5, 'galaxy'], [6, 'atom']];
   for (const [chapter, label] of movingForms) {
@@ -112,8 +152,12 @@ fs.mkdirSync(out, { recursive: true });
       await small.waitForTimeout(150);
       const copy = await small.locator('.scene:not([inert]) .scene-copy').boundingBox();
       const cue = await small.locator('.scroll-cue').boundingBox();
+      const soundControl = await small.locator('.sound-toggle').boundingBox();
+      const progressControl = await small.locator('.journey-progress').boundingBox();
       assert(copy.y > 50 && copy.y + copy.height < viewport.height - 35, JSON.stringify({ viewport, i, copy }));
       assert(copy.x >= 0 && copy.x + copy.width <= viewport.width);
+      assert(soundControl.x >= 0 && soundControl.x + soundControl.width <= viewport.width && soundControl.y + soundControl.height <= viewport.height, 'sound control clipped');
+      assert(progressControl.x >= 0 && progressControl.x + progressControl.width <= viewport.width && progressControl.y + progressControl.height <= viewport.height, 'progress control clipped');
       if (i === 6) {
         const portal = await small.locator('.portal-link').boundingBox();
         assert(portal.x >= 0 && portal.x + portal.width <= viewport.width && portal.y > 20 && portal.y + portal.height < viewport.height - 20, 'portal clipped');
@@ -141,7 +185,8 @@ fs.mkdirSync(out, { recursive: true });
   report.noOverlappingCopy = true;
   await page.evaluate(() => scrollTo(0, (document.documentElement.scrollHeight - innerHeight) * 6 / 7));
   await page.waitForTimeout(150);
-  await page.keyboard.press('Tab'); await page.keyboard.press('Tab');
+  await page.locator('.brand').focus();
+  await page.keyboard.press('Tab');
   assert.equal(await page.evaluate(() => document.activeElement.className), 'portal-link');
   assert.equal(await page.locator('.portal-link').getAttribute('href'), '/');
   assert.equal(await page.locator('.portal-link').textContent(), '');

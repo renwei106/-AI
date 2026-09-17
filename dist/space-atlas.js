@@ -202,11 +202,11 @@
     const n=get(state.focus)||root;
     state.hover=null;state.drag=null;state.settling=false;
     dialog.innerHTML=`<div class="at-shell at-full-page${orbital()?' at-orbital':''}${galaxy()?' at-galaxy':''}" data-mode="${state.mode}" data-layout="${state.layout}" data-presentation="${state.mode==='3d'?state.scene3d:'spatial'}">
-      <button class="at-cover-return" data-at="home" aria-label="返回首页"><span>首页</span><span>点击返回首页</span></button>
+      <button class="at-cover-return" data-at="home" aria-label="返回首页"><span>首页</span><span>点击返回首页</span></button><div class="at-header-actions space-top-actions"></div>
       <div class="at-canvas" aria-label="${esc(n.name)}关系图" tabindex="0"></div>
       <div class="at-footer"><div class="at-legend"><span><i></i>空间</span><span><i></i>场景</span><span><i></i>分组</span><span>${icons.link}网址</span><span class="at-parent-legend">┄ 上级</span><span class="at-child-legend">─ 下级</span></div><p class="at-hint" role="status"></p><div class="at-view-tools"><button class="at-focus-scene" data-at="focus-scene" aria-label="聚焦场景" title="聚焦场景：恢复当前节点的默认视角">${icons.locate}</button>${layoutPicker()}</div></div>
       <aside class="at-drawer" hidden aria-label="图谱管理"></aside><div class="at-notice" hidden role="status"></div></div>`;
-    mountEntry();query('.at-search')?.remove();positionChrome();
+    mountEntry();mountAtlasHeaderActions();query('.at-search')?.remove();positionChrome();
     resizeObserver?.disconnect();const observedCanvas=query('.at-canvas');let observedWidth=observedCanvas.clientWidth,observedHeight=observedCanvas.clientHeight;
     resizeObserver=new ResizeObserver(()=>{if(dialog.open){positionChrome();const resized=observedCanvas.clientWidth!==observedWidth||observedCanvas.clientHeight!==observedHeight;if(!resized)return;observedWidth=observedCanvas.clientWidth;observedHeight=observedCanvas.clientHeight;if((observedWidth<650)!==compactLayout)renderGraph(get(state.focus));else layout(true);needsPaint=true}});resizeObserver.observe(observedCanvas);
     const picker=query('.at-view-picker');
@@ -215,11 +215,22 @@
     renderGraph(n);
     needsPaint=true;
   }
+  function mountAtlasHeaderActions(){
+    const host=query('.at-header-actions'),source=document.querySelector('.workspace .space-top-actions');if(!host||!source)return;
+    for(const child of source.children){
+      if(child.classList.contains('space-global-search'))continue;
+      const type=child.hasAttribute('data-space-inbox')?'inbox':child.hasAttribute('data-action')?'add':child.hasAttribute('data-share-open')?'share':child.hasAttribute('data-display-scope-open')?'settings':null;if(!type)continue;
+      const copy=child.cloneNode(true);copy.dataset.atHeader=type;copy.removeAttribute('data-space-inbox');copy.removeAttribute('data-action');copy.removeAttribute('data-share-open');copy.removeAttribute('data-display-scope-open');copy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));host.append(copy);
+    }
+    mountGlobalSearch(host);
+  }
   function positionChrome(){
     syncCordClearance();
     const heading=document.querySelector('.workspace .space-heading')?.getBoundingClientRect(),actions=document.querySelector('.workspace .space-top-actions')?.getBoundingClientRect();
+    const buttons=query('.at-header-actions');
     if(heading){dialog.style.setProperty('--chrome-left',heading.left+'px');dialog.style.setProperty('--chrome-top',heading.top+'px')}
-    if(actions)dialog.style.setProperty('--chrome-right',Math.max(24,innerWidth-actions.right)+'px');
+    if(actions){buttons.style.left=actions.left+'px';buttons.style.top=actions.top+'px';buttons.style.right='auto';dialog.style.setProperty('--chrome-right',Math.max(24,innerWidth-actions.right)+'px')}else{buttons.style.left='auto';buttons.style.right='18px';buttons.style.top='24px'}
+    clearCordOverlap(buttons);
     returnWheelTop=Math.max(96,heading?.bottom||0,actions?.bottom||0)+24;
   }
   const layoutName=id=>({radial:'径向环绕',organization:'层级结构',mindmap:'思维脉络',spatial:'微观结构',solar:classicOrbits?'行星轨道':'银河星系',systems:'场景星系'}[id]);
@@ -343,7 +354,7 @@
       // Dense sibling levels wrap as connected graph branches; no list view is used.
       const rowGap=Math.max(...direct.map(c=>c.h))+18,columnGap=Math.max(...direct.map(c=>c.w))+24;
       if(state.layout==='organization'){
-        const cols=Math.max(2,Math.floor((w-90)/145)),rows=Math.ceil(direct.length/cols);n.by=-usableH/2+70;
+        const cols=Math.max(2,Math.min(10,Math.floor((w-40)/150))),rows=Math.ceil(direct.length/cols);n.by=-usableH/2+70;
         direct.forEach((c,i)=>{const row=Math.floor(i/cols),count=Math.min(cols,direct.length-row*cols);c.bx=(i%cols-(count-1)/2)*Math.max(columnGap,Math.min(154,(w-90)/cols));c.by=-usableH/2+195+row*rowGap});
       }else{
         const verticalStep=Math.max(...direct.map(c=>c.h))+8,rows=Math.max(2,Math.floor((usableH+8)/verticalStep)),cols=Math.ceil(direct.length/rows);n.bx=-w/2+120;
@@ -362,6 +373,8 @@
       for(const r of visible)if(!r.isParent){r.bx+=dx;r.by+=dy}
       if(state.layout==='mindmap'&&n.kind!=='group'){const add=direct.find(r=>r.kind==='add');if(add)add.by=Math.max(...direct.map(r=>r.by))}
     }
+    if(fit&&state.mode==='3d'&&state.scene3d==='spatial')state.zoom=1.12;
+    if(fit&&state.mode==='2d'&&state.layout==='organization')state.zoom=1.1;
     needsPaint=true;
   }
   function orbitIdentity(r){return r.kind==='link'?'u:'+hash((r.item?.[1]||'')+'\u0000'+(r.item?.[0]||'')):r.key}
@@ -444,7 +457,7 @@
       let extentX=0,extentY=0;
       for(const orbit of orbits)for(let i=0;i<=160;i++){const p=orbit.galaxy?galaxyPoint(orbit,i/160):orbitPoint(orbit,i/160*Math.PI*2);extentX=Math.max(extentX,Math.abs(p.x)+24);extentY=Math.max(extentY,Math.abs(p.y)+24)}
       for(const r of visible)if(!r.isParent){extentX=Math.max(extentX,Math.abs(r.bx-r.anchorX),Math.abs(r.bx+r.w-r.anchorX));extentY=Math.max(extentY,Math.abs(r.by-r.anchorY),Math.abs(r.by+r.h-r.anchorY))}
-      state.zoom=Math.max(.25,Math.min(3,(w-48)/(extentX*2),(usableH-32)/(extentY*2)));
+      state.zoom=Math.max(.25,Math.min(3,(w-48)/(extentX*2),(usableH-32)/(extentY*2))*1.18);
     }
   }
   function galaxyPoint(orbit,t,jitter=0){
@@ -678,7 +691,7 @@
     if(!e.target.closest('.at-layout-picker'))closeViewPicker();
     if(!e.target.closest('.space-global-search')){const results=document.querySelector('.workspace .global-search-results');if(results)results.hidden=true}
     const b=e.target.closest('button,a');if(!b)return;
-    if(b.hasAttribute('data-at-header')){const selector={add:'[data-action=add]',share:'[data-share-open]',settings:'[data-display-scope-open]'}[b.dataset.atHeader];setContext(get(state.focus));editorBusy=true;try{render();document.querySelector('.workspace '+selector)?.click()}finally{editorBusy=false}return}
+    if(b.hasAttribute('data-at-header')){if(b.dataset.atHeader==='inbox')return;const selector={add:'[data-action=add]',share:'[data-share-open]',settings:'[data-display-scope-open]'}[b.dataset.atHeader];setContext(get(state.focus));editorBusy=true;try{render();document.querySelector('.workspace '+selector)?.click()}finally{editorBusy=false}return}
     if(b.hasAttribute('data-at-link')){const n=get(b.dataset.atLink);if(!n||!safeURL(n.item[1])){e.preventDefault();notify('这个网址地址无效，请从管理菜单编辑')}return}
     if(b.hasAttribute('data-at-create')){const n=get(b.dataset.atCreate);if(n)addChild(n);return}
     if(b.hasAttribute('data-at-overview')){state.overview=!state.overview;renderAtlas();return}

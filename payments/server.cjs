@@ -41,7 +41,17 @@ function createPaymentHandler(options = {}) {
     if (!Array.isArray(data.items)) throw new PaymentError('套餐配置无效', 'CATALOG_INVALID', 503);
     return data.items;
   }) });
-  const status = { enabled: config.enabled, mode: config.mode, providers: Object.fromEntries(['wechat', 'alipay'].map(p => [p, { ready: !!providers[p], kind: p === 'wechat' ? 'qr' : 'redirect' }])) };
+  const publicStatus = () => ({ enabled: config.enabled, mode: config.mode, providers: Object.fromEntries(['wechat', 'alipay'].map(p => [p, { enabled: config[p].enabled !== false, ready: config[p].enabled !== false && !!providers[p], kind: p === 'wechat' ? 'qr' : 'redirect' }])) });
+  let revision = '';
+  function reloadConfig() {
+    if (options.config || options.providers) return;
+    const fs = require('node:fs'), stamp = fs.existsSync(config.file) ? String(fs.statSync(config.file).mtimeMs) : '';
+    if (stamp === revision) return;
+    const fresh = loadConfig(config.file), ready = inspect(fresh), updated = {};
+    if (ready.providers.wechat.ready) updated.wechat = new WechatProvider(fresh.wechat);
+    if (ready.providers.alipay.ready) updated.alipay = new AlipayProvider(fresh.alipay);
+    Object.assign(config, fresh); delete providers.wechat; delete providers.alipay; Object.assign(providers, updated); revision = stamp;
+  }
   async function authenticate(req) {
     if (options.authenticate) return options.authenticate(req);
     if (config.mode === 'integration') {
@@ -64,7 +74,8 @@ function createPaymentHandler(options = {}) {
     const url = new URL(req.url, 'http://localhost');
     if (!url.pathname.startsWith(PREFIX + '/')) return false;
     try {
-      if (url.pathname === PREFIX + '/status' && req.method === 'GET') { json(res, 200, status); return true; }
+      reloadConfig();
+      if (url.pathname === PREFIX + '/status' && req.method === 'GET') { json(res, 200, publicStatus()); return true; }
       if (!config.enabled) throw new PaymentError('支付服务暂未开放', 'PAYMENTS_DISABLED', 503);
       const notification = url.pathname.match(/^\/api\/shiyu\/payments\/notify\/(wechat|alipay)$/);
       if (notification) {

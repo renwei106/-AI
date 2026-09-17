@@ -102,7 +102,7 @@
     }
   }
 
-  const MODE_KEYS=['form','water','snow','chaos'];
+  const MODE_KEYS=['water','form','snow','chaos'];
   const STYLE_NAMES={chaos:'混沌漫游',form:'万象成形',snow:'灵感落雪',tide:'潮汐涌动',water:'流光涌浪'};
   const FLOW_DOCK_ICON='<span class="flow-dock-gateway" aria-hidden="true"><svg viewBox="0 0 52 42" fill="none"><path class="flow-dock-gate" d="M26 2.5 44 12.7v16.6L26 39.5 8 29.3V12.7Z" stroke="currentColor" stroke-width="1.35"/><g class="flow-dock-enter" fill="currentColor"><circle cx="20.5" cy="16.5" r="2.5"/><rect x="27.5" y="14" width="5" height="5" rx="1"/><path d="m21 23.5 3.4 5.7h-6.8Z"/><path d="M28.9 22.7h2.2v2.2h2.2v2.2h-2.2v2.2h-2.2v-2.2h-2.2v-2.2h2.2Z"/></g></svg></span>';
   const FLOW_SPACE_SHAPES=[
