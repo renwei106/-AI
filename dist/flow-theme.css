@@ -33,8 +33,8 @@ body[data-dark=true] .flow-cover { background:color-mix(in srgb,var(--accent) 27
 .inspiration-style-menu button { position:relative; min-width:72px; padding:7px 13px; border-radius:999px; color:inherit; white-space:nowrap; font:10px/1.2 var(--font); letter-spacing:.12em; opacity:.66; }
 .inspiration-style-menu button:hover,.inspiration-style-menu button:focus-visible,.inspiration-style-menu button[aria-pressed=true] { opacity:1; background:color-mix(in srgb,currentColor 12%,transparent); }
 .inspiration-style-menu button[aria-pressed=true]:after { content:''; position:absolute; right:8px; top:50%; width:3px; height:3px; border-radius:50%; background:currentColor; transform:translateY(-50%); }
-.flow-copy h1 { margin:0; white-space:pre-line; overflow-wrap:anywhere; font:400 clamp(48px,7vw,110px)/1.22 var(--font); letter-spacing:.045em; color:inherit; opacity:.88; text-shadow:0 0 22px color-mix(in srgb,var(--flow-ink) 18%,transparent); }
-.flow-copy p { margin:28px 0 0; font:12px/1.8 var(--font); letter-spacing:.13em; opacity:.72; white-space:pre-line; text-shadow:0 0 12px color-mix(in srgb,var(--flow-ink) 18%,transparent); }
+.flow-copy h1 { margin:0; white-space:pre-line; overflow-wrap:anywhere; font:400 clamp(48px,7vw,110px)/1.22 var(--font); letter-spacing:.045em; color:inherit; opacity:.88; text-shadow:0 1px 1px #10152255,0 3px 2px #10152233,0 8px 16px #10152240; }
+.flow-copy p { margin:28px 0 0; font:12px/1.8 var(--font); letter-spacing:.13em; opacity:.72; white-space:pre-line; text-shadow:0 1px 2px #10152266,0 3px 7px #10152233; }
 .flow-touch-hint { display:none; position:absolute; bottom:23%; width:100%; text-align:center; font:10px/1.5 var(--font); letter-spacing:.12em; opacity:.6; pointer-events:none; }
 .home-flow .utility-search { position:fixed; right:4.5%; bottom:25px; z-index:2; color:var(--flow-ink); }
 .home-flow .utility-search button,.home-flow .utility-search button>span,.home-flow .utility-search kbd { color:inherit; }
@@ -60,3 +60,9 @@ body[data-view=home].global-chrome-idle .dock-trigger { opacity:.02; }
 @media(max-width:760px) { .home.home-flow { height:calc(100svh - 76px); }.flow-copy { top:31%; width:90vw; }.flow-copy h1 { font-size:clamp(40px,10.5vw,65px); line-height:1.35; }.flow-eyebrow { font-size:9px; }.inspiration-style-switch { margin-bottom:25px; }.inspiration-style-menu { max-width:calc(100vw - 24px); }.inspiration-style-menu button { min-width:0; padding-inline:9px; font-size:9px; }.flow-copy p { font-size:10px; margin-top:24px; }.home-flow .utility-search button>span { display:none; } }
 @media(hover:none) { .flow-touch-hint { display:block; } }
 @media(prefers-reduced-motion:reduce) { .flow-touch-hint { display:none; } }
+
+/* Formation alone uses a compact heading; side silhouettes reserve room around the copy. */
+.flow-cover[data-particle-mode=form] .flow-copy { top:25%; }
+.flow-cover[data-particle-mode=form] .flow-copy h1 { font-size:clamp(30px,6vw,90px); }
+.flow-cover[data-particle-mode=form][data-form-layout=side] .flow-copy h1 { font-size:clamp(28px,4vw,62px); }
+@media(max-width:760px){.flow-cover[data-particle-mode=form] .flow-copy h1 {font-size:clamp(24px,7.4vw,48px);}.flow-cover[data-particle-mode=form] .flow-copy{top:25%;}}

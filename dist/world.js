@@ -1,13 +1,13 @@
-/* Local operations preview. Production publishing and access enforcement remain server responsibilities. */
+/* Published operations configuration and isolated admin preview. */
 (()=>{
  const token=new URLSearchParams(location.search).get('operations-preview'),key='shiyu-operations-preview-v1';
- const empty={world:{enabled:true,audience:'all',percentage:100,whitelist:'',blacklist:'',title:'一个值得慢慢探索的世界',description:'发现精选网址、学习路线与创作素材，遇见更多值得收藏的灵感。'},announcement:{enabled:false},update:{enabled:false}};
- let config=empty,identity='',previewKind='',dialog,timer;
- try{const stored=JSON.parse(sessionStorage.getItem(key)||'null');if(token&&stored?.token===token){config=stored.config;identity=stored.identity;previewKind=stored.kind}}catch{}
- const lists=value=>String(value||'').split(/[\s,，;；]+/).filter(Boolean);
- const user=()=>identity||(signed?String(prefs.accountProfile?.id||'local-account'):'guest');
+ const empty={world:{enabled:false,audience:'all',percentage:100,whitelist:'',blacklist:'',title:'一个值得慢慢探索的世界',description:'发现精选网址、学习路线与创作素材，遇见更多值得收藏的灵感。'},announcement:{enabled:false},update:{enabled:false}};
+ let config=empty,identity='',previewKind='',dialog,timer,loadingPublished,previewReceived=false;
+ const lists=value=>String(value||'').split(/[\s,，;；]+/).map(item=>item.trim().toLowerCase()).filter(Boolean);
+ const identities=()=>identity?lists(identity):(signed?[prefs.accountProfile?.phone,prefs.accountProfile?.mobile,prefs.accountProfile?.email,prefs.accountProfile?.id,'local-account'].map(value=>String(value||'').trim().toLowerCase()).filter(Boolean):['guest']);
+ const user=()=>identities()[0]||'guest';
  const bucket=id=>{let hash=2166136261;for(const c of id)hash=Math.imul(hash^c.charCodeAt(0),16777619);return (hash>>>0)%100};
- const eligible=()=>{const w=config.world,id=user(),white=lists(w.whitelist);return w.enabled&&!lists(w.blacklist).includes(id)&&(white.length?white.includes(id):w.audience!=='percentage'||bucket(id)<Number(w.percentage))};
+ const eligible=()=>{const w=config.world,ids=identities(),black=lists(w.blacklist);if(ids.some(id=>black.includes(id)))return false;if(!w.enabled)return false;const white=lists(w.whitelist),listed=ids.some(id=>white.includes(id));if(w.audience==='whitelist')return listed;if(w.audience==='percentage')return listed||bucket(user())<Number(w.percentage);return true};
  const receipt=(kind)=>'shiyu-notice-read:'+user()+':'+kind+':'+String(config[kind]?.revision||'');
  const read=kind=>{try{return localStorage.getItem(receipt(kind))==='yes'}catch{return false}};
  function mark(kind){try{localStorage.setItem(receipt(kind),'yes')}catch{}syncEntry()}
@@ -16,7 +16,7 @@
   dialog.innerHTML='<div class="ops-heading"><h2 id="shiyu-operations-title">'+esc(title)+'</h2><button data-ops-close aria-label="关闭">×</button></div>'+body+'<div class="ops-actions">'+footer+'</div>';
   dialog.querySelector('[data-ops-close]').onclick=()=>dialog.close();if(!dialog.open)dialog.showModal();return dialog;
  }
- function waiting(){modal(config.world.title,'<div class="ops-world-symbol">'+svgIcon('<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>')+'</div><p class="ops-body">'+esc(config.world.description)+'</p><p class="ops-coming">敬请期待</p>','<button class="primary" data-ops-ok>知道了</button>').querySelector('[data-ops-ok]').onclick=()=>dialog.close()}
+ function waiting(){modal(config.world.title,'<div class="ops-coming-hero"><strong>敬请期待</strong><span>COMING SOON</span></div><p class="ops-body ops-world-description">'+esc(config.world.description)+'</p>','<button class="primary" data-ops-ok>知道了</button>').querySelector('[data-ops-ok]').onclick=()=>dialog.close()}
  function details(kind){const n=config[kind];if(!n?.enabled)return;document.querySelector('.shiyu-update-prompt')?.remove();const d=modal(n.title,'<p class="ops-eyebrow">'+(kind==='announcement'?'服务公告':'版本 '+esc(n.revision))+'</p><p class="ops-body">'+esc(n.body)+'</p>','<button class="primary" data-ops-ok>'+(kind==='announcement'?'我知道了':'开始体验')+'</button>');d.querySelector('[data-ops-ok]').onclick=()=>{mark(kind);d.close()};if(kind==='announcement'){mark(kind)} }
  function center(){
   const items=['announcement','update'].filter(k=>config[k]?.enabled);const d=modal('消息通知',items.length?'<div class="ops-notice-list">'+items.map(k=>'<button data-ops-details="'+k+'"><span><small>'+(k==='announcement'?'全局公告':'版本更新')+(read(k)?' · 已读':' · 未读')+'</small><b>'+esc(config[k].title)+'</b></span><span>→</span></button>').join('')+'</div>':'<p class="ops-empty">暂时没有新消息，安心享受你的一隅。</p>','');d.querySelectorAll('[data-ops-details]').forEach(b=>b.onclick=()=>details(b.dataset.opsDetails));
@@ -34,18 +34,25 @@
   if(!config.update.enabled||read('update')||dismissed()||document.querySelector('.shiyu-update-prompt'))return;
   const box=document.createElement('aside');box.className='shiyu-update-prompt';box.setAttribute('aria-label','版本更新通知');box.setAttribute('role','status');box.innerHTML='<span class="ops-update-icon">'+svgIcon('<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/>')+'</span><div><small>有新版本 · '+esc(config.update.revision)+'</small><b>'+esc(config.update.title)+'</b><button data-ops-view>查看更新 →</button></div><button class="ops-dismiss" aria-label="稍后提醒">×</button>';document.body.append(box);box.querySelector('[data-ops-view]').onclick=()=>details('update');box.querySelector('.ops-dismiss').onclick=()=>{try{sessionStorage.setItem(receipt('update')+':later','yes')}catch{}box.remove()};
  }
- function normalize(value){const notice=n=>({enabled:!!n?.enabled,revision:String(n?.revision||'').slice(0,40),title:String(n?.title||'').slice(0,80),body:String(n?.body||'').slice(0,4000)});const w=value?.world||{};return {world:{...empty.world,enabled:w.enabled!==false,audience:w.audience==='percentage'?'percentage':'all',percentage:Math.min(100,Math.max(0,Number(w.percentage)||0)),whitelist:String(w.whitelist||'').slice(0,30000),blacklist:String(w.blacklist||'').slice(0,30000),title:String(w.title||empty.world.title).slice(0,60),description:String(w.description||empty.world.description).slice(0,1000)},announcement:notice(value?.announcement),update:notice(value?.update)}}
+ function normalize(value){const notice=n=>({enabled:!!n?.enabled,revision:String(n?.revision||'').slice(0,40),title:String(n?.title||'').slice(0,160),body:String(n?.body||'').slice(0,12000)});const w=value?.world||{};return {world:{...empty.world,enabled:w.enabled===true,audience:w.audience==='whitelist'||w.audience==='percentage'?w.audience:'all',percentage:Math.min(100,Math.max(0,Number(w.percentage)||0)),whitelist:String(w.whitelist||'').slice(0,30000),blacklist:String(w.blacklist||'').slice(0,30000),title:String(w.title||empty.world.title).slice(0,60),description:String(w.description||empty.world.description).slice(0,1000)},announcement:notice(value?.announcement),update:notice(value?.update)}}
+ function publish(){syncEntry();deliver();dispatchEvent(new CustomEvent('shiyu-operations-config',{detail:{worldEnabled:config.world.enabled}}))}
+ async function loadPublished(force=false){
+  if(token&&!force)return;if(loadingPublished)return loadingPublished;
+  loadingPublished=fetch('/api/shiyu/operations',{cache:'no-store'}).then(async response=>{const value=await response.json();if(!response.ok)throw new Error(value?.message||'配置加载失败');const responseI18n=await fetch('/api/shiyu/i18n/public',{cache:'no-store'});const translated=responseI18n.ok?await responseI18n.json():{notices:{}};const locale=window.ShiyuLanguage?.locale||window.SHIYU_LOCALE_STATE?.locale||'zh-CN';const localizedNotice=kind=>{const n=translated.notices?.[kind],text=n?.translations?.[locale];return text?{...n,...text}:{enabled:false}};config=normalize({world:value.world,announcement:localizedNotice('announcement'),update:localizedNotice('update')})}).catch(()=>{config=normalize(empty)}).finally(()=>{loadingPublished=null;publish()});
+  return loadingPublished;
+ }
  addEventListener('message',event=>{
   if(!token||event.source!==window.opener||event.origin!=='http://127.0.0.1:5175'||event.data?.type!=='shiyu-operations-preview'||event.data?.token!==token)return;
+  previewReceived=true;
   config=normalize(event.data.draft);identity=String(event.data.identity||'preview-user-001');previewKind=event.data.kind;
   if(previewKind==='announcement'||previewKind==='update'){config[previewKind].enabled=true;const other=previewKind==='announcement'?'update':'announcement';config[other].enabled=false;try{localStorage.removeItem(receipt(previewKind));sessionStorage.removeItem(receipt('update')+':later')}catch{}}
   try{sessionStorage.setItem(key,JSON.stringify({token,config,identity,kind:previewKind}))}catch{}
-  syncEntry();deliver();
+  publish();
  });
  window.ShiyuOperations=Object.freeze({enterWorld:()=>{if(!config.world.enabled)return false;if(eligible())return true;waiting();return false},center});
  document.addEventListener('click',event=>{if(event.target.closest('#world-page [data-ops-center]'))center()});
- addEventListener('focus',deliver);document.addEventListener('visibilitychange',()=>{if(!document.hidden)deliver()});
- setTimeout(()=>{syncEntry();deliver();if(token&&window.opener)window.opener.postMessage({type:'shiyu-operations-ready',token},'http://127.0.0.1:5175')},0);
+ addEventListener('focus',()=>{if(token)deliver();else void loadPublished()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(token)deliver();else void loadPublished()}});
+ setTimeout(()=>{syncEntry();if(token){deliver();if(window.opener)window.opener.postMessage({type:'shiyu-operations-ready',token},'http://127.0.0.1:5175');setTimeout(()=>{if(!previewReceived)void loadPublished(true)},500)}else void loadPublished()},0);
 })();
 /* An isolated public discovery surface, sharing the global day/night preference. */
 (()=>{
@@ -137,6 +144,7 @@
  const entry=document.createElement('button');entry.className='world-entry';entry.innerHTML=icon('compass')+'<span>发现世界</span><span aria-hidden="true">↑</span>';entry.setAttribute('aria-label','向上探索，进入拾隅世界');entry.title='向上滚动，或点击进入世界';entry.onclick=()=>{section='discover';topic='all';query='';source='all';detailId='';open()};document.body.append(entry);
  function readURL(){const u=new URL(location.href);if(u.searchParams.get('page')==='world'){section=u.searchParams.get('section')||'discover';topic=u.searchParams.get('topic')||'all';query=u.searchParams.get('q')||'';source=u.searchParams.get('source')||'all';detailId=u.searchParams.get('id')||'';if(!active)open(false);else{renderWorld();root.scrollTop=0}}else close(false)}
  addEventListener('popstate',readURL);
+ addEventListener('shiyu-operations-config',event=>{if(event.detail?.worldEnabled===false){if(active)close();return}readURL()});
  addEventListener('wheel',event=>{if(active){event.stopImmediatePropagation();return}if(view==='home'&&!event.ctrlKey&&Math.abs(event.deltaY)>Math.abs(event.deltaX))resetOppositeEntry(event.deltaY);if(view!=='home'||Date.now()<transitionUntil||scrollY>2||event.ctrlKey||Math.abs(event.deltaX)>Math.abs(event.deltaY)||event.deltaY>=0||document.querySelector('dialog[open]')||event.target.closest('input,textarea,select,.dock,.paper-life,.world-entry')||document.body.classList.contains('paper-edit-active')){wheelSum=0;entryArmedAt=0;return}const now=Date.now();if(now-lastWheel>200){wheelSum=0;wheelHandled=false}lastWheel=now;wheelSum+=Math.abs(event.deltaY)*(event.deltaMode===1?16:event.deltaMode===2?innerHeight:1);event.preventDefault();if(wheelSum>80&&!wheelHandled){wheelSum=0;wheelHandled=true;enterByGesture()}},{capture:true,passive:false});
  addEventListener('touchstart',event=>{if(active){event.stopImmediatePropagation();return}touch=view==='home'&&scrollY<=2&&event.touches.length===1&&!document.querySelector('dialog[open]')&&!event.target.closest('button,a,input,textarea,select,.paper-life')?{x:event.touches[0].clientX,y:event.touches[0].clientY}:null},{capture:true,passive:true});
  addEventListener('touchend',event=>{if(active){event.stopImmediatePropagation();return}if(touch&&event.changedTouches.length){const t=event.changedTouches[0];if(Math.abs(t.clientY-touch.y)>65&&Math.abs(t.clientX-touch.x)<60)resetOppositeEntry(touch.y-t.clientY);if(t.clientY-touch.y>85&&Math.abs(t.clientX-touch.x)<60){event.stopImmediatePropagation();touchStart=null;enterByGesture()}else entryArmedAt=0}touch=null},{capture:true,passive:true});

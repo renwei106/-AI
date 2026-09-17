@@ -1,0 +1,29 @@
+{
+  "enabled": false,
+  "mode": "integration",
+  "publicBaseUrl": "",
+  "allowedOrigins": ["http://127.0.0.1:4318", "http://localhost:4318", "http://127.0.0.1:4348", "http://localhost:4348"],
+  "catalogUrl": "http://127.0.0.1:5175/api/shiyu/plans",
+  "identityUrl": "",
+  "database": "orders.sqlite",
+  "alipay": {
+    "appId": "2021007100687465",
+    "sellerId": "",
+    "privateKeyPath": "keys/alipay/app-private.pem",
+    "publicKeyPath": "keys/alipay/alipay-public.pem",
+    "appCertPath": "",
+    "alipayPublicCertPath": "",
+    "alipayRootCertPath": ""
+  },
+  "wechat": {
+    "mchId": "1117807116",
+    "appId": "",
+    "apiV3Key": "",
+    "privateKeyPath": "keys/wechat/apiclient_key.pem",
+    "certificatePath": "keys/wechat/apiclient_cert.pem",
+    "serialNo": "",
+    "publicKeyPath": "keys/wechat/wechatpay-public.pem",
+    "publicKeyId": "",
+    "platformCertificatePath": ""
+  }
+}

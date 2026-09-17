@@ -295,9 +295,9 @@ body.atlas-active[data-dark=true] #space-mode-menu{--ink:#efefea;--muted:#b0b0b8
 #space-atlas .at-cover-return{position:absolute;left:50%;top:13px;z-index:79;display:grid;place-items:center;grid-template-areas:"label";transform:translateX(-50%);min-width:72px;height:30px;padding:0 13px;border-radius:18px;background:color-mix(in srgb,var(--surface) 62%,transparent);color:var(--muted);font-size:10px;letter-spacing:.4px;opacity:.3;cursor:pointer;transition:opacity .2s ease,background .2s ease,color .2s ease}
 #space-atlas .at-cover-return span{grid-area:label;transition:opacity .18s ease,transform .18s ease}
 #space-atlas .at-cover-return span:last-child{opacity:0;transform:translateY(4px)}
-#space-atlas .at-cover-return:hover,#space-atlas .at-cover-return:focus-visible{opacity:1;background:var(--surface);color:var(--ink)}
-#space-atlas .at-cover-return:hover span:first-child,#space-atlas .at-cover-return:focus-visible span:first-child{opacity:0;transform:translateY(-4px)}
-#space-atlas .at-cover-return:hover span:last-child,#space-atlas .at-cover-return:focus-visible span:last-child{opacity:1;transform:translateY(0)}
+#space-atlas .at-cover-return:hover,#space-atlas .at-cover-return:focus-visible,#space-atlas .at-cover-return.is-wheel-armed{opacity:1;background:var(--surface);color:var(--ink)}
+#space-atlas .at-cover-return:hover span:first-child,#space-atlas .at-cover-return:focus-visible span:first-child,#space-atlas .at-cover-return.is-wheel-armed span:first-child{opacity:0;transform:translateY(-4px)}
+#space-atlas .at-cover-return:hover span:last-child,#space-atlas .at-cover-return:focus-visible span:last-child,#space-atlas .at-cover-return.is-wheel-armed span:last-child{opacity:1;transform:translateY(0)}
 #space-atlas .at-node-main{cursor:grab;user-select:none;-webkit-user-drag:none}
 #space-atlas .at-node[data-kind=link] .at-node-main{cursor:pointer}
 #space-atlas .at-node.is-parent .at-node-main{cursor:pointer}
@@ -376,6 +376,7 @@ body.atlas-active[data-dark=true] #space-mode-menu{--ink:#efefea;--muted:#b0b0b8
 #space-atlas .at-galaxy .at-node[data-level="0"] .at-orb{box-shadow:0 0 30px color-mix(in srgb,var(--at-accent) 26%,transparent),0 0 90px color-mix(in srgb,var(--at-accent) 12%,transparent),inset 2px 2px 10px #fff7}
 
 .space-top-actions .space-global-search{position:relative;flex:0 0 34px;width:34px;height:36px;z-index:80}
+.workspace-top:has(.space-global-search.is-open){z-index:21}
 .space-global-search .global-search-trigger{position:relative;display:grid;place-items:center;width:34px;height:36px;padding:8px;border-radius:12px;color:var(--muted);z-index:2;background:transparent}
 .space-global-search svg{display:block;width:18px;height:18px}
 .space-global-search .global-search-field{position:absolute;right:0;top:0;display:flex;align-items:center;width:34px;height:36px;overflow:hidden;opacity:0;background:var(--surface);border-radius:12px;transition:width .24s ease,opacity .2s}

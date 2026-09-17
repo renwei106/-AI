@@ -1,0 +1,5 @@
+.payment-order-dialog .payment-order-body { text-align: center; }
+.payment-order-dialog .payment-qr { display: block; margin: 18px auto; width: 264px; max-width: 100%; height: auto; border-radius: 8px; }
+.payment-order-dialog .payment-cashier { display: inline-flex; text-decoration: none; align-items: center; justify-content: center; margin: 16px 0 0; }
+.payment-order-dialog .payment-order-number { overflow-wrap: anywhere; font-size: 12px; }
+.payment-order-dialog .payment-confirmed { color: var(--accent); }

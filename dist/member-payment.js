@@ -1,0 +1,153 @@
+// Real checkout adapts the existing membership UI; all prices and payment states come from the server.
+(() => {
+ 'use strict';
+ const API = '/api/shiyu/payments';
+ let status = null, account = null, currentOrder = null, timer = null, submitting = false;
+ let pendingRequest = null;
+ const originalCenter = openMemberCenter, originalOrders = openMemberOrders, originalMember = isMember;
+ const originalAgreement = simulatePayment;
+ const text = value => esc(String(value ?? ''));
+ const money = cents => (cents / 100).toFixed(2);
+ async function request(path, options = {}) {
+  const response = await fetch(API + path, { cache: 'no-store', ...options, headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers } });
+  const data = await response.json();
+  if (!response.ok) { const error = new Error(data.message || '支付服务暂时无法连接'); Object.assign(error, { code: data.code, orderId: data.orderId }); throw error; }
+  return data;
+ }
+ function decorate() {
+  const d = document.querySelector('#member-center');
+  if (!d?.open) return;
+  const button = d.querySelector('.member-checkout>.member-primary'), note = d.querySelector('.simulation-note');
+  if (!button) return;
+  if (!button.dataset.paymentWidth) {
+   button.style.minWidth = button.getBoundingClientRect().width + 'px';
+   button.dataset.paymentWidth = 'preserved';
+  }
+  const plan = MEMBER_CONFIG.plans[selectedMemberPlan], recurring = plan?.auto || plan?.autoRenew;
+  button.disabled = freeMemberSelected || recurring || !status?.providers?.[memberPayment]?.ready || submitting;
+  button.textContent = freeMemberSelected ? '免费使用' : recurring ? '连续订阅暂未开放' : !status?.providers?.[memberPayment]?.ready ? '支付暂未开放' : submitting ? '正在创建订单…' : '立即支付';
+  button.onclick = purchase;
+  if (note) {
+   if (!note.dataset.paymentWidth) {
+    note.style.minWidth = note.getBoundingClientRect().width + 'px';
+    note.dataset.paymentWidth = 'preserved';
+   }
+   note.textContent = status?.enabled && status.mode === 'integration' ? '联调支付会产生真实扣款' : '\u00a0';
+  }
+  if (account) {
+   const memberStatus = d.querySelector('.member-status>span');
+   if (memberStatus) memberStatus.textContent = account.memberExpiresAt > Date.now() ? '会员有效至 ' + new Date(account.memberExpiresAt).toLocaleDateString() : '免费账户';
+  }
+ }
+ openMemberCenter = function () { originalCenter(); decorate(); };
+ isMember = function () { return status?.enabled ? !!account && account.memberExpiresAt > Date.now() : originalMember(); };
+ async function refreshAccount() {
+  if (!status?.enabled) return;
+  try { account = await request('/account'); } catch { account = null; }
+  decorate();
+  if (typeof updateHeader === 'function') updateHeader();
+ }
+ async function purchase() {
+  if (submitting) return;
+  if (!status?.providers?.[memberPayment]?.ready) { toast('该支付方式暂未开放'); return; }
+  const plan = MEMBER_CONFIG.plans[selectedMemberPlan];
+  if (!plan?.id || freeMemberSelected) { toast('请等待套餐加载完成'); return; }
+  if (plan.auto || plan.autoRenew) { toast('连续订阅暂未开放，请选择月度或年度会员'); return; }
+  if (!memberAgreed) {
+   originalAgreement();
+   const dialog = document.querySelector('#agreement-required-dialog');
+   const confirm = dialog?.querySelector('[data-return-agreement]');
+   if (confirm) confirm.onclick = () => { memberAgreed = true; const input = document.querySelector('[data-member-agree]'); if (input) input.checked = true; dialog.close(); purchase(); };
+   return;
+  }
+  submitting = true; decorate();
+  const selection = plan.id + ':' + memberPayment;
+  if (!pendingRequest || pendingRequest.selection !== selection) pendingRequest = { selection, requestId: crypto.randomUUID().replaceAll('-', '') };
+  try {
+   const data = await request('/orders', { method: 'POST', body: JSON.stringify({ planId: plan.id, provider: memberPayment, requestId: pendingRequest.requestId, accepted: true }) });
+   showOrder(data.order);
+  } catch (error) {
+   if (error.orderId) {
+    try { const data = await request('/orders/' + error.orderId); showOrder(data.order); } catch { toast('下单结果尚未确认，请在我的订单中查询，勿重复付款'); }
+   } else toast(error.message);
+  } finally { submitting = false; decorate(); }
+ }
+ simulatePayment = purchase;
+ // The older page has multiple render wrappers. Capture checkout clicks to prevent any saved demo handler from running.
+ document.addEventListener('click', event => {
+  const button = event.target.closest('#member-center .member-checkout>.member-primary');
+  if (!button || button.disabled) return;
+  event.preventDefault(); event.stopImmediatePropagation(); purchase();
+ }, true);
+ function stopPolling() { clearTimeout(timer); timer = null; }
+ function showOrder(order) {
+  stopPolling(); currentOrder = order;
+  const d = memberDialog('payment-order', order.provider === 'wechat' ? '微信扫码支付' : '支付宝支付');
+  d.classList.add('payment-order-dialog');
+  d.addEventListener('close', stopPolling, { once: true });
+  d.innerHTML += '<div class="payment-order-body"></div>';
+  paintOrder();
+  if (!d.open) d.showModal();
+  pollSoon();
+ }
+ function paintOrder(error = '') {
+  const d = document.querySelector('#payment-order'), order = currentOrder;
+  if (!d || !order) return;
+  const body = d.querySelector('.payment-order-body'), expired = order.expiresAt <= Date.now();
+  let content = `<div class="member-order-summary"><h3>${text(order.planName)}</h3><strong>¥${money(order.amount)}</strong><p>${order.days} 天 · ${order.provider === 'wechat' ? '微信支付' : '支付宝'}</p></div>`;
+  if (order.status === 'paid') {
+   content += `<h3 class="payment-confirmed">支付成功</h3><p class="member-sub">会员有效期至 ${text(new Date(order.memberExpiresAt).toLocaleString())}</p>`;
+   pendingRequest = null;
+  } else if (order.status === 'closed') content += '<p class="member-sub">订单已关闭，请返回会员中心重新下单。</p>';
+  else if (expired) content += '<p class="member-sub">支付时间已结束。若你已完成付款，请查询支付结果。</p>';
+  else if (order.checkout?.kind === 'qr') content += `<img class="payment-qr" width="264" height="264" src="${text(order.checkout.image)}" alt="微信支付二维码"><p class="member-sub">使用微信扫一扫完成付款</p>`;
+  else if (order.checkout?.kind === 'redirect') content += `<a class="member-primary payment-cashier" href="${text(order.checkout.url)}" target="_blank" rel="noopener noreferrer">前往支付宝付款</a><p class="member-sub">付款后返回此页查看结果</p>`;
+  else content += '<p class="member-sub">订单已记录，正在确认支付渠道状态。</p>';
+  if (error) content += `<p class="member-policy" role="status">${text(error)}</p>`;
+  content += `<p class="member-policy payment-order-number">订单号：${text(order.id)}</p>`;
+  if (!['paid', 'closed'].includes(order.status)) content += '<button class="member-primary" data-payment-query>查询支付结果</button>';
+  else content += '<button class="member-primary" data-payment-done>返回会员中心</button>';
+  body.innerHTML = content;
+  body.querySelector('[data-payment-query]')?.addEventListener('click', () => poll(true));
+  body.querySelector('[data-payment-done]')?.addEventListener('click', () => { d.close(); pendingRequest = null; openMemberCenter(); });
+ }
+ function pollSoon() {
+  if (currentOrder && !['paid', 'closed'].includes(currentOrder.status) && document.querySelector('#payment-order')?.open) timer = setTimeout(() => poll(false), 4500);
+ }
+ async function poll(manual) {
+  stopPolling();
+  const id = currentOrder?.id;
+  if (!id) return;
+  try {
+   const data = await request('/orders/' + id);
+   if (currentOrder?.id !== id) return;
+   const changed = data.order.status !== currentOrder.status || (!currentOrder.checkout && data.order.checkout);
+   currentOrder = data.order;
+   if (changed || manual) paintOrder();
+   if (currentOrder.status === 'paid') await refreshAccount();
+  } catch (error) { if (manual && currentOrder?.id === id) paintOrder(error.message); }
+  pollSoon();
+ }
+ openMemberOrders = function () {
+  if (!status?.enabled) { originalOrders(); return; }
+  const d = memberDialog('member-orders', '我的订单');
+  d.innerHTML += '<div class="member-empty">正在加载订单…</div>'; d.showModal();
+  request('/orders').then(data => {
+   if (!d.open) return;
+   const target = d.querySelector('.member-empty');
+   const labels = { created: '待支付', pending: '待支付', unknown: '结果待确认', paid: '支付成功', closed: '已关闭' };
+   target.innerHTML = data.items.length ? data.items.map((o, i) => `<button class="member-order-row" data-real-order="${i}"><span>${text(o.planName)}<small>${text(new Date(o.createdAt).toLocaleString())}</small></span><span>¥${money(o.amount)}<small>${text(labels[o.status] || o.status)}　↗</small></span></button>`).join('') : '暂无订单';
+   target.querySelectorAll('[data-real-order]').forEach(button => button.onclick = () => showOrder(data.items[Number(button.dataset.realOrder)]));
+  }).catch(error => { if (d.open) d.querySelector('.member-empty').textContent = error.message; });
+ };
+ async function initialize() {
+  try { status = await request('/status'); } catch { status = { enabled: false, providers: {} }; }
+  decorate(); await refreshAccount();
+  const id = new URLSearchParams(location.search).get('paymentOrder');
+  if (id && /^SY[a-f0-9]{28}$/.test(id)) {
+   try { const data = await request('/orders/' + id); showOrder(data.order); } catch (error) { toast(error.message); }
+  }
+ }
+ window.addEventListener('focus', refreshAccount);
+ initialize();
+})();

@@ -1,2 +1,11 @@
 .local-shares/
 .local-feedback/
+.local/payments/
+.local/translation-venv/
+.local/translation-data/
+.local/translation-logs/
+payments/node_modules/
+payments/.pnpm-store/
+payments/.env*
+!payments/.env.example
+payments/keys/

@@ -575,3 +575,43 @@ body[data-view=space][data-dark=true] :is(.workspace-tools .space-mode-entry,.wo
  body[data-view=space] .workspace-tools>.group-view-controls{position:fixed;right:22px;bottom:123px;z-index:40;margin:0;flex-wrap:nowrap}
  .workspace-tools .group-view-controls>.space-mode-entry{width:30px;height:30px;flex-basis:30px}
 }
+/* Keep the view switch and style control anchored across both presentations. */
+body[data-view=space] .workspace-tools>.group-view-controls{gap:8px}
+body[data-view=space] .workspace-tools [data-link-settings]{height:40px;box-sizing:border-box;flex:none}
+body[data-view=space] .workspace-tools [data-link-settings]{display:flex;align-items:center;gap:8px;padding:0 14px}
+.workspace-tools [data-link-settings]>span{white-space:nowrap}
+body[data-view=space] :is(.workspace-tools .space-mode-entry,#space-atlas .at-view-tools>.space-mode-entry){width:40px;height:40px;flex:0 0 40px;box-sizing:border-box}
+@media(max-width:760px){body[data-view=space] #space-atlas .at-footer{right:22px}}
+/* A shared footprint keeps both footer controls still when changing views. */
+body[data-view=space] :is(.workspace-tools [data-link-settings],#space-atlas .at-view-picker>.at-quiet){width:148px;height:40px;box-sizing:border-box;flex:none}
+.workspace-tools [data-link-settings]>span{flex:1;text-align:left}
+.workspace-tools [data-link-settings]>small{display:flex;align-items:center;justify-content:center;width:18px;height:18px;flex:0 0 18px}
+.workspace-tools [data-link-settings]>small>svg{width:18px;height:18px}
+#space-atlas .at-view-picker>.at-quiet>.at-view-current{flex:1;padding-right:14px;box-sizing:border-box}
+#space-atlas .at-view-picker>.at-quiet>.at-view-current>svg:last-child{margin-left:auto}
+
+.workspace-guide{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;background:transparent;color:var(--ink);overflow:hidden}
+.workspace-guide::backdrop{background:transparent}
+.workspace-guide-ring{position:fixed;box-sizing:border-box;border:2px solid var(--accent);border-radius:12px;box-shadow:0 0 0 100vmax #0007;pointer-events:none}
+.workspace-guide-panel{position:fixed;box-sizing:border-box;width:min(360px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:20px;border-radius:16px;background:var(--surface);box-shadow:0 10px 40px #0003;font:13px/1.65 var(--font);color:var(--ink)}
+.workspace-guide-panel h2{font:600 18px/1.4 var(--font);margin:8px 0 12px}.workspace-guide-panel p{margin:0 0 20px;color:var(--ink)}
+.workspace-guide-progress{font-size:11px;color:var(--muted)}.workspace-guide-actions{display:flex;align-items:center;gap:10px}.workspace-guide-actions>span{flex:1}.workspace-guide-actions button{padding:7px 10px;border-radius:8px;font-size:12px;white-space:nowrap}.workspace-guide-actions button:disabled{opacity:.35}.workspace-guide-actions button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* Home/space transition: a solid home cover over a stationary space layer.
+   These rules exist only while this specific page transition is active. */
+html[data-home-cover] body{transition:none}
+html[data-home-cover]::view-transition{pointer-events:none}
+html[data-home-cover]::view-transition-group(root){animation:none}
+html[data-home-cover]::view-transition-image-pair(root){isolation:isolate}
+html[data-home-cover]::view-transition-old(root),html[data-home-cover]::view-transition-new(root){
+  animation:none;mix-blend-mode:normal;opacity:1;width:100%;height:100%;object-fit:fill;
+}
+html[data-home-cover=leaving]::view-transition-new(root),html[data-home-cover=returning]::view-transition-old(root){
+  z-index:1;transform:none;
+}
+html[data-home-cover=leaving]::view-transition-old(root){z-index:2;animation:home-cover-lift 650ms cubic-bezier(.22,.72,.18,1) both}
+html[data-home-cover=returning]::view-transition-new(root){z-index:2;animation:home-cover-lower 650ms cubic-bezier(.22,.72,.18,1) both}
+@keyframes home-cover-lift{from{transform:translateY(0)}to{transform:translateY(-100%)}}
+@keyframes home-cover-lower{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){
+  html[data-home-cover]::view-transition-old(root),html[data-home-cover]::view-transition-new(root){animation:none}
+}

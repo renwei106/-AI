@@ -1,0 +1,15 @@
+.shiyu-language-picker{position:relative;display:flex;align-items:center;flex:none;color:var(--ink)}
+.shiyu-language-trigger svg{display:block;width:18px;height:18px}
+.shiyu-language-menu{position:absolute;z-index:90;top:calc(100% + 10px);right:0;min-width:146px;padding:6px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 30px #0002}
+.shiyu-language-menu[hidden]{display:none}
+.shiyu-language-menu::before{content:"";position:absolute;left:0;right:0;top:-11px;height:11px}
+.shiyu-language-menu .shiyu-language-option{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:38px;margin:0;padding:9px 12px;border:0;border-radius:7px;background:transparent;color:var(--ink);font:13px/1.5 system-ui,sans-serif;text-align:left;white-space:nowrap;cursor:pointer}
+.shiyu-language-menu .shiyu-language-option:hover,.shiyu-language-menu .shiyu-language-option:focus-visible{background:var(--soft)}
+.shiyu-language-menu .shiyu-language-option[aria-checked=true]{color:var(--accent)}
+.shiyu-language-option:focus-visible,.shiyu-language-trigger:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.shiyu-language-check{font-size:14px;line-height:1}
+html:lang(en) body,html:lang(ja) body{font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif}
+html:not(:lang(zh-CN)) :is(dialog,.ops-body,.ops-notice-list){overflow-wrap:anywhere}
+html:not(:lang(zh-CN)) body[data-view=space] :is(.workspace-tools [data-link-settings],#space-atlas .at-view-picker>.at-quiet){width:212px}
+html:not(:lang(zh-CN)) .workspace-tools [data-link-settings]>span{font-size:11px}
+html:not(:lang(zh-CN)) #space-atlas .at-view-current>b{white-space:nowrap;font-size:10px}

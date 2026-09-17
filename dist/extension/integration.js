@@ -17,7 +17,7 @@
   function decorateWorkspace() {
     if (view !== 'space') return;
     const groupHost=document.querySelector('#groups');
-    if(groupHost&&!groupHost.dataset.laterScrollBound){groupHost.dataset.laterScrollBound='true';groupHost.addEventListener('wheel',e=>{if(innerWidth>760&&e.target.closest('.group'))e.stopPropagation();},{passive:true});}
+    if(groupHost&&!groupHost.dataset.laterScrollBound){groupHost.dataset.laterScrollBound='true';groupHost.addEventListener('wheel',e=>{const group=e.target.closest('.group');if(innerWidth>760&&group&&!(e.deltaY<0&&group.scrollTop<=2)){e.stopPropagation();gestureTotal=0;wheelBurstHandled=false;lastWheelAt=Date.now();if(e.deltaY>0)coverReturnArmed=0;}},{passive:true});}
     const actions = document.querySelector('.space-top-actions') || document.querySelector('.workspace-top');
     if (!actions || actions.querySelector('[data-space-inbox]')) return;
     const count = Array.isArray(prefs.extensionInbox) ? prefs.extensionInbox.length : 0;

@@ -522,7 +522,7 @@
      menu.onclick=event=>{const target=event.target.closest('[data-corner-target]'),b=event.target.closest('[data-bookmark-action]');if(!b&&!target)return;const ctx=source,gid=target?.dataset.cornerTarget;closeMenu();if(b?.dataset.bookmarkAction==='open'){run('open',ctx);return}authorize(ctx,()=>target?addToCorner(ctx,gid):run(b.dataset.bookmarkAction,ctx))};
      menu.onkeydown=event=>{const corner=menu.querySelector('[data-bookmark-action=corner]'),sub=event.target.closest('.bookmark-corner-targets');if(event.key==='ArrowRight'&&event.target===corner){event.preventDefault();showCornerTargets(corner,true);return}if(event.key==='ArrowLeft'&&sub){event.preventDefault();hideCornerTargets();corner.focus();return}const buttons=[...(sub||menu).querySelectorAll(sub?'button':':scope>[data-bookmark-action]')],at=buttons.indexOf(document.activeElement);if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();buttons[event.key==='Home'?0:event.key==='End'?buttons.length-1:(at+(event.key==='ArrowUp'?-1:1)+buttons.length)%buttons.length].focus()}};
    }
-   menu.innerHTML=[['open','打开网址'],['edit','修改编辑'],['corner','添加到我的一隅'],['move','移动位置'],['batch','批量移动网址'],...(ctx.atlas?[['batch-edit','批量修改网址']]:[]),['delete','删除']].map(([key,label])=>'<button type="button" role="menuitem" data-bookmark-action="'+key+'">'+(icons[key]||icons.edit)+'<span>'+label+'</span></button>').join('');
+   menu.innerHTML=[['open','打开网址'],['edit','修改编辑'],['corner','添加到我的一隅'],['move','移动至...'],['batch','批量移动网址'],...(ctx.atlas?[['batch-edit','批量修改网址']]:[]),['delete','删除']].map(([key,label])=>'<button type="button" role="menuitem" data-bookmark-action="'+key+'">'+(icons[key]||icons.edit)+'<span>'+label+'</span></button>').join('');
    const corner=menu.querySelector('[data-bookmark-action=corner]');corner.setAttribute('aria-haspopup','menu');corner.setAttribute('aria-controls','bookmark-corner-targets');corner.setAttribute('aria-expanded','false');corner.insertAdjacentHTML('beforeend','<i class="bookmark-submenu-arrow" aria-hidden="true">›</i>');corner.onpointerenter=()=>showCornerTargets(corner);
    for(const b of menu.querySelectorAll('[data-bookmark-action]:not([data-bookmark-action=corner])')){b.onpointerenter=hideCornerTargets;b.onfocus=hideCornerTargets}
    menu.hidden=false;menu.showPopover();button.setAttribute('aria-expanded','true');
@@ -562,7 +562,7 @@
  function selectionStep(d,items,selected,onNext){
    const panel=document.createElement('section');panel.className='bookmark-selection-step';
    panel.innerHTML='<div class="bookmark-batch-list"></div><div class="bookmark-selection-footer"><button type="button" data-select-page aria-pressed="false">全选本页</button><span data-page-count></span><span data-selection-count aria-live="polite"></span><div class="bookmark-batch-pagination"><button type="button" data-page-prev aria-label="上一页">‹</button><span data-page-number></span><button type="button" data-page-next aria-label="下一页">›</button></div><button type="button" class="primary" data-batch-next>下一步</button></div>';
-   d.querySelector('.dialog-heading').after(panel);let page=0;const pageSize=50,pages=Math.max(1,Math.ceil(items.length/pageSize));
+   d.querySelector('.dialog-heading').after(panel);let page=0,pages=1;const pageSize=50;
    function update(){
      const current=items.slice(page*pageSize,(page+1)*pageSize);
      const button=panel.querySelector('[data-select-page]'),count=current.filter(x=>selected.has(x)).length;button.setAttribute('aria-pressed',count===current.length&&count>0?'true':count>0?'mixed':'false');button.disabled=!current.length;
@@ -570,6 +570,7 @@
      panel.querySelector('[data-batch-next]').disabled=!selected.size;
    }
    function listing(){
+     pages=Math.max(1,Math.ceil(items.length/pageSize));page=Math.min(page,pages-1);
      panel.querySelector('.bookmark-batch-list').innerHTML=items.slice(page*pageSize,(page+1)*pageSize).map((item,i)=>'<label><input type="checkbox" value="'+(page*pageSize+i)+'" '+(selected.has(item)?'checked':'')+'><span><b>'+esc(item[0])+'</b><small>'+esc(item[1])+'</small></span></label>').join('')||'<p>当前分组暂无网址</p>';
      panel.querySelector('.bookmark-batch-list').scrollTop=0;
      panel.querySelector('[data-page-count]').textContent='共 '+items.length+' 条 · '+pages+' 页';panel.querySelector('[data-page-number]').textContent=(page+1)+' / '+pages;
@@ -578,7 +579,7 @@
    panel.querySelector('.bookmark-batch-list').onchange=e=>{const item=items[Number(e.target.value)];if(!item)return;e.target.checked?selected.add(item):selected.delete(item);update()};
    panel.querySelector('[data-select-page]').onclick=()=>{const current=items.slice(page*pageSize,(page+1)*pageSize),all=current.every(item=>selected.has(item)),scroll=panel.querySelector('.bookmark-batch-list').scrollTop;for(const item of current)all?selected.delete(item):selected.add(item);listing();panel.querySelector('.bookmark-batch-list').scrollTop=scroll};
    panel.querySelector('[data-page-prev]').onclick=()=>{page--;listing()};panel.querySelector('[data-page-next]').onclick=()=>{page++;listing()};
-   panel.querySelector('[data-batch-next]').onclick=()=>{if(selected.size)onNext()};listing();return panel;
+   panel.querySelector('[data-batch-next]').onclick=()=>{if(selected.size)onNext()};panel.refreshItems=()=>{page=0;listing()};listing();return panel;
  }
  function batchEditDialog(ctx){
    const d=createDialog('bookmark-batch-edit-dialog','第一步 · 选择网址'),items=[...ctx.g.items],selected=new Set([ctx.item]),drafts=new Map();d.classList.add('is-batch');
@@ -603,7 +604,7 @@
  }
  function moveDialog(ctx,batch){
    const d=createDialog('bookmark-move-dialog',batch?'批量移动网址':'移动位置'),items=[...ctx.g.items],selected=new Set([ctx.item]);let target={...ctx};d.classList.toggle('is-batch',batch);
-   d.insertAdjacentHTML('beforeend',(batch?'':'<p class="bookmark-action-note">选择新的分类分组，或调整在分组中的顺序。</p><p class="bookmark-moving-name">'+esc(ctx.item[0])+'</p>')+'<form><div class="destination-cascade bookmark-move-cascade"><label>空间<select name="space" aria-label="目标空间"></select></label><label>场景<select name="scene" aria-label="目标场景"></select></label><label>分组<select name="group" aria-label="目标分组"></select></label></div><label class="bookmark-move-position">放置位置<select name="position" aria-label="放置位置"></select></label><p class="edit-error" role="alert"></p><div class="bookmark-dialog-footer">'+(batch?'<button type="button" data-batch-back>上一步</button>':'<button type="button" data-action="close">取消</button>')+'<button type="submit" class="primary">确认移动</button></div></form>');
+   d.insertAdjacentHTML('beforeend',(batch?'':'<div class="bookmark-moving-card"><i>'+bookmarkMark(ctx.item)+'</i><span><b>'+esc(ctx.item[0])+'</b><small>'+esc(ctx.item[1])+'</small></span></div>')+'<form><div class="destination-cascade bookmark-move-cascade"><label>空间<select name="space" aria-label="目标空间"></select></label><label>场景<select name="scene" aria-label="目标场景"></select></label><label>分组<select name="group" aria-label="目标分组"></select></label></div><label class="bookmark-move-position">放置位置<select name="position" aria-label="放置位置"></select></label><p class="edit-error" role="alert"></p><div class="bookmark-dialog-footer">'+(batch?'<button type="button" data-batch-back>上一步</button>':'<button type="button" data-action="close">取消</button>')+'<button type="submit" class="primary">确认移动</button></div></form>');
    const form=d.querySelector('form'),select=name=>form.elements.namedItem(name),options=(list,current)=>list.map(x=>'<option value="'+esc(x.id)+'" '+(x===current?'selected':'')+'>'+esc(x.name)+'</option>').join('');
    function positions(){select('position').innerHTML='<option value="end">末尾</option><option value="start">最前面</option>';form.querySelector('[type=submit]').disabled=!selected.size||!target.g;enhanceControls()}
    function destinations(level){
@@ -617,6 +618,13 @@
    destinations('space');
    if(batch){
      const heading=d.querySelector('h2'),panel=selectionStep(d,items,selected,()=>{panel.hidden=true;form.hidden=false;heading.textContent='第二步 · 选择目标位置';positions();form.querySelector('select').focus()});
+     const filters=document.createElement('div');filters.className='destination-cascade bookmark-source-cascade';filters.innerHTML='<label>空间<select data-source-space aria-label="筛选空间"></select></label><label>场景<select data-source-scene aria-label="筛选场景"></select></label><label>分组<select data-source-group aria-label="筛选分组"></select></label>';panel.prepend(filters);
+     const source={...ctx},sourceSelect=name=>filters.querySelector('[data-source-'+name+']');
+     function sourceOptions(){sourceSelect('space').innerHTML=options(data,source.s);sourceSelect('scene').innerHTML=options(source.s.scenes,source.c);sourceSelect('group').innerHTML=options(source.c?.groups||[],source.g);enhanceControls();}
+     function sourceChanged(){ctx={...source,item:source.g?.items[0]};items.splice(0,items.length,...(source.g?.items||[]));selected.clear();panel.refreshItems();sourceOptions();}
+     sourceSelect('space').onchange=()=>{source.s=data.find(s=>s.id===sourceSelect('space').value);source.c=source.s.scenes[0];source.g=source.c?.groups[0];sourceChanged()};
+     sourceSelect('scene').onchange=()=>{source.c=source.s.scenes.find(c=>c.id===sourceSelect('scene').value);source.g=source.c?.groups[0];sourceChanged()};
+     sourceSelect('group').onchange=()=>{source.g=source.c.groups.find(g=>g.id===sourceSelect('group').value);sourceChanged()};sourceOptions();
      form.hidden=true;heading.textContent='第一步 · 选择网址';
      form.querySelector('[data-batch-back]').onclick=()=>{form.hidden=true;panel.hidden=false;heading.textContent='第一步 · 选择网址';panel.querySelector('[data-batch-next]').focus()};
    }
@@ -629,7 +637,7 @@
      d.close();refresh();toast('已移动 '+moving.length+' 个网址');
    })};d.showModal();
  }
- const previousEdit=editBookmark;editBookmark=function(index){const ctx={...context(),item:currentGroup().items[index]};previousEdit(index);const form=document.querySelector('#bookmark-editor-form');if(!form||!ctx.item)return;const button=document.createElement('button');button.type='button';button.className='bookmark-editor-delete';button.textContent='删除网址';button.onclick=()=>deleteDialog(ctx);form.append(button)};
+ const previousEdit=editBookmark;editBookmark=function(index){const ctx={...context(),item:currentGroup().items[index]};previousEdit(index);const form=document.querySelector('#bookmark-editor-form');if(!form||!ctx.item)return;const button=document.createElement('button');button.type='button';button.className='bookmark-editor-delete';button.textContent='删除网址';button.onclick=()=>deleteDialog(ctx);const footer=document.createElement('div');footer.className='bookmark-editor-footer';footer.append(button,form.querySelector('[type=submit]'));form.append(footer)};
  document.addEventListener('pointerdown',event=>{if(menu&&!menu.hidden&&!menu.contains(event.target)&&!anchor?.contains(event.target))closeMenu()},true);
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&menu&&!menu.hidden){event.preventDefault();event.stopImmediatePropagation();closeMenu(true)}},true);
  addEventListener('resize',()=>closeMenu());addEventListener('scroll',event=>{if(!menu?.contains(event.target))closeMenu()},true);
