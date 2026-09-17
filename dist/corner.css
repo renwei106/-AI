@@ -1,0 +1,486 @@
+/* Scoped addition: both original and new entries can be compared or rolled back. */
+#dock .dock.with-corner{display:flex;align-items:flex-end;justify-content:center;gap:26px}
+.space-dock-zone{display:flex;flex-direction:column;align-items:center}
+#dock [data-corner-relocated][hidden]{display:none!important}
+#dock .space-management:not(:has(button:not([hidden]))){display:none}
+#dock .dock.with-corner:not(:has(.space-dock-zone:hover)):not(:has(.space-dock-zone:focus-within)) .dock-options{opacity:0;visibility:hidden;pointer-events:none}
+#dock .corner-entry{min-width:88px;color:var(--ink);border:0;background:transparent;box-shadow:none;backdrop-filter:none;cursor:pointer}
+#dock .corner-entry-art{display:grid;place-items:center;height:44px;width:54px;color:var(--accent);transition:transform .3s}
+#dock .corner-entry-art svg{width:36px;height:36px}
+#dock .corner-entry:is(:hover,:focus-visible) .corner-entry-art{transform:translateY(-4px) rotate(-5deg)}
+#dock[data-dock-theme=flow] .corner-entry-art{color:var(--flow-ink,var(--ink))}
+.space-heading-controls{display:flex;align-items:center;gap:8px;width:100%;min-width:0}
+.corner-space-switch{display:flex;align-items:center;gap:8px;flex:1;min-width:0;padding:0;font:inherit;text-align:left}
+.corner-space-switch>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.corner-space-switch>svg{width:14px;height:14px;flex:none;color:var(--muted)}
+.corner-space-switch .space-detail-icon{display:grid;place-items:center;flex:none;width:21px;height:24px}
+.corner-space-switch .space-detail-icon svg{width:21px;height:21px}
+.space-heading-controls .space-mode-entry{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:8px}
+.space-heading-controls .space-mode-entry:hover,.corner-space-switch:hover>svg{background:var(--space-control-soft,var(--soft));color:var(--space-control-accent,var(--accent))}
+#corner-space-menu{position:fixed;z-index:210;width:260px;max-width:calc(100vw - 24px);padding:10px;border-radius:15px;background:var(--surface);color:var(--ink);box-shadow:0 12px 36px #0002;font:13px var(--font)}
+#corner-space-menu[hidden]{display:none}
+#corner-space-menu>p{margin:8px 10px 12px;color:var(--muted);font-size:11px}
+#corner-space-menu>div{max-height:45vh;overflow:auto}
+#corner-space-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:12px 10px;text-align:left;border-radius:8px}
+#corner-space-menu button>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#corner-space-menu svg{width:18px;height:18px}
+#corner-space-menu i{display:grid;place-items:center;width:22px}
+#corner-space-menu button:hover,#corner-space-menu button[aria-current=true]{background:var(--space-control-soft,var(--soft));color:var(--space-control-accent,var(--accent))}
+#corner-space-menu .corner-manage-spaces{margin-top:8px;background:var(--space-control-soft,var(--soft))}
+.corner-dialog{box-sizing:border-box;padding:30px;background:var(--surface);color:var(--ink);border:0;border-radius:24px;width:min(620px,calc(100vw - 32px));max-height:90dvh;overflow:auto;box-shadow:0 24px 90px #0002}
+.corner-dialog::backdrop{background:#11151c66;backdrop-filter:blur(9px)}
+body[data-dark=true] .corner-dialog .corner-toolbar button,body[data-dark=true] .corner-dialog .corner-card-add,body[data-dark=true] .corner-dialog .corner-card-cover>svg,body[data-dark=true] .corner-dialog .corner-empty-art,body[data-dark=true] #corner-space-menu button:is(:hover,[aria-current=true]),body[data-dark=true] .corner-editor-action button{color:color-mix(in srgb,var(--accent) 55%,var(--ink))}
+.corner-dialog .dialog-heading{align-items:flex-start;margin:0 0 24px;gap:18px}
+.corner-dialog h2{margin:0;font-size:25px;font-weight:500;letter-spacing:.06em}
+.corner-dialog .dialog-heading p{font-size:12px;color:var(--muted);margin:9px 0 0}
+.corner-dialog [data-corner-close]{flex:none;width:32px;height:32px;border-radius:50%;background:color-mix(in srgb,var(--ink) 5%,transparent);color:var(--ink);font:24px/1 sans-serif;display:grid;place-items:center}
+.corner-dialog .primary[data-corner-close]{width:auto;height:auto;border-radius:10px;font:13px var(--font);padding:12px 24px;background:var(--accent);color:var(--on-accent,#fff)}
+.corner-dialog button:not(:disabled){cursor:pointer}
+.corner-dialog button:disabled{opacity:.3;cursor:default}
+.corner-dialog button:focus-visible,.corner-dialog a:focus-visible,.corner-space-switch:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.corner-dialog .primary{border-radius:10px}
+#my-corner{width:min(1160px,calc(100vw - 64px));padding:34px 38px;overflow:hidden}
+.corner-body{max-height:calc(90dvh - 68px);overflow:auto;scrollbar-width:thin}
+.corner-toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:22px}
+.corner-toolbar button,.corner-card-add,.corner-editor-action button,#corner-new-group button{background:var(--space-control-soft,var(--soft));color:var(--space-control-accent,var(--accent));padding:10px 14px;border-radius:9px;font-size:12px}
+.corner-toolbar button:hover,.corner-card-add:hover,.corner-editor-action button:hover{background:color-mix(in srgb,var(--accent) 20%,var(--surface))}
+.corner-toolbar>span{margin-left:auto;font-size:11px;color:var(--muted)}
+.corner-empty{text-align:center;padding:34px 10px 50px}
+.corner-empty-art{display:grid;place-items:center;margin:0 auto 28px;width:105px;height:115px;color:var(--accent);transform:rotate(-8deg)}
+.corner-empty-art svg{width:90px;height:90px;stroke-width:.7}
+.corner-empty h3{font-size:23px;font-weight:400;letter-spacing:.06em;margin:0 0 16px}
+.corner-empty p{font-size:13px;line-height:2;color:var(--muted);margin:0 0 25px}
+.corner-empty small{display:block;font-size:11px;color:var(--muted);margin-top:20px;line-height:1.8}
+.corner-deck{display:flex;align-items:stretch;gap:22px;overflow-x:auto;scrollbar-width:thin;padding:14px 5px 26px;perspective:1200px;scroll-snap-type:x proximity}
+.corner-card{flex:0 0 286px;min-width:0;display:flex;flex-direction:column;max-height:480px;border-radius:19px;background:color-mix(in srgb,var(--accent) 5%,var(--surface));box-shadow:0 9px 20px #0000000a;overflow:hidden;scroll-snap-align:start;animation:corner-arrive .55s ease both,corner-float 9s ease-in-out .55s infinite;animation-delay:calc(var(--card-order)*50ms),.55s;transform:rotate(var(--card-tilt))}
+.corner-card:is(:hover,:focus-within){animation-play-state:running,paused}
+.corner-card:first-child{margin-left:auto}.corner-card:last-child{margin-right:auto}
+.corner-card-cover{position:relative;padding:22px 24px 20px;user-select:none;touch-action:pan-x;cursor:grab;background:color-mix(in srgb,var(--accent) 9%,var(--surface))}
+.corner-card-cover>span{font:10px monospace;letter-spacing:2px;color:var(--muted)}
+.corner-card-cover>svg{display:block;width:78px;height:78px;margin:5px auto 10px;color:var(--accent);stroke-width:.65}
+.corner-card-cover h3{font-size:19px;font-weight:500;letter-spacing:.04em;margin:0 0 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.corner-card-cover small{font-size:10px;color:var(--muted)}
+.corner-links{overflow-y:auto;scrollbar-width:thin;min-height:90px;flex:1;padding:10px 12px}
+.corner-link{position:relative;display:flex;align-items:center;flex-wrap:wrap;border-radius:9px;min-height:46px}
+.corner-link:hover{background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.corner-link>a{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:9px 5px;text-decoration:none;color:var(--ink);font-size:12px}
+.corner-link>a>span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.corner-link i,.corner-source>i{display:grid;place-items:center;width:26px;height:26px;flex:none;font-style:normal;color:var(--accent)}
+.corner-link i img,.corner-link i svg,.corner-source>i img,.corner-source>i svg{max-width:22px;max-height:22px;object-fit:contain}
+.corner-grip{width:20px;padding:0;color:var(--muted);opacity:.45;cursor:grab;touch-action:none}
+.corner-grip svg{width:14px;height:18px}
+.corner-link-tools{display:flex;align-items:center;gap:3px;flex-basis:100%;padding:0 4px 8px 20px}
+.corner-link-tools button{padding:4px;font-size:10px;color:var(--muted)}
+.corner-link-tools select{min-width:0;flex:1;width:50px;font-size:10px;padding:4px;margin:0;background:var(--surface);color:var(--ink);border:0;border-radius:4px}
+.corner-card-empty{font-size:12px;line-height:1.8;color:var(--muted);text-align:center;padding:15px}
+.corner-card-add{margin:2px 18px 18px;background:transparent;text-align:left;padding:6px;font-size:11px}
+.corner-footnote{font-size:10px;color:var(--muted);text-align:center;margin:12px 0 0}
+.corner-dialog label{display:block;font-size:12px;margin:0 0 15px}
+.corner-dialog input:not([type=checkbox]),.corner-dialog select{box-sizing:border-box;width:100%;padding:11px 12px;border:0;border-radius:8px;margin-top:8px;background:color-mix(in srgb,var(--ink) 5%,var(--surface));color:var(--ink);font:13px var(--font);outline-offset:2px}
+.corner-source-list{max-height:38dvh;overflow:auto;margin:20px 0}
+.corner-source-list .corner-source{display:flex;align-items:center;gap:12px;margin:0;padding:12px 8px;border-radius:9px;cursor:pointer}
+.corner-source:hover{background:var(--soft)}
+.corner-source input{width:15px;height:15px;flex:none;accent-color:var(--accent)}
+.corner-source>span{min-width:0}
+.corner-source small{display:block;font-size:10px;color:var(--muted);margin-top:5px}
+.corner-picker-note,.corner-group-note{font-size:11px;line-height:1.8;color:var(--muted)}
+.corner-group-list>div{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.corner-group-list input{min-width:0;flex:1;margin:0!important}
+.corner-group-list button{padding:6px;font-size:12px;flex:none}
+#corner-new-group{display:flex;align-items:center;gap:8px;margin:22px 0}
+#corner-new-group input{margin:0;min-width:0;flex:1}
+#corner-new-group button{white-space:nowrap}
+.corner-editor-action{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}
+.corner-editor-action button{display:flex;align-items:center;gap:7px}
+.corner-editor-action svg{width:19px;height:19px}
+.corner-editor-action small{color:var(--muted);font-size:11px}
+.corner-dragging .corner-card{animation:none;scroll-snap-align:none}
+.corner-drag-ghost{position:fixed!important;z-index:1000;pointer-events:none;opacity:.8;max-height:180px!important;overflow:hidden;animation:none!important;box-shadow:0 16px 30px #0002;background:var(--surface)}
+@keyframes corner-arrive{from{opacity:0;translate:0 16px}to{opacity:1;translate:0 0}}
+@keyframes corner-float{0%,100%{translate:0 0}50%{translate:0 -4px}}
+@media(max-width:760px){#dock .dock.with-corner{gap:20px}#my-corner{width:calc(100vw - 24px);padding:24px 18px}.corner-body{max-height:calc(90dvh - 48px)}.corner-card{flex-basis:252px}.corner-dialog{padding:24px 20px}.corner-empty h3{font-size:19px}.corner-empty{padding:20px 0 30px}.corner-toolbar>span{display:none}.space-heading-controls{gap:3px}.corner-space-switch{gap:4px}.corner-space-switch .space-detail-icon{display:none}.space-heading-controls .space-mode-entry{width:26px}.corner-deck{gap:14px}.corner-toolbar{gap:6px}.corner-toolbar button{padding:9px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){.corner-card{animation:none}.corner-entry-art{transition:none!important}.corner-dialog::backdrop{backdrop-filter:none}}
+
+/* The collection is a transparent stage over the current page, not a panel. */
+#my-corner{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;padding:0;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:hidden;color:var(--ink)}
+#my-corner::backdrop{background:color-mix(in srgb,var(--bg) 32%,transparent);backdrop-filter:blur(18px) saturate(.75)}
+#my-corner .corner-body{max-height:none;height:100%;overflow:visible}
+#my-corner .corner-stage{position:absolute;inset:clamp(48px,9vh,110px) 0 155px;display:flex;align-items:center;justify-content:center;perspective:1800px;--drift-x:0px;--drift-y:0px}
+#my-corner .corner-deck{box-sizing:border-box;width:min(1240px,calc(100vw - 156px));height:100%;max-height:740px;display:flex;align-items:center;gap:28px;padding:22px 12px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-snap-type:x proximity;perspective:1600px;transform:translate3d(var(--drift-x),var(--drift-y),0);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+#my-corner .corner-deck::-webkit-scrollbar{display:none}
+#my-corner .corner-card{position:relative;flex:0 0 calc((100% - 56px)/3);height:calc(100% - 12px);max-height:680px;min-width:0;display:block;border:0;border-radius:22px;background:none;box-shadow:none;overflow:visible;scroll-snap-align:start;transform:rotate(var(--card-tilt)) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg));transform-style:preserve-3d;transition:transform .55s cubic-bezier(.2,.8,.2,1);animation:corner-stage-float 7s ease-in-out infinite;animation-delay:calc(var(--card-order)*-.8s)}
+#my-corner .corner-card:first-child{margin-left:auto}#my-corner .corner-card:last-child{margin-right:auto}
+#my-corner .corner-card:is(:hover,:focus-within){animation-play-state:running}
+.corner-card-turn{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.72,.22,1)}
+.corner-card.is-flipped .corner-card-turn{transform:rotateY(180deg)}
+.corner-card-front,.corner-card-back{box-sizing:border-box;position:absolute;inset:0;display:flex;flex-direction:column;border-radius:22px;padding:0;background:color-mix(in srgb,var(--accent) 3%,var(--surface));box-shadow:0 18px 40px #00000012;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+.corner-card-front{cursor:pointer;transform:rotateY(0deg)}
+.corner-card-back{transform:rotateY(180deg);cursor:default;background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+#my-corner .corner-card-cover{position:relative;padding:24px 25px 18px;background:transparent;min-height:112px;box-sizing:border-box;flex:none;cursor:pointer}
+#my-corner .corner-card-number{font:10px monospace;letter-spacing:2px;color:var(--muted);opacity:.65;display:block;margin-bottom:14px}
+.corner-card-logo{position:absolute;right:24px;top:27px;color:var(--accent);display:grid;place-items:center;width:42px;height:42px}
+.corner-card-logo svg{width:38px;height:38px;stroke-width:1}
+#my-corner .corner-card-cover h3{font-size:26px;letter-spacing:.04em;font-weight:500;margin:0 42px 6px 0;line-height:1.35}
+#my-corner .corner-card-cover small{font-size:11px}
+#my-corner .corner-links{flex:1;min-height:0;padding:0 22px;overflow:auto;scrollbar-width:thin}
+#my-corner .corner-link{height:43px;min-height:43px;box-sizing:border-box;border-radius:7px;border-bottom:1px dotted color-mix(in srgb,var(--accent) 15%,transparent)}
+#my-corner .corner-link>a{height:100%;box-sizing:border-box;font:14px var(--font);padding:6px 4px;gap:10px;cursor:pointer}
+#my-corner .corner-link>a small{font:11px sans-serif;color:var(--muted);opacity:.45}
+#my-corner .corner-link i{width:24px;height:24px}
+#my-corner .corner-link i svg,#my-corner .corner-link i img{max-width:21px;max-height:21px}
+#my-corner .corner-grip{width:16px;opacity:0;flex:none;transition:opacity .2s}
+#my-corner .corner-link:is(:hover,:focus-within) .corner-grip{opacity:.6}
+.corner-flip-hint{padding:16px 24px 22px;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted);opacity:.6;flex:none}
+.corner-flip-hint svg{width:17px;height:17px}
+#my-corner .corner-card-empty{height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 0 30px;margin:0;text-align:center}
+.corner-empty-lines{width:100%;height:150px;display:grid;place-items:center;opacity:.25;color:var(--accent)}
+.corner-empty-lines svg{width:115px;height:115px;stroke-width:.4}
+#my-corner .corner-card-empty p{font-size:14px;margin:20px 0 12px;font-weight:400;color:var(--ink)}
+#my-corner .corner-card-empty small{font-size:11px;line-height:1.9;color:var(--muted)}
+.corner-deck-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:4;display:grid;place-items:center;width:38px;height:52px;border-radius:20px;color:var(--ink);background:color-mix(in srgb,var(--surface) 60%,transparent);backdrop-filter:blur(8px);transition:background .2s}
+.corner-deck-arrow.previous{left:22px}.corner-deck-arrow.next{right:22px}
+.corner-deck-arrow svg{width:20px;height:20px}
+.corner-deck-arrow[hidden]{display:none}
+.corner-new-card{position:absolute;top:-28px;right:84px;bottom:auto;left:auto;display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:20px;font-size:11px;color:var(--ink);background:color-mix(in srgb,var(--surface) 65%,transparent);backdrop-filter:blur(10px)}
+.corner-new-card svg{width:15px;height:15px}
+.corner-first-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:25px;width:340px;height:90%;margin:auto;background:var(--surface);color:var(--ink);border-radius:22px}
+.corner-first-card svg{width:60px;height:60px;color:var(--accent)}
+#my-corner .corner-close-entry{z-index:8;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;min-width:0;margin:0;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;opacity:1!important;transition:opacity .3s;cursor:pointer}
+.corner-close-symbol{display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;min-width:46px;min-height:46px;aspect-ratio:1;box-sizing:border-box;border-radius:50%;background:color-mix(in srgb,var(--surface) 85%,transparent);color:var(--ink);backdrop-filter:blur(12px);transition:transform .25s}
+.corner-close-symbol svg{width:23px;height:23px}
+.corner-close-entry:hover .corner-close-symbol{transform:rotate(90deg)}
+#my-corner .corner-close-entry .dock-label{color:var(--ink);font:10px var(--font);letter-spacing:2px}
+.corner-back-header{display:flex;align-items:center;justify-content:space-between;padding:22px 22px 17px;flex:none;font-size:12px;color:var(--muted)}
+.corner-back-header button{display:flex;align-items:center;gap:4px;color:var(--ink);padding:5px;font-size:12px}
+.corner-back-header svg{width:15px;height:15px}
+.corner-back-scroll{flex:1;min-height:0;overflow:auto;padding:0 22px;scrollbar-width:thin}
+#my-corner .corner-back-scroll label{font-size:11px;margin-bottom:18px;color:var(--muted)}
+#my-corner .corner-back-scroll input:not([type=checkbox]){font-size:13px;padding:10px;margin-top:7px;background:color-mix(in srgb,var(--ink) 5%,var(--surface));color:var(--ink)}
+.corner-icon-label{font-size:11px;color:var(--muted);margin-bottom:10px}
+.corner-icon-choices{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:22px}
+.corner-icon-choices button{display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:color-mix(in srgb,var(--accent) 5%,var(--surface));color:var(--ink)}
+.corner-icon-choices button[aria-pressed=true]{background:color-mix(in srgb,var(--accent) 18%,var(--surface))}
+.corner-icon-choices svg{width:24px;height:24px}
+.corner-back-section{display:flex;align-items:center;justify-content:space-between;gap:5px;margin:4px 0 15px;font-size:11px}
+.corner-back-section b{font-weight:500}.corner-back-section button{font-size:11px;padding:5px;color:var(--ink)}
+.corner-edit-link{padding:10px 0;border-bottom:1px dotted color-mix(in srgb,var(--ink) 15%,transparent);font-size:12px}
+.corner-edit-link>span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:7px}
+.corner-edit-link>div{display:flex;align-items:center;gap:7px}.corner-edit-link button{flex:none;padding:3px 7px;color:var(--muted)}
+#my-corner .corner-edit-link select{margin:0;padding:5px;min-width:0;font-size:10px}
+.corner-edit-links>p,.corner-inline-sources>p{font-size:11px;line-height:1.8;color:var(--muted)}
+.corner-back-footer{display:flex;justify-content:space-between;align-items:center;padding:19px 22px;flex:none;font-size:10px;color:var(--muted)}
+.corner-back-footer button{font-size:11px;color:var(--muted);padding:5px 0}.corner-back-footer button:hover{color:var(--ink)}
+.corner-inline-sources{max-height:210px;overflow:auto;scrollbar-width:thin;margin:10px 0}
+#my-corner .corner-inline-sources label{display:flex;align-items:center;gap:8px;margin:0;padding:10px 0;color:var(--ink);font-size:12px;cursor:pointer}
+.corner-inline-sources input{width:14px;height:14px;flex:none;accent-color:var(--accent)}
+.corner-inline-sources label span{min-width:0}.corner-inline-sources small{display:block;font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px;margin-top:4px}
+.corner-save-choices,.corner-direct form>button{padding:10px 12px;border-radius:8px;background:color-mix(in srgb,var(--accent) 16%,var(--surface));font-size:11px;color:var(--ink);width:100%}
+.corner-direct{margin-top:20px;font-size:11px;color:var(--muted)}.corner-direct summary{cursor:pointer;padding:8px 0}
+.corner-direct form>button{margin-top:12px}.corner-direct form small{display:block;line-height:1.8;margin-top:6px}
+.corner-delete-confirm{position:absolute;inset:auto 12px 12px;border-radius:14px;padding:20px;background:var(--surface);box-shadow:0 -10px 35px #0002;color:var(--ink)}
+.corner-delete-confirm[hidden]{display:none}.corner-delete-confirm p{font-size:14px;margin:0 0 10px}.corner-delete-confirm small{font-size:11px;line-height:1.8;color:var(--muted);display:block}.corner-delete-confirm>div{display:flex;gap:15px;justify-content:flex-end;margin-top:15px}.corner-delete-confirm button{padding:8px 12px;font-size:12px;border-radius:7px;background:var(--soft)}
+body[data-dark=true] #my-corner .corner-card-logo{color:color-mix(in srgb,var(--accent) 55%,var(--ink))}
+#my-corner.corner-dragging .corner-card{animation:none}
+#my-corner .corner-drag-ghost{height:180px!important;max-height:180px!important;flex:none;animation:none!important;translate:0 0}
+@keyframes corner-stage-float{0%,100%{translate:0 0}50%{translate:0 -9px}}
+@media(min-width:761px) and (max-height:820px){#my-corner .corner-stage{top:32px;bottom:136px}#my-corner .corner-card-cover{min-height:98px;padding:17px 22px 12px}#my-corner .corner-card-cover h3{font-size:23px}.corner-card-logo{top:20px}#my-corner .corner-card-number{margin-bottom:8px}#my-corner .corner-link{height:39px;min-height:39px}.corner-flip-hint{padding:11px 22px 15px}}
+@media(max-width:760px){#my-corner .corner-stage{top:42px;bottom:150px}#my-corner .corner-deck{width:calc(100vw - 36px);padding:16px 10px;gap:22px}#my-corner .corner-card{flex-basis:calc(100% - 20px);height:calc(100% - 12px)}.corner-deck-arrow{width:27px;height:38px}.corner-deck-arrow.previous{left:4px}.corner-deck-arrow.next{right:4px}.corner-new-card{top:-30px;right:22px;bottom:auto}#my-corner .corner-card-cover{min-height:105px;padding:20px 22px 13px}#my-corner .corner-card-cover h3{font-size:24px}#my-corner .corner-card-number{margin-bottom:8px}#my-corner .corner-link{height:38px;min-height:38px}#my-corner .corner-link>a{font-size:13px}.corner-flip-hint{padding:12px 22px 16px}#my-corner .corner-grip{opacity:.35}.corner-card-front,.corner-card-back{border-radius:20px}}
+@media(prefers-reduced-motion:reduce){#my-corner .corner-card{animation:none}#my-corner .corner-deck,.corner-card-turn,#my-corner .corner-card{transition:none}#my-corner::backdrop{backdrop-filter:blur(18px)}}
+
+/* Centered fan: the same cards move between discrete positions. */
+#my-corner .corner-stage{top:clamp(125px,15vh,165px)}
+#my-corner .corner-stage-heading{position:absolute;left:max(68px,calc((100vw - 1140px)/2));top:-74px;pointer-events:none}
+#my-corner .corner-stage-heading h2{font-size:25px;letter-spacing:.1em}
+#my-corner .corner-stage-heading p{margin:9px 0 0;font-size:11px;color:var(--muted)}
+#my-corner .corner-deck{position:relative;display:block;width:min(1240px,calc(100vw - 96px));padding:0;overflow:visible;scroll-snap-type:none;transform:none;perspective:none;touch-action:pan-y}
+#my-corner .corner-card{position:absolute;left:50%;top:50%;margin:0;flex:none;height:calc(100% - 45px);transform:translate(-50%,-50%) translate3d(var(--fan-x,0px),var(--fan-y,0px),0) rotate(var(--fan-angle,0deg)) scale(var(--fan-scale,1)) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg));transition:transform .7s cubic-bezier(.22,.8,.22,1),opacity .45s,filter .45s;will-change:transform;opacity:1}
+#my-corner .corner-card:first-child,#my-corner .corner-card:last-child{margin:0}
+#my-corner .corner-card.is-away{opacity:0;pointer-events:none}
+#my-corner.corner-fast .corner-card{transition-duration:.2s,.2s,.2s}
+#my-corner.corner-editing .corner-card:not(.is-center):not(.is-away){opacity:.3;filter:saturate(.55)}
+#my-corner.corner-editing .corner-card.is-center{animation-play-state:paused}
+#my-corner .corner-card.is-center .corner-card-back{background:color-mix(in srgb,var(--surface) 96%,var(--ink));box-shadow:0 22px 54px #0000001a}
+#my-corner .corner-card-logo{border-radius:12px;background:color-mix(in srgb,var(--accent) 14%,var(--surface));color:color-mix(in srgb,var(--accent) 72%,var(--ink));width:46px;height:46px;cursor:pointer}
+#my-corner .corner-card-logo svg{width:29px;height:29px;stroke-width:1.5}
+#my-corner .corner-grip{cursor:grab}
+#my-corner .corner-grip:active,#my-corner.corner-dragging,#my-corner.corner-dragging *{cursor:grabbing}
+#my-corner .corner-link{flex-wrap:nowrap}
+#my-corner .corner-link-remove{display:grid;place-items:center;flex:none;width:26px;height:28px;padding:4px;border-radius:6px;opacity:0;color:var(--muted);transition:opacity .2s,background .2s}
+#my-corner .corner-link-remove svg{width:17px;height:17px}
+#my-corner .corner-link:is(:hover,:focus-within) .corner-link-remove{opacity:1}
+#my-corner .corner-link-remove:hover{color:var(--ink);background:color-mix(in srgb,var(--accent) 15%,transparent)}
+#my-corner .corner-icon-gallery{display:flex;align-items:center;gap:5px;margin-bottom:24px}
+#my-corner .corner-icon-choices{display:grid;grid-template-rows:repeat(2,40px);grid-auto-columns:40px;grid-auto-flow:column;gap:7px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;padding:3px;margin:0}
+#my-corner .corner-icon-choices button{width:40px;height:40px}
+#my-corner .corner-icon-choices button[aria-pressed=true]{color:var(--ink);background:color-mix(in srgb,var(--accent) 25%,var(--surface));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 45%,transparent)}
+#my-corner .corner-icon-arrow{flex:none;width:18px;height:38px;font:22px sans-serif;color:var(--muted)}
+#my-corner .corner-icon-arrow:hover{color:var(--ink)}
+#my-corner .corner-sort{margin:0;padding:0;border:0;min-width:0}
+#my-corner .corner-sort legend{font-size:11px;color:var(--muted);margin-bottom:10px}
+#my-corner .corner-sort>div{display:flex;gap:3px;padding:4px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent)}
+#my-corner .corner-sort button{flex:1;padding:10px 0;border-radius:7px;font-size:12px;color:var(--muted)}
+#my-corner .corner-sort button[aria-pressed=true]{background:var(--surface);color:var(--ink)}
+#my-corner .corner-sort small{display:block;margin-top:10px;font-size:10px;line-height:1.8;color:var(--muted)}
+#my-corner .corner-new-card{top:-65px;right:max(68px,calc((100vw - 1140px)/2))}
+#my-corner .corner-deck-arrow{z-index:15}
+#my-corner .corner-drag-ghost{left:0;top:0;transform:none!important;pointer-events:none!important;opacity:.8!important;z-index:30!important}
+@media(min-width:761px) and (max-height:820px){#my-corner .corner-stage{top:105px}#my-corner .corner-stage-heading{top:-67px}}
+@media(max-width:760px){#my-corner .corner-stage{top:108px;bottom:132px}#my-corner .corner-stage-heading{left:26px;top:-72px}#my-corner .corner-stage-heading h2{font-size:21px}#my-corner .corner-stage-heading p{font-size:10px}#my-corner .corner-deck{width:calc(100vw - 36px);padding:0}#my-corner .corner-new-card{top:-65px;right:22px}#my-corner .corner-card{height:calc(100% - 34px)}#my-corner .corner-link-remove{opacity:.6}}
+@media(prefers-reduced-motion:reduce){#my-corner .corner-card{animation:none;transition:none}}
+
+/* Responsive open row, with shallow layers only at the outer edges. */
+#my-corner{--muted:color-mix(in srgb,var(--ink) 78%,var(--surface))}
+#my-corner .corner-deck{width:calc(100vw - 96px);max-width:none}
+#my-corner .corner-card-cover{display:grid;grid-template-columns:minmax(0,1fr) 46px;grid-template-rows:auto auto auto;column-gap:14px;align-items:center}
+#my-corner .corner-card-number{grid-column:1 / -1;margin-bottom:12px;opacity:1;font-size:11px}
+#my-corner .corner-card-cover h3{grid-column:1;grid-row:2;margin:0;font-size:24px;line-height:1.4}
+#my-corner .corner-card-cover small{grid-column:1;grid-row:3;margin-top:6px;color:var(--muted);font-size:12px}
+#my-corner .corner-card-logo{position:static;grid-column:2;grid-row:2;align-self:center}
+#my-corner .corner-card-front,#my-corner .corner-card-back{background:var(--corner-face,var(--surface))}
+#my-corner .corner-back-header,#my-corner .corner-back-scroll label,#my-corner .corner-sort legend{font-size:13px;color:var(--ink)}
+#my-corner .corner-back-scroll input:not([type=checkbox]){font-size:14px}
+#my-corner .corner-flip-hint{font-size:11px;opacity:1;color:var(--muted)}
+#my-corner .corner-back-footer,#my-corner .corner-sort small{font-size:11px;color:var(--muted)}
+#my-corner .corner-link>a small{display:grid;place-items:center;opacity:1;color:var(--muted)}
+#my-corner .corner-link>a small svg{width:15px;height:15px}
+#my-corner .corner-empty-lines{opacity:.6}
+#my-corner .corner-card-empty small{font-size:12px}
+#my-corner .corner-appearance-tabs{display:flex;gap:22px;margin:0 0 14px;flex:none}
+#my-corner .corner-appearance-tabs button{font-size:13px;padding:5px 0 8px;color:var(--muted);border-bottom:2px solid transparent}
+#my-corner .corner-appearance-tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
+#my-corner .corner-icon-choices{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:none;grid-auto-columns:auto;grid-auto-flow:row;gap:7px;padding:3px;margin:0 0 22px;overflow:visible}
+#my-corner .corner-icon-choices button{width:100%;height:37px;color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,var(--surface))}
+#my-corner .corner-icon-choices svg{width:23px;height:23px;stroke-width:1.6}
+#my-corner .corner-color-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:22px}
+#my-corner .corner-color-options button{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;padding:10px 4px;border-radius:9px;color:var(--ink);background:color-mix(in srgb,var(--ink) 5%,var(--surface));font-size:11px}
+#my-corner .corner-color-options button[aria-pressed=true]{box-shadow:inset 0 0 0 1.5px var(--accent)}
+#my-corner .corner-color-options i{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;font-style:normal}
+#my-corner .corner-color-options i svg{width:19px;height:19px}
+#my-corner .corner-theme-swatch{background:linear-gradient(135deg,var(--surface) 50%,var(--accent) 50%);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 25%,transparent)}
+#my-corner .corner-member-badge{position:absolute;right:4px;top:4px;display:grid;place-items:center;color:var(--member-accent,var(--ink))}
+#my-corner .corner-member-badge svg{width:13px;height:13px}
+#my-corner .corner-custom-color{position:absolute;opacity:0;width:1px!important;height:1px;padding:0!important;pointer-events:none}
+#my-corner [role=tabpanel][hidden]{display:none}
+#my-corner.corner-editing .corner-card{animation-play-state:paused}
+#my-corner.corner-editing .corner-deck-arrow{opacity:0;pointer-events:none}
+#my-corner .corner-deck-arrow{z-index:30}
+#my-corner .corner-add-card>button{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;width:100%;height:100%;padding:24px;border:1.5px dashed color-mix(in srgb,var(--ink) 40%,transparent);border-radius:22px;background:color-mix(in srgb,var(--surface) 70%,transparent);color:var(--ink)}
+#my-corner .corner-add-card>button>svg{width:36px;height:36px;stroke-width:1.2}
+#my-corner .corner-add-card>button>span{font-size:19px}
+#my-corner .corner-add-card>button>small{font-size:12px;color:var(--muted)}
+#my-corner .corner-add-card>button:hover{background:color-mix(in srgb,var(--surface) 88%,transparent)}
+@media(max-width:760px){#my-corner .corner-deck{width:calc(100vw - 32px)}#my-corner .corner-icon-choices{grid-template-columns:repeat(5,minmax(0,1fr))}}
+
+/* Crisp UI type and flat faces once the flip has finished. */
+#my-corner{font-family:var(--font);font-synthesis:none;text-shadow:none;--muted:color-mix(in srgb,var(--ink) 85%,var(--surface))}
+#my-corner button,#my-corner input{font-family:var(--font)}
+#my-corner .corner-card{will-change:auto}
+#my-corner .corner-card.is-settled .corner-card-turn{transform:none;transform-style:flat;transition:none}
+#my-corner .corner-card.is-settled .corner-card-front,#my-corner .corner-card.is-settled .corner-card-back{transform:none;backface-visibility:visible}
+#my-corner .corner-card.is-settled:not(.is-flipped) .corner-card-back,#my-corner .corner-card.is-settled.is-flipped .corner-card-front{visibility:hidden;pointer-events:none}
+#my-corner .corner-card.is-center .corner-card-back{background:color-mix(in srgb,var(--surface) 90%,var(--ink));opacity:1}
+#my-corner.corner-editing .corner-card:not(.is-center):not(.is-away){opacity:.62;filter:none}
+#my-corner .corner-card-cover h3{font-weight:500}
+#my-corner .corner-back-footer,#my-corner .corner-flip-hint,#my-corner .corner-sort small{font-size:12px}
+#my-corner .corner-back-header,#my-corner .corner-back-header button,#my-corner .corner-sort button{font-size:13px}
+#my-corner .corner-card-logo svg{width:30px;height:30px;stroke-width:1.6}
+#my-corner .corner-follow-icon{grid-column:1 / -1;width:100%;font-size:12px;margin-bottom:3px}
+#my-corner .corner-icon-choices .corner-follow-icon[aria-pressed=true]{background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+
+/* One shared carousel position; pointer actions never restart a card animation. */
+#my-corner.corner-animating .corner-card{transition-property:opacity;transition-duration:.15s;animation-play-state:paused}
+#my-corner.corner-dragging .corner-card{animation:corner-stage-float 7s ease-in-out infinite;animation-delay:calc(var(--card-order)*-.8s);animation-play-state:paused;transition:transform .24s cubic-bezier(.2,.75,.25,1),opacity .2s}
+#my-corner .corner-held-card{z-index:60!important;transition:none!important;pointer-events:none;cursor:grabbing;opacity:1!important}
+#my-corner .corner-ref-ghost{position:fixed;z-index:65;pointer-events:none;margin:0;height:43px;min-height:43px;box-sizing:border-box;background:var(--surface);color:var(--ink);border-radius:7px;box-shadow:0 6px 16px #0002}
+#my-corner .corner-held-ref{opacity:.35}
+#my-corner .corner-card-front:hover,#my-corner .corner-card-back:hover{animation-play-state:inherit}
+
+/* One original themed dock symbol, opening the common collection. */
+#dock .corner-unified .dock-options[hidden]{display:none!important}
+#dock .corner-dock-preview{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);padding:18px 20px 24px;box-sizing:border-box;border-radius:18px;background:var(--surface);color:var(--ink);box-shadow:0 12px 32px #0002;visibility:hidden;pointer-events:none;z-index:5}
+#dock .corner-unified.corner-peeking .corner-dock-preview{visibility:visible;pointer-events:auto}
+#dock .corner-dock-preview>p{font-size:12px;margin:0 0 16px;text-align:left;color:var(--muted)}
+#dock .corner-peek-rail{display:flex;align-items:center;gap:6px;min-width:0;max-width:min(760px,calc(100vw - 72px))}
+#dock .corner-peek-groups{display:flex;gap:12px;min-width:0;max-width:min(680px,calc(100vw - 72px));overflow:auto;scrollbar-width:none}
+#dock .corner-peek-groups::-webkit-scrollbar{display:none}
+#dock .corner-peek-groups button{display:flex;flex-direction:column;align-items:center;gap:10px;width:max-content;min-width:82px;max-width:220px;flex:none;padding:10px 12px;border-radius:10px;color:var(--ink)}
+#dock .corner-peek-arrow{display:grid;place-items:center;flex:0 0 24px;width:24px;height:32px;padding:4px;border-radius:7px;color:var(--ink)}
+#dock .corner-peek-arrow svg{width:16px;height:16px}
+#dock .corner-peek-arrow:disabled{opacity:.3;cursor:default}
+#dock .corner-peek-arrow:not(:disabled):hover{background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+#dock .corner-peek-arrow[hidden]{display:none}
+#dock .corner-peek-groups button:hover{background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+#dock .corner-peek-groups i{display:grid;place-items:center;width:38px;height:38px;color:var(--accent)}
+#dock .corner-peek-groups svg{width:32px;height:32px}
+#dock .corner-peek-groups span{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#my-corner .corner-add-card>button>.corner-member-badge{position:static;font-size:inherit}
+#my-corner .corner-add-card>button>.corner-member-badge svg{width:22px;height:22px}
+
+/* Theme materials stay behind the same readable links and editing controls. */
+#my-corner[data-corner-theme=music] .corner-card-front{border-radius:7px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 26%,var(--corner-face,var(--surface))) 0 9px,transparent 9px),radial-gradient(circle at 100% 0,color-mix(in srgb,var(--accent) 18%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)) 65%)}
+#my-corner[data-corner-theme=music] .corner-card-cover{background:repeating-radial-gradient(circle at 85% -35%,transparent 0 8px,color-mix(in srgb,var(--ink) 7%,transparent) 9px 10px,transparent 11px 15px);border-bottom:1px solid color-mix(in srgb,var(--ink) 12%,transparent)}
+#my-corner[data-corner-theme=music] .corner-card-logo{border-radius:50%;background:repeating-radial-gradient(circle,var(--corner-face,var(--surface)) 0 4px,color-mix(in srgb,var(--ink) 20%,var(--corner-face,var(--surface))) 5px 6px);box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 12%,transparent)}
+#my-corner[data-corner-theme=paper] .corner-card-front{border-radius:3px;background:linear-gradient(90deg,transparent 49.8%,color-mix(in srgb,var(--ink) 4%,transparent) 50%,transparent 50.2%),var(--corner-face,var(--surface));box-shadow:4px 5px 0 color-mix(in srgb,var(--corner-face,var(--surface)) 90%,var(--ink)),0 12px 32px #0001}
+#my-corner[data-corner-theme=paper] .corner-card-cover{border-top:3px double color-mix(in srgb,var(--ink) 40%,transparent);border-bottom:3px double color-mix(in srgb,var(--ink) 40%,transparent);margin:18px 20px 0;padding:10px 5px 16px}
+#my-corner[data-corner-theme=paper] .corner-link{border-bottom-style:dashed}
+#my-corner[data-corner-theme=reading] .corner-card-front{border-radius:4px 18px 18px 4px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 30%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)) 9px,color-mix(in srgb,var(--ink) 10%,var(--corner-face,var(--surface))) 12px,var(--corner-face,var(--surface)) 17px)}
+#my-corner[data-corner-theme=cosmos] .corner-card-front{background:radial-gradient(ellipse at 80% 0,color-mix(in srgb,var(--accent) 24%,var(--corner-face,var(--surface))),transparent 65%),var(--corner-face,var(--surface))}
+#my-corner[data-corner-theme=cosmos] .corner-card-cover{background:repeating-radial-gradient(ellipse at 100% -35%,transparent 0 35px,color-mix(in srgb,var(--accent) 14%,transparent) 36px 37px,transparent 38px 58px)}
+#my-corner[data-corner-theme=flow] .corner-card-front{background:radial-gradient(ellipse at 0 100%,color-mix(in srgb,var(--accent) 16%,var(--corner-face,var(--surface))),transparent 60%),var(--corner-face,var(--surface))}
+#my-corner[data-corner-theme=poly] .corner-card-cover{background:conic-gradient(from 30deg at 85% 40%,transparent 0 70deg,color-mix(in srgb,var(--accent) 10%,transparent) 70deg 150deg,transparent 150deg 240deg,color-mix(in srgb,var(--accent) 6%,transparent) 240deg)}
+#my-corner[data-corner-theme=rain] .corner-card-cover{background:repeating-linear-gradient(105deg,transparent 0 24px,color-mix(in srgb,var(--accent) 9%,transparent) 25px 26px,transparent 27px 43px)}
+#my-corner[data-corner-theme=flip] .corner-card-cover{border-bottom:1px solid color-mix(in srgb,var(--ink) 18%,transparent);background:linear-gradient(color-mix(in srgb,var(--ink) 4%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)))}
+#my-corner:is([data-corner-theme=cinema],[data-corner-theme=projection]) .corner-card-front{border-radius:8px;background:linear-gradient(90deg,color-mix(in srgb,var(--ink) 10%,var(--corner-face,var(--surface))) 0 7px,transparent 7px calc(100% - 7px),color-mix(in srgb,var(--ink) 10%,var(--corner-face,var(--surface))) calc(100% - 7px)),var(--corner-face,var(--surface))}
+#my-corner:is([data-corner-theme=cinema],[data-corner-theme=projection]) .corner-card-cover{border-bottom:1px dashed color-mix(in srgb,var(--ink) 25%,transparent)}
+
+/* The collection title cycles themes without a hover menu. */
+#my-corner .corner-stage-heading{z-index:35}
+#my-corner .corner-stage-heading [data-corner-next-theme]{pointer-events:auto;font:inherit;letter-spacing:inherit;color:inherit;padding:0;border:0;background:none;cursor:pointer}
+#my-corner>.dialog-done{display:none}
+
+/* Preview icons move in place; hit areas and labels remain still. */
+#dock .corner-unified{--corner-icon-motion:corner-icon-float}
+#dock[data-dock-theme=base] .corner-unified{--corner-icon-motion:corner-icon-travel}
+#dock[data-dock-theme=music] .corner-unified{--corner-icon-motion:corner-icon-beat}
+#dock[data-dock-theme=cosmos] .corner-unified{--corner-icon-motion:corner-icon-orbit}
+#dock[data-dock-theme=flow] .corner-unified,#dock[data-dock-theme=poly] .corner-unified{--corner-icon-motion:corner-icon-shape}
+#dock[data-dock-theme=flip] .corner-unified{--corner-icon-motion:corner-icon-tick}
+#dock[data-dock-theme=reading] .corner-unified,#dock[data-dock-theme=paper] .corner-unified{--corner-icon-motion:corner-icon-page}
+#dock .corner-unified.corner-peeking .corner-peek-groups i svg{animation:var(--corner-icon-motion) 3.4s ease-in-out infinite;animation-delay:calc(var(--peek-index,0)*-.23s);transform-origin:center;transform-box:fill-box}
+#dock .corner-unified.corner-peeking .corner-themed-entry>:not(.dock-label):not(.train-track){animation:var(--corner-icon-motion) 3.4s ease-in-out infinite;transform-origin:center}
+@keyframes corner-icon-travel{0%,100%{transform:translateX(-3px) rotate(-2deg)}50%{transform:translateX(3px) translateY(-2px) rotate(2deg)}}
+@keyframes corner-icon-beat{0%,100%{transform:rotate(-7deg) scale(.97)}50%{transform:rotate(7deg) scale(1.04)}}
+@keyframes corner-icon-orbit{0%,100%{transform:translate(-2px,1px) rotate(-8deg)}50%{transform:translate(2px,-3px) rotate(8deg)}}
+@keyframes corner-icon-shape{0%,100%{transform:translateY(1px) rotate(-10deg)}50%{transform:translateY(-3px) rotate(10deg)}}
+@keyframes corner-icon-tick{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes corner-icon-page{0%,100%{transform:skewY(-3deg) translateY(0)}50%{transform:skewY(3deg) translateY(-3px)}}
+@keyframes corner-icon-float{0%,100%{transform:translateY(1px) rotate(-2deg)}50%{transform:translateY(-3px) rotate(2deg)}}
+@media(prefers-reduced-motion:reduce){#dock .corner-unified.corner-peeking .corner-peek-groups i svg,#dock .corner-unified.corner-peeking .corner-themed-entry>:not(.dock-label):not(.train-track){animation:none}}
+
+#my-corner .corner-card:not(.is-center):not(.is-away){opacity:.55}
+#my-corner.corner-editing .corner-card:not(.is-center):not(.is-away){opacity:.38}
+#my-corner .corner-card.is-center{--corner-face:color-mix(in srgb,var(--surface) 40%,#fff);opacity:1}
+body[data-dark=true] #my-corner .corner-card.is-center{--corner-face:color-mix(in srgb,var(--surface) 88%,#fff)}
+#my-corner .corner-card.is-center .corner-card-back{background:var(--corner-face);opacity:1}
+#my-corner .corner-card.is-center .corner-card-front{box-shadow:0 14px 36px #0002,inset 0 0 0 1px color-mix(in srgb,var(--ink) 10%,transparent)}
+#my-corner .corner-link>a>span{transition:color .16s,background-color .16s;border-radius:3px}
+#my-corner .corner-link>a>span{color:inherit;background:transparent}
+#my-corner .corner-link:has(:focus-visible){outline:1px solid var(--accent);outline-offset:2px}
+#my-corner .corner-link:not(:hover):not(:has(:focus-visible)) :is(.corner-grip,.corner-link-remove){opacity:0}
+#my-corner [data-corner-add-links]{display:grid;place-items:center;width:28px;height:28px;margin:-5px -5px -5px 0;border-radius:50%;color:var(--ink);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+#my-corner [data-corner-add-links]:hover{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+#my-corner [data-corner-add-links] svg{width:18px;height:18px}
+#corner-picker .corner-add-tabs{display:flex;gap:20px;margin:0 0 20px}
+#corner-picker .corner-add-tabs button{padding:7px 0;color:var(--muted);border-bottom:2px solid transparent}
+#corner-picker .corner-add-tabs [aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
+#corner-picker [hidden]{display:none!important}
+#corner-picker .corner-pasted-links textarea{display:block;box-sizing:border-box;width:100%;resize:vertical;min-height:130px;margin:10px 0;padding:12px;background:color-mix(in srgb,var(--ink) 5%,var(--surface));color:var(--ink);font:13px/1.7 "Segoe UI","Microsoft YaHei",sans-serif;border:1px solid color-mix(in srgb,var(--ink) 14%,transparent);border-radius:8px}
+#corner-picker .corner-pasted-links small{font-size:11px;color:var(--muted);line-height:1.8}
+
+#my-corner .corner-top-notice{position:fixed;top:24px;left:50%;transform:translate(-50%,-8px);z-index:90;max-width:calc(100vw - 150px);padding:10px 18px;border-radius:12px;background:var(--ink);color:var(--surface);font:12px/1.5 var(--font);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+#my-corner .corner-top-notice.show{opacity:1;transform:translate(-50%,0)}
+#my-corner[open] button.corner-pull-cord[data-corner-cord]{position:fixed;display:flex;visibility:visible;opacity:1;z-index:80;pointer-events:auto}
+#corner-picker{width:min(780px,calc(100vw - 40px));box-sizing:border-box}
+#corner-picker .corner-library-browser{display:grid;grid-template-columns:205px minmax(0,1fr);height: min(390px,42dvh);gap:20px;margin:20px 0 12px}
+#corner-picker .corner-library-nav{display:block;overflow:auto;padding:10px;background:color-mix(in srgb,var(--ink) 4%,var(--surface));border-radius:12px;font-size:12px}
+#corner-picker .corner-library-nav details details{margin-left:10px}
+#corner-picker .corner-library-nav summary{padding:10px 4px;cursor:pointer;color:var(--ink);overflow-wrap:anywhere}
+#corner-picker .corner-library-nav button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:10px;border-radius:7px;text-align:left;color:var(--muted)}
+#corner-picker .corner-library-nav button span{overflow-wrap:anywhere;min-width:0}
+#corner-picker .corner-library-nav button:hover,#corner-picker .corner-library-nav [aria-current=true]{background:color-mix(in srgb,var(--accent) 13%,transparent);color:var(--ink)}
+#corner-picker .corner-library-content{min-width:0;min-height:0;display:flex;flex-direction:column}
+#corner-picker .corner-library-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;font-size:11px;color:var(--muted)}
+#corner-picker .corner-library-toolbar>span{min-width:0;overflow-wrap:anywhere}
+#corner-picker .corner-library-toolbar button{flex:none;padding:7px 9px;border-radius:6px;color:var(--ink);background:color-mix(in srgb,var(--accent) 12%,transparent);font-size:11px}
+#corner-picker .corner-library-toolbar button:disabled{opacity:.4;cursor:default}
+#corner-picker .corner-source-list{flex:1;min-height:0;max-height:none;margin:0;overflow:auto;overscroll-behavior:contain}
+#corner-picker .corner-source-list small{overflow-wrap:anywhere}
+#corner-picker #corner-save{display:block;width:100%;min-height:48px;margin-top:12px;font-size:14px}
+#my-corner .corner-inbox .corner-card-number{font-size:10px;letter-spacing:2px;color:var(--muted)}
+#my-corner .corner-inbox .corner-card-cover{cursor:pointer}
+@media(max-width:600px){
+ #corner-picker .corner-library-browser{grid-template-columns:112px minmax(0,1fr);gap:10px;height:40dvh}
+ #corner-picker .corner-library-nav{padding:5px}
+ #corner-picker .corner-library-nav details details{margin-left:4px}
+ #corner-picker .corner-library-toolbar{align-items:flex-start;flex-direction:column}
+ #corner-picker .corner-source-list .corner-source{gap:7px;padding:10px 2px}
+}
+/* The permanent inbox is a shallow open drawer, distinct from the upright cards. */
+#my-corner[data-corner-theme] .corner-inbox .corner-card-turn{height:100%;top:0}
+#my-corner[data-corner-theme] .corner-inbox .corner-card-front{border-radius:8px 8px 18px 18px;background:linear-gradient(180deg,color-mix(in srgb,var(--ink) 16%,var(--corner-face)) 0 35px,var(--corner-face) 72px);border:0;box-shadow:inset 10px 0 color-mix(in srgb,var(--accent) 15%,var(--corner-face)),inset -10px 0 color-mix(in srgb,var(--accent) 15%,var(--corner-face)),0 15px 28px #0002;clip-path:polygon(7% 0,93% 0,100% 8%,100% 100%,0 100%,0 8%)}
+#my-corner[data-corner-theme] .corner-inbox .corner-card-cover{padding:46px 26px 20px;margin:0;border:0;background:none}
+#my-corner[data-corner-theme] .corner-inbox .corner-card-cover:before{content:'';position:absolute;left:20px;right:20px;top:18px;height:16px;border-radius:4px;background:color-mix(in srgb,var(--surface) 86%,var(--accent));box-shadow:0 -5px 0 color-mix(in srgb,var(--surface) 65%,var(--accent));transform:perspective(180px) rotateX(28deg)}
+#my-corner[data-corner-theme] .corner-inbox .corner-card-logo{top:49px;background:transparent}
+#my-corner[data-corner-theme] .corner-inbox .corner-flip-hint{position:relative;min-height:65px;padding:29px 24px 14px;background:color-mix(in srgb,var(--accent) 17%,var(--corner-face));opacity:1;border-top:1px solid color-mix(in srgb,var(--ink) 9%,transparent)}
+#my-corner[data-corner-theme] .corner-inbox .corner-flip-hint:before{content:'';position:absolute;top:10px;left:calc(50% - 26px);width:52px;height:9px;border-radius:3px 3px 8px 8px;border:2px solid color-mix(in srgb,var(--ink) 45%,var(--surface));border-top-width:3px}
+#my-corner[data-corner-theme] .corner-inbox .corner-card-empty{padding-bottom:12px}
+#my-corner[data-corner-theme] .corner-inbox .corner-empty-lines{height:65px}
+#my-corner[data-corner-theme] .corner-inbox .corner-empty-lines svg{height:60px;width:60px}
+
+/* System inbox: one front face and a neutral palette shared by every theme. */
+#my-corner[data-corner-theme] .corner-card.corner-inbox{color:var(--ink);--surface:#eceeed;--corner-face:#eceeed;--ink:#303733;--muted:#707973;--accent:#77857c}
+body[data-dark=true] #my-corner[data-corner-theme] .corner-card.corner-inbox{--surface:#303733;--corner-face:#303733;--ink:#edf0ed;--muted:#a5afa8;--accent:#9baa9e}
+#my-corner[data-corner-theme] .corner-inbox.is-center .corner-card-front{box-shadow:inset 10px 0 color-mix(in srgb,var(--accent) 15%,var(--corner-face)),inset -10px 0 color-mix(in srgb,var(--accent) 15%,var(--corner-face)),0 15px 28px #0002}
+#my-corner[data-corner-theme] .corner-inbox .corner-card-logo{border-radius:0;background:none;box-shadow:none;color:var(--ink);cursor:default}
+#my-corner[data-corner-theme] .corner-inbox .corner-card-logo svg{animation:none;transform:none}
+#my-corner[data-corner-theme] .corner-inbox.is-center :is(.corner-card-cover,.corner-card-front){cursor:default}
+#my-corner[data-corner-theme] .corner-inbox .corner-link{border-bottom-style:solid}
+/* A quiet, neutral system drawer with a read-only reverse. */
+#my-corner[data-corner-theme] .corner-card.corner-inbox{--surface:#e9e9e9;--corner-face:#e9e9e9;--ink:#414141;--muted:#777;--accent:#888;--control-accent:#888}
+body[data-dark=true] #my-corner[data-corner-theme] .corner-card.corner-inbox{--surface:#343434;--corner-face:#343434;--ink:#e1e1e1;--muted:#aaa;--accent:#999;--control-accent:#999}
+#my-corner[data-corner-theme] .corner-inbox :is(.corner-card-front,.corner-card-back){clip-path:none;border-radius:22px;background:var(--corner-face);color:var(--ink)}
+#my-corner[data-corner-theme] .corner-inbox .corner-card-cover:before{border-radius:9px;transform:none}
+#my-corner[data-corner-theme] .corner-inbox.is-center .corner-card-cover,#my-corner[data-corner-theme] .corner-inbox .corner-card-logo{cursor:pointer}
+#my-corner .corner-inbox-note{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;width:100%;height:100%;padding:30px;background:none;color:var(--muted);cursor:pointer;text-align:center}
+#my-corner .corner-inbox-note svg{width:40px;height:40px;color:var(--muted)}
+#my-corner .corner-inbox-note>span{font-size:20px;color:var(--ink)}
+#my-corner .corner-inbox-note p{font-size:13px;line-height:2.2;margin:0}
+#my-corner .corner-inbox-note small{font-size:11px;margin-top:20px}
+/* The collection scrim is neutral; only the cards follow the selected theme. */
+#my-corner::backdrop{background:rgba(255,255,255,.72);backdrop-filter:blur(18px) saturate(0)}
+body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-filter:blur(18px) saturate(0)}
+#my-corner .corner-stage-heading [data-corner-next-theme]:focus-visible{outline:none}
+
+/* The inbox slides a lid over its list; only custom cards rotate. */
+#my-corner[data-corner-theme] .corner-inbox .corner-card-turn{transform:none!important;transform-style:flat;overflow:hidden;border-radius:22px;box-shadow:0 15px 28px #0002}
+#my-corner[data-corner-theme] .corner-inbox .corner-card-front{transform:none!important;visibility:visible!important;backface-visibility:visible;pointer-events:auto!important;z-index:0}
+#my-corner[data-corner-theme] .corner-inbox .corner-inbox-lid{z-index:2;isolation:isolate;visibility:visible!important;pointer-events:auto;backface-visibility:visible;background:var(--corner-face);transform:translateY(0);transition:transform .72s cubic-bezier(.22,.75,.22,1);box-shadow:0 8px 18px #0002;cursor:default}
+#my-corner[data-corner-theme] .corner-inbox.is-inbox-open .corner-inbox-lid{transform:translateY(calc(-100% + 18px));pointer-events:none}
+#my-corner .corner-inbox-lid:before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.08;background:var(--inbox-pattern) center/160px 160px}
+#my-corner .corner-inbox-lid:after{content:'';position:absolute;bottom:6px;left:calc(50% - 23px);width:46px;height:3px;border-radius:3px;background:var(--muted);opacity:.35;pointer-events:none}
+#my-corner .corner-inbox-lid .corner-inbox-note{min-height:0;flex:1;height:auto;padding:30px;pointer-events:none;cursor:inherit}
+#my-corner[data-corner-theme] .corner-inbox :is(.corner-inbox-lid,.corner-flip-hint){cursor:pointer}
+#my-corner .corner-inbox-lid .corner-inbox-note:before{display:none}
+#my-corner[data-corner-theme] .corner-inbox .corner-card-cover{flex-shrink:0}
+@media(prefers-reduced-motion:reduce){#my-corner[data-corner-theme] .corner-inbox .corner-inbox-lid{transition:none}}
+
+/* Card fronts and edit faces inherit the active personalized typeface. */
+#my-corner,#my-corner *{font-family:var(--font)!important}
+
+/* Keep stacked cards opaque so the nearest card conceals those behind it. */
+#my-corner:not(.corner-editing) .corner-card:not(.is-center):not(.is-away){opacity:1}
+#my-corner .corner-add-card>button{background:transparent;border-color:color-mix(in srgb,var(--ink) 15%,transparent)}
+#my-corner .corner-add-card>button:hover{background:color-mix(in srgb,var(--ink) 3%,transparent)}
+#my-corner .corner-add-card>button>span{display:flex;align-items:center;justify-content:center;gap:10px}
+#my-corner .corner-add-card .corner-member-badge{position:static;display:inline-flex}
+#my-corner .corner-add-card .corner-member-badge svg{width:19px;height:19px}
+#corner-space-menu>.corner-switch-heading{display:flex;align-items:center;justify-content:space-between;overflow:visible;padding:2px 6px 8px;gap:16px}
+#corner-space-menu .corner-switch-heading p{margin:0;font-size:11px;color:var(--muted)}
+#corner-space-menu .corner-switch-heading button{width:auto;padding:7px 3px;font-size:11px;background:none}
+#corner-space-menu .corner-add-space{margin-top:8px;justify-content:flex-start;position:relative}
+#corner-space-menu .corner-add-space:before{content:'';position:absolute;left:10px;right:10px;top:-5px;border-top:1px dashed var(--line);pointer-events:none}
+#corner-space-menu .corner-add-space>svg{width:22px;flex:0 0 22px}
+#my-corner .corner-inbox-note{position:relative;isolation:isolate;overflow:hidden;border-radius:inherit}
+#my-corner .corner-inbox-note:before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.08;background-image:var(--inbox-pattern);background-size:160px 160px;background-position:center}
+
+#my-corner[data-corner-theme=base]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M0%20125Q40%2065%2080%20110T160%2095M0%20145Q45%2090%20100%20132T160%20115M122%2020v26m-13-13h26%22%2F%3E%3Ccircle%20cx%3D%2236%22%20cy%3D%2230%22%20r%3D%229%22%2F%3E%3C%2Fsvg%3E")}
+#my-corner[data-corner-theme=paper]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M16%2018h128M16%2025h128M16%2040h56v45H16ZM84%2040h60m-60%2012h60m-60%2012h60m-60%2012h43M16%20103h128M16%20115h128M16%20127h85%22%2F%3E%3C%2Fsvg%3E")}
+#my-corner[data-corner-theme=reading]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M14%2025q30-12%2065%200%2035-12%2067%200v94q-32-12-67%200-34-12-65%200ZM79%2025v94M27%2046h34m-34%2013h34m-34%2013h25m47-26h34m-34%2013h34m-34%2013h25%22%2F%3E%3C%2Fsvg%3E")}
+#my-corner[data-corner-theme=music]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M0%2042h160M0%2050h160M0%2058h160M0%2066h160M0%2074h160M38%2064V22l30-6v39m34%2077V96l23-6v34%22%2F%3E%3Cellipse%20cx%3D%2231%22%20cy%3D%2265%22%20rx%3D%227%22%20ry%3D%225%22%2F%3E%3Cellipse%20cx%3D%2261%22%20cy%3D%2256%22%20rx%3D%227%22%20ry%3D%225%22%2F%3E%3Cellipse%20cx%3D%2295%22%20cy%3D%22133%22%20rx%3D%227%22%20ry%3D%225%22%2F%3E%3Cellipse%20cx%3D%22118%22%20cy%3D%22125%22%20rx%3D%227%22%20ry%3D%225%22%2F%3E%3C%2Fsvg%3E")}
+#my-corner[data-corner-theme=cinema]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cg%20transform%3D%22rotate%28-18%2080%2080%29%22%3E%3Crect%20x%3D%228%22%20y%3D%2216%22%20width%3D%22144%22%20height%3D%2284%22%20rx%3D%223%22%2F%3E%3Cpath%20d%3D%22M8%2029h144M8%2087h144M50%2029v58m53-58v58%22%2F%3E%3Cpath%20d%3D%22M16%2022h8m12%200h8m12%200h8m12%200h8m12%200h8m12%200h8m12%200h8M16%2094h8m12%200h8m12%200h8m12%200h8m12%200h8m12%200h8m12%200h8%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+#my-corner[data-corner-theme=projection]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%2225%22%20y%3D%2239%22%20width%3D%22110%22%20height%3D%2267%22%20rx%3D%223%22%2F%3E%3Cpath%20d%3D%22M80%20106v28m-20%200h40M40%2086l24-27%2020%2018%2017-12%2022%2021%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%2218%22%20r%3D%2212%22%2F%3E%3Ccircle%20cx%3D%2274%22%20cy%3D%2218%22%20r%3D%2212%22%2F%3E%3C%2Fsvg%3E")}
+#my-corner[data-corner-theme=cosmos]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2280%22%20r%3D%2223%22%2F%3E%3Cellipse%20cx%3D%2280%22%20cy%3D%2280%22%20rx%3D%2257%22%20ry%3D%2215%22%20transform%3D%22rotate%28-30%2080%2080%29%22%2F%3E%3Cpath%20d%3D%22M20%2016v12m-6-6h12M130%20123v18m-9-9h18%22%2F%3E%3Ccircle%20cx%3D%22120%22%20cy%3D%2223%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%2231%22%20cy%3D%22132%22%20r%3D%222%22%2F%3E%3C%2Fsvg%3E")}
+#my-corner[data-corner-theme=rain]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m26%208-8%2026m40-19-8%2026m53-29-8%2026m48-13-8%2026M8%20100q20-13%2040%200t40%200t40%200t40%200M8%20113q20-13%2040%200t40%200t40%200t40%200%22%2F%3E%3C%2Fsvg%3E")}
+#my-corner[data-corner-theme=flip]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%2227%22%20y%3D%2222%22%20width%3D%22106%22%20height%3D%22112%22%20rx%3D%228%22%2F%3E%3Cpath%20d%3D%22M27%2048h106M48%2013v21m64-21v21M40%2084h80%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2291%22%20r%3D%2225%22%2F%3E%3Cpath%20d%3D%22M80%2072v19l13%208%22%2F%3E%3C%2Fsvg%3E")}
+#my-corner[data-corner-theme=flow]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M-15%2030Q40-10%2085%2040T180%2032M-15%2046Q40%206%2085%2056T180%2048M-15%20105Q40%2065%2085%20115T180%20107M-15%20121Q40%2081%2085%20131T180%20123%22%2F%3E%3C%2Fsvg%3E")}
+#my-corner[data-corner-theme=poly]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M0%200h160v160H0ZM0%200l80%2042%2080-42M80%2042v77L0%20160m80-41%2080%2041M0%200v84l80%2035m80-119v84l-80%2035M0%2084l80-42%2080%2042%22%2F%3E%3C%2Fsvg%3E")}

@@ -1,0 +1,102 @@
+const { chromium } = require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+let browser;
+const out = __dirname, errors = [];
+async function setup(page) {
+  await page.goto('http://127.0.0.1:4321/', { waitUntil: 'networkidle' });
+  await page.evaluate(() => { signed = true; prefs.accountProfile = { id: 'FEEDBACK-UI-001', name: '回音测试' }; prefs.membershipDemo = { expiresAt: 1900000000000 }; prefs.theme = 'base'; prefs.mode = 'light'; prefs.font = 'sans'; prefs.color = '#48614c'; render(); });
+  await page.evaluate(() => document.fonts.ready);
+}
+async function open(page) { await page.locator('[data-account-open]').click(); await page.locator('[data-menu-feedback]').click(); await page.waitForFunction(() => !document.querySelector('#support-feedback [type=submit]').disabled); }
+async function layout(page, selectors) {
+  return page.evaluate(selectors => selectors.map(selector => {
+    const e = document.querySelector(selector), r = e.getBoundingClientRect(), css = getComputedStyle(e);
+    return { selector, x: r.x, y: r.y, width: r.width, height: r.height, font: css.fontFamily, color: css.color, background: css.backgroundColor };
+  }), selectors);
+}
+(async () => {
+  browser = await chromium.launch({ channel: 'msedge', headless: true });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const before = await context.newPage();
+  await before.route('**/feedback.js', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await before.route('**/feedback.css', route => route.fulfill({ contentType: 'text/css', body: '' }));
+  await setup(before);
+  const page = await context.newPage(); page.on('pageerror', error => errors.push(error.message)); await setup(page);
+  assert.deepEqual(await layout(page, ['header', '.header-right', '#main', '#dock']), await layout(before, ['header', '.header-right', '#main', '#dock']));
+  const menuBefore = await before.locator('.account-menu button').allTextContents();
+  assert.deepEqual((await page.locator('.account-menu button').allTextContents()).filter(x => x !== '捎来回音'), menuBefore);
+  await page.locator('[data-account-open]').click(); await page.screenshot({ path: path.join(out, 'menu.png') });
+  await page.locator('[data-menu-feedback]').click();
+  await page.waitForFunction(() => !document.querySelector('#support-feedback [type=submit]').disabled);
+  const d = page.locator('#support-feedback');
+  const submitted = []; page.on('request', req => { if (req.method() === 'POST' && req.url().endsWith('/api/shiyu/feedback')) submitted.push(req.postDataJSON()); });
+  await d.locator('[type=submit]').click(); assert.match(await d.locator('.feedback-error').textContent(), /请选择/); assert.equal(submitted.length, 0);
+  await d.locator('.feedback-type-options>label').first().click();
+  await d.locator('[type=submit]').click(); assert.match(await d.locator('.feedback-error').textContent(), /描述/);
+  await page.locator('#feedback-description').fill('希望收藏完成后，可以更清楚地看到保存位置。');
+  await page.locator('#feedback-contact').fill('invalid'); await d.locator('[type=submit]').click(); assert.match(await d.locator('.feedback-error').textContent(), /联系电话或邮箱/);
+  await page.locator('#feedback-contact').fill('feedback-test@example.com'); await page.locator('#feedback-category').selectOption('collection');
+  const png = await page.evaluate(() => { const canvas = document.createElement('canvas'); canvas.width = 360; canvas.height = 220; const c = canvas.getContext('2d'); c.fillStyle = '#e9ede3'; c.fillRect(0, 0, 360, 220); c.fillStyle = '#48614c'; c.fillRect(25, 25, 310, 25); c.font = '16px sans-serif'; c.fillText('收藏成功 · 示例截图', 25, 95); return canvas.toDataURL('image/png'); });
+  const file = n => ({ name: `screen-${n}.png`, mimeType: 'image/png', buffer: Buffer.from(png.split(',')[1], 'base64') });
+  await page.locator('#feedback-files').setInputFiles([file(1), file(2)]);
+  await page.waitForFunction(() => document.querySelector('.feedback-image-count').textContent === '2 / 5');
+  await page.locator('#feedback-description').evaluate((el, data) => { const raw = atob(data.split(',')[1]); const bytes = Uint8Array.from(raw, c => c.charCodeAt(0)); const dt = new DataTransfer(); dt.items.add(new File([bytes], 'paste.png', { type: 'image/png' })); el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true })); }, png);
+  await page.waitForFunction(() => document.querySelector('.feedback-image-count').textContent === '3 / 5');
+  await d.evaluate((el, data) => { const bytes = Uint8Array.from(atob(data.split(',')[1]), c => c.charCodeAt(0)); const dt = new DataTransfer(); dt.items.add(new File([bytes], 'drop.png', { type: 'image/png' })); el.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true })); }, png);
+  await page.waitForFunction(() => document.querySelector('.feedback-image-count').textContent === '4 / 5');
+  await page.locator('#feedback-files').setInputFiles([file(5), file(6)]); await page.waitForFunction(() => document.querySelector('.feedback-image-count').textContent === '5 / 5');
+  assert.match(await d.locator('.feedback-image-error').textContent(), /最多添加 5/);
+  await d.locator('[aria-label="预览图片 1"]').click(); assert(await page.locator('#feedback-image-preview').isVisible()); await page.keyboard.press('Escape'); assert(await d.isVisible());
+  await d.locator('[aria-label="移除图片 2"]').click(); assert.equal(await d.locator('.feedback-thumbnail').count(), 4);
+  await page.locator('#feedback-files').setInputFiles({ name: 'bad.png', mimeType: 'image/png', buffer: Buffer.from('not an image') });
+  await page.waitForFunction(() => document.querySelector('.feedback-image-error').textContent.includes('无法读取'));
+  await page.locator('#feedback-files').setInputFiles({ name: 'too-large.png', mimeType: 'image/png', buffer: Buffer.alloc(5 * 1024 * 1024 + 1) });
+  await page.waitForFunction(() => document.querySelector('.feedback-image-error').textContent.includes('超过'));
+  assert.equal(await d.locator('.feedback-thumbnail').count(), 4);
+  await d.locator('[aria-label="移除图片 4"]').click();
+  await d.locator('[data-feedback-close]').first().click(); await open(page);
+  assert.match(await page.locator('#feedback-description').inputValue(), /保存位置/); assert.equal(await d.locator('.feedback-thumbnail').count(), 3);
+  await page.screenshot({ path: path.join(out, 'filled-light.png') });
+  await page.evaluate(() => { prefs.mode = 'dark'; render(); });
+  await page.waitForTimeout(350); await page.screenshot({ path: path.join(out, 'filled-dark.png') });
+  for (const size of [{ width: 390, height: 844 }, { width: 320, height: 568 }, { width: 844, height: 390 }]) {
+    await page.setViewportSize(size); await page.evaluate(() => { prefs.mode = 'light'; render(); });
+    const box = await d.boundingBox(); assert(box.x >= 0 && box.y >= 0 && box.x + box.width <= size.width && box.y + box.height <= size.height);
+    const footer = await d.locator('.feedback-footer').boundingBox(); assert(footer.y + footer.height <= size.height);
+    assert(await d.locator('.feedback-scroll').evaluate(el => el.scrollWidth <= el.clientWidth));
+    assert(await d.locator('[type=submit]').evaluate(el => { const r = el.getBoundingClientRect(); return el.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)); }), 'submit must be visible above scrolling fields');
+    await page.locator('#feedback-contact').scrollIntoViewIfNeeded();
+    assert(await page.locator('#feedback-contact').evaluate(el => { const r = el.getBoundingClientRect(); return el === document.elementFromPoint(r.x + 10, r.y + r.height / 2); }), 'last field must be reachable');
+    await d.locator('.feedback-scroll').evaluate(el => el.scrollTop = 0);
+    await page.screenshot({ path: path.join(out, `filled-${size.width}.png`) });
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.route('**/api/shiyu/feedback', async route => route.fulfill({ status: 503, contentType: 'application/json', body: '{"message":"测试：服务暂不可用"}' }));
+  await d.locator('[type=submit]').click(); await page.waitForFunction(() => document.querySelector('.feedback-error').textContent.includes('服务暂不可用'));
+  assert.equal(await d.locator('.feedback-thumbnail').count(), 3); assert(await page.locator('#feedback-description').inputValue());
+  await page.unroute('**/api/shiyu/feedback');
+  await d.locator('[type=submit]').click(); await d.locator('.feedback-success').waitFor({ state: 'visible' });
+  assert.equal(submitted.length, 2); assert.deepEqual(submitted[0], submitted[1]);
+  assert.equal(submitted[1].identity.id, 'FEEDBACK-UI-001'); assert.equal(submitted[1].identity.isMember, true);
+  const record = JSON.parse(await fs.readFile(path.join(out, 'submissions', submitted[1].submissionId + '.json')));
+  assert.equal(record.images.length, 3); assert.equal(record.identity.name, '回音测试'); assert.equal(record.description, submitted[1].description);
+  await page.screenshot({ path: path.join(out, 'success.png') });
+  await d.locator('.feedback-success [data-feedback-close]').click(); await open(page); assert.equal(await page.locator('#feedback-description').inputValue(), '');
+  await page.locator('#feedback-description').fill('旧账号草稿'); await page.evaluate(() => { prefs.accountProfile.id = 'another-account'; render(); });
+  assert.equal(await page.locator('#feedback-description').inputValue(), '');
+  await d.locator('[data-feedback-close]').first().click();
+  await page.route('**/api/shiyu/feedback/categories', route => route.fulfill({ status: 503, contentType: 'application/json', body: '{}' }));
+  await page.locator('[data-account-open]').click(); await page.locator('[data-menu-feedback]').click();
+  await d.locator('.feedback-category-status').waitFor({ state: 'visible' }); assert(await d.locator('[type=submit]').isDisabled());
+  await page.unroute('**/api/shiyu/feedback/categories'); await d.locator('[data-feedback-reload]').click(); await page.waitForFunction(() => !document.querySelector('#support-feedback [type=submit]').disabled);
+  await page.keyboard.press('Escape'); assert(!(await d.isVisible()));
+  await page.locator('[data-account-open]').click(); await page.locator('[data-menu-profile]').click(); assert(await page.locator('#account-center').isVisible()); await page.keyboard.press('Escape');
+  await before.evaluate(() => goSpace(data[0].id)); await page.evaluate(() => goSpace(data[0].id));
+  await page.waitForTimeout(400); await before.waitForTimeout(400);
+  assert.equal(await page.locator('[data-menu-feedback]').count(), 0);
+  assert.deepEqual(await layout(page, ['header', '#main']), await layout(before, ['header', '#main']));
+  assert.deepEqual(errors, []);
+  console.log('PASS UI: unchanged home/menu/space layout, original profile entry, validation, pick/paste/drop, limit/invalid images, preview/remove, draft and account isolation, light/dark/390/320/landscape, pinned footer, category recovery, retained retry id, actual persisted submission and success.');
+})().catch(e => { console.error(e); process.exitCode = 1; }).finally(() => browser?.close());

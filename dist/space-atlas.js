@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const KEY = 'shiyu-space-atlas-v1';
+  const classicOrbits = new URLSearchParams(location.search).get('atlas-orbits')==='classic';
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const svg = paths => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
   const icons = {
@@ -21,6 +22,7 @@
     add:svg('<path d="M12 5v14M5 12h14"/>'),
     minus:svg('<path d="M5 12h14"/>'),
     fit:svg('<path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/>'),
+    locate:svg('<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>'),
     pause:svg('<path d="M9 5v14M15 5v14"/>'),
     play:svg('<path d="m8 5 11 7-11 7V5Z"/>'),
     edit:svg('<path d="m4 16 11-11 4 4L8 20H4Zm9-9 4 4"/>'),
@@ -35,9 +37,10 @@
   const solar = () => state.mode==='3d'&&state.scene3d==='solar';
   const systems = () => state.mode==='3d'&&state.scene3d==='systems';
   const orbital = () => solar()||systems();
+  const galaxy = () => !classicOrbits&&orbital()&&get(state.focus)?.kind==='space';
   let orbits=[], satelliteOrbits=[];
   let dialog, index=new Map(), root, visible=[], nodeEls=new Map(), edgeEls=[], activeFlow=null, raf=0, lastFrame=0, needsPaint=true, returnFocus, resizeObserver, noticeTimer, compactLayout=false, modeMenu, menuTimer, menuTrigger, viewMenuTimer=0, editorBusy=false, atlasTransitionTimer=0, atlasClosing=false;
-  let leavingForHome=false;
+  let leavingForHome=false,sharedHeading;
   const get = key => index.get(key);
   const query = s => dialog.querySelector(s);
   const label = kind => ({space:'空间',scene:'场景',group:'分组',link:'网址',bundle:'分支'}[kind]);
@@ -54,7 +57,7 @@
     return '<svg class="at-vector-letter" viewBox="0 0 24 24" aria-hidden="true"><text x="12" y="12" text-anchor="middle" dominant-baseline="central">'+esc(glyph)+'</text></svg>';
   }
   const pathOf = n => {const chain=[];for(let p=n;p;p=get(p.parent))chain.unshift(p);return chain};
-  const countText = n => n.kind==='space'?`${n.children.length} 个场景 · ${n.children.reduce((v,c)=>v+c.children.length,0)} 个分组`:n.kind==='scene'?`${n.children.length} 个分组`:n.kind==='group'?`${n.children.length} 个网址`:host(n.item?.[1]);
+  const countText = n => n.kind==='space'?`${n.children.length} 个场景 · ${n.children.reduce((v,c)=>v+c.children.length,0)} 个分组 · ${n.links.toLocaleString()} 个网址`:n.kind==='scene'?`${n.children.length} 个分组 · ${n.links.toLocaleString()} 个网址`:n.kind==='group'?`${n.children.length} 个网址`:host(n.item?.[1]);
   function preferences() {
     const p=saved[state.sid]||{};
     state.mode=p.mode==='3d'?'3d':'2d';state.motion=!reduceMotion.matches;state.layout=['radial','organization','mindmap'].includes(p.layout)?p.layout:'radial';
@@ -85,7 +88,15 @@
     if(view!=='space'){syncCordClearance();return}
     document.querySelectorAll('.space-atlas-entry').forEach(b=>b.remove());
     const heading=document.querySelector('.workspace .space-heading');
-    if(heading&&!heading.querySelector('.space-mode-entry')){heading.replaceChildren(modeButton(space().name));}
+    if(heading){
+      sharedHeading??=modeButton(space().name);
+      if(sharedHeading.parentElement!==heading)heading.replaceChildren(sharedHeading);
+      const current=space(),atlas=!!dialog?.open,switcher=sharedHeading.querySelector('.corner-space-switch'),button=sharedHeading.querySelector('.space-mode-entry');
+      switcher.querySelector('.space-detail-icon').innerHTML=typeof entityIcon==='function'?entityIcon(current.icon||'work'):icons.space;
+      switcher.querySelector('span').textContent=current.name;switcher.setAttribute('aria-label','切换空间：'+current.name);
+      button.querySelector('.space-mode-indicator').innerHTML=atlas?icons.graph:icons.grid;
+      button.setAttribute('aria-label','切换视图，当前'+(atlas?'图谱视图':'常规视图'));
+    }
     mountGlobalSearch(document.querySelector('.workspace .space-top-actions'));
     const field=document.querySelector('.workspace #filter');if(field){field.hidden=true;const mark=field.previousElementSibling;if(mark?.tagName==='SPAN')mark.hidden=true}
     syncCordClearance();
@@ -121,7 +132,12 @@
     const s=data.find(s=>s.id===(atlas?state.sid:spaceId)),mark=typeof entityIcon==='function'?entityIcon(s?.icon||'work'):icons.space;
     b.innerHTML='<i class="space-detail-icon">'+mark+'</i><span class="space-mode-name">'+esc(name)+'</span><i class="space-mode-indicator" title="'+(atlas?'图谱视图':'常规视图')+'">'+(atlas?icons.graph:icons.grid)+'</i>'+icons.down;
     b.setAttribute('aria-label',name+'，当前'+(atlas?'图谱视图':'常规视图')+'，切换空间展示方式');b.setAttribute('aria-expanded','false');b.setAttribute('aria-haspopup','true');
-    b.onpointerenter=()=>showModeMenu(b);b.onclick=()=>showModeMenu(b);b.onpointerleave=()=>{menuTimer=setTimeout(hideModeMenu,240)};return b;
+    b.onpointerenter=()=>showModeMenu(b);b.onclick=()=>showModeMenu(b);b.onpointerleave=()=>{menuTimer=setTimeout(hideModeMenu,240)};
+    const controls=document.createElement('div');controls.className='space-heading-controls';
+    const switcher=document.createElement('button');switcher.type='button';switcher.className='corner-space-switch';switcher.dataset.cornerSwitch='';switcher.setAttribute('aria-label','切换空间：'+name);switcher.setAttribute('aria-expanded','false');switcher.setAttribute('aria-haspopup','true');
+    switcher.innerHTML='<i class="space-detail-icon">'+mark+'</i><span>'+esc(name)+'</span>'+icons.down;
+    b.innerHTML='<i class="space-mode-indicator">'+(atlas?icons.graph:icons.grid)+'</i>';b.title='切换视图';b.setAttribute('aria-label','切换视图，当前'+(atlas?'图谱视图':'常规视图'));
+    controls.append(switcher,b);return controls;
   }
   function hideModeMenu(){if(modeMenu)modeMenu.hidden=true;document.querySelectorAll('.space-mode-entry').forEach(b=>b.setAttribute('aria-expanded','false'))}
   function showModeMenu(button){
@@ -144,7 +160,7 @@
       dialog.addEventListener('input',input);
       dialog.addEventListener('keydown',keydown);
       dialog.addEventListener('close',()=>{const goHome=leavingForHome;leavingForHome=false;atlasClosing=false;clearTimeout(atlasTransitionTimer);atlasTransitionTimer=0;dialog.classList.remove('atlas-ready','atlas-direct-entry');cancelAnimationFrame(raf);resizeObserver?.disconnect();state.hover=null;state.drag=null;clearTimeout(noticeTimer);clearTimeout(viewMenuTimer);hideModeMenu();document.body.classList.remove('atlas-active','atlas-transitioning');if(view==='space'&&spaceId===state.sid){rememberPresentation(spaceId,goHome?'atlas':'daily');writeSaved()}if(goHome){changeView('home');return}render();requestAnimationFrame(()=>document.querySelector('.workspace .space-mode-entry')?.focus({preventScroll:true}))});
-      dialog.addEventListener('cancel',e=>{if(!query('.at-drawer').hidden){e.preventDefault();closeDrawer()}else if(!query('.global-search-results').hidden){e.preventDefault();clearSearch()}});
+      dialog.addEventListener('cancel',e=>{if(!query('.at-drawer').hidden){e.preventDefault();closeDrawer()}else if(document.querySelector('.workspace .global-search-results:not([hidden])')){e.preventDefault();clearSearch()}});
       dialog.addEventListener('wheel',wheel,{passive:false});
       dialog.addEventListener('pointerdown',pointerDown);
       dialog.addEventListener('pointermove',pointerMove);
@@ -167,14 +183,15 @@
   }
   function resetCamera(){state.zoom=1;state.yaw=0;state.pitch=0;state.panX=0;state.panY=0;state.phase=0;state.orbitClock=0;needsPaint=true}
   function renderAtlas() {
+    if(!classicOrbits&&state.scene3d==='systems')state.scene3d='solar';
     const n=get(state.focus)||root;
     state.hover=null;state.drag=null;state.settling=false;
-    dialog.innerHTML=`<div class="at-shell at-full-page${orbital()?' at-orbital':''}" data-mode="${state.mode}" data-layout="${state.layout}" data-presentation="${state.mode==='3d'?state.scene3d:'spatial'}">
-      <button class="at-cover-return" data-at="home" aria-label="返回首页"><span>首页</span><span>点击返回首页</span></button><div class="at-mode-host"></div><div class="at-header-actions space-top-actions"><button class="primary" data-at-header="add">＋ 收藏网址</button><button class="space-share" data-at-header="share" aria-label="分享空间" title="分享空间">${svg('<path d="M12 16V3m-4 4 4-4 4 4M5 11v10h14V11"/>')}</button><button class="display-scope-button" data-at-header="settings" aria-label="空间设置" title="空间设置">${icons.grid}</button></div>
+    dialog.innerHTML=`<div class="at-shell at-full-page${orbital()?' at-orbital':''}${galaxy()?' at-galaxy':''}" data-mode="${state.mode}" data-layout="${state.layout}" data-presentation="${state.mode==='3d'?state.scene3d:'spatial'}">
+      <button class="at-cover-return" data-at="home" aria-label="返回首页"><span>首页</span><span>点击返回首页</span></button>
       <div class="at-canvas" aria-label="${esc(n.name)}关系图" tabindex="0"></div>
-      <div class="at-footer"><div class="at-legend"><span><i></i>空间</span><span><i></i>场景</span><span><i></i>分组</span><span>${icons.link}网址</span><span class="at-parent-legend">┄ 上级</span><span class="at-child-legend">─ 下级</span></div><p class="at-hint" role="status"></p>${layoutPicker()}</div>
+      <div class="at-footer"><div class="at-legend"><span><i></i>空间</span><span><i></i>场景</span><span><i></i>分组</span><span>${icons.link}网址</span><span class="at-parent-legend">┄ 上级</span><span class="at-child-legend">─ 下级</span></div><p class="at-hint" role="status"></p><div class="at-view-tools"><button class="at-focus-scene" data-at="focus-scene" aria-label="聚焦场景" title="聚焦场景：恢复当前节点的默认视角">${icons.locate}</button>${layoutPicker()}</div></div>
       <aside class="at-drawer" hidden aria-label="图谱管理"></aside><div class="at-notice" hidden role="status"></div></div>`;
-    query('.at-mode-host').append(modeButton(root.name,true));mountGlobalSearch(query('.at-header-actions'));query('.at-search')?.remove();positionChrome();
+    mountEntry();query('.at-search')?.remove();positionChrome();
     resizeObserver?.disconnect();const observedCanvas=query('.at-canvas');let observedWidth=observedCanvas.clientWidth,observedHeight=observedCanvas.clientHeight;
     resizeObserver=new ResizeObserver(()=>{if(dialog.open){positionChrome();const resized=observedCanvas.clientWidth!==observedWidth||observedCanvas.clientHeight!==observedHeight;if(!resized)return;observedWidth=observedCanvas.clientWidth;observedHeight=observedCanvas.clientHeight;if((observedWidth<650)!==compactLayout)renderGraph(get(state.focus));else layout(true);needsPaint=true}});resizeObserver.observe(observedCanvas);
     const picker=query('.at-view-picker');
@@ -186,21 +203,17 @@
   function positionChrome(){
     syncCordClearance();
     const heading=document.querySelector('.workspace .space-heading')?.getBoundingClientRect(),actions=document.querySelector('.workspace .space-top-actions')?.getBoundingClientRect();
-    const host=query('.at-mode-host'),buttons=query('.at-header-actions');
-    if(heading){host.style.left=heading.left+'px';host.style.top=heading.top+'px';host.style.width=heading.width+'px';const source=document.querySelector('.workspace .space-mode-entry');if(source)host.style.font=getComputedStyle(source).font;dialog.style.setProperty('--chrome-left',heading.left+'px');dialog.style.setProperty('--chrome-top',heading.top+'px')}
-    if(actions){buttons.style.left=actions.left+'px';buttons.style.top=actions.top+'px';buttons.style.right='auto'}else{buttons.style.left='auto';buttons.style.right='18px';buttons.style.top='24px'}
-    clearCordOverlap(buttons);
+    if(heading){dialog.style.setProperty('--chrome-left',heading.left+'px');dialog.style.setProperty('--chrome-top',heading.top+'px')}
     if(actions)dialog.style.setProperty('--chrome-right',Math.max(24,innerWidth-actions.right)+'px');
-    const original=document.querySelector('.workspace [data-action=add]');if(original)query('[data-at-header=add]').innerHTML=original.innerHTML;
-    const originalSettings=document.querySelector('.workspace [data-display-scope-open]');if(originalSettings)query('[data-at-header=settings]').innerHTML=originalSettings.innerHTML;
   }
-  const layoutName=id=>({radial:'径向环绕',organization:'层级结构',mindmap:'思维脉络',spatial:'星际漫游',solar:'行星轨道',systems:'场景星系'}[id]);
+  const layoutName=id=>({radial:'径向环绕',organization:'层级结构',mindmap:'思维脉络',spatial:'星际漫游',solar:classicOrbits?'行星轨道':'银河星系',systems:'场景星系'}[id]);
+  const viewOptions=mode=>mode==='2d'?['radial','organization','mindmap']:classicOrbits?['spatial','solar','systems']:['spatial','solar'];
   function layoutPicker(){
     const current=state.mode==='2d'?state.layout:state.scene3d;
-    const descriptions={radial:'从中心向四周逐级展开',organization:'从上到下，清楚呈现层级',mindmap:'从左到右，沿着分支浏览',spatial:'在立体空间中，探索收藏的关系',solar:'以当前节点为恒星，内容沿多层轨道运行',systems:'场景沿主轨道运行，分组环绕各自场景'};
-    const groups={two:['radial','organization','mindmap'],three:['spatial','solar','systems']};
+    const descriptions={radial:'从中心向四周逐级展开',organization:'从上到下，清楚呈现层级',mindmap:'从左到右，沿着分支浏览',spatial:'在立体空间中，探索收藏的关系',solar:classicOrbits?'以当前节点为恒星，内容沿多层轨道运行':'空间展开银河旋臂，场景与分组呈现行星圆盘',systems:'场景沿主轨道运行，分组环绕各自场景'};
+    const groups={two:viewOptions('2d'),three:viewOptions('3d')};
     const panel=(mode,ids)=>'<div class="at-view-panel" id="at-view-panel-'+mode+'" role="tabpanel" aria-labelledby="at-view-tab-'+mode+'" data-at-view-panel="'+mode+'"'+(state.mode===mode?'':' hidden')+'>'+ids.map(id=>'<button data-at-view="'+id+'" aria-pressed="'+(id===current)+'">'+layoutIcon(id)+'<span><b>'+layoutName(id)+'</b><small>'+descriptions[id]+'</small></span></button>').join('')+'</div>';
-    return '<div class="at-layout-picker at-view-picker"><button class="at-quiet" data-at="views" aria-label="切换图谱视图" aria-haspopup="dialog" aria-controls="at-view-dialog" aria-expanded="false"><small class="at-view-dimension">'+state.mode.toUpperCase()+'</small><span class="at-view-current">'+layoutIcon(current)+'<b>'+layoutName(current)+'</b></span>'+icons.down+'</button><div class="at-layout-menu" id="at-view-dialog" role="dialog" aria-label="图谱展示方式" hidden><div class="at-view-tabs" role="tablist" aria-label="选择二维或三维"><button id="at-view-tab-2d" role="tab" data-at-dimension="2d" aria-controls="at-view-panel-2d" aria-selected="'+(state.mode==='2d')+'">2D</button><button id="at-view-tab-3d" role="tab" data-at-dimension="3d" aria-controls="at-view-panel-3d" aria-selected="'+(state.mode==='3d')+'">3D</button></div>'+panel('2d',groups.two)+panel('3d',groups.three)+'</div></div>';
+    return '<div class="at-layout-picker at-view-picker"><div class="at-quiet" role="group" aria-label="切换图谱视图"><button class="at-view-dimension" data-at="toggle-dimension" aria-label="切换到'+(state.mode==='3d'?'2D':'3D')+'模式" aria-haspopup="dialog" aria-controls="at-view-dialog" aria-expanded="false">'+state.mode.toUpperCase()+'</button><button class="at-view-current" data-at="views" aria-label="切换下一个结构视图" aria-haspopup="dialog" aria-controls="at-view-dialog" aria-expanded="false">'+layoutIcon(current)+'<b>'+layoutName(current)+'</b>'+icons.down+'</button></div><div class="at-layout-menu" id="at-view-dialog" role="dialog" aria-label="图谱展示方式" hidden><div class="at-view-tabs" role="tablist" aria-label="选择二维或三维"><button id="at-view-tab-2d" role="tab" data-at-dimension="2d" aria-controls="at-view-panel-2d" aria-selected="'+(state.mode==='2d')+'">2D</button><button id="at-view-tab-3d" role="tab" data-at-dimension="3d" aria-controls="at-view-panel-3d" aria-selected="'+(state.mode==='3d')+'">3D</button></div>'+panel('2d',groups.two)+panel('3d',groups.three)+'</div></div>';
   }
   function layoutIcon(id){if(id==='systems')return svg('<circle cx="8" cy="12" r="2.6"/><ellipse cx="8" cy="12" rx="6" ry="3.5"/><circle cx="15.5" cy="8" r="1.8"/><ellipse cx="15.5" cy="8" rx="5.5" ry="2.8" transform="rotate(-18 15.5 8)"/><circle cx="20" cy="7" r="1"/>');if(id==='solar')return svg('<circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="11" ry="6" transform="rotate(-25 12 12)"/><circle cx="21" cy="8" r="2"/>');if(id==='spatial')return icons.space;return id==='radial'?icons.graph:id==='organization'?svg('<rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M5 17v-5h14v5"/>'):svg('<rect x="2" y="9" width="6" height="6" rx="1"/><rect x="17" y="2" width="5" height="5" rx="1"/><rect x="17" y="17" width="5" height="5" rx="1"/><path d="M8 12h5V5h4m-4 7v7h4"/>')}
   function bundle(parent,children,kind) {
@@ -210,12 +223,12 @@
     const canvas=query('.at-canvas'),w=canvas.clientWidth,h=canvas.clientHeight;
     const radial=state.mode==='3d'||state.layout==='radial';
     const budget=radial?Math.max(18,Math.min(70,Math.floor(w*Math.max(240,h-320)/15500))):state.layout==='organization'?Math.max(4,Math.floor((w-110)/140)):Math.max(4,Math.floor((h-330)/76));
-    const result=[{...n,level:0}],pageSize=w<650?6:orbital()?9:radial?18:state.layout==='organization'?9:7;
-    const first=n.kind==='group'?n.children.slice(0,Math.max(pageSize,state.limit)):n.children;
+    const result=[{...n,level:0}];
+    const first=n.children;
     result.push(...first.map(x=>({...x,level:1})));
-    if(first.length<n.children.length)result.push({...bundle(n,n.children.slice(first.length),'link'),level:1});
     const perBranch=orbital()?2:Math.min(n.kind==='space'&&radial?3:Infinity,Math.max(1,Math.floor((radial?budget-result.length:budget)/Math.max(1,first.length))));
     for(const child of first){
+      if(state.mode==='2d'&&state.layout==='radial'||state.mode==='3d'&&state.scene3d==='spatial'||!classicOrbits&&orbital())continue;
       if(systems()&&n.kind==='space'&&child.kind==='scene'&&child.children.length){const limit=w<650?2:4,shown=child.children.slice(0,limit);result.push(...shown.map(x=>({...x,level:2})));if(shown.length<child.children.length)result.push({...bundle(child,child.children.slice(shown.length),child.children[0].kind),level:2});continue}
       if(orbital()&&child.children.length){result.push({...bundle(child,child.children,child.children[0].kind),level:2});continue}
       if(!child.children.length||(!radial&&first.length>12)||(!state.overview&&n.parent&&first.length>(w<650?4:10)))continue;
@@ -239,23 +252,25 @@
       const el=document.createElement('div');el.className='at-node'+(r.isParent?' is-parent':'')+(r.kind==='link'&&tiny?' at-link-dot':'');el.dataset.key=r.key;el.dataset.kind=r.kind;el.dataset.level=r.level;
       if(r.kind==='add')el.dataset.addKind=r.addKind;
       const rootNode=r.level===0,shapeKind=r.kind==='add'?r.addKind:r.kind,size=rootNode?[compactLayout?115:145,compactLayout?118:137]:shapeKind==='link'?(tiny?[15,15]:[compactLayout?120:144,52]):shapeKind==='bundle'?[compactLayout?112:126,51]:shapeKind==='group'?[compactLayout?86:dense?90:112,63]:[compactLayout?94:dense?102:122,compactLayout?73:86];
-      if(rootNode){size[1]+=36}
       if(orbital()&&!rootNode&&!r.isParent){size[0]=shapeKind==='link'?112:r.kind==='bundle'?104:108;size[1]=r.level===2?56:shapeKind==='link'?72:103;el.style.setProperty('--planet-shift',((hash(r.key)%5)-2)*13+'deg')}
       if(systems()&&r.level===2&&!r.isParent){size[0]=r.kind==='bundle'?60:68;size[1]=46}
-      if(state.mode==='2d'&&state.layout!=='radial'&&!rootNode&&shapeKind!=='link'){size[0]=124;size[1]=48;el.classList.add('at-compact-node')}
+      if(state.mode==='2d'&&!rootNode&&shapeKind==='bundle')size[1]=80;
+      if(state.mode==='2d'&&state.layout!=='radial'&&!rootNode&&shapeKind!=='link')size[1]=Math.max(size[1],shapeKind==='scene'?94:80);
       if(r.isParent){size[0]=compactLayout?100:138;size[1]=70;el.classList.remove('at-compact-node')}
       r.w=size[0];r.h=size[1];el.style.width=r.w+'px';el.style.height=r.h+'px';
       const name=esc(r.name), satelliteMore=systems()&&r.kind==='bundle'&&r.level===2,mark=r.kind==='add'?'<span class="at-add-mark">'+icons.add+'</span>':r.kind==='link'?`<span class="at-logo">${graphBookmarkMark(r.item)}</span>`:satelliteMore?'<span class="at-orb at-more-orb">…</span>':r.kind==='bundle'?'<span class="at-bundle-mark">'+(r.bundleKind==='link'?icons.link:icons.group)+'</span>':`<span class="at-orb">${icons[r.kind]}</span>`;
-      const content=mark+`<strong>${satelliteMore?'还有 '+r.source.length+' 个':name}</strong>`+(r.isParent?'':rootNode?`<small>${esc(countText(r))}</small>`:orbital()&&r.level===1&&r.kind!=='add'&&r.kind!=='bundle'?'':satelliteMore?'':r.kind==='bundle'?'<small>'+ (r.bundleKind==='group'?r.links+' 个网址':'展开查看')+'</small>':r.kind==='group'?'<small>'+r.links.toLocaleString()+' 个网址</small>':r.kind==='scene'?'<small>'+r.children.length+' 个分组 · '+r.links+' 个网址</small>':'');
+      const content=mark+`<strong>${satelliteMore?'还有 '+r.source.length+' 个':name}</strong>`+(r.isParent?'':rootNode?`<small>${esc(countText(r))}</small>`:orbital()&&r.level===1&&r.kind!=='add'&&r.kind!=='bundle'?(!classicOrbits&&['scene','group'].includes(r.kind)?'<small class="at-planet-summary">'+esc(countText(r))+'</small>':''):satelliteMore?'':r.kind==='bundle'?'<small>'+ (r.bundleKind==='group'?r.links+' 个网址':'展开查看')+'</small>':r.kind==='group'?'<small>'+r.links.toLocaleString()+' 个网址</small>':r.kind==='scene'?'<small>'+r.children.length+' 个分组 · '+r.links+' 个网址</small>':'');
       el.innerHTML=r.kind==='link'?`<a class="at-node-main" href="${esc(safeURL(r.item[1])||'#')}" target="_blank" rel="noopener noreferrer" title="打开 ${name}" data-at-link="${esc(r.key)}">${content}</a>`:`<button class="at-node-main" data-at-focus="${esc(r.key)}" title="${name}" aria-label="${r.isParent?'返回':rootNode?'当前':'进入'}${name}">${content}</button>`;
       if(r.kind==='add'){el.querySelector('button').removeAttribute('data-at-focus');el.querySelector('button').setAttribute('data-at-create',r.owner);el.querySelector('button').setAttribute('aria-label',r.name)}
       if(!['bundle','add'].includes(r.kind)&&!r.isParent)el.insertAdjacentHTML('beforeend',`<button class="at-node-menu" data-at-details="${esc(r.key)}" aria-label="管理 ${name}" title="管理">${icons.more}</button>`);
-      if(rootNode&&['scene','space'].includes(r.kind))el.insertAdjacentHTML('beforeend',`<button class="at-summary" data-at-overview aria-pressed="${state.overview}" title="展开各分组的网址">${icons.link}<span>共 ${r.links.toLocaleString()} 个网址</span>${icons.chevron}</button>`);
       canvas.append(el);nodeEls.set(r.key,el);
       const symbol=el.querySelector('.at-orb,.at-logo,.at-bundle-mark,.at-add-mark')||el.querySelector('.at-node-main'),nodeBox=el.getBoundingClientRect(),symbolBox=symbol.getBoundingClientRect();
       r.anchorX=symbolBox.left-nodeBox.left+symbolBox.width/2;r.anchorY=symbolBox.top-nodeBox.top+symbolBox.height/2;
+      const card=r.kind==='link'||(r.kind==='bundle'&&state.mode!=='2d')||(r.kind==='add'&&r.addKind==='link');
+      const boundary=card?el.querySelector('.at-node-main'):symbol,box=boundary.getBoundingClientRect();
+      r.boundary={x:box.left-nodeBox.left-r.anchorX,y:box.top-nodeBox.top-r.anchorY,w:box.width,h:box.height,radius:parseFloat(getComputedStyle(boundary).borderRadius)||0};
       const parent=visible.find(x=>x.key===r.parent);
-      if(parent){const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.classList.add('at-line');if(parent.isParent)path.classList.add('is-upstream');if(r.kind==='link')path.classList.add('at-link-line');path.dataset.from=parent.key;path.dataset.to=r.key;lines.append(path);const flow=document.createElementNS('http://www.w3.org/2000/svg','g');flow.classList.add('at-packet');flow.innerHTML='<circle class="at-packet-head" r="1.65"/>';flow.dataset.from=parent.key;flow.dataset.to=r.key;flows.append(flow);edgeEls.push({el:path,flow,from:parent,to:r})}
+      if(parent){const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.classList.add('at-line');if(parent.isParent)path.classList.add('is-upstream');if(r.kind==='link')path.classList.add('at-link-line');path.dataset.from=parent.key;path.dataset.to=r.key;path.dataset.level=r.level;lines.append(path);const flow=document.createElementNS('http://www.w3.org/2000/svg','g');flow.classList.add('at-packet');flow.innerHTML='<circle class="at-packet-head" r="1.65"/>';flow.dataset.from=parent.key;flow.dataset.to=r.key;flows.append(flow);edgeEls.push({el:path,flow,from:parent,to:r})}
     }
     const aggregated=visible.some(x=>x.kind==='bundle');
     query('.at-hint').textContent=state.mode==='3d'?'拖动排序 · 空白处旋转 · 滚轮缩放':'拖动排序 · 空白处移动 · 滚轮缩放';
@@ -267,7 +282,7 @@
     const canvas=query('.at-canvas'),w=canvas.clientWidth,h=canvas.clientHeight,n=visible.find(x=>x.level===0);if(!w||!h||!n)return;
     const top=compactLayout?190:145,bottom=compactLayout?180:155,usableH=Math.max(220,h-top-bottom),centerY=top+usableH/2;
     const childrenMap=new Map();for(const x of visible){if(x.level<=0)continue;if(!childrenMap.has(x.parent))childrenMap.set(x.parent,[]);childrenMap.get(x.parent).push(x)}
-    const children=p=>childrenMap.get(p.key)||[],direct=children(n),radial=state.mode==='3d'||state.layout==='radial';
+    const radial=state.mode==='3d'||state.layout==='radial',children=p=>(childrenMap.get(p.key)||[]).filter(x=>!radial||x.kind!=='add'),direct=children(n);
     for(const r of visible){r.bx=0;r.by=0;r.bz=0;r.ox=0;r.oy=0}
     if(orbital()){
       layoutSolar(n,children,w,usableH,fit);
@@ -280,6 +295,10 @@
         if(state.mode==='3d'){const ch=children(c),outer=radius+step;ch.forEach((g,j)=>{const a=angle+(j-(ch.length-1)/2)*(Math.PI*1.5/Math.max(1,batch.length))/Math.max(1,ch.length);g.bx=Math.cos(a)*outer;g.by=Math.sin(a)*outer;g.bz=Math.sin(a*2+.4)*outer*.24})}
       });rings.push({batch,radius});cursor+=batch.length;radius+=step;ring++}
       if(state.mode==='2d'){
+        // Straight spokes need distinct directions, including a reserved downward
+        // direction for the add target. Keep the existing concentric ring radii.
+        const ordered=[...direct].sort((a,b)=>((a.layoutAngle-Math.PI/2+Math.PI*2)%(Math.PI*2))-((b.layoutAngle-Math.PI/2+Math.PI*2)%(Math.PI*2)));
+        ordered.forEach((node,i)=>{const radius=Math.hypot(node.bx,node.by),angle=Math.PI/2+Math.PI*2*(i+1)/(ordered.length+1);node.layoutAngle=angle;node.bx=Math.cos(angle)*radius-(node.kind==='link'?node.w/2-node.anchorX:0);node.by=Math.sin(angle)*radius-(node.kind==='link'?node.h/2-node.anchorY:0)});
         const outerDirect=rings.at(-1)?.radius||radius-step;
         // Keep each branch on its scene's outward ray. One child is exactly collinear;
         // siblings open into a small mirrored fan without entering any first-level ring.
@@ -292,32 +311,49 @@
         });
       }
       // Leave the readable node size unchanged; large rings remain reachable by panning/zooming.
+    }else if(n.kind==='group'){
+      // Link cards keep their full width; the final add target occupies a normal cell.
+      const gap=20,cellW=Math.max(120,...direct.map(c=>c.w)),cellH=Math.max(52,...direct.map(c=>c.h)),vertical=state.layout==='organization';
+      const heading=sharedHeading.getBoundingClientRect(),box=canvas.getBoundingClientRect(),rootX=clamp(heading.left-box.left+(compactLayout?42:58),55,w*.25),left=rootX+(compactLayout?110:180);
+      const available=vertical?w-80:Math.max(cellW,w-left-40),cols=Math.max(1,Math.floor((available+gap)/(cellW+gap))),rows=Math.ceil(direct.length/cols);
+      direct.forEach((c,i)=>{const row=Math.floor(i/cols),col=i%cols,count=Math.min(cols,direct.length-row*cols);
+        c.bx=(vertical?(col-(count-1)/2)*(cellW+gap)-cellW/2:left-rootX+col*(cellW+gap))+c.anchorX;
+        c.by=(vertical?140:-(rows*(cellH+gap)-gap)/2)+row*(cellH+gap)+c.anchorY;
+      });
     }else if(direct.length>12){
       // Dense sibling levels wrap as connected graph branches; no list view is used.
+      const rowGap=Math.max(...direct.map(c=>c.h))+18,columnGap=Math.max(...direct.map(c=>c.w))+24;
       if(state.layout==='organization'){
         const cols=Math.max(2,Math.floor((w-90)/145)),rows=Math.ceil(direct.length/cols);n.by=-usableH/2+70;
-        direct.forEach((c,i)=>{const row=Math.floor(i/cols),count=Math.min(cols,direct.length-row*cols);c.bx=(i%cols-(count-1)/2)*Math.min(154,(w-90)/cols);c.by=-usableH/2+195+row*Math.min(100,(usableH-225)/Math.max(1,rows-1))});
+        direct.forEach((c,i)=>{const row=Math.floor(i/cols),count=Math.min(cols,direct.length-row*cols);c.bx=(i%cols-(count-1)/2)*Math.max(columnGap,Math.min(154,(w-90)/cols));c.by=-usableH/2+195+row*rowGap});
       }else{
-        const rows=Math.max(4,Math.floor((usableH-70)/57)),cols=Math.ceil(direct.length/rows);n.bx=-w/2+120;
-        direct.forEach((c,i)=>{c.bx=-w/2+320+Math.floor(i/rows)*Math.min(230,(w-460)/Math.max(1,cols-1));c.by=(i%rows-(Math.min(rows,direct.length-Math.floor(i/rows)*rows)-1)/2)*57});
+        const verticalStep=Math.max(...direct.map(c=>c.h))+8,rows=Math.max(2,Math.floor((usableH+8)/verticalStep)),cols=Math.ceil(direct.length/rows);n.bx=-w/2+120;
+        direct.forEach((c,i)=>{c.bx=-w/2+320+Math.floor(i/rows)*Math.max(columnGap,Math.min(230,(w-460)/Math.max(1,cols-1)));c.by=(i%rows-(Math.min(rows,direct.length-Math.floor(i/rows)*rows)-1)/2)*verticalStep});
       }
     }else{
       const vertical=state.layout==='organization',gap=vertical?22:18;
       function measure(p){const ch=children(p);p.span=Math.max(vertical?p.w:p.h,ch.length?ch.reduce((sum,c)=>sum+measure(c),0)+gap*(ch.length-1):0);return p.span}measure(n);
-      const maxLevel=Math.max(...visible.map(r=>r.level)),crossScale=Math.min(1,(vertical?w-100:usableH-60)/n.span),step=vertical?Math.min(220,(usableH-130)/Math.max(1,maxLevel)):Math.min(320,(w-260)/Math.max(1,maxLevel));
+      const maxLevel=Math.max(...visible.map(r=>r.level)),crossScale=1,step=vertical?Math.max(145,Math.min(220,(usableH-130)/Math.max(1,maxLevel))):Math.max(180,Math.min(320,(w-260)/Math.max(1,maxLevel)));
       function arrange(p,depth,cross){if(vertical){p.bx=cross*crossScale;p.by=(depth-maxLevel/2)*step}else{p.bx=(depth-maxLevel/2)*step;p.by=cross*crossScale}const ch=children(p);let cursor=cross-(ch.reduce((sum,c)=>sum+c.span,0)+Math.max(0,ch.length-1)*gap)/2;ch.forEach(c=>{arrange(c,depth+1,cursor+c.span/2);cursor+=c.span+gap})}arrange(n,0,0);
     }
-    if(n.parent){const x=n.bx,y=n.by,z=n.bz;for(const r of visible)if(!r.isParent){r.bx-=x;r.by-=y;r.bz-=z}}
+    if(radial&&n.parent){const x=n.bx,y=n.by,z=n.bz;for(const r of visible)if(!r.isParent){r.bx-=x;r.by-=y;r.bz-=z}}
+    if(!radial){
+      const heading=sharedHeading.getBoundingClientRect(),box=canvas.getBoundingClientRect(),startX=clamp(heading.left-box.left+(compactLayout?42:58),55,w*.25),startY=clamp(heading.bottom-box.top+55,105,h*.28);
+      const dx=state.layout==='mindmap'?startX-w/2-n.bx:0,dy=state.layout==='organization'?startY-centerY-n.by:0;
+      for(const r of visible)if(!r.isParent){r.bx+=dx;r.by+=dy}
+      if(state.layout==='mindmap'&&n.kind!=='group'){const add=direct.find(r=>r.kind==='add');if(add)add.by=Math.max(...direct.map(r=>r.by))}
+    }
     needsPaint=true;
   }
   function orbitIdentity(r){return r.kind==='link'?'u:'+hash((r.item?.[1]||'')+'\u0000'+(r.item?.[0]||'')):r.key}
   function orbitPlan(n,create=false,scope='main'){
-    const owner=saved[state.sid]||(create?(saved[state.sid]={}):{}),plans=owner.orbitPlans||(create?(owner.orbitPlans={}):null),key=state.scene3d+':'+(scope==='satellite'?'satellite:':'')+n.key;
+    const owner=saved[state.sid]||(create?(saved[state.sid]={}):{}),plans=owner.orbitPlans||(create?(owner.orbitPlans={}):null),key=state.scene3d+':'+(scope==='satellite'?'satellite:':!classicOrbits&&n.kind==='space'?'galaxy:':'')+n.key;
     return {owner,plans,key,values:plans?.[key]||null};
   }
   function layoutSolar(n,children,w,usableH,fit){
+    if(galaxy()){layoutGalaxy(n,children,w,usableH,fit);return}
     orbits=[];satelliteOrbits=[];
-    const direct=children(n),available=Math.min(w*.43,(usableH-155)/1.04);
+    const add=visible.find(r=>r.kind==='add'),direct=[...children(n),...(!classicOrbits&&add?[add]:[])],available=Math.min(w*.43,(usableH-155)/1.04);
     // Larger circumferences receive more slots. Saved ring choices change only
     // this visual arrangement; the data hierarchy remains the source of truth.
     const capacities=[];let capacity=0;
@@ -325,14 +361,14 @@
     const baseRingCount=Math.max(1,capacities.length),counts=capacities.map(c=>Math.floor(direct.length*c/Math.max(1,capacity)));
     for(let remaining=direct.length-counts.reduce((a,b)=>a+b,0),i=counts.length-1;remaining>0;remaining--,i=(i-1+counts.length)%counts.length)counts[i]++;
     const autoRings=[];for(let i=0;i<counts.length;i++)for(let j=0;j<counts[i];j++)autoRings.push(i);
-    const stored=orbitPlan(n).values||{},assignments=direct.map((r,i)=>{const value=stored[orbitIdentity(r)];return Number.isInteger(value)&&value>=0&&value<baseRingCount?value:autoRings[i]||0});
+    const stored=orbitPlan(n).values||{},assignments=direct.map((r,i)=>{if(!classicOrbits&&r.kind==='add')return 0;const value=stored[orbitIdentity(r)];return Number.isInteger(value)&&value>=0&&value<baseRingCount?value:autoRings[i]||0});
     const ringCount=Math.max(baseRingCount,...assignments.map(x=>x+1));while(capacities.length<ringCount)capacities.push((compactLayout?3:4)+capacities.length*2);
     const branches=Array.from({length:ringCount},()=>[]);direct.forEach((r,i)=>branches[assignments[i]].push(r));
     const nestedSystems=systems()&&n.kind==='space',inner=Math.max(nestedSystems?255:230,Math.min(nestedSystems?335:310,available*.56)),step=Math.max(nestedSystems?190:160,(available-inner)/Math.max(1,ringCount-1));
     for(let i=0;i<ringCount;i++){
       const members=branches[i],radius=inner+i*step;
       const color=['var(--at-accent)','color-mix(in srgb,var(--at-accent) 48%,#709dc4)','color-mix(in srgb,var(--at-accent) 42%,#b496c7)','color-mix(in srgb,var(--at-accent) 45%,#bc9b66)'][i%4];
-      const orbit={id:i,parentKey:n.key,nodeKind:members.find(r=>!['add','bundle'].includes(r.kind))?.kind,radius,tilt:1.0,speed:.00013/Math.pow(i+1,1.45),members,capacity:capacities[i],color,angle:-.75+i*1.1};orbits.push(orbit);
+      const orbit={id:i,parentKey:n.key,nodeKind:members.find(r=>!['add','bundle'].includes(r.kind))?.kind,radius,tilt:1.0,speed:(classicOrbits?1:-1)*.00013/Math.pow(i+1,1.45),members,capacity:capacities[i],color,angle:-.75+i*1.1};orbits.push(orbit);
       members.forEach((r,j)=>{
         r.orbit=orbit;r.orbitAngle=orbit.angle+j*Math.PI*2/Math.max(1,members.length);r.ring=i;
         const el=nodeEls.get(r.key);el.dataset.orbit=i;el.style.setProperty('--orbit-color',color);el.style.setProperty('--planet-shift','0deg');
@@ -356,16 +392,59 @@
     updateSolarPositions();
     // Fit the whole system on entry, keeping the individual labels readable.
     if(fit){const extent=(orbits.at(-1)?.radius||inner)+(nestedSystems?120:0);
-      state.zoom=Math.min(1,(w-90)/(extent*2+160),(usableH-35)/(extent*2*Math.cos(1)+185));
+      const add=classicOrbits?visible.find(r=>r.kind==='add'):null;
+      state.zoom=Math.min(1,(w-90)/(extent*2+160),(usableH-35)/(extent*2*Math.cos(1)+185+(add?add.h*2+44:0)));
       state.zoom=Math.max(.34,state.zoom);
     }
+  }
+  function layoutGalaxy(n,children,w,usableH,fit){
+    orbits=[];satelliteOrbits=[];
+    const direct=children(n),stored=orbitPlan(n).values||{},innerMembers=direct.filter(r=>stored[orbitIdentity(r)]===-1).slice(0,3);
+    for(const r of direct)if(innerMembers.length<3&&!innerMembers.includes(r))innerMembers.push(r);
+    const add=visible.find(r=>r.kind==='add'),innerPlanets=[...innerMembers,...(add?[add]:[])],armCount=Math.max(1,innerPlanets.length),arms=Array.from({length:armCount},()=>[]);
+    direct.filter(r=>!innerMembers.includes(r)).forEach((r,i)=>{const storedArm=stored[orbitIdentity(r)];arms[Number.isInteger(storedArm)&&storedArm>=0&&storedArm<armCount?storedArm:i%armCount].push(r)});
+    const longest=Math.max(1,...arms.map(a=>a.length)),outer=Math.max(530,245+(longest-1)*85),ns='http://www.w3.org/2000/svg',lines=query('.at-lines');
+    lines.querySelectorAll('.at-orbit-track,.at-orbit-current,.at-satellite-track,.at-galaxy-haze,.at-galaxy-stars,.at-galaxy-gradient').forEach(el=>el.remove());
+    const defs=document.createElementNS(ns,'defs');defs.classList.add('at-galaxy-gradient');
+    defs.innerHTML='<radialGradient id="at-galaxy-arm-fade" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="1"><stop offset="0" stop-color="var(--at-accent)" stop-opacity=".78"/><stop offset=".3" stop-color="var(--at-accent)" stop-opacity=".68"/><stop offset=".65" stop-color="var(--at-accent)" stop-opacity=".48"/><stop offset="1" stop-color="var(--at-accent)" stop-opacity=".32"/></radialGradient>';lines.prepend(defs);
+    arms.forEach((members,i)=>{
+      const orbit={id:i,parentKey:n.key,nodeKind:'scene',galaxy:true,inner:185,radius:outer,tilt:.78,speed:.000035,angle:-.8+i*Math.PI*2/armCount,members,capacity:Math.max(8,members.length+1),color:'var(--at-accent)'};orbits.push(orbit);
+      const slots=galaxySlots(orbit,members.length);
+      members.forEach((r,j)=>{r.orbit=orbit;r.orbitAngle=slots[j];r.ring=i;const el=nodeEls.get(r.key);el.dataset.orbit=i;el.style.setProperty('--orbit-color',orbit.color);el.style.setProperty('--planet-shift','0deg')});
+      for(const [name,cls] of [['halo','at-galaxy-haze'],['el','at-orbit-track'],['stars','at-galaxy-stars']]){orbit[name]=document.createElementNS(ns,'path');orbit[name].classList.add(cls);orbit[name].style.setProperty('--orbit-color',orbit.color);lines.prepend(orbit[name])}
+      orbit.el.dataset.orbit=i;orbit.el.dataset.capacity=orbit.capacity;
+      orbit.el.style.stroke='url(#at-galaxy-arm-fade)';orbit.halo.style.stroke='url(#at-galaxy-arm-fade)';
+    });
+    if(innerPlanets.length){const orbit={id:-1,parentKey:n.key,nodeKind:'scene',radius:185,tilt:.78,speed:.000035,members:innerPlanets,capacity:4,color:'var(--at-accent)',angle:-.8};orbits.push(orbit);
+      innerPlanets.forEach((r,i)=>{r.orbit=orbit;r.orbitAngle=orbit.angle+i*Math.PI*2/armCount;r.ring=-1;const el=nodeEls.get(r.key);el.dataset.orbit='-1';el.style.setProperty('--orbit-color',orbit.color)});
+      orbit.el=document.createElementNS(ns,'path');orbit.el.classList.add('at-orbit-track','at-add-orbit');orbit.el.dataset.orbit='-1';lines.prepend(orbit.el);
+    }
+    updateSolarPositions();
+    if(fit){
+      // Fit the visible arms and labels instead of an oversized circular envelope.
+      let extentX=0,extentY=0;
+      for(const orbit of orbits)for(let i=0;i<=160;i++){const p=orbit.galaxy?galaxyPoint(orbit,i/160):orbitPoint(orbit,i/160*Math.PI*2);extentX=Math.max(extentX,Math.abs(p.x)+24);extentY=Math.max(extentY,Math.abs(p.y)+24)}
+      for(const r of visible)if(!r.isParent){extentX=Math.max(extentX,Math.abs(r.bx-r.anchorX),Math.abs(r.bx+r.w-r.anchorX));extentY=Math.max(extentY,Math.abs(r.by-r.anchorY),Math.abs(r.by+r.h-r.anchorY))}
+      state.zoom=Math.max(.25,Math.min(3,(w-48)/(extentX*2),(usableH-32)/(extentY*2)));
+    }
+  }
+  function galaxyPoint(orbit,t,jitter=0){
+    // Zero radial derivative at the root joins each arm tangentially to the inner ring.
+    const radius=orbit.inner+(orbit.radius-orbit.inner)*t*t,angle=orbit.angle-t*Math.PI*2+state.orbitClock*orbit.speed+jitter;
+    return {x:Math.cos(angle)*radius,y:Math.sin(angle)*radius*Math.cos(orbit.tilt),z:Math.sin(angle)*radius*Math.sin(orbit.tilt)};
+  }
+  function galaxySlots(orbit,count){
+    // Space planets by distance along the arm, keeping the inner-ring junction clear.
+    const start=Math.sqrt((270-orbit.inner)/(orbit.radius-orbit.inner)),samples=[{t:start,distance:0}];let previous=galaxyPoint(orbit,start),distance=0;
+    for(let i=1;i<=80;i++){const t=start+(1-start)*i/80,p=galaxyPoint(orbit,t);distance+=Math.hypot(p.x-previous.x,p.y-previous.y,p.z-previous.z);samples.push({t,distance});previous=p}
+    return Array.from({length:count},(_,i)=>{const target=distance*(i+.35)/count,index=samples.findIndex(s=>s.distance>=target),a=samples[Math.max(0,index-1)],b=samples[index];return a.t+(b.t-a.t)*(target-a.distance)/Math.max(.001,b.distance-a.distance)});
   }
   function orbitPoint(orbit,a){
     const local={x:Math.cos(a)*orbit.radius,y:Math.sin(a)*orbit.radius*Math.cos(orbit.tilt),z:Math.sin(a)*orbit.radius*Math.sin(orbit.tilt)};
     return orbit.isSatellite?{x:orbit.parent.bx+local.x,y:orbit.parent.by+local.y,z:orbit.parent.bz+local.z}:local;
   }
   function updateSolarPositions(){
-    for(const r of visible){if(r.orbit){const o=r.orbit,p=orbitPoint(o,r.orbitAngle+state.orbitClock*o.speed);r.bx=p.x;r.by=p.y;r.bz=p.z}}
+    for(const r of visible){if(r.orbit){const o=r.orbit,p=o.galaxy?galaxyPoint(o,r.orbitAngle):orbitPoint(o,r.orbitAngle+state.orbitClock*o.speed);r.bx=p.x;r.by=p.y;r.bz=p.z}}
     for(const orbit of satelliteOrbits)for(const r of orbit.members){const p=orbitPoint(orbit,r.orbitAngle+state.orbitClock*orbit.speed);r.bx=p.x;r.by=p.y;r.bz=p.z}
     for(const r of visible){if(r.satellite&&!r.satellite.orbit){const {parent}=r.satellite;r.bx=parent.bx;r.by=parent.by;r.bz=parent.bz}}
   }
@@ -373,13 +452,64 @@
     const canvas=query('.at-canvas'),w=canvas.clientWidth,h=canvas.clientHeight,top=compactLayout?190:145,bottom=compactLayout?180:155;
     const yaw=state.mode==='3d'?state.yaw+state.phase:0,pitch=state.mode==='3d'?state.pitch:0;
     const rx=fixed?x:x*Math.cos(yaw)+z*Math.sin(yaw),rz=fixed?0:z*Math.cos(yaw)-x*Math.sin(yaw),ry=fixed?y:y*Math.cos(pitch)-rz*Math.sin(pitch),depth=fixed?0:rz*Math.cos(pitch)+y*Math.sin(pitch);
-    return {x:w/2+rx*state.zoom+state.panX,y:top+(h-top-bottom)/2+ry*state.zoom+state.panY,depth};
+    return {x:w/2+rx*state.zoom+state.panX,y:(galaxy()?h/2:top+(h-top-bottom)/2)+ry*state.zoom+state.panY,depth};
   }
   function paintOrbits(){
     if(!orbital())return;
-    for(const orbit of [...orbits,...satelliteOrbits]){let d='';orbit.screenPoints=[];for(let i=0;i<=80;i++){const a=i/80*Math.PI*2,world=orbitPoint(orbit,a),p=project(world.x,world.y,world.z);if(orbit.isSatellite){p.x+=orbit.parent.ox||0;p.y+=orbit.parent.oy||0}orbit.screenPoints.push(p);d+=(i?' L':'M')+p.x+','+p.y}orbit.el.setAttribute('d',d);
+    const arm=orbits.find(orbit=>orbit.galaxy),gradient=query('#at-galaxy-arm-fade');
+    if(arm&&gradient){const c=project(0,0,0),x=project(arm.radius,0,0),y=project(0,arm.radius*Math.cos(arm.tilt),arm.radius*Math.sin(arm.tilt));gradient.setAttribute('gradientTransform',`matrix(${x.x-c.x} ${x.y-c.y} ${y.x-c.x} ${y.y-c.y} ${c.x} ${c.y})`)}
+    for(const orbit of [...orbits,...satelliteOrbits]){let d='';orbit.screenPoints=[];for(let i=0;i<=80;i++){const a=i/80*Math.PI*2,world=orbit.galaxy?galaxyPoint(orbit,i/80):orbitPoint(orbit,a),p=project(world.x,world.y,world.z);if(orbit.isSatellite){p.x+=orbit.parent.ox||0;p.y+=orbit.parent.oy||0}orbit.screenPoints.push(p);d+=(i?' L':'M')+p.x+','+p.y}orbit.el.setAttribute('d',d);
+      if(orbit.galaxy){orbit.halo.setAttribute('d',d);orbit.halo.style.strokeWidth=54*state.zoom;let dust='';for(let i=0;i<75;i++){const t=(i+.5)/75,jitter=((hash(orbit.id+':'+i)%1000)/1000-.5)*.23,world=galaxyPoint(orbit,t,jitter),p=project(world.x,world.y,world.z);dust+='M'+p.x+','+p.y+'h.1'}orbit.stars.setAttribute('d',dust);orbit.stars.style.strokeWidth=1.5*state.zoom}
       if(orbit.marker){const world=orbitPoint(orbit,state.orbitClock*orbit.speed+orbit.angle+.5),p=project(world.x,world.y,world.z);orbit.marker.setAttribute('transform','translate('+(p.x-1.5)+' '+(p.y-1.5)+') rotate(45 1.5 1.5)')}
     }
+  }
+  // Use the visible circle/rounded card, not its icon centre, as the connection boundary.
+  function edgeShape(node){
+    const z=node.isParent?1:state.zoom,b=node.boundary;
+    return {x:node.px+(b.x+b.w/2)*z,y:node.py+(b.y+b.h/2)*z,hw:b.w*z/2,hh:b.h*z/2,r:Math.min(b.radius,b.w/2,b.h/2)*z};
+  }
+  function edgePort(shape,toward){
+    const dx=toward.x-shape.x,dy=toward.y-shape.y,length=Math.hypot(dx,dy)||1,ux=dx/length,uy=dy/length;
+    let lo=0,hi=Math.hypot(shape.hw,shape.hh)+1;
+    for(let i=0;i<18;i++){const t=(lo+hi)/2,qx=Math.abs(ux*t)-shape.hw+shape.r,qy=Math.abs(uy*t)-shape.hh+shape.r;
+      if(Math.hypot(Math.max(qx,0),Math.max(qy,0))+Math.min(Math.max(qx,qy),0)<=shape.r)lo=t;else hi=t;
+    }
+    return {x:shape.x+ux*lo,y:shape.y+uy*lo};
+  }
+  function routeEdge(edge,routed){
+    if(state.layout==='radial'){const a=edgeShape(edge.from),b=edgeShape(edge.to),start=edgePort(a,b),end=edgePort(b,a);return `M${start.x},${start.y} L${end.x},${end.y}`}
+    const a=edgeShape(edge.from),b=edgeShape(edge.to),z=state.zoom,dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1;
+    const nx=-dy/len,ny=dx/len,radial=state.layout==='radial'||edge.from.isParent;
+    const siblings=edgeEls.filter(e=>e.from===edge.from),order=siblings.indexOf(edge),lane=(order-(siblings.length-1)/2)*2.5*z;
+    const fan=[...siblings].sort((left,right)=>{const l=edgeShape(left.to),r=edgeShape(right.to);return Math.atan2(l.y-a.y,l.x-a.x)-Math.atan2(r.y-a.y,r.x-a.x)||Math.hypot(l.x-a.x,l.y-a.y)-Math.hypot(r.x-a.x,r.y-a.y)}),rank=fan.indexOf(edge);
+    const obstacles=visible.filter(n=>n!==edge.from&&n!==edge.to).map(n=>{const scale=n.isParent?1:z;return {x:n.px-n.anchorX*scale,y:n.py-n.anchorY*scale,w:n.w*scale,h:n.h*scale}});
+    let best;
+    // Test separate curved lanes. Penalize crossing nodes and running along an existing
+    // connection; isolated crossings remain possible without merging relationship lines.
+    for(let attempt=0;attempt<9;attempt++){
+      const bend=attempt?Math.ceil(attempt/2)*(attempt%2?1:-1)*24*z:0;
+      let c1,c2;
+      if(radial){const offset=bend+(edge.to.level>1?-30*z:Math.min(72*z,len*.12))+lane;c1={x:a.x+dx/3+nx*offset,y:a.y+dy/3+ny*offset};c2={x:a.x+dx*2/3+nx*offset,y:a.y+dy*2/3+ny*offset}}
+      else if(state.layout==='organization'){const mid=(a.y+b.y)/2;c1={x:a.x+lane+bend,y:mid};c2={x:b.x+lane+bend,y:mid}}
+      else{const mid=(a.x+b.x)/2;c1={x:mid,y:a.y+lane+bend};c2={x:mid,y:b.y+lane+bend}}
+      if(!radial&&fan.length>1){const direction=(state.layout==='organization'?Math.PI/2:0)+(rank/(fan.length-1)-.5)*2.25,reach=Math.min(180*z,len*.38);c1={x:a.x+Math.cos(direction)*reach,y:a.y+Math.sin(direction)*reach}}
+      const start=edgePort(a,c1),end=edgePort(b,c2),points=[];
+      let score=Math.abs(bend)/Math.max(z,0.01)*.2;
+      for(let i=0;i<=40;i++){const t=i/40,s=1-t;points.push({x:s*s*s*start.x+3*s*s*t*c1.x+3*s*t*t*c2.x+t*t*t*end.x,y:s*s*s*start.y+3*s*s*t*c1.y+3*s*t*t*c2.y+t*t*t*end.y})}
+      for(let i=1;i<points.length-1;i++){const p=points[i];for(const o of obstacles)if(p.x>o.x-3*z&&p.x<o.x+o.w+3*z&&p.y>o.y-3*z&&p.y<o.y+o.h+3*z)score+=100;
+        const tangent={x:points[i+1].x-p.x,y:points[i+1].y-p.y},tl=Math.hypot(tangent.x,tangent.y)||1;
+        if(Math.hypot(p.x-start.x,p.y-start.y)<18*z||Math.hypot(p.x-end.x,p.y-end.y)<18*z)continue;
+        for(const [q,r] of routed.get(Math.floor(p.x/(32*z))+','+Math.floor(p.y/(32*z)))||[]){const vx=r.x-q.x,vy=r.y-q.y,vl=Math.hypot(vx,vy)||1;
+          if(Math.abs(tangent.x*vy-tangent.y*vx)/(tl*vl)<.1&&segmentDistance(p,q,r)<3*z)score+=1000;
+        }
+      }
+      if(!best||score<best.score)best={score,points,path:`M${start.x},${start.y} C${c1.x},${c1.y} ${c2.x},${c2.y} ${end.x},${end.y}`};
+      if(score<.01)break;
+    }
+    for(let i=1;i<best.points.length;i++){const a=best.points[i-1],b=best.points[i],cell=32*z;
+      for(let x=Math.floor((Math.min(a.x,b.x)-3*z)/cell);x<=Math.floor((Math.max(a.x,b.x)+3*z)/cell);x++)for(let y=Math.floor((Math.min(a.y,b.y)-3*z)/cell);y<=Math.floor((Math.max(a.y,b.y)+3*z)/cell);y++){const key=x+','+y;if(!routed.has(key))routed.set(key,[]);routed.get(key).push([a,b])}
+    }
+    return best.path;
   }
   function paint(dt) {
     const canvas=query('.at-canvas');if(!canvas)return;const w=canvas.clientWidth,h=canvas.clientHeight,top=compactLayout?190:145,bottom=compactLayout?180:155;
@@ -388,9 +518,9 @@
     if(state.drag?.type==='branch'&&state.drag.moved){const d=state.drag,amount=reduceMotion.matches?1:1-Math.exp(-dt/100);for(const r of visible){if(d.keys.has(r.key))continue;r.ox+=(r.previewX-r.ox)*amount;r.oy+=(r.previewY-r.oy)*amount}needsPaint=true}
     if(state.settling){const keep=reduceMotion.matches?0:Math.exp(-dt/115);let unfinished=false;for(const r of visible){r.ox=(r.ox||0)*keep;r.oy=(r.oy||0)*keep;if(Math.abs(r.ox)+Math.abs(r.oy)<.08){r.ox=0;r.oy=0}else unfinished=true}state.settling=unfinished;needsPaint=true;canvas.classList.toggle('is-settling',unfinished)}
     if(needsPaint){if(orbital())updateSolarPositions();const yaw=state.mode==='3d'?state.yaw+state.phase:0,pitch=state.mode==='3d'?state.pitch:0,camera=Math.max(w,h)*3;
-      const heading=query('.at-mode-host').getBoundingClientRect(),canvasBox=canvas.getBoundingClientRect(),startX=clamp(heading.left-canvasBox.left+(compactLayout?42:58),55,w*.25),startY=clamp(heading.bottom-canvasBox.top+55,105,h*.28),centerX=w/2,centerY=top+(h-top-bottom)/2;
+      const heading=sharedHeading.getBoundingClientRect(),canvasBox=canvas.getBoundingClientRect(),startX=clamp(heading.left-canvasBox.left+(compactLayout?42:58),55,w*.25),startY=clamp(heading.bottom-canvasBox.top+55,105,h*.28),centerX=w/2,centerY=top+(h-top-bottom)/2;
       for(const r of visible){const x=r.bx||0,y=r.by||0,z=r.bz||0,rx=r.isParent?x:x*Math.cos(yaw)+z*Math.sin(yaw),rz=r.isParent?0:z*Math.cos(yaw)-x*Math.sin(yaw),ry=r.isParent?y:y*Math.cos(pitch)-rz*Math.sin(pitch),depth=r.isParent?0:rz*Math.cos(pitch)+y*Math.sin(pitch);
-        r.baseX=w/2+rx*state.zoom+state.panX;r.baseY=top+(h-top-bottom)/2+ry*state.zoom+state.panY+(r.satellite&&!r.satellite.orbit?90*state.zoom:0);r.px=r.baseX+(r.ox||0);r.py=r.baseY+(r.oy||0);
+        r.baseX=w/2+rx*state.zoom+state.panX;r.baseY=(galaxy()?h/2:top+(h-top-bottom)/2)+ry*state.zoom+state.panY+(r.satellite&&!r.satellite.orbit?90*state.zoom:0);r.px=r.baseX+(r.ox||0);r.py=r.baseY+(r.oy||0);
         if(r.isParent){const span=Math.max(1,Math.hypot(centerX-startX,centerY-startY)),ancestorGap=compactLayout?94:112,t=r.ancestorIndex*Math.min(.34,ancestorGap/span);r.baseX=r.px=startX+(centerX-startX)*t;r.baseY=r.py=startY+(centerY-startY)*t}
         const anchorX=r.anchorX??r.w/2,anchorY=r.anchorY??r.h/2;
         const el=nodeEls.get(r.key),renderZoom=r.isParent?1:state.zoom;
@@ -399,12 +529,29 @@
         // makes both labels and icons visibly soft after zooming.
         el.style.zoom=String(renderZoom);el.style.transform='translate('+(r.px/renderZoom-anchorX)+'px,'+(r.py/renderZoom-anchorY)+'px)';el.style.transformOrigin='0 0';el.style.zIndex=String(30+Math.round(-depth/50));el.style.setProperty('--depth-opacity',String(clamp(1-depth/(camera*.65),.5,1)));el.dataset.depth=Math.round(depth);
       }
+      // Circular and orbital layouts keep their add target below the displayed graph.
+      if(state.mode==='3d'&&(!orbital()||classicOrbits)||state.mode==='2d'&&state.layout==='radial'){
+        const add=visible.find(r=>r.kind==='add'),focus=visible.find(r=>r.level===0);
+        if(add){const bottom=Math.max(...visible.filter(r=>!r.isParent&&r!==add).map(r=>r.py+(r.h-r.anchorY)*state.zoom));
+          add.baseX=add.px=focus.px+(add.anchorX-add.w/2)*state.zoom;add.baseY=add.py=bottom+(22+add.anchorY)*state.zoom;
+          const el=nodeEls.get(add.key);el.style.transform='translate('+(add.px/state.zoom-add.anchorX)+'px,'+(add.py/state.zoom-add.anchorY)+'px)';el.style.setProperty('--depth-opacity','1');
+        }
+      }
+      const routed=new Map();
       for(const edge of edgeEls){const {el,from:a,to:b}=edge;let path;
-        if(a.isParent)path='M'+a.px+','+a.py+' L'+b.px+','+b.py;
+        if(state.mode==='2d')path=routeEdge(edge,routed);
+        else if(a.isParent)path='M'+a.px+','+a.py+' L'+b.px+','+b.py;
         else if(state.mode==='2d'&&state.layout==='organization'){const my=(a.py+b.py)/2;path='M'+a.px+','+a.py+' C'+a.px+','+my+' '+b.px+','+my+' '+b.px+','+b.py}
         else if(state.mode==='2d'&&state.layout==='mindmap'){const mx=(a.px+b.px)/2;path='M'+a.px+','+a.py+' C'+mx+','+a.py+' '+mx+','+b.py+' '+b.px+','+b.py}
         else path='M'+a.px+','+a.py+' L'+b.px+','+b.py;
         el.setAttribute('d',path);edge.length=el.getTotalLength();
+      }
+      if(orbital()&&!classicOrbits){
+        const boxes=visible.map(r=>({node:r,box:nodeEls.get(r.key).querySelector('.at-node-main').getBoundingClientRect()}));
+        for(const r of visible){const el=nodeEls.get(r.key),summary=el.querySelector('.at-planet-summary');if(!summary)continue;const box=summary.getBoundingClientRect();
+          const clear=state.zoom>=.95&&!boxes.some(other=>other.node!==r&&box.left<other.box.right+8&&box.right>other.box.left-8&&box.top<other.box.bottom+8&&box.bottom>other.box.top-8);
+          el.classList.toggle('is-summary-visible',clear);
+        }
       }
       paintOrbits();
       needsPaint=false;
@@ -457,7 +604,7 @@
     const matches=[...index.values()].filter(n=>n.name.toLowerCase().includes(q)||(n.kind==='link'&&(n.item[1]+' '+n.item[2]).toLowerCase().includes(q)));
     box.innerHTML=matches.slice(0,40).map(n=>{const content=`${icons[n.kind]}<span><b>${esc(n.name)}</b><small>${esc(pathOf(n).slice(0,-1).map(x=>x.name).join(' / ')||'当前空间')}</small></span>`;return n.kind==='link'?`<div class="at-result"><a class="at-result" href="${esc(safeURL(n.item[1])||'#')}" data-at-link="${esc(n.key)}" target="_blank" rel="noopener noreferrer">${content}</a><button data-at-locate="${esc(n.key)}" title="定位到所属分组" aria-label="定位 ${esc(n.name)}">${icons.fit}</button></div>`:`<button class="at-result" data-at-focus="${esc(n.key)}">${content}</button>`}).join('')+`<span class="at-search-note">${matches.length?'找到 '+matches.length+' 项'+(matches.length>40?' · 显示前 40 项，请输入更具体的关键词':''):'没有找到，试试名称或网址'}</span>`;
   }
-  function clearSearch(){const el=query('.space-global-search');if(el){el.querySelector('input').value='';el.querySelector('.global-search-results').hidden=true;el.classList.remove('is-open')}}
+  function clearSearch(){const el=document.querySelector('.workspace .space-global-search');if(el){el.querySelector('input').value='';el.querySelector('.global-search-results').hidden=true;el.classList.remove('is-open')}}
   function drawer(title,body) {
     const aside=query('.at-drawer');aside.onclick=null;aside.hidden=false;aside.innerHTML=`<div class="at-drawer-top"><h2>${esc(title)}</h2><button data-at="close-drawer" aria-label="关闭面板">${icons.close}</button></div>${body}<button class="at-drawer-done" data-at="close-drawer">完成</button>`;
     aside.querySelector('button')?.focus({preventScroll:true});return aside;
@@ -502,7 +649,7 @@
   function notify(text,canUndo=false){const el=query('.at-notice');el.hidden=false;el.innerHTML=`<span>${esc(text)}</span>${canUndo?'<button data-at="undo">撤销</button>':''}`;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{if(el.isConnected)el.hidden=true},canUndo?12000:3500)}
   function click(e) {
     if(!e.target.closest('.at-layout-picker'))closeViewPicker();
-    if(!e.target.closest('.space-global-search')){const results=query('.global-search-results');if(results)results.hidden=true}
+    if(!e.target.closest('.space-global-search')){const results=document.querySelector('.workspace .global-search-results');if(results)results.hidden=true}
     const b=e.target.closest('button,a');if(!b)return;
     if(b.hasAttribute('data-at-header')){const selector={add:'[data-action=add]',share:'[data-share-open]',settings:'[data-display-scope-open]'}[b.dataset.atHeader];setContext(get(state.focus));editorBusy=true;try{render();document.querySelector('.workspace '+selector)?.click()}finally{editorBusy=false}return}
     if(b.hasAttribute('data-at-link')){const n=get(b.dataset.atLink);if(!n||!safeURL(n.item[1])){e.preventDefault();notify('这个网址地址无效，请从管理菜单编辑')}return}
@@ -514,12 +661,14 @@
     if(b.hasAttribute('data-at-delete')){remove(b.dataset.atDelete);return}
     if(b.hasAttribute('data-at-locate')){const n=get(b.dataset.atLocate);if(n){focus(n.parent);requestAnimationFrame(()=>query(`[data-key="${CSS.escape(n.key)}"] a`)?.focus({preventScroll:true}))}return}
     if(b.hasAttribute('data-at-dimension')){setViewDimension(b.dataset.atDimension,true);return}
-    if(b.hasAttribute('data-at-view')){const id=b.dataset.atView;state.mode=['spatial','solar','systems'].includes(id)?'3d':'2d';if(state.mode==='3d')state.scene3d=id;else state.layout=id;state.motion=!reduceMotion.matches;savePreferences();resetCamera();renderAtlas();query('[data-at=views]').focus({preventScroll:true});return}
+    if(b.hasAttribute('data-at-view')){selectGraphView(b.dataset.atView);return}
     if(b.hasAttribute('data-at-space')){state.sid=b.dataset.atSpace;state.focus='s:'+state.sid;preferences();resetCamera();buildIndex();setContext(root);renderAtlas();return}
     const action=b.dataset.at;
     if(action==='daily'){setContext(get(state.focus));closeAtlas('daily');return}
     if(action==='home'){leaveAtlasForHome();return}
-    if(action==='views'){openViewPicker();return}
+    if(action==='toggle-dimension'){selectGraphView(viewOptions(state.mode==='3d'?'2d':'3d')[0],'toggle-dimension');return}
+    if(action==='views'){const options=viewOptions(state.mode),current=state.mode==='2d'?state.layout:state.scene3d;selectGraphView(options[(options.indexOf(current)+1)%options.length]);return}
+    if(action==='focus-scene'){closeViewPicker();resetCamera();layout(true);query('.at-canvas').focus({preventScroll:true});return}
     if(action==='back'){const p=get(state.focus).parent;if(p)focus(p);return}
     if(action==='spaces'){drawer('切换空间',`<div class="at-drawer-list">${data.map(s=>`<button data-at-space="${esc(s.id)}" aria-current="${s.id===state.sid}">${esc(s.name)}<small>${s.scenes.length} 个场景</small></button>`).join('')}</div>`);return}
     if(action==='add'){addChild(get(state.focus));return}
@@ -532,17 +681,24 @@
     dialog.classList.remove('atlas-ready');atlasTransitionTimer=setTimeout(()=>{if(dialog.open)dialog.close()},reduceMotion.matches?0:110);
   }
   function leaveAtlasForHome(){closeAtlas('home')}
+  function selectGraphView(id,trigger='views'){state.mode=viewOptions('3d').includes(id)?'3d':'2d';if(state.mode==='3d')state.scene3d=id;else state.layout=id;state.motion=!reduceMotion.matches;savePreferences();resetCamera();renderAtlas();query('[data-at="'+trigger+'"]').focus({preventScroll:true})}
   function setViewDimension(mode,focusTab=false){
     if(!['2d','3d'].includes(mode))return;
     query('.at-view-tabs')?.querySelectorAll('[data-at-dimension]').forEach(tab=>tab.setAttribute('aria-selected',String(tab.dataset.atDimension===mode)));
     query('.at-layout-menu')?.querySelectorAll('[data-at-view-panel]').forEach(panel=>panel.hidden=panel.dataset.atViewPanel!==mode);
     if(focusTab)query('[data-at-dimension="'+mode+'"]')?.focus({preventScroll:true});
   }
-  function openViewPicker(){clearTimeout(viewMenuTimer);const pop=query('.at-layout-menu');if(!pop)return;pop.hidden=false;query('[data-at=views]')?.setAttribute('aria-expanded','true')}
-  function closeViewPicker(){clearTimeout(viewMenuTimer);const pop=query('.at-layout-menu');if(pop)pop.hidden=true;query('[data-at=views]')?.setAttribute('aria-expanded','false')}
-  function zoomBy(ratio){state.zoom=clamp(state.zoom*ratio,.35,3);needsPaint=true}
+  function openViewPicker(){clearTimeout(viewMenuTimer);const pop=query('.at-layout-menu');if(!pop)return;pop.hidden=false;query('.at-view-picker')?.querySelectorAll('[aria-haspopup=dialog]').forEach(b=>b.setAttribute('aria-expanded','true'))}
+  function closeViewPicker(){clearTimeout(viewMenuTimer);const pop=query('.at-layout-menu');if(pop)pop.hidden=true;query('.at-view-picker')?.querySelectorAll('[aria-haspopup=dialog]').forEach(b=>b.setAttribute('aria-expanded','false'))}
+  function zoomBy(ratio,point){
+    const before=state.zoom;state.zoom=clamp(before*ratio,(!classicOrbits&&orbital()) ? .25 : .35,3);
+    const canvas=query('.at-canvas'),top=compactLayout?190:145,bottom=compactLayout?180:155,cx=canvas.clientWidth/2,cy=galaxy()?canvas.clientHeight/2:top+(canvas.clientHeight-top-bottom)/2;
+    const x=point?.x??cx,y=point?.y??cy,scale=state.zoom/before;
+    state.panX=x-cx-(x-cx-state.panX)*scale;state.panY=y-cy-(y-cy-state.panY)*scale;
+    needsPaint=true;
+  }
   function wheel(e){
-    if(!e.target.closest('.at-canvas'))return;e.preventDefault();e.stopPropagation();if(!state.drag)zoomBy(Math.exp(-e.deltaY*.001))
+    if(!e.target.closest('.at-canvas'))return;e.preventDefault();e.stopPropagation();const box=query('.at-canvas').getBoundingClientRect();if(!state.drag)zoomBy(Math.exp(-e.deltaY*.001),{x:e.clientX-box.left,y:e.clientY-box.top})
   }
   function branchKeys(key){const keys=new Set([key]);for(let found=true;found;){found=false;for(const r of visible)if(keys.has(r.parent)&&!keys.has(r.key)){keys.add(r.key);found=true}}return keys}
   function segmentDistance(point,a,b){const dx=b.x-a.x,dy=b.y-a.y,length=dx*dx+dy*dy,t=length?clamp(((point.x-a.x)*dx+(point.y-a.y)*dy)/length,0,1):0;return Math.hypot(point.x-(a.x+dx*t),point.y-(a.y+dy*t))}
@@ -558,7 +714,41 @@
     for(const orbit of satelliteOrbits){if(orbit.id===source.satellite.orbit.id||!orbit.screenPoints?.length)continue;let distance=Infinity;for(let i=1;i<orbit.screenPoints.length;i++)distance=Math.min(distance,segmentDistance(point,orbit.screenPoints[i-1],orbit.screenPoints[i]));if(distance<(best?.distance??Infinity))best={orbit,distance}}
     return best&&best.distance<16?best.orbit:null;
   }
-  function clearOrbitTargets(){for(const orbit of [...orbits,...satelliteOrbits])orbit.el?.classList.remove('is-drop-target')}
+  function clearOrbitTargets(){for(const orbit of [...orbits,...satelliteOrbits])orbit.el?.classList.remove('is-drop-target');query('.at-orbit-slot')?.remove()}
+  function nearestOrbitGap(orbit,clientX,clientY){
+    const box=query('.at-canvas').getBoundingClientRect(),pointer={x:clientX-box.left,y:clientY-box.top},members=orbit.members,gaps=[];
+    const screenAt=t=>{const world=orbit.galaxy?galaxyPoint(orbit,t):orbitPoint(orbit,t+state.orbitClock*orbit.speed);return project(world.x,world.y,world.z)};
+    if(!members.length)gaps.push({start:orbit.galaxy?0:orbit.angle,end:orbit.galaxy?1:orbit.angle+Math.PI*2});
+    else if(orbit.galaxy&&members.length===1){gaps.push({start:0,end:members[0].orbitAngle,before:members[0]},{start:members[0].orbitAngle,end:1,after:members[0]})}
+    else for(let i=0;i<(orbit.galaxy?members.length-1:members.length);i++){const next=(i+1)%members.length;gaps.push({start:members[i].orbitAngle,end:members[next].orbitAngle+(next===0?Math.PI*2:0),after:members[i],before:members[next]})}
+    let best;
+    for(const gap of gaps){for(let i=0;i<=40;i++){const t=gap.start+(gap.end-gap.start)*i/40,p=screenAt(t),distance=Math.hypot(p.x-pointer.x,p.y-pointer.y);if(!best||distance<best.distance)best={...gap,distance}}}
+    if(!best)return null;
+    // Show the opening on the actual track between the neighbouring planets.
+    return {point:screenAt((best.start+best.end)/2),beforeKey:best.before?.key||null,afterKey:best.after?.key||null};
+  }
+  function insertAtOrbitGap(list,entity,orbit,gap){
+    const before=orbit.members.find(r=>r.key===gap?.beforeKey)?.entity,after=orbit.members.find(r=>r.key===gap?.afterKey)?.entity;
+    let index=before?list.indexOf(before):-1;
+    if(index<0&&after)index=list.indexOf(after)+1;
+    if(index<0){const last=orbit.members.map(r=>list.indexOf(r.entity)).filter(i=>i>=0).at(-1);index=last===undefined?list.length:last+1}
+    list.splice(index,0,entity);
+  }
+  function previewOrbitSlot(orbit,source,clientX,clientY){
+    if(!orbit)return;
+    orbit.el?.classList.add('is-drop-target');
+    const full=orbit.members.length>=orbit.capacity,ns='http://www.w3.org/2000/svg',slot=document.createElementNS(ns,'g'),label=document.createElementNS(ns,'text');
+    slot.classList.add('at-orbit-slot');slot.dataset.state=full?'full':'available';slot.style.setProperty('--orbit-color',orbit.color);
+    let point,gap=null;
+    if(full){const box=query('.at-canvas').getBoundingClientRect();point={x:clientX-box.left,y:clientY-box.top};}
+    else{
+      gap=nearestOrbitGap(orbit,clientX,clientY);if(!gap)return;point=gap.point;
+      slot.dataset.before=gap.beforeKey||'';slot.dataset.after=gap.afterKey||'';
+      const circle=document.createElementNS(ns,'circle');circle.setAttribute('r',String(Math.max(14,22*state.zoom)));slot.append(circle);
+    }
+    slot.setAttribute('transform',`translate(${point.x},${point.y})`);label.setAttribute('y',String(full?Math.max(14,22*state.zoom)+19:-Math.max(14,22*state.zoom)-12));label.textContent=full?'轨道已满 · 松开互换':'空槽位 · 松开放入';slot.append(label);query('.at-lines').append(slot);
+    return gap;
+  }
   function orbitValuesFor(n){
     const info=orbitPlan(n,true),values={...(info.values||{})};
     for(const orbit of orbits)for(const member of orbit.members)if(member.entity&&!['add','bundle'].includes(member.kind))values[orbitIdentity(member)]=orbit.id;
@@ -574,6 +764,7 @@
     const canvas=e.target.closest('.at-canvas');if(!canvas||e.button!==0||e.target.closest('.at-node-menu'))return;
     const node=e.target.closest('.at-node');
     if(node&&['add','bundle'].includes(node.dataset.kind))return;
+    if(state.mode==='3d'&&node?.dataset.level==='0'){state.drag={type:'canvas',fromFocus:true,moved:false,x:e.clientX,y:e.clientY,panX:state.panX,panY:state.panY,pan:true};return}
     if(node&&!node.classList.contains('is-parent')){const keys=branchKeys(node.dataset.key);state.drag={type:'branch',key:node.dataset.key,keys,x:e.clientX,y:e.clientY,moved:false,offsets:new Map(visible.map(r=>[r.key,{x:r.ox||0,y:r.oy||0}])),slots:new Map(visible.map(r=>[r.key,{x:r.baseX,y:r.baseY}]))};for(const r of visible){r.previewX=0;r.previewY=0}return}
     if(e.target.closest('button,a'))return;
     e.preventDefault();
@@ -585,6 +776,7 @@
   }
   function pointerMove(e){
     const d=state.drag;if(!d)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;
+    if(d.fromFocus){if(!d.moved&&Math.hypot(dx,dy)<6)return;if(!d.moved){d.moved=true;clearHover();query('.at-canvas').setPointerCapture(e.pointerId);query('.at-canvas').classList.add('is-dragging')}e.preventDefault()}
     if(d.type==='branch'){
       if(!d.moved&&Math.hypot(dx,dy)<6)return;
       if(!d.moved){d.moved=true;state.settling=false;query('.at-canvas').setPointerCapture(e.pointerId);query('.at-canvas').classList.add('is-node-dragging');clearHover();for(const key of d.keys)nodeEls.get(key)?.classList.add('is-held')}
@@ -592,20 +784,22 @@
       const source=visible.find(r=>r.key===d.key),crossSceneGroups=systems()&&source?.kind==='group'&&source.satellite?.orbit,candidates=visible.filter(r=>(r.parent===source?.parent||crossSceneGroups&&r.kind==='group'&&r.satellite?.orbit)&&r.kind===source?.kind&&r.key!==d.key&&!r.isParent);
       const origin=d.slots.get(d.key),x=origin.x+dx,y=origin.y+dy,dist=r=>Math.hypot(d.slots.get(r.key).x-x,d.slots.get(r.key).y-y);
       const nearest=candidates.sort((a,b)=>dist(a)-dist(b))[0];
-      d.target=nearest&&dist(nearest)<Math.max(46,Math.hypot(nearest.w,nearest.h)*state.zoom*.62)?nearest.key:null;
+      const symbol=nearest&&orbital()&&nodeEls.get(nearest.key)?.querySelector('.at-orb'),targetRadius=symbol?Math.max(24,symbol.getBoundingClientRect().width/2+12):nearest?Math.max(46,Math.hypot(nearest.w,nearest.h)*state.zoom*.62):0;
+      d.target=nearest&&dist(nearest)<targetRadius?nearest.key:null;
       const mainTarget=d.target?null:nearestOrbitTrack(e.clientX,e.clientY,source),satelliteTarget=d.target||mainTarget?null:nearestSatelliteTrack(e.clientX,e.clientY,source);
       d.orbitTarget=mainTarget?.id;d.satelliteTarget=satelliteTarget?.id;
       previewSwap(d,d.target);
       nodeEls.forEach((el,key)=>el.classList.toggle('is-sort-target',key===d.target));
-      clearOrbitTargets();if(d.orbitTarget!==undefined&&d.orbitTarget!==null)orbits.find(orbit=>orbit.id===d.orbitTarget)?.el?.classList.add('is-drop-target');else if(d.satelliteTarget)satelliteOrbits.find(orbit=>orbit.id===d.satelliteTarget)?.el?.classList.add('is-drop-target');
+      clearOrbitTargets();d.orbitGap=previewOrbitSlot(mainTarget||satelliteTarget,source,e.clientX,e.clientY);
     }else if(d.pan){state.panX=d.panX+dx;state.panY=d.panY+dy}else{state.yaw=d.yaw+dx*.006;state.pitch=d.pitch+dy*.005}
     needsPaint=true;
   }
   function pointerUp(e){
+    if(state.drag?.fromFocus&&state.drag.moved)state.suppressClickUntil=performance.now()+400;
     const d=state.drag;if(d?.type==='branch'&&d.moved){state.suppressClickUntil=performance.now()+400;state.settling=true;needsPaint=true;nodeEls.forEach(el=>el.classList.remove('is-held'));query('.at-canvas').classList.add('is-settling')}
     state.drag=null;query('.at-canvas')?.classList.remove('is-dragging','is-node-dragging');
     nodeEls.forEach(el=>el.classList.remove('is-sort-target'));clearOrbitTargets();
-    if(d?.moved&&e?.type!=='pointercancel'){if(d.target)reorder(d.key,d.target);else if(d.orbitTarget!==undefined&&d.orbitTarget!==null)moveToOrbit(d.key,d.orbitTarget,e.clientX,e.clientY);else if(d.satelliteTarget)moveGroupToScene(d.key,d.satelliteTarget,e.clientX,e.clientY)}
+    if(d?.moved&&e?.type!=='pointercancel'){if(d.target)reorder(d.key,d.target);else if(d.orbitTarget!==undefined&&d.orbitTarget!==null)moveToOrbit(d.key,d.orbitTarget,e.clientX,e.clientY,d.orbitGap);else if(d.satelliteTarget)moveGroupToScene(d.key,d.satelliteTarget,e.clientX,e.clientY,d.orbitGap)}
   }
   function reorder(key,target){
     const n=get(key),other=get(target),vr=visible.find(r=>r.key===key),vo=visible.find(r=>r.key===target),crossSceneGroups=systems()&&n?.kind==='group'&&other?.kind==='group'&&vr?.satellite?.orbit&&vo?.satellite?.orbit&&n.parent!==other.parent;if(!n||!other||n.kind!==other.kind||n.parent!==other.parent&&!crossSceneGroups)return;
@@ -618,14 +812,14 @@
       [list[a],list[b]]=[list[b],list[a]];undo=()=>{list.splice(0,list.length,...before);if(planInfo){planInfo.plans[planInfo.key]=beforePlan;writeSaved()}persist()};persist();if(planInfo)writeSaved();restoreMotion(positions,camera);
     });
   }
-  function moveToOrbit(key,orbitId,clientX,clientY){
+  function moveToOrbit(key,orbitId,clientX,clientY,gap){
     const n=get(key),source=visible.find(r=>r.key===key),target=orbits.find(orbit=>orbit.id===orbitId),focusNode=get(state.focus);if(!n||!source?.orbit||!target||source.orbit.id===target.id||source.parent!==target.parentKey)return;
     const realTargets=target.members.filter(r=>r.entity&&!['add','bundle'].includes(r.kind)&&r.kind===source.kind);
     if(target.members.length>=target.capacity&&realTargets.length){const box=query('.at-canvas').getBoundingClientRect(),x=clientX-box.left,y=clientY-box.top,nearest=[...realTargets].sort((a,b)=>Math.hypot(a.px-x,a.py-y)-Math.hypot(b.px-x,b.py-y))[0];reorder(key,nearest.key);return}
     writable(n,()=>{const list=sourceList(n),at=list.indexOf(n.entity);if(at<0)return;paint(0);
       const before=[...list],positions=new Map(visible.filter(r=>r.entity).map(r=>[r.entity,{x:r.px,y:r.py}])),camera=Object.fromEntries(['zoom','yaw','pitch','panX','panY','phase','orbitClock'].map(k=>[k,state[k]])),plan=orbitValuesFor(focusNode),beforePlan={...plan.values};
       plan.values[orbitIdentity(source)]=target.id;plan.info.plans[plan.info.key]=plan.values;
-      list.splice(at,1);const anchors=target.members.map(r=>r.entity).filter(Boolean),last=anchors.map(entity=>list.indexOf(entity)).filter(i=>i>=0).at(-1);list.splice(last===undefined?list.length:last+1,0,n.entity);
+      list.splice(at,1);insertAtOrbitGap(list,n.entity,target,gap);
       undo=()=>{list.splice(0,list.length,...before);plan.info.plans[plan.info.key]=beforePlan;persist();writeSaved()};persist();writeSaved();restoreMotion(positions,camera);notify('已移到第 '+(target.id+1)+' 条轨道',true);
     });
   }
@@ -642,7 +836,7 @@
       persist();writeSaved();restoreMotion(positions,camera);notify('两个分组已交换位置',true)
     })
   }
-  function moveGroupToScene(key,orbitId,clientX,clientY){
+  function moveGroupToScene(key,orbitId,clientX,clientY,gap){
     const n=get(key),source=visible.find(r=>r.key===key),targetOrbit=satelliteOrbits.find(orbit=>orbit.id===orbitId),scene=get(targetOrbit?.parentKey),fromScene=get(n?.parent);if(!n||n.kind!=='group'||!source?.satellite?.orbit||!scene||scene.kind!=='scene'||!fromScene)return;
     const realTargets=targetOrbit.members.filter(r=>r.entity&&r.kind==='group');
     if(targetOrbit.members.length>=targetOrbit.capacity&&realTargets.length){const box=query('.at-canvas').getBoundingClientRect(),x=clientX-box.left,y=clientY-box.top,nearest=[...realTargets].sort((a,b)=>Math.hypot(a.px-x,a.py-y)-Math.hypot(b.px-x,b.py-y))[0];reorder(key,nearest.key);return}
@@ -653,7 +847,7 @@
       const beforeFrom=[...from],beforeTo=sameScene?null:[...to],positions=new Map(visible.filter(r=>r.entity).map(r=>[r.entity,{x:r.px,y:r.py}])),camera=Object.fromEntries(['zoom','yaw','pitch','panX','panY','phase','orbitClock'].map(k=>[k,state[k]]));
       const fromPlan=satelliteValuesFor(fromScene),toPlan=sameScene?fromPlan:satelliteValuesFor(scene),beforeFromPlan={...fromPlan.values},beforeToPlan=sameScene?null:{...toPlan.values},identity=orbitIdentity(source);
       if(!sameScene)delete fromPlan.values[identity];toPlan.values[identity]=targetOrbit.ring;fromPlan.info.plans[fromPlan.info.key]=fromPlan.values;toPlan.info.plans[toPlan.info.key]=toPlan.values;
-      from.splice(at,1);to.splice(Math.min(to.length,targetOrbit.ring*targetOrbit.capacity),0,n.entity);
+      from.splice(at,1);insertAtOrbitGap(to,n.entity,targetOrbit,gap);
       undo=()=>{from.splice(0,from.length,...beforeFrom);if(!sameScene)to.splice(0,to.length,...beforeTo);fromPlan.info.plans[fromPlan.info.key]=beforeFromPlan;if(!sameScene)toPlan.info.plans[toPlan.info.key]=beforeToPlan;persist();writeSaved()};
       persist();writeSaved();restoreMotion(positions,camera);notify(sameScene?'已移到第 '+(targetOrbit.ring+1)+' 条分组轨道':'已移到「'+scene.name+'」的第 '+(targetOrbit.ring+1)+' 条轨道',true)
     })

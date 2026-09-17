@@ -1,0 +1,863 @@
+{
+  "package": "@tabler/icons",
+  "version": "3.31.0",
+  "upstream": "https://github.com/tabler/tabler-icons",
+  "license": "MIT",
+  "cosmos": {
+    "0": "sun",
+    "3": "world",
+    "4": "moon-2",
+    "7": "planet",
+    "11": "comet",
+    "12": "meteor",
+    "14": "universe",
+    "15": "galaxy",
+    "16": "stars",
+    "18": "moon-stars"
+  },
+  "paper": {
+    "日报": "news",
+    "双栏报": "article",
+    "刊物": "book",
+    "特刊": "book-2",
+    "报刊集": "books",
+    "手记": "notebook",
+    "札记": "notes",
+    "便笺": "note",
+    "文稿": "file-text",
+    "专题": "file-description",
+    "排印": "file-typography",
+    "社论": "file-pencil",
+    "剪报集": "files",
+    "采编": "clipboard-text",
+    "档案": "archive",
+    "书签": "bookmark",
+    "藏刊": "bookmarks",
+    "周刊": "calendar-week",
+    "信笺": "mail-opened",
+    "印刷": "printer"
+  },
+  "note": "All other theme choices reuse the existing app SVG library. Planet details without a matching icon remain project SVG paths.",
+  "themeCatalog": {
+    "base": [
+      {
+        "id": "car",
+        "name": "轿车"
+      },
+      {
+        "id": "bus",
+        "name": "公交车"
+      },
+      {
+        "id": "motorbike",
+        "name": "摩托车"
+      },
+      {
+        "id": "bike",
+        "name": "自行车"
+      },
+      {
+        "id": "scooter",
+        "name": "滑板车"
+      },
+      {
+        "id": "moped",
+        "name": "轻便摩托"
+      },
+      {
+        "id": "tir",
+        "name": "货运卡车"
+      },
+      {
+        "id": "truck",
+        "name": "卡车"
+      },
+      {
+        "id": "truck-delivery",
+        "name": "配送车"
+      },
+      {
+        "id": "ambulance",
+        "name": "救护车"
+      },
+      {
+        "id": "firetruck",
+        "name": "消防车"
+      },
+      {
+        "id": "tractor",
+        "name": "拖拉机"
+      },
+      {
+        "id": "train",
+        "name": "火车"
+      },
+      {
+        "id": "caravan",
+        "name": "房车"
+      },
+      {
+        "id": "plane",
+        "name": "飞机"
+      },
+      {
+        "id": "helicopter",
+        "name": "直升机"
+      },
+      {
+        "id": "sailboat",
+        "name": "帆船"
+      },
+      {
+        "id": "ship",
+        "name": "轮船"
+      },
+      {
+        "id": "submarine",
+        "name": "潜水艇"
+      },
+      {
+        "id": "air-balloon",
+        "name": "热气球"
+      }
+    ],
+    "music": [
+      {
+        "id": "music",
+        "name": "音符"
+      },
+      {
+        "id": "vinyl",
+        "name": "黑胶唱片"
+      },
+      {
+        "id": "headphones",
+        "name": "耳机"
+      },
+      {
+        "id": "microphone",
+        "name": "麦克风"
+      },
+      {
+        "id": "microphone-2",
+        "name": "演唱话筒"
+      },
+      {
+        "id": "radio",
+        "name": "收音机"
+      },
+      {
+        "id": "guitar-pick",
+        "name": "拨片"
+      },
+      {
+        "id": "piano",
+        "name": "钢琴"
+      },
+      {
+        "id": "device-speaker",
+        "name": "音箱"
+      },
+      {
+        "id": "device-airpods",
+        "name": "无线耳机"
+      },
+      {
+        "id": "playlist",
+        "name": "播放列表"
+      },
+      {
+        "id": "music-heart",
+        "name": "喜欢的音乐"
+      },
+      {
+        "id": "music-plus",
+        "name": "添加乐曲"
+      },
+      {
+        "id": "music-search",
+        "name": "寻找音乐"
+      },
+      {
+        "id": "music-bolt",
+        "name": "节拍"
+      },
+      {
+        "id": "metronome",
+        "name": "节拍器"
+      },
+      {
+        "id": "volume",
+        "name": "音量"
+      },
+      {
+        "id": "adjustments",
+        "name": "调音台"
+      },
+      {
+        "id": "player-record",
+        "name": "录音"
+      },
+      {
+        "id": "wave-sine",
+        "name": "声波"
+      }
+    ],
+    "flow": [
+      {
+        "id": "cube",
+        "name": "立方体"
+      },
+      {
+        "id": "sphere",
+        "name": "球体"
+      },
+      {
+        "id": "pyramid",
+        "name": "四棱锥"
+      },
+      {
+        "id": "cone",
+        "name": "圆锥"
+      },
+      {
+        "id": "cylinder",
+        "name": "圆柱"
+      },
+      {
+        "id": "prism",
+        "name": "棱柱"
+      },
+      {
+        "id": "hexagon",
+        "name": "六边形"
+      },
+      {
+        "id": "pentagon",
+        "name": "五边形"
+      },
+      {
+        "id": "square",
+        "name": "正方形"
+      },
+      {
+        "id": "triangle",
+        "name": "三角形"
+      },
+      {
+        "id": "circle",
+        "name": "圆形"
+      },
+      {
+        "id": "octagon",
+        "name": "八边形"
+      },
+      {
+        "id": "rectangle",
+        "name": "矩形"
+      },
+      {
+        "id": "oval",
+        "name": "椭圆"
+      },
+      {
+        "id": "diamond",
+        "name": "菱形"
+      },
+      {
+        "id": "triangle-inverted",
+        "name": "倒三角"
+      },
+      {
+        "id": "cube-unfolded",
+        "name": "展开立方体"
+      },
+      {
+        "id": "cone-2",
+        "name": "倒圆锥"
+      },
+      {
+        "id": "circles",
+        "name": "圆形组合"
+      },
+      {
+        "id": "squares",
+        "name": "方形组合"
+      }
+    ],
+    "reading": [
+      {
+        "id": "book",
+        "name": "书本"
+      },
+      {
+        "id": "book-2",
+        "name": "书册"
+      },
+      {
+        "id": "books",
+        "name": "书架"
+      },
+      {
+        "id": "book-download",
+        "name": "下载书籍"
+      },
+      {
+        "id": "book-upload",
+        "name": "上传书籍"
+      },
+      {
+        "id": "text-size",
+        "name": "字号"
+      },
+      {
+        "id": "text-recognition",
+        "name": "文字识别"
+      },
+      {
+        "id": "highlight",
+        "name": "阅读标注"
+      },
+      {
+        "id": "bookmark-plus",
+        "name": "添加书签"
+      },
+      {
+        "id": "bookmark",
+        "name": "书签"
+      },
+      {
+        "id": "bookmarks",
+        "name": "多重书签"
+      },
+      {
+        "id": "bookmark-edit",
+        "name": "标注书签"
+      },
+      {
+        "id": "notebook",
+        "name": "读书笔记"
+      },
+      {
+        "id": "notes",
+        "name": "阅读札记"
+      },
+      {
+        "id": "vocabulary",
+        "name": "词汇"
+      },
+      {
+        "id": "bookmark-question",
+        "name": "阅读疑问"
+      },
+      {
+        "id": "alphabet-latin",
+        "name": "字母"
+      },
+      {
+        "id": "language",
+        "name": "语言"
+      },
+      {
+        "id": "eyeglass",
+        "name": "阅读眼镜"
+      },
+      {
+        "id": "lamp",
+        "name": "阅读灯"
+      }
+    ],
+    "flip": [
+      {
+        "id": "clock",
+        "name": "时钟"
+      },
+      {
+        "id": "alarm",
+        "name": "闹钟"
+      },
+      {
+        "id": "hourglass",
+        "name": "沙漏"
+      },
+      {
+        "id": "calendar",
+        "name": "日历"
+      },
+      {
+        "id": "stopwatch",
+        "name": "秒表"
+      },
+      {
+        "id": "device-watch",
+        "name": "腕表"
+      },
+      {
+        "id": "calendar-event",
+        "name": "纪念日"
+      },
+      {
+        "id": "calendar-week",
+        "name": "周历"
+      },
+      {
+        "id": "calendar-month",
+        "name": "月历"
+      },
+      {
+        "id": "calendar-time",
+        "name": "日程时间"
+      },
+      {
+        "id": "history",
+        "name": "时光回溯"
+      },
+      {
+        "id": "timeline",
+        "name": "时间线"
+      },
+      {
+        "id": "hours-24",
+        "name": "全天"
+      },
+      {
+        "id": "hourglass-high",
+        "name": "流逝"
+      },
+      {
+        "id": "hourglass-low",
+        "name": "余时"
+      },
+      {
+        "id": "clock-24",
+        "name": "二十四时"
+      },
+      {
+        "id": "calendar-clock",
+        "name": "日程时钟"
+      },
+      {
+        "id": "alarm-snooze",
+        "name": "小憩"
+      },
+      {
+        "id": "clock-hour-3",
+        "name": "三点时刻"
+      },
+      {
+        "id": "clock-hour-9",
+        "name": "九点时刻"
+      }
+    ],
+    "rain": [
+      {
+        "id": "cloud-rain",
+        "name": "落雨"
+      },
+      {
+        "id": "umbrella",
+        "name": "雨伞"
+      },
+      {
+        "id": "droplet",
+        "name": "雨滴"
+      },
+      {
+        "id": "cloud",
+        "name": "云朵"
+      },
+      {
+        "id": "cloud-storm",
+        "name": "雷雨"
+      },
+      {
+        "id": "wind",
+        "name": "微风"
+      },
+      {
+        "id": "ripple",
+        "name": "涟漪"
+      },
+      {
+        "id": "rainbow",
+        "name": "彩虹"
+      },
+      {
+        "id": "cloud-snow",
+        "name": "落雪"
+      },
+      {
+        "id": "snowflake",
+        "name": "雪花"
+      },
+      {
+        "id": "leaf",
+        "name": "叶片"
+      },
+      {
+        "id": "flower",
+        "name": "花朵"
+      },
+      {
+        "id": "plant",
+        "name": "绿植"
+      },
+      {
+        "id": "tree",
+        "name": "树木"
+      },
+      {
+        "id": "seedling",
+        "name": "幼苗"
+      },
+      {
+        "id": "mountain",
+        "name": "山峦"
+      },
+      {
+        "id": "sunrise",
+        "name": "日出"
+      },
+      {
+        "id": "sunset",
+        "name": "日落"
+      },
+      {
+        "id": "mist",
+        "name": "薄雾"
+      },
+      {
+        "id": "windmill",
+        "name": "风车"
+      }
+    ],
+    "projection": [
+      {
+        "id": "device-projector",
+        "name": "投影仪"
+      },
+      {
+        "id": "presentation",
+        "name": "放映幕"
+      },
+      {
+        "id": "presentation-analytics",
+        "name": "演示幕"
+      },
+      {
+        "id": "device-tv",
+        "name": "电视"
+      },
+      {
+        "id": "device-tv-old",
+        "name": "复古电视"
+      },
+      {
+        "id": "device-desktop",
+        "name": "桌面屏幕"
+      },
+      {
+        "id": "device-desktop-analytics",
+        "name": "监视器"
+      },
+      {
+        "id": "device-laptop",
+        "name": "笔记本"
+      },
+      {
+        "id": "device-tablet",
+        "name": "平板"
+      },
+      {
+        "id": "device-mobile",
+        "name": "手机"
+      },
+      {
+        "id": "device-imac",
+        "name": "一体屏"
+      },
+      {
+        "id": "device-vision-pro",
+        "name": "头显"
+      },
+      {
+        "id": "device-cctv",
+        "name": "摄像头"
+      },
+      {
+        "id": "video",
+        "name": "摄录"
+      },
+      {
+        "id": "video-plus",
+        "name": "添加视频"
+      },
+      {
+        "id": "video-minus",
+        "name": "视频片段"
+      },
+      {
+        "id": "cast",
+        "name": "投屏"
+      },
+      {
+        "id": "screen-share",
+        "name": "共享屏幕"
+      },
+      {
+        "id": "picture-in-picture",
+        "name": "画中画"
+      },
+      {
+        "id": "device-computer-camera",
+        "name": "电脑摄像头"
+      }
+    ],
+    "cinema": [
+      {
+        "id": "movie",
+        "name": "电影胶片"
+      },
+      {
+        "id": "device-remote",
+        "name": "遥控器"
+      },
+      {
+        "id": "camera",
+        "name": "摄影机"
+      },
+      {
+        "id": "camera-up",
+        "name": "拍摄"
+      },
+      {
+        "id": "camera-down",
+        "name": "取景"
+      },
+      {
+        "id": "camera-bolt",
+        "name": "闪光摄影"
+      },
+      {
+        "id": "camera-cog",
+        "name": "摄影设置"
+      },
+      {
+        "id": "camera-spark",
+        "name": "影像创作"
+      },
+      {
+        "id": "camera-rotate",
+        "name": "转动镜头"
+      },
+      {
+        "id": "photo-video",
+        "name": "影像画面"
+      },
+      {
+        "id": "ticket",
+        "name": "电影票"
+      },
+      {
+        "id": "chair-director",
+        "name": "导演椅"
+      },
+      {
+        "id": "masks-theater",
+        "name": "戏剧面具"
+      },
+      {
+        "id": "armchair",
+        "name": "影院座椅"
+      },
+      {
+        "id": "badge-hd",
+        "name": "高清电影"
+      },
+      {
+        "id": "badge-4k",
+        "name": "超清电影"
+      },
+      {
+        "id": "badge-3d",
+        "name": "立体电影"
+      },
+      {
+        "id": "aspect-ratio",
+        "name": "画幅"
+      },
+      {
+        "id": "player-play",
+        "name": "播放电影"
+      },
+      {
+        "id": "disc",
+        "name": "电影光盘"
+      }
+    ],
+    "paper": [
+      {
+        "id": "news",
+        "name": "新闻报纸"
+      },
+      {
+        "id": "article",
+        "name": "新闻文章"
+      },
+      {
+        "id": "file-text",
+        "name": "文字稿"
+      },
+      {
+        "id": "file-description",
+        "name": "报道"
+      },
+      {
+        "id": "file-typography",
+        "name": "排版"
+      },
+      {
+        "id": "file-pencil",
+        "name": "编辑稿"
+      },
+      {
+        "id": "files",
+        "name": "稿件集"
+      },
+      {
+        "id": "clipboard-text",
+        "name": "采访记录"
+      },
+      {
+        "id": "printer",
+        "name": "印刷机"
+      },
+      {
+        "id": "typography",
+        "name": "铅字"
+      },
+      {
+        "id": "writing",
+        "name": "撰稿"
+      },
+      {
+        "id": "writing-sign",
+        "name": "签名"
+      },
+      {
+        "id": "pencil",
+        "name": "铅笔"
+      },
+      {
+        "id": "ballpen",
+        "name": "圆珠笔"
+      },
+      {
+        "id": "rubber-stamp",
+        "name": "印章"
+      },
+      {
+        "id": "mail-opened",
+        "name": "读者来信"
+      },
+      {
+        "id": "mail",
+        "name": "信件"
+      },
+      {
+        "id": "send",
+        "name": "传播"
+      },
+      {
+        "id": "rss",
+        "name": "新闻订阅"
+      },
+      {
+        "id": "broadcast",
+        "name": "广播"
+      }
+    ],
+    "poly": [
+      {
+        "id": "polygon",
+        "name": "多边形"
+      },
+      {
+        "id": "lasso-polygon",
+        "name": "多边选区"
+      },
+      {
+        "id": "shape",
+        "name": "构形"
+      },
+      {
+        "id": "shape-2",
+        "name": "组合形"
+      },
+      {
+        "id": "shape-3",
+        "name": "轮廓形"
+      },
+      {
+        "id": "artboard",
+        "name": "画板"
+      },
+      {
+        "id": "color-swatch",
+        "name": "色卡"
+      },
+      {
+        "id": "palette",
+        "name": "调色板"
+      },
+      {
+        "id": "brush",
+        "name": "画刷"
+      },
+      {
+        "id": "vector-bezier-arc",
+        "name": "弧线节点"
+      },
+      {
+        "id": "vector",
+        "name": "矢量"
+      },
+      {
+        "id": "vector-triangle",
+        "name": "矢量三角"
+      },
+      {
+        "id": "vector-bezier",
+        "name": "贝塞尔曲线"
+      },
+      {
+        "id": "vector-bezier-2",
+        "name": "曲线节点"
+      },
+      {
+        "id": "vector-spline",
+        "name": "样条曲线"
+      },
+      {
+        "id": "geometry",
+        "name": "几何线稿"
+      },
+      {
+        "id": "pentagram",
+        "name": "五角构图"
+      },
+      {
+        "id": "hexagons",
+        "name": "六边组合"
+      },
+      {
+        "id": "hexagonal-prism",
+        "name": "六棱柱"
+      },
+      {
+        "id": "diamonds",
+        "name": "菱形组合"
+      }
+    ]
+  }
+}

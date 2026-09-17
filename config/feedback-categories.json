@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "id": "collection", "name": "收藏与空间", "enabled": true },
+    { "id": "appearance", "name": "主题与外观", "enabled": true },
+    { "id": "account", "name": "账号与会员", "enabled": true },
+    { "id": "extension", "name": "浏览器插件", "enabled": true },
+    { "id": "other", "name": "其他问题", "enabled": true }
+  ]
+}

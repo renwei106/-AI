@@ -387,11 +387,11 @@ body.is-fullscreen>header>.brand-discovery,body.is-fullscreen>header>.brand,body
 body.is-fullscreen>header>.brand-discovery:hover,body.is-fullscreen>header>.brand-discovery:focus-within,body.is-fullscreen>header>.brand:hover,body.is-fullscreen>header>.brand:focus-visible,body.is-fullscreen>header>.header-right:hover,body.is-fullscreen>header>.header-right:focus-within{opacity:1}
 
 .brand-theme-menu{width:174px}
-.brand-origin-link{display:grid;grid-template-columns:20px minmax(0,1fr);align-items:center;gap:9px;margin:8px 0 0;padding:12px 8px 7px;border-top:1px solid var(--line);border-radius:0 0 7px 7px;color:var(--ink);transition:background .35s ease,color .35s ease}
-.brand-origin-link>svg{width:20px;height:20px;color:var(--accent);stroke:currentColor;fill:none}
+.brand-origin-link{display:grid;grid-template-columns:20px minmax(0,1fr);align-items:center;gap:9px;margin:8px 0 0;padding:12px 8px 7px;border-top:1px solid var(--line);border-radius:0 0 7px 7px;color:color-mix(in srgb,var(--ink) 60%,var(--surface));transition:background .35s ease,color .35s ease}
+.brand-origin-link>svg{width:20px;height:20px;color:inherit;opacity:.7;stroke:currentColor;fill:none}
 .brand-origin-link>span{display:flex;min-width:0;flex-direction:column;gap:2px}
-.brand-origin-link b{font-size:11px;font-weight:500;letter-spacing:.04em}
-.brand-origin-link small{overflow:hidden;color:var(--muted);font-size:9px;line-height:1.5;letter-spacing:.02em;white-space:nowrap;text-overflow:ellipsis}
+.brand-origin-link b{font-size:11px;font-weight:400;letter-spacing:.04em}
+.brand-origin-link small{overflow:hidden;color:inherit;font-size:9px;line-height:1.5;letter-spacing:.02em;white-space:nowrap;text-overflow:ellipsis}
 .brand-origin-link:hover,.brand-origin-link:focus-visible{background:var(--soft)}
 body.is-fullscreen .mode-pull-cord,body.is-fullscreen .color-pull-cord{opacity:.08;transition:opacity .25s ease}
 body.is-fullscreen .mode-pull-cord:hover,body.is-fullscreen .mode-pull-cord:focus-visible,body.is-fullscreen .color-pull-cord:hover,body.is-fullscreen .color-pull-cord:focus-visible{opacity:1}
@@ -459,3 +459,63 @@ body[data-view=space] #link-view-settings .link-view-grid button:is(:hover,:focu
 body[data-view=space] #link-view-settings .link-view-grid button:is([aria-pressed=true],:hover,:focus-visible),body[data-view=space] #link-view-settings .link-view-grid button:is([aria-pressed=true],:hover,:focus-visible) :is(span,b,small,i,svg){color:var(--accent)!important}
 body[data-view=space] .workspace .cards .bookmark>.bookmark-edit:is(:hover,:focus-visible){background:var(--space-accent-hover)!important;color:var(--accent)!important}
 body[data-view=space] .workspace .cards .bookmark>.bookmark-edit:is(:hover,:focus-visible) :is(span,b,small,i,svg){color:var(--accent)!important}
+/* Pagination belongs to the scrolling URL list; style controls keep their dock position. */
+@media(min-width:761px){
+ body[data-view=space]:not(.atlas-active) #bookmark-pagination{position:static;margin:24px 0 0;padding:16px 0 0;border-top:1px solid var(--line);background:var(--bg);gap:12px;min-height:34px;flex-wrap:wrap}
+ body[data-view=space] .workspace-tools>.group-view-controls{bottom:max(76px,env(safe-area-inset-bottom));min-height:34px}
+ body[data-view=space] #bookmark-pagination label{margin-top:0;margin-bottom:0}
+ body[data-view=space] #bookmark-pagination>label{margin-left:0}
+}
+@media(min-width:761px) and (max-width:1100px){
+ body[data-view=space] .workspace-tools>.group-view-controls{bottom:88px}
+ body[data-view=space]:not(.atlas-active) #bookmark-pagination{gap:7px;font-size:11px}
+}
+@media(min-width:761px){
+ body[data-view=space]:not(.atlas-active){overflow:hidden}
+ body[data-view=space]:not(.atlas-active) .workspace{height:100dvh;min-height:0;margin-bottom:0;padding-bottom:132px;box-sizing:border-box}
+ body[data-view=space]:not(.atlas-active) .workspace-content{height:calc(100dvh - 164px);min-height:0;display:flex;flex-direction:column}
+ body[data-view=space]:not(.atlas-active) .workspace-content>:not(#groups){flex-shrink:0}
+ body[data-view=space]:not(.atlas-active) #groups{display:flex;flex-direction:column;flex:1;min-height:0}
+ body[data-view=space]:not(.atlas-active) .group-tab-bar{position:relative;top:auto;flex-shrink:0}
+ body[data-view=space]:not(.atlas-active) #groups>.group:not([hidden]){flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;padding-bottom:20px;scrollbar-width:thin}
+}
+
+/* Menu identity uses the popover palette, independent of cover/header ink. */
+.account-menu .menu-identity{color:var(--ink)}
+.account-menu .menu-avatar{color:var(--ink)}
+.account-menu .menu-avatar>img{width:40px;height:40px;object-fit:cover;border-radius:50%}
+
+
+/* Daily newspaper: editorial content instead of saved links. */
+.paper-life [data-paper-life]{white-space:pre-wrap;overflow-wrap:anywhere}
+.home-paper .paper-life .paper-columns>section,.home-paper .paper-life .paper-columns>div{overflow:auto;scrollbar-width:thin;overscroll-behavior:contain}
+.home-paper .paper-life .paper-life-story{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line);flex:1;align-items:center}
+.paper-life-story>div{min-width:0}.paper-life-story .paper-link-number{flex:none;align-self:flex-start;margin-top:3px}
+.home-paper .paper-life .paper-life-story h3{font-size:clamp(17px,1.5vw,22px);line-height:1.5;margin:0 0 7px;font-weight:600}
+.home-paper .paper-life .paper-life-story p,.home-paper .paper-life .paper-life-column p{font-size:12px;line-height:1.9;white-space:pre-wrap;margin:0;overflow:visible;color:var(--muted)}
+.home-paper .paper-life .paper-index{display:flex;flex-direction:column}
+.paper-life-column{padding:19px 0;border-bottom:1px solid var(--line);flex:1}
+.paper-life-column:last-child{border-bottom:0}.paper-life-column h3{font-size:25px;line-height:1.4;margin:10px 0}
+.home-paper .paper-life .paper-lead>p{display:block;overflow:visible;-webkit-line-clamp:unset;line-height:1.9;flex:none}
+.paper-life .paper-editor-note{white-space:pre-wrap;margin-top:18px}
+.paper-life .paper-visual-upload{border:0;margin:0;min-height:140px;overflow:hidden;cursor:default}
+.home-paper .paper-visual-upload>.paper-cover,.home-paper .paper-visual-upload>.landscape{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.paper-visual-upload .paper-upload-cover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:9px;color:#fff;background:rgba(0,0,0,.2);text-shadow:0 1px 3px #0006;cursor:pointer;font-size:13px;transition:background .2s}
+.paper-visual-upload .paper-upload-cover:hover{background:rgba(0,0,0,.35)}
+.paper-upload-cover svg{width:21px;height:21px;fill:none;stroke:currentColor}
+.paper-visual-upload .paper-remove-cover{position:absolute;right:10px;bottom:10px;padding:7px 10px;background:var(--surface);color:var(--ink);font-size:11px;border-radius:4px}
+.paper-visual-upload [hidden]{display:none!important}
+@media(min-width:761px){.home-paper .paper-life .paper-lead>.landscape,.home-paper .paper-life .paper-lead>.paper-cover{min-height:100px}.home-paper .paper-life .paper-saved,.home-paper .paper-life .paper-index{overflow:auto;scrollbar-width:thin;overscroll-behavior:contain}}
+@media(min-width:761px) and (max-height:850px){.home-paper .paper-life .paper-life-story{padding:9px 0}.home-paper .paper-life .paper-life-story h3{font-size:16px;margin-bottom:4px}.home-paper .paper-life .paper-life-story p,.home-paper .paper-life .paper-life-column p{font-size:11px;line-height:1.6}.paper-life-column{padding:10px 0}.paper-life-column h3{font-size:21px;margin:6px 0}.paper-life .paper-editor-note{margin-top:9px;font-size:11px}}
+@media(max-width:760px){.home-paper .paper-life .paper-columns{grid-template-columns:1fr}.home-paper .paper-life .paper-saved,.home-paper .paper-life .paper-index{border-left:0;padding-left:0}.home-paper .paper-life .paper-lead>.paper-cover{height:220px;flex:auto}.paper-life .paper-visual-upload{height:220px;flex:auto}.home-paper .paper-life .paper-life-story h3{font-size:20px}.paper-life-column{padding:18px 0}.home-paper .paper-life .paper-index{margin-top:12px}}
+.paper-visual-upload .paper-remove-cover{top:auto;left:auto;height:auto;min-height:0}
+.home-paper .paper-life .paper-columns>*{overflow:auto;scrollbar-width:thin;overscroll-behavior:contain}.paper-life .paper-lead h2,.paper-life .paper-lead .paper-kicker{flex:none}
+@media(max-width:760px){body.paper-edit-active:has(.paper-life){overflow-y:auto}}
+@media(max-width:760px){.home-paper .paper-life .paper-columns>*{overflow:visible;overscroll-behavior:auto}}
+/* Match the atlas view picker baseline. */
+@media(min-width:761px){body[data-view=space] .workspace-tools>.group-view-controls{bottom:max(24px,env(safe-area-inset-bottom))}}
+
+/* Shared dialog close geometry; the surrounding heading keeps its own layout. */
+dialog button.dialog-close-control{box-sizing:border-box!important;display:grid!important;place-items:center!important;flex:0 0 34px!important;width:34px!important;min-width:34px!important;max-width:34px!important;height:34px!important;min-height:34px!important;max-height:34px!important;aspect-ratio:1!important;padding:0!important;border:0!important;border-radius:50%!important;line-height:1!important;letter-spacing:0!important;color:var(--neutral-close-ink)!important;background:var(--neutral-close-bg)!important}
+dialog button.dialog-close-control:is(:hover,:focus-visible){color:var(--neutral-close-ink)!important;background:var(--neutral-close-hover)!important}
+dialog button.dialog-close-control>[data-dialog-close-icon]{display:block!important;position:static!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;margin:0!important;padding:0!important;transform:none!important;color:inherit!important}

@@ -475,6 +475,9 @@ const centerBeforeDemographics=openAccountCenter;openAccountCenter=function(){ce
 document.addEventListener('click',e=>{const b=e.target.closest('[data-profile-gender]');if(!b)return;prefs.accountProfile={...accountProfile(),gender:b.dataset.profileGender};persist();$('#account-center').querySelectorAll('[data-profile-gender]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
 document.addEventListener('click',e=>{if(e.target.closest('[data-pref="font"]'))prefs.explicitFont=true},true);
 const loginBeforeAligned=renderAccountLogin;renderAccountLogin=function(){loginBeforeAligned();const d=$('#login');d.querySelector('.dialog-heading>button')?.remove();const submit=d.querySelector('.account-login-content>.primary');if(submit)submit.textContent='登录，让喜欢有归处';d.querySelectorAll('.account-login-content>label').forEach(label=>{const node=label.firstChild;if(node?.nodeType===3){const span=document.createElement('span');span.className='account-field-caption';span.textContent=node.textContent;node.replaceWith(span)}})};
+
+const loginBeforeShiyuAccount=renderAccountLogin;renderAccountLogin=function(){loginBeforeShiyuAccount();const d=$('#login'),submit=d.querySelector('.account-login-content>.primary'),status=d.querySelector('.account-status');if(submit){submit.removeAttribute('data-auth-unavailable');submit.setAttribute('data-shiyu-login','');submit.textContent=accountLoginTab==='password'?'登录':'验证并登录'}if(status)status.textContent='体验账号：13800138000；密码或验证码：123456。手机号验证码首次登录会创建对应后台用户。'};
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-shiyu-login]');if(!b)return;const d=$('#login'),inputs=d.querySelectorAll('.account-login-content input'),status=d.querySelector('.account-status'),account=inputs[0]?.value.trim(),credential=inputs[1]?.value.trim();b.disabled=true;status.textContent='正在登录…';try{const response=await fetch('/api/shiyu/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({account,credential,mode:accountLoginTab==='password'?'password':'code',name:prefs.accountProfile?.name||'任伟'})}),result=await response.json();if(!response.ok)throw new Error(result.message||'登录失败');signed=true;prefs.accountProfile={...(prefs.accountProfile||{}),id:result.user.id,name:result.user.name,phone:result.user.phone,avatar:prefs.accountProfile?.avatar||ACCOUNT_AVATARS[0]};persist();d.close();render();toast('登录成功');if(!organizationAfterLogin&&!pending)openAccountCenter()}catch(error){status.textContent=error.message||'登录失败'}finally{b.disabled=false}});
 const passwordBeforeAligned=showPasswordOnboarding;showPasswordOnboarding=function(){passwordBeforeAligned();const d=$('#account-password-step');d.querySelectorAll('label').forEach((label,i)=>{const span=document.createElement('span');span.className='account-field-caption';span.textContent=i?'确认密码':'登录密码';label.firstChild.replaceWith(span);label.querySelector('input').placeholder=i?'再次输入密码':'输入密码'})};
 function addBrandDiscovery(){const brand=$('.brand');if(!brand)return;let wrapper=brand.parentElement;if(!wrapper.classList.contains('brand-discovery')){wrapper=document.createElement('div');wrapper.className='brand-discovery';brand.before(wrapper);wrapper.append(brand)}wrapper.querySelector('.brand-theme-menu')?.remove();wrapper.insertAdjacentHTML('beforeend',`<div class="brand-theme-menu" aria-label="选择主题风格">${Object.entries(THEMES).map(([id,t])=>`<button data-brand-theme="${id}" aria-pressed="${effective().theme===id}">${t.name}<span>${effective().theme===id?'✓':'→'}</span></button>`).join('')}</div>`);wrapper.querySelector('.brand-guide')?.remove();if(!signed&&!prefs.brandGuideDismissed&&view==='home')wrapper.insertAdjacentHTML('beforeend','<div class="brand-guide"><button data-dismiss-guide aria-label="关闭风格引导">×</button><b>换个风格，遇见另一种拾隅</b><p>点击左上角切换风格，悬停可展开全部主题。</p></div>')}
 const headerBeforeDiscovery=updateHeader;updateHeader=function(){headerBeforeDiscovery();addBrandDiscovery()};
@@ -508,7 +511,24 @@ const centerBeforeBirthdayAlign=openAccountCenter;openAccountCenter=function(){c
 render();
 // Preserve authored line breaks and fit text to its available width.
 COPY_LIMITS.intro.lines=2;
-function fitHomeText(){if(view!=='home')return;document.querySelectorAll('.customizable-copy').forEach(el=>{el.style.removeProperty('font-size');el.style.whiteSpace='pre';el.style.overflowWrap='normal';el.style.wordBreak='normal';const rect=el.getBoundingClientRect();const width=Math.min(el.clientWidth,window.innerWidth-rect.left-24);if(width<=0)return;let size=parseFloat(getComputedStyle(el).fontSize);for(let i=0;i<70&&el.scrollWidth>width+1;i++){size*=.94;el.style.setProperty('font-size',size+'px','important')}})}
+const HOME_COPY_SELECTOR='.home .customizable-copy,.home [data-flow-title],.home [data-flow-intro],.home [data-reading-title],.home [data-reading-intro],.home .surge-copy h1,.home [data-surge-intro]';
+function fitHomeText(){
+ if(view!=='home')return;
+ document.querySelectorAll(HOME_COPY_SELECTOR).forEach(el=>{
+  el.style.removeProperty('font-size');el.style.setProperty('white-space','pre','important');el.style.setProperty('overflow-wrap','normal','important');el.style.setProperty('word-break','normal','important');el.style.setProperty('max-width','none','important');
+  const parent=el.parentElement,pr=parent.getBoundingClientRect(),ps=getComputedStyle(parent),es=getComputedStyle(el),paddingLeft=parseFloat(ps.paddingLeft)||0,paddingRight=parseFloat(ps.paddingRight)||0;
+  const left=Math.max(16,pr.left+paddingLeft),right=Math.min(innerWidth-16,pr.right-paddingRight),available=right-left;if(available<=0||!el.getClientRects().length)return;
+  // Remove only the copy's arbitrary cap; illustrated columns keep their own bounds.
+  if(!['inline','contents'].includes(es.display)){el.style.width='100%';el.style.boxSizing='border-box';}
+  let size=parseFloat(es.fontSize);const range=document.createRange();range.selectNodeContents(el);
+  for(let i=0;i<4;i++){const lineWidth=Math.max(0,...[...range.getClientRects()].map(r=>r.width)),height=el.getBoundingClientRect().height,maxHeight=innerHeight*(el.matches('h1,h2,[data-flow-title],[data-reading-title]')?.34:.22),ratio=Math.min(1,available/Math.max(lineWidth,1),maxHeight/Math.max(height,1));if(ratio>=.998)break;size*=ratio*.99;el.style.setProperty('font-size',size+'px','important');}
+ });
+}
+let homeCopyFitFrame=0;
+function scheduleHomeCopyFit(){if(homeCopyFitFrame)return;homeCopyFitFrame=requestAnimationFrame(()=>{homeCopyFitFrame=0;fitHomeText()});}
+new MutationObserver(records=>{if(view!=='home')return;const matches=node=>node.nodeType===1&&(node.matches(HOME_COPY_SELECTOR)||node.querySelector(HOME_COPY_SELECTOR));if(records.some(r=>r.target.parentElement?.closest(HOME_COPY_SELECTOR)||r.target.nodeType===1&&r.target.matches(HOME_COPY_SELECTOR)||[...r.addedNodes].some(matches)))scheduleHomeCopyFit();}).observe(document.querySelector('#main'),{childList:true,subtree:true,characterData:true});
+document.addEventListener('fullscreenchange',scheduleHomeCopyFit);document.fonts.addEventListener('loadingdone',scheduleHomeCopyFit);
+
 const copyBeforeFit=applyHomeCopy;applyHomeCopy=function(){copyBeforeFit();fitHomeText();requestAnimationFrame(fitHomeText)};
 const homeBeforeFit=home;home=function(){homeBeforeFit();fitHomeText();requestAnimationFrame(fitHomeText)};
 window.addEventListener('resize',fitHomeText);document.fonts.ready.then(fitHomeText);
@@ -668,7 +688,7 @@ const paymentBeforeRequiredAgreement=simulatePayment;simulatePayment=function(){
 const centerBeforeFreeDisplayOnly=openMemberCenter;openMemberCenter=function(){freeMemberSelected=false;centerBeforeFreeDisplayOnly();const free=$('#member-center [data-free-plan]');if(free){free.disabled=true;free.onclick=null;free.setAttribute('aria-pressed','false');free.title='免费版仅作权益对比，无需购买'}};
 if(new URLSearchParams(location.search).get('page')==='membership')openMemberCenter();
 const INVITATION_PREVIEW=[{name:'林间',date:'2026-09-12',registered:true,paid:true},{name:'小满',date:'2026-09-11',registered:true,paid:false},{name:'远山',date:'2026-09-10',registered:true,paid:true},{name:'听雨',date:'2026-09-09',registered:true,paid:false},{name:'南风',date:'2026-09-08',registered:true,paid:false}];
-openMemberInvite=function(){const d=memberDialog('member-invite-dialog','邀请同频的人，让喜欢延续。');d.classList.add('invite-monochrome');const registered=INVITATION_PREVIEW.filter(x=>x.registered).length,paid=INVITATION_PREVIEW.filter(x=>x.paid).length,total=registered*3+paid*7;d.innerHTML+=`<p class="member-sub">邀请奖励 · 以下明细为模拟数据，不计入实际会员时长</p><section class="invitation-rules-block"><h3><small>01</small> 活动规则</h3><div class="invite-reward-cards"><article><small>每位好友首次注册成功</small><strong>+3<em>天会员</em></strong></article><article><small>每位好友首次付费成功</small><strong>+7<em>天会员</em></strong></article></div><p class="invite-rule-summary">同一好友可累计奖励 10 天，每个阶段仅计奖一次。奖励到账后顺延会员有效期；自邀、重复账号及退款订单不计入。活动尚未开放。</p></section><section class="invitation-records-block"><h3><small>02</small> 邀请明细 <span>模拟记录</span></h3><div class="invite-summary-grid"><article><small>累计奖励</small><strong>${total}<em>天</em></strong></article><article><small>注册成功</small><strong>${registered}<em>人</em></strong><span>奖励 ${registered*3} 天</span></article><article><small>付费成功</small><strong>${paid}<em>人</em></strong><span>奖励 ${paid*7} 天</span></article></div><div class="invite-record-list"><div class="invite-record-head"><span>受邀好友</span><span>注册奖励</span><span>付费奖励</span><span>累计</span></div>${INVITATION_PREVIEW.map(r=>`<div class="invite-record-row"><span><b>${r.name}</b><small>${r.date}</small></span><span>已注册<small>+3 天</small></span><span>${r.paid?'已付费<small>+7 天</small>':'未付费<small>—</small>'}</span><strong>${3+(r.paid?7:0)} 天</strong></div>`).join('')}</div></section><button class="member-primary" disabled>活动开放后，获取邀请链接</button>`;if(!d.open)d.showModal()};
+openMemberInvite=function(){const d=memberDialog('member-invite-dialog','邀请同频的人，让喜欢延续。');d.classList.add('invite-monochrome');const registered=INVITATION_PREVIEW.filter(x=>x.registered).length,paid=INVITATION_PREVIEW.filter(x=>x.paid).length,total=registered*3+paid*7;d.innerHTML+=`<p class="member-sub">邀请奖励 · 以下明细为模拟数据，不计入实际会员时长</p><section class="invitation-rules-block"><h3><small>01</small> 活动规则</h3><div class="invite-reward-cards"><article><small>每位好友首次注册成功</small><strong>+3<em>天会员</em></strong></article><article><small>每位好友首次付费成功</small><strong>+7<em>天会员</em></strong></article></div><p class="invite-rule-summary">同一好友可累计奖励 10 天，每个阶段仅计奖一次。奖励到账后顺延会员有效期；自邀、重复账号及退款订单不计入。活动尚未开放。</p></section><section class="invitation-records-block"><h3><small>02</small> 邀请明细 </h3><div class="invite-summary-grid"><article><small>累计奖励</small><strong>${total}<em>天</em></strong></article><article><small>注册成功</small><strong>${registered}<em>人</em></strong><span>奖励 ${registered*3} 天</span></article><article><small>付费成功</small><strong>${paid}<em>人</em></strong><span>奖励 ${paid*7} 天</span></article></div><div class="invite-record-list"><div class="invite-record-head"><span>受邀好友</span><span>注册奖励</span><span>付费奖励</span><span>累计</span></div>${INVITATION_PREVIEW.map(r=>`<div class="invite-record-row"><span><b>${r.name}</b><small>${r.date}</small></span><span>已注册<small>+3 天</small></span><span>${r.paid?'已付费<small>+7 天</small>':'未付费<small>—</small>'}</span><strong>${3+(r.paid?7:0)} 天</strong></div>`).join('')}</div></section><button class="member-primary" disabled>活动开放后，获取邀请链接</button>`;if(!d.open)d.showModal()};
 const paymentBeforeReadableAgreements=simulatePayment;simulatePayment=function(){paymentBeforeReadableAgreements();const d=$('#agreement-required-dialog');if(!d?.open)return;const p=MEMBER_CONFIG.plans[selectedMemberPlan],text=d.querySelector('.member-sub');d.querySelector('h2').textContent='请阅读以下协议';text.innerHTML='<button class="agreement-inline-link" data-read-service>《会员服务协议》</button>'+(p.auto?`<button class="agreement-inline-link" data-read-renew>《${p.days===30?'连续包月':'连续包年'}服务协议》</button>`:'');text.querySelector('[data-read-service]').onclick=()=>showMemberAgreement(false);text.querySelector('[data-read-renew]')?.addEventListener('click',()=>showMemberAgreement(true));const confirm=d.querySelector('[data-return-agreement]');confirm.textContent='我已确认并同意，继续支付';confirm.onclick=()=>{memberAgreed=true;const checkbox=$('#member-center [data-member-agree]');if(checkbox)checkbox.checked=true;d.close();paymentBeforeRequiredAgreement()};d.querySelector('[data-member-close]').innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>'};
 
 if(new URLSearchParams(location.search).get('page')==='membership')openMemberCenter();
@@ -984,7 +1004,7 @@ editPaper=function(){
  const finish=()=>{document.body.classList.remove('paper-edit-active');gestureTotal=0;wheelBurstHandled=false;touchStart=null;actions.remove();home()};actions.querySelector('[data-paper-cancel]').onclick=finish;actions.querySelector('[data-paper-save]').onclick=()=>{prefs.paperEditorial=draft;persist();finish();toast('版面已保存')};
 };
 
-window.addEventListener('wheel',e=>{if(!document.body.classList.contains('paper-edit-active'))return;e.stopImmediatePropagation();if(!e.target.closest('.paper-inline-choices'))e.preventDefault()},{capture:true,passive:false});
+window.addEventListener('wheel',e=>{if(!document.body.classList.contains('paper-edit-active'))return;e.stopImmediatePropagation();if(!e.target.closest('.paper-inline-choices,.paper-life'))e.preventDefault()},{capture:true,passive:false});
 const navigateBeforePaperEdit=navigationGesture;navigationGesture=function(...args){if(document.body.classList.contains('paper-edit-active'))return;return navigateBeforePaperEdit(...args)};
 
 const shareBeforePublicAccess=openSpaceShare;openSpaceShare=function(){shareBeforePublicAccess();const form=document.querySelector('#share-form');if(!form)return;const password=form.querySelector('[name=access][value=password]').closest('label'),expiry=form.querySelector('.share-expiry');for(const el of [password,expiry]){const badge=document.createElement('span');badge.className='membership-badge';badge.textContent='✧';badge.title='会员功能';el.append(badge)}
@@ -993,3 +1013,65 @@ const shareBeforePublicAccess=openSpaceShare;openSpaceShare=function(){shareBefo
 };
 const markBeforePublicSharing=markMemberEntries;markMemberEntries=function(){markBeforePublicSharing();document.querySelectorAll('[data-share-open] .membership-badge').forEach(e=>e.remove())};markMemberEntries();
 
+
+// The cover is an editable daily newspaper, independent of saved URLs and spaces.
+const PAPER_LIFE_DEFAULTS={
+ masthead:'拾光日报',tagline:'THE EVERYDAY EDITION · 把寻常日子，过成自己的头条',
+ strip:'今日特别报道 · 好好生活，就是今天最重要的事',title:'重磅消息：\n今天也值得好好过',intro:'不用等一个特别的日子。吃一顿热饭，做完手边的一件小事，给自己留一点发呆的时间。生活的好消息，常常就藏在这些小事里。',quote:'今日社论\n允许自己慢一点，也别忘了向前走。',leadLabel:'今日头条 / FRONT PAGE',dailyLabel:'生活快讯 / DAILY NOTES',sideLabel:'给自己的话 / PERSONAL COLUMN',
+ dailyTitle0:'记得吃饭，比什么都重要',dailyBody0:'再忙也留一段午餐时间。热腾腾的一餐，是今天给自己最朴素的照顾。',
+ dailyTitle1:'工作中，也请为自己加油',dailyBody1:'把大任务拆成一小步。先做完眼前这一件，今天就已经有了进展。',
+ dailyTitle2:'紧急提醒：该起来走走了',dailyBody2:'把视线移向窗外，接一杯水，伸个懒腰。好状态也需要短暂的休息。',
+ dailyTitle3:'今晚，把时间还给生活',dailyBody3:'听一首喜欢的歌，或者和朋友聊聊天。不必每一分钟都拿来赶路。',
+ sideTitle0:'今日允许',sideBody0:'允许计划有变化\n允许偶尔不在状态\n允许快乐没有理由',
+ sideTitle1:'一件小事',sideBody1:'给在意的人发一句问候。\n有时候，一句话就能让一天变得不一样。',
+ sideTitle2:'明日预告',sideBody2:'愿明天有新的好消息。\n今晚先好好睡一觉。'
+};
+function paperLife(){return {...PAPER_LIFE_DEFAULTS,...prefs.paperEditorial};}
+function fillPaperLife(){
+ const page=document.querySelector('.newspaper');if(!page)return;const p=paperLife();page.classList.add('paper-life');
+ const field=(tag,key,max,cls='')=>`<${tag} class="${cls}" data-paper-life="${key}" data-paper-max="${max}">${esc(p[key]??PAPER_LIFE_DEFAULTS[key])}</${tag}>`;
+ page.querySelector('.masthead h1').outerHTML=field('h1','masthead',20);page.querySelector('.masthead>span').outerHTML=field('span','tagline',90);
+ page.querySelector('.paper-newsline>span').outerHTML=field('span','strip',100);page.querySelector('.paper-lead .paper-kicker').outerHTML=field('div','leadLabel',50,'paper-kicker');page.querySelector('.paper-lead h2').outerHTML=field('h2','title',70);page.querySelector('.paper-lead>p').outerHTML=field('p','intro',260);
+ page.querySelector('.paper-saved').innerHTML=field('div','dailyLabel',50,'paper-kicker')+Array.from({length:4},(_,i)=>'<article class="paper-life-story"><span class="paper-link-number">0'+(i+1)+'</span><div>'+field('h3','dailyTitle'+i,60)+field('p','dailyBody'+i,220)+'</div></article>').join('')+field('div','quote',150,'paper-editor-note');
+ page.querySelector('.paper-index').innerHTML=field('div','sideLabel',50,'paper-kicker')+Array.from({length:3},(_,i)=>'<article class="paper-life-column"><small>0'+(i+1)+' / NOTE</small>'+field('h3','sideTitle'+i,40)+field('p','sideBody'+i,220)+'</article>').join('');
+ page.querySelector('.paper-more')?.remove();
+ page.addEventListener('wheel',e=>{const column=e.target.closest('.paper-lead,.paper-saved,.paper-index');if(column&&column.scrollHeight>column.clientHeight+1)e.stopPropagation();},{passive:true});
+}
+const homeBeforePaperLife=home;home=function(){homeBeforePaperLife();document.querySelectorAll('.home .ai-links').forEach(el=>el.remove());if(effective().theme==='paper')fillPaperLife();};
+editPaper=function(){
+ const page=document.querySelector('.newspaper');if(!page||page.classList.contains('paper-editing'))return;
+ const draft={...paperLife()};page.classList.add('paper-editing');document.body.classList.add('paper-edit-active');
+ for(const el of page.querySelectorAll('[data-paper-life]')){const key=el.dataset.paperLife,max=Number(el.dataset.paperMax);el.contentEditable='plaintext-only';el.dataset.paperInline=key;el.setAttribute('role','textbox');el.setAttribute('aria-label',key==='masthead'?'报纸名称':key==='title'?'大头条':key==='intro'?'封面简介':key.startsWith('dailyTitle')?'生活快讯标题':key.startsWith('dailyBody')?'生活快讯正文':key.startsWith('sideTitle')?'专栏标题':key.startsWith('sideBody')?'专栏正文':'栏目文字');el.oninput=()=>{draft[key]=el.innerText.slice(0,max)};}
+ const cover=page.querySelector('.paper-cover,.landscape');if(cover){
+  const upload=document.createElement('div');upload.className='paper-inline-upload paper-visual-upload';const art=cover.cloneNode(true);art.removeAttribute('id');upload.append(art);
+  const choose=document.createElement('button');choose.type='button';choose.className='paper-upload-cover';choose.setAttribute('aria-label','更换报纸封面图');choose.innerHTML=entityIcon('lib-Camera')+'<span>点击更换封面图</span>';upload.append(choose);cover.replaceWith(upload);
+  const input=document.createElement('input');input.type='file';input.accept='image/png,image/jpeg,image/webp';input.hidden=true;input.tabIndex=-1;upload.append(input);choose.onclick=()=>input.click();
+  const clear=document.createElement('button');clear.type='button';clear.className='paper-remove-cover';clear.textContent='恢复默认图片';clear.hidden=!draft.cover;upload.append(clear);
+  const showImage=value=>{upload.querySelector('.paper-cover,.landscape')?.remove();const holder=document.createElement('div');holder.innerHTML=value?'<img class="paper-cover" alt="封面预览" src="'+esc(value)+'">':landscape('paper');upload.prepend(holder.firstElementChild);};
+  clear.onclick=()=>{revision++;draft.cover='';showImage('');input.value='';clear.hidden=true;};
+  let revision=0;input.onchange=()=>{const file=input.files[0],version=++revision;if(!file)return;if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>3*1024*1024){toast('请选择 3 MB 以内的 JPG、PNG 或 WebP 图片');return;}const reader=new FileReader();reader.onerror=()=>toast('图片读取失败，请重新选择');reader.onload=()=>{const image=new Image();image.onerror=()=>toast('图片无法读取，请更换图片');image.onload=()=>{if(!page.isConnected||version!==revision)return;const canvas=document.createElement('canvas'),scale=Math.min(1,1200/image.width);canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);draft.cover=canvas.toDataURL('image/jpeg',.8);showImage(draft.cover);clear.hidden=false;};image.src=reader.result;};reader.readAsDataURL(file);};
+ }
+ const trigger=page.querySelector('[data-paper-edit]');if(trigger)trigger.hidden=true;
+ const actions=document.createElement('div');actions.className='paper-inline-actions';actions.innerHTML='<button data-paper-cancel>取消</button><button data-paper-save>保存版面</button>';document.body.append(actions);
+ const finish=()=>{document.body.classList.remove('paper-edit-active');gestureTotal=0;wheelBurstHandled=false;touchStart=null;actions.remove();home();};actions.querySelector('[data-paper-cancel]').onclick=finish;actions.querySelector('[data-paper-save]').onclick=()=>{prefs.paperEditorial=draft;persist();finish();toast('版面已保存');};
+};
+THEMES.paper.desc='把日常的小事，编成自己的头条。';
+
+// A shared icon for dialog dismiss controls, independent of the chosen text font.
+(() => {
+ const candidates='button[aria-label^="关闭"],button[data-member-close],button[data-detail-close],button.close,.dialog-heading>button[data-action="close"],[class*="-heading"]>button';
+ function normalize(root){
+  if(root.nodeType===1&&!root.closest('dialog')&&!root.querySelector('dialog'))return;
+  const buttons=[...(root.matches?.(candidates)?[root]:[]),...root.querySelectorAll(candidates)];
+  for(const button of buttons){
+   if(!button.closest('dialog')||button.matches('.corner-entry,.corner-close-entry')||button.querySelector('[data-dialog-close-icon]'))continue;
+   const label=button.getAttribute('aria-label')||'',text=button.textContent.trim();
+   if(!label.startsWith('关闭')&&!['×','✕'].includes(text))continue;
+   button.classList.add('dialog-close-control');
+   if(!label)button.setAttribute('aria-label','关闭');
+   button.innerHTML='<svg data-dialog-close-icon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>';
+  }
+ }
+ normalize(document);
+ new MutationObserver(records=>{for(const record of records){if(record.target.matches?.(candidates))normalize(record.target);for(const node of record.addedNodes)if(node.nodeType===1)normalize(node);}}).observe(document.body,{childList:true,subtree:true});
+})();

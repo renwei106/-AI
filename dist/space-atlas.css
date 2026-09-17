@@ -315,7 +315,7 @@ body.atlas-active[data-dark=true] #space-mode-menu{--ink:#efefea;--muted:#b0b0b8
 #space-atlas .at-node[data-kind=bundle] .at-node-main>small{font-size:9px;text-align:left}
 #space-atlas .at-node[data-kind=add] .at-node-main{border:1px dashed color-mix(in srgb,var(--at-accent) 45%,transparent);background:color-mix(in srgb,var(--at-accent) 3%,transparent);color:var(--muted);box-shadow:none;cursor:pointer;gap:7px;min-height:50px}
 #space-atlas .at-node[data-kind=add] .at-node-main:hover{color:var(--at-accent);background:var(--soft)}
-#space-atlas .at-add-mark{display:grid;place-items:center;width:28px;height:28px}
+#space-atlas .at-add-mark{display:grid;place-items:center;flex:none;box-sizing:border-box;width:28px;height:28px}
 #space-atlas .at-node[data-kind=add] strong{font-size:11px;font-weight:400}
 #space-atlas .at-full-page[data-mode="2d"] .at-node[data-kind=add][data-add-kind=scene] .at-node-main,#space-atlas .at-full-page[data-mode="2d"] .at-node[data-kind=add][data-add-kind=group] .at-node-main{border:0;background:transparent;flex-direction:column}
 #space-atlas .at-full-page[data-mode="2d"] .at-node[data-kind=add][data-add-kind=scene] .at-add-mark{width:43px;height:43px;border:1px dashed color-mix(in srgb,var(--at-accent) 55%,transparent);border-radius:50%;background:color-mix(in srgb,var(--at-accent) 4%,transparent)}
@@ -329,13 +329,15 @@ body.atlas-active[data-dark=true] #space-mode-menu{--ink:#efefea;--muted:#b0b0b8
 #space-atlas .at-full-page[data-mode="3d"][data-presentation="spatial"] .at-node[data-kind=add][data-add-kind=group] .at-add-mark{width:28px;height:28px;border:1px dashed color-mix(in srgb,var(--at-accent) 62%,transparent);border-radius:50%;background:radial-gradient(circle at 28% 22%,color-mix(in srgb,var(--at-accent) 8%,white),color-mix(in srgb,var(--at-accent) 18%,var(--surface)) 55%,color-mix(in srgb,var(--at-accent) 35%,var(--surface)))}
 #space-atlas .at-full-page[data-mode="3d"][data-presentation="spatial"] .at-node[data-kind=add][data-add-kind=link] .at-node-main{display:flex;flex-direction:row;justify-content:flex-start;border-radius:12px;padding:9px 12px}
 #space-atlas .at-full-page[data-mode="3d"][data-presentation="spatial"] .at-node[data-kind=add][data-add-kind=link] .at-add-mark{flex:0 0 30px;width:30px;height:30px;border-radius:8px;background:var(--soft)}
-#space-atlas .at-node[data-level="0"]>.at-node-main{padding-bottom:31px}
+#space-atlas .at-node[data-level="0"]>.at-node-main{padding-bottom:5px}
 #space-atlas .at-node[data-level="0"][data-kind=group]>.at-node-main{padding-bottom:5px}
 #space-atlas .at-summary{position:absolute;bottom:0;left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;padding:8px 11px;border-radius:9px;background:color-mix(in srgb,var(--surface) 92%,transparent);font-size:10px;color:var(--muted)}
 #space-atlas .at-summary svg{width:12px;height:12px}
 #space-atlas .at-summary:hover,#space-atlas .at-summary[aria-pressed=true]{color:var(--at-accent);background:var(--soft)}
 #space-atlas .at-drawer-done{display:block;width:100%;border-radius:10px;background:var(--soft);padding:12px;margin-top:24px}
 #space-atlas .at-node.is-sort-target .at-node-main{outline:1px solid var(--at-accent);outline-offset:5px;background:color-mix(in srgb,var(--at-accent) 12%,var(--surface))}
+#space-atlas [data-mode="2d"] .at-node.is-sort-target:not([data-kind="link"]) .at-node-main{outline:none;background:transparent;box-shadow:none}
+#space-atlas [data-mode="2d"] .at-node.is-sort-target .at-orb{outline:1px solid var(--at-accent);outline-offset:4px}
 #space-atlas .at-orbit-track{fill:none;stroke:color-mix(in srgb,var(--at-accent) 27%,var(--bg));stroke-width:1;pointer-events:none}
 #space-atlas .at-orbit-current{fill:var(--at-accent);opacity:.75;pointer-events:none}
 #space-atlas .at-orbital .at-canvas{background:radial-gradient(ellipse at 50% 48%,color-mix(in srgb,var(--at-accent) 9%,transparent),transparent 57%)}
@@ -351,7 +353,7 @@ body.atlas-active[data-dark=true] #space-mode-menu{--ink:#efefea;--muted:#b0b0b8
 #space-atlas .at-orbital .at-node[data-level="1"][data-kind=link] .at-logo{border-radius:50%;width:36px;height:36px;flex:0 0 36px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--at-accent) 15%,transparent),0 3px 14px #0001}
 #space-atlas .at-orbital .at-node[data-level="1"][data-kind=link] strong{flex:none;width:100%;text-align:center}
 #space-atlas .at-orbital .at-node[data-kind=add] .at-node-main{border:0;background:transparent;gap:8px}
-#space-atlas .at-orbital .at-node[data-kind=add] .at-add-mark{width:47px;height:47px;border:1px dashed color-mix(in srgb,var(--at-accent) 55%,transparent);border-radius:50%}
+#space-atlas .at-orbital .at-node[data-kind=add] .at-add-mark{width:48px;height:48px;border:1px dashed color-mix(in srgb,var(--at-accent) 55%,transparent);border-radius:50%}
 #space-atlas .at-orbital .at-node[data-kind=add][data-add-kind=link] .at-add-mark{width:36px;height:36px}
 #space-atlas .at-orbital .at-node[data-level="2"] .at-node-menu{top:-8px;right:-3px}
 #space-atlas .at-orbital .at-node[data-level="2"]:not(:hover):not(:focus-within) .at-node-main{opacity:.75}
@@ -364,6 +366,13 @@ body.atlas-active[data-dark=true] #space-mode-menu{--ink:#efefea;--muted:#b0b0b8
 #space-atlas .at-orbital .at-node[data-level="1"]:not([data-kind=add]):not([data-kind=bundle]) .at-node-main>strong{font-size:14px}
 #space-atlas .at-orbital .at-node[data-level="0"] .at-node-main>strong{font-size:15px}
 #space-atlas .at-orbital .at-node[data-level="2"]{color:var(--muted)}
+#space-atlas .at-orbital .at-planet-summary{visibility:hidden;opacity:0;white-space:normal;line-height:1.5;max-width:130px;transition:opacity .18s}
+#space-atlas .at-orbital .is-summary-visible .at-planet-summary{visibility:visible;opacity:1}
+#space-atlas .at-galaxy-haze{fill:none;stroke:var(--at-accent);opacity:.085;stroke-linecap:round;filter:blur(7px);pointer-events:none}
+#space-atlas .at-galaxy-stars{fill:none;stroke:color-mix(in srgb,var(--ink) 65%,var(--at-accent));opacity:.4;stroke-linecap:round;pointer-events:none}
+#space-atlas .at-galaxy .at-orbit-track:not(.at-add-orbit){stroke:color-mix(in srgb,var(--at-accent) 25%,transparent);stroke-width:1.2}
+#space-atlas .at-galaxy .at-add-orbit{stroke-dasharray:3 6;opacity:.4}
+#space-atlas .at-galaxy .at-node[data-level="0"] .at-orb{box-shadow:0 0 30px color-mix(in srgb,var(--at-accent) 26%,transparent),0 0 90px color-mix(in srgb,var(--at-accent) 12%,transparent),inset 2px 2px 10px #fff7}
 
 .space-top-actions .space-global-search{position:relative;flex:0 0 34px;width:34px;height:36px;z-index:80}
 .space-global-search .global-search-trigger{position:relative;display:grid;place-items:center;width:34px;height:36px;padding:8px;border-radius:12px;color:var(--muted);z-index:2;background:transparent}
@@ -404,13 +413,17 @@ body.atlas-active[data-dark=true] #space-mode-menu{--ink:#efefea;--muted:#b0b0b8
 #space-atlas .at-header-actions .membership-badge svg{width:15px;height:15px}
 .space-top-actions .membership-badge{width:15px;flex:0 0 15px;justify-content:center}
 #space-atlas .at-view-picker{margin-left:auto;pointer-events:auto}
-#space-atlas .at-view-picker>.at-quiet{padding:11px 14px;border-radius:24px;background:var(--surface);gap:10px;color:var(--ink)}
-#space-atlas .at-view-picker>.at-quiet>.at-view-dimension{font-size:10px;line-height:1;color:var(--muted);letter-spacing:.45px;flex:none}
-#space-atlas .at-view-picker>.at-quiet>.at-view-current{display:flex;align-items:center;gap:7px;min-width:0}
+#space-atlas .at-view-tools{display:flex;align-items:center;gap:8px;margin-left:auto;pointer-events:auto}
+#space-atlas .at-focus-scene{display:grid;place-items:center;flex:none;width:36px;height:36px;padding:0;border-radius:50%;background:var(--surface);color:var(--muted)}
+#space-atlas .at-focus-scene svg{width:18px;height:18px}
+#space-atlas .at-focus-scene:hover,#space-atlas .at-focus-scene:focus-visible{background:var(--soft);color:var(--at-accent)}
+#space-atlas .at-view-picker>.at-quiet{padding:0;border-radius:24px;background:var(--surface);gap:0;color:var(--ink)}
+#space-atlas .at-view-picker>.at-quiet>.at-view-dimension{padding:11px 5px 11px 14px;font-size:10px;line-height:18px;color:var(--muted);letter-spacing:.45px;flex:none}
+#space-atlas .at-view-picker>.at-quiet>.at-view-current{padding:11px 14px 11px 5px;display:flex;align-items:center;gap:7px;min-width:0}
 #space-atlas .at-view-picker>.at-quiet>.at-view-current>svg{width:18px;height:18px;color:var(--at-accent);flex:none}
 #space-atlas .at-view-picker>.at-quiet>.at-view-current>b{font-size:11px;font-weight:500}
-#space-atlas .at-view-picker>.at-quiet>svg:last-child{transform:rotate(180deg)}
-#space-atlas .at-view-picker>.at-quiet[aria-expanded=true]{background:var(--soft)}
+#space-atlas .at-view-picker>.at-quiet>.at-view-current>svg:last-child{transform:rotate(180deg);margin-left:3px;color:var(--ink)}
+#space-atlas .at-view-picker>.at-quiet:has([aria-expanded=true]){background:var(--soft)}
 #space-atlas .at-view-picker .at-layout-menu{top:auto;bottom:calc(100% + 10px);max-height:min(470px,calc(100dvh - 150px));overflow-y:auto;overscroll-behavior:contain;width:min(290px,calc(100vw - 32px))}
 #space-atlas .at-view-tabs{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;margin:1px 1px 8px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent)}
 #space-atlas .at-view-tabs>button{padding:8px 10px;border-radius:8px;color:var(--muted);font-size:11px;letter-spacing:.5px}
@@ -441,6 +454,10 @@ body.atlas-active[data-dark=true] #space-mode-menu{--ink:#efefea;--muted:#b0b0b8
 #space-atlas .at-orbital .at-node[data-orbit] .at-add-mark{border-color:var(--orbit-color)}
 #space-atlas .at-satellite-track{fill:none;stroke:color-mix(in srgb,var(--orbit-color,var(--at-accent)) 24%,transparent);stroke-width:.72;stroke-dasharray:2.5 4;pointer-events:none}
 #space-atlas .at-orbit-track.is-drop-target,#space-atlas .at-satellite-track.is-drop-target{stroke:var(--orbit-color,var(--at-accent));stroke-width:2.2;opacity:1;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--orbit-color,var(--at-accent)) 45%,transparent))}
+#space-atlas .at-galaxy .at-orbit-track.is-drop-target{stroke:var(--orbit-color,var(--at-accent))!important}
+#space-atlas .at-orbit-slot{pointer-events:none;color:var(--orbit-color,var(--at-accent))}
+#space-atlas .at-orbit-slot circle{fill:color-mix(in srgb,var(--orbit-color,var(--at-accent)) 12%,var(--bg));stroke:currentColor;stroke-width:1.5;stroke-dasharray:4 3}
+#space-atlas .at-orbit-slot text{fill:var(--ink);font-size:11px;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}
 #space-atlas [data-presentation=systems] .at-node[data-level="2"] .at-node-main{display:flex;flex-direction:column;justify-content:center;gap:5px;padding:0;background:transparent;box-shadow:none;overflow:visible}
 #space-atlas [data-presentation=systems] .at-node[data-level="2"] .at-node-main>strong{width:68px;text-align:center;font-size:9px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #space-atlas [data-presentation=systems] .at-node[data-level="2"] .at-node-main>small{display:none}
@@ -448,3 +465,45 @@ body.atlas-active[data-dark=true] #space-mode-menu{--ink:#efefea;--muted:#b0b0b8
 #space-atlas [data-presentation=systems] .at-node[data-level="2"][data-kind=bundle] .at-node-main{display:flex;background:transparent}
 #space-atlas [data-presentation=systems] .at-node[data-level="2"][data-kind=bundle] .at-node-main>strong{text-align:center}
 #space-atlas [data-mode="3d"] .at-node[data-level="0"] .at-orb{filter:none;background:radial-gradient(circle at 28% 22%,color-mix(in srgb,var(--at-accent) 12%,white),color-mix(in srgb,var(--at-accent) 52%,var(--surface)) 42%,color-mix(in srgb,var(--at-accent) 88%,#17241c));color:#fff;box-shadow:inset -5px -6px 13px #0002,inset 2px 2px 5px #fff6,0 0 30px color-mix(in srgb,var(--at-accent) 15%,transparent)}
+/* Both space presentations use the original action bar and body-level cords. */
+body:is(.atlas-active,.atlas-transitioning) #main>.workspace{z-index:auto}
+body:is(.atlas-active,.atlas-transitioning) .workspace .space-top-actions{position:relative;z-index:90;visibility:visible}
+body:is(.atlas-active,.atlas-transitioning) .workspace .sidebar{z-index:90}
+body:is(.atlas-active,.atlas-transitioning) .workspace .space-heading-controls{visibility:visible}
+@media(min-width:761px){
+ body.atlas-active .workspace{height:100dvh;min-height:0;margin-bottom:0;padding-bottom:132px;box-sizing:border-box}
+ body.atlas-active .workspace-content{height:calc(100dvh - 164px);min-height:0;display:flex;flex-direction:column}
+ body.atlas-active .workspace-content>:not(#groups){flex-shrink:0}
+}
+/* Add targets keep the silhouette of their peers, with a quiet dashed outline. */
+#space-atlas .at-full-page[data-mode="2d"] .at-compact-node[data-kind=add][data-add-kind] .at-node-main{flex-direction:row;gap:7px;padding:7px 10px;min-height:0;border:1px dashed color-mix(in srgb,var(--at-accent) 45%,transparent);border-radius:10px;background:color-mix(in srgb,var(--at-accent) 3%,transparent)}
+#space-atlas .at-full-page[data-mode="2d"] .at-compact-node[data-kind=add][data-add-kind] .at-add-mark{width:22px;height:22px;border:0;border-radius:50%;background:transparent}
+#space-atlas .at-full-page[data-mode="3d"][data-presentation="spatial"] .at-node[data-kind=add][data-add-kind] .at-add-mark{background:color-mix(in srgb,var(--at-accent) 4%,transparent)}
+#space-atlas .at-full-page[data-mode="2d"] .at-node[data-kind=add][data-add-kind=link] .at-add-mark,#space-atlas .at-full-page[data-mode="3d"][data-presentation="spatial"] .at-node[data-kind=add][data-add-kind=link] .at-add-mark{flex:0 0 25px;width:25px;height:25px;border-radius:50%;background:transparent}
+/* In radial views, direct relationships lead and deeper branches recede. */
+#space-atlas .at-full-page[data-mode="2d"][data-layout="radial"] .at-line[data-level="1"]{stroke:var(--at-accent);stroke-width:1.3;opacity:.8}
+#space-atlas .at-full-page[data-mode="2d"][data-layout="radial"] .at-line[data-level="2"]{stroke:var(--at-accent);stroke-width:.8;opacity:.2}
+#space-atlas .at-full-page[data-mode="2d"][data-layout="radial"] .at-node[data-level="2"]{opacity:.4}
+#space-atlas .at-full-page[data-mode="2d"][data-layout="radial"] .at-line.is-muted{opacity:.1}
+#space-atlas .at-full-page[data-mode="2d"][data-layout="radial"] .at-node.is-muted{opacity:.15}
+#space-atlas .at-full-page[data-mode="2d"][data-layout="radial"] .at-node[data-level="2"]:is(.is-related,:hover,:focus-within){opacity:.85}
+#space-atlas .at-full-page[data-mode="2d"][data-layout="radial"] .at-line[data-level="2"].is-related{opacity:.45}
+/* Match add-label alignment to the resource cards in every presentation. */
+#space-atlas .at-full-page .at-node[data-kind=add] .at-node-main>strong{text-align:left}
+#space-atlas .at-full-page[data-mode="2d"] .at-node[data-kind=add]:is([data-add-kind=scene],[data-add-kind=group]) .at-node-main>strong{text-align:center}
+#space-atlas .at-full-page.at-orbital .at-node[data-kind=add] .at-node-main{display:flex;flex-direction:column;align-items:center}
+#space-atlas .at-full-page.at-orbital .at-node[data-kind=add] .at-node-main>strong{width:100%;text-align:center}
+/* Expandable collections use a square symbol; only actual URLs have a card surface. */
+#space-atlas [data-mode="2d"] .at-node[data-kind=bundle] .at-node-main{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:5px;border:0;background:transparent;box-shadow:none}
+#space-atlas [data-mode="2d"] .at-node[data-kind=bundle] .at-bundle-mark{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:7px;background:var(--soft)}
+#space-atlas [data-mode="2d"] .at-node[data-kind=bundle] .at-node-main>strong,#space-atlas [data-mode="2d"] .at-node[data-kind=bundle] .at-node-main>small{text-align:center}
+#space-atlas .at-full-page[data-mode="3d"] .at-node[data-level="1"]{opacity:calc(var(--depth-opacity,1)*.85)}
+#space-atlas .at-full-page[data-mode="3d"] .at-node[data-level="2"]{opacity:calc(var(--depth-opacity,1)*.28)}
+#space-atlas .at-full-page[data-mode="3d"] .at-node.is-muted{opacity:.12}
+#space-atlas .at-full-page[data-mode="3d"] .at-node[data-level="1"]:is(.is-related,:hover,:focus-within){opacity:1}
+#space-atlas .at-full-page[data-mode="3d"] .at-node[data-level="2"]:is(.is-related,:hover,:focus-within){opacity:.6}
+#space-atlas .at-full-page[data-mode="3d"][data-presentation="spatial"] .at-line[data-level="1"]{stroke:var(--at-accent);stroke-width:1.3;opacity:.8}
+#space-atlas .at-full-page[data-mode="3d"][data-presentation="spatial"] .at-line[data-level="2"]{stroke:var(--at-accent);stroke-width:.8;opacity:.18}
+#space-atlas .at-full-page[data-mode="3d"][data-presentation="spatial"] .at-line.is-muted{opacity:.08}
+#space-atlas .at-full-page[data-mode="3d"][data-presentation="spatial"] .at-line[data-level="2"].is-related{opacity:.4}
+#space-atlas .at-full-page[data-mode="3d"] .at-satellite-track{opacity:.35}

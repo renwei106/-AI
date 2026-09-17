@@ -1,0 +1,2 @@
+from pathlib import Path
+p=Path('dist/corner.css');s=p.read_text(encoding='utf-8').replace('#my-corner{--font:"Segoe UI","Microsoft YaHei UI","Microsoft YaHei",sans-serif;font-family:var(--font);','#my-corner{font-family:var(--font);');s+='\n/* Card fronts and edit faces inherit the active personalized typeface. */\n#my-corner,#my-corner *{font-family:var(--font)}\n';p.write_text(s,encoding='utf-8')
