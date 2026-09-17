@@ -58,8 +58,52 @@
   const FORM_START=10000,FORM_END=30000;
   const FORM_NAMES=['城堡','喷水鲸鱼','远行','地球','银河','太阳系','玫瑰','奔马','飞鸟','帆船','埃菲尔铁塔','飞机','上海天际线','东方明珠','金字塔','蒲公英','参天大树','蒙娜丽莎','一字雁阵','人字雁阵','天鹅左岸','天鹅右岸','双翼飞机'];
   const FORM_ORDER=[9,22,10,16,17,0,1,2,4,5,6,7,12,14,15];
-  const MODE_KEYS=['form','snow','tide','chaos'];
-  const STYLE_NAMES={chaos:'混沌漫游',form:'万象成形',snow:'灵感落雪',tide:'潮汐涌动'};
+  // Independent free-surface solver for the fifth mode. Positions are never tied to a grid.
+  class WaterParticles {
+    constructor(w,h){
+      this.w=w;this.h=h;this.time=0;this.accumulator=0;
+      this.spacing=Math.max(10,Math.sqrt(w*h*.37/2600));this.radius=this.spacing*2.4;
+      this.cols=Math.ceil(w/this.radius)+2;this.rows=Math.ceil(h/this.radius)+2;
+      this.head=new Int32Array(this.cols*this.rows);this.p=[];
+      const d=this.spacing;
+      for(let row=0,y=h-d*.6;y>h*.63;y-=d*.87,row++)for(let x=d*.6+(row%2)*d*.5;x<w-d*.4;x+=d){
+        this.p.push({x,y:y+Math.sin(x/w*6.28)*d*.8,ox:x,oy:y,vx:0,vy:0,kind:Math.floor(Math.random()*6),angle:Math.random()*6.28,size:d*(.28+Math.random()*.10)});
+      }
+      this.next=new Int32Array(this.p.length);this.neighbors=[];this.weights=[];
+    }
+    stir(x,y,px,py,vx,vy){
+      const dx=x-px,dy=y-py,len=dx*dx+dy*dy,r=Math.min(105,this.w*.16),speed=Math.min(1700,Math.hypot(vx,vy));
+      for(const p of this.p){const t=len?clamp(((p.x-px)*dx+(p.y-py)*dy)/len,0,1):0,ox=p.x-px-dx*t,oy=p.y-py-dy*t,d=Math.hypot(ox,oy);if(d>=r)continue;
+        const q=(1-d/r)**2;p.vx+=clamp(vx,-1400,1400)*q*.34;p.vy+=(clamp(vy,-1400,1400)*.34-speed*.23)*q;
+      }
+    }
+    step(dt){this.accumulator+=dt;let steps=0;while(this.accumulator>=1/60&&steps++<3){this.advance(1/60);this.accumulator-=1/60;}}
+    advance(dt){
+      this.time+=dt;const a=this.p,R=this.radius;
+      for(const p of a){p.ox=p.x;p.oy=p.y;p.vx+=Math.sin(this.time*1.3+p.y/160)*32*dt;p.vy+=(700+Math.sin(p.x/this.w*6.28-this.time*1.6)*190)*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;}
+      for(let iteration=0;iteration<2;iteration++){
+        this.head.fill(-1);
+        for(let i=0;i<a.length;i++){const p=a[i],cx=clamp(Math.floor(p.x/R),0,this.cols-1),cy=clamp(Math.floor(p.y/R),0,this.rows-1),k=cy*this.cols+cx;this.next[i]=this.head[k];this.head[k]=i;}
+        for(let i=0;i<a.length;i++){
+          const p=a[i],cx=clamp(Math.floor(p.x/R),0,this.cols-1),cy=clamp(Math.floor(p.y/R),0,this.rows-1);let density=0,near=0,n=0;
+          for(let yy=Math.max(0,cy-1);yy<=Math.min(this.rows-1,cy+1);yy++)for(let xx=Math.max(0,cx-1);xx<=Math.min(this.cols-1,cx+1);xx++)for(let j=this.head[yy*this.cols+xx];j>=0;j=this.next[j]){if(j===i)continue;const q=a[j],d=Math.hypot(q.x-p.x,q.y-p.y);if(d>=R||d<.001)continue;const weight=1-d/R;density+=weight*weight;near+=weight*weight*weight;this.neighbors[n]=j;this.weights[n++]=weight;}
+          const pressure=Math.max(-.08,(density-2.8)*.65),nearPressure=near*.65;let sx=0,sy=0;
+          for(let k=0;k<n;k++){const q=a[this.neighbors[k]],weight=this.weights[k],dx=q.x-p.x,dy=q.y-p.y,d=Math.max(.001,Math.hypot(dx,dy)),push=clamp((pressure*weight+nearPressure*weight*weight)*.5,-.08,1.5),ox=dx/d*push,oy=dy/d*push;q.x+=ox;q.y+=oy;sx-=ox;sy-=oy;}
+          p.x+=sx;p.y+=sy;
+        }
+        for(const p of a){p.x=clamp(p.x,3,this.w-3);p.y=clamp(p.y,3,this.h-3);}
+      }
+      for(const p of a){p.vx=clamp((p.x-p.ox)/dt*.996,-1800,1800);p.vy=clamp((p.y-p.oy)/dt*.996,-1800,1800);p.angle+=clamp(p.vx*.002,-2,2)*dt;}
+    }
+    draw(ctx,dpr,ink){
+      ctx.fillStyle=ink;ctx.globalAlpha=.9;
+      for(const p of this.p){const c=Math.cos(p.angle)*p.size*dpr,s=Math.sin(p.angle)*p.size*dpr;ctx.setTransform(c,s,-s,c,p.x*dpr,p.y*dpr);ctx.fill(shapes[p.kind]);}
+      ctx.globalAlpha=1;ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+  }
+
+  const MODE_KEYS=['form','water','snow','chaos'];
+  const STYLE_NAMES={chaos:'混沌漫游',form:'万象成形',snow:'灵感落雪',tide:'潮汐涌动',water:'流光涌浪'};
   const FLOW_DOCK_ICON='<span class="flow-dock-gateway" aria-hidden="true"><svg viewBox="0 0 52 42" fill="none"><path class="flow-dock-gate" d="M26 2.5 44 12.7v16.6L26 39.5 8 29.3V12.7Z" stroke="currentColor" stroke-width="1.35"/><g class="flow-dock-enter" fill="currentColor"><circle cx="20.5" cy="16.5" r="2.5"/><rect x="27.5" y="14" width="5" height="5" rx="1"/><path d="m21 23.5 3.4 5.7h-6.8Z"/><path d="M28.9 22.7h2.2v2.2h2.2v2.2h-2.2v2.2h-2.2v-2.2h-2.2v-2.2h2.2Z"/></g></svg></span>';
   const FLOW_SPACE_SHAPES=[
     '<circle cx="12" cy="12" r="7"/>','<rect x="5" y="5" width="14" height="14" rx="2"/>','<path d="m12 4 8 15H4Z"/>','<path d="m12 3.5 8.5 8.5-8.5 8.5L3.5 12Z"/>',
@@ -67,12 +111,13 @@
     '<path d="M5 19V11a7 7 0 0 1 14 0v8h-4v-8a3 3 0 0 0-6 0v8Z"/>','<path d="m12 3 2.2 6.1 6.3.2-5 3.8 1.8 6.2-5.3-3.5-5.3 3.5 1.8-6.2-5-3.8 6.3-.2Z"/>','<path d="M18.5 16.7a8 8 0 1 1-8.7-12.1 6.8 6.8 0 1 0 8.7 12.1Z"/>','<path d="M4 17h16M6 14l3-7 3 7 3-10 3 10"/>'
   ];
   const MODE_COPY={
+    water:{title:'让灵感\n逐浪而行',intro:'轻轻划过，掀起一片波光'},
     chaos:{title:'让灵感\n自在流动',intro:'散落其间，也自有方向'},
     form:{title:'万象缓缓成形',intro:'拨动一次，等待下一种相遇'},
     snow:{title:'让灵感\n缓缓落下',intro:'落下，积聚，等一场清扫'},
     tide:{title:'让灵感\n随潮涌动',intro:'每一次经过，都会掀起新的流向'}
   };
-  function normalizeMode(value){return value==='surge'?'snow':value==='flow'?'chaos':MODE_KEYS.includes(value)?value:'form';}
+  function normalizeMode(value){return value==='tide'?'water':value==='surge'?'snow':value==='flow'?'chaos':MODE_KEYS.includes(value)?value:'form';}
   function modeCopy(mode){const custom=prefs.sharedHomeCopy?.mode==='custom'||prefs.homeCopy?.flow?.mode==='custom';return custom?currentCopy('flow'):MODE_COPY[mode]||MODE_COPY.chaos;}
   const CHROME_IDLE_AFTER=10000;
   let chromeIdleTimer=0;
@@ -259,12 +304,13 @@
     const reduce=matchMedia('(prefers-reduced-motion: reduce)'),rand=random(94176);
     let width=0,height=0,dpr=1,field,blocks=[],head,next,hashCols,frame=0,last=0,clock=0,disposed=false,previous=null,ink='#fff',tone='#d9e1ff',detailInk='#142154',modalOpen=false;
     let formation=activeMode==='form'?1:0,formationIndex=activeMode==='form'?FORM_ORDER[0]:-1,formationTargets=[],formationCenter={x:0,y:0},formationAssignedClock=0,solarOrbits=[],lastStir=performance.now()-(activeMode==='form'?FORM_END:0),lastGesture=-Infinity,morphStep=0,inherited=transition?.particles||null,modeStartedAt=0,handoffUntil=0;
+    let water=null;
     let pendingForm=null;
     function previewForm(){if(pendingForm===null){const candidates=FORM_ORDER.filter(index=>index!==formationIndex);pendingForm=candidates[Math.floor(Math.random()*candidates.length)];}return pendingForm;}
     let ripples=[],lastRipple=0,lastRipplePoint=null,traces=[],lastTracePoint=null,lastTrace=0;
     const firefly={x:0,y:0,time:0,hold:0,attack:0,target:null,ready:false};
     const cell=24,pixel=document.createElement('canvas');pixel.width=pixel.height=1;const pixelContext=pixel.getContext('2d',{willReadFrequently:true});
-    const touchHints={chaos:'轻触或滑动，让粒子在空间里漫游',form:'轻触或滑动，打乱后等待万象成形',snow:'轻触或滑动，拨开一场落雪',tide:'轻触或滑动，掀起一阵潮汐'};
+    const touchHints={chaos:'轻触或滑动，让粒子在空间里漫游',form:'轻触或滑动，打乱后等待万象成形',snow:'轻触或滑动，拨开一场落雪',tide:'轻触或滑动，掀起一阵潮汐',water:'轻触或滑动，拨动水面'};
     function updateModeUI(){
       const copy=modeCopy(activeMode),switcher=cover.querySelector('.inspiration-style-switch'),label=switcher?.querySelector('.inspiration-style-label>span:first-child');
       cover.dataset.particleMode=activeMode;cover.dataset.flowState=activeMode;canvas.dataset.mode=activeMode;document.body.dataset.flowStyle=activeMode;
@@ -304,6 +350,7 @@
       nextMode=normalizeMode(nextMode);if(nextMode===activeMode)return;pendingForm=null;
       if(activeMode==='form')bakeFormationMotion();
       activeMode=nextMode;prefs.flowStyle=nextMode;persist();previous=null;ripples=[];lastRipplePoint=null;traces=[];lastTracePoint=null;formation=0;morphStep=0;solarOrbits=[];formationTargets=[];formationIndex=activeMode==='form'?FORM_ORDER[0]:-1;lastStir=performance.now()-(activeMode==='form'?FORM_END:0);lastGesture=-Infinity;modeStartedAt=clock;handoffUntil=performance.now()+160;
+      water=activeMode==='water'?new WaterParticles(width,height):null;
       resetSnowBed();syncParticleCount();blocks.forEach(resetParticleForMode);updateModeUI();if(activeMode==='form'){blocks=blocks.filter(p=>!p.retiring);next=new Int32Array(blocks.length);formation=1;}if(formationIndex>=0&&width){assignFormation();settleEntryForm();}draw();
     }
     function settleEntryForm(){if(activeMode!=='form'||formation<1)return;morph();blocks.forEach(p=>{p.birth=1;p.gx=p.tx;p.gy=p.ty;p.renderX=p.x;p.renderY=p.y;});canvas.dataset.formation='1.000';cover.dataset.flowState='formed';cover.dataset.formLocked='true';}
@@ -338,6 +385,7 @@
       const r=cover.getBoundingClientRect(),w=Math.max(1,r.width),h=Math.max(1,r.height),ratio=Math.min(devicePixelRatio||1,2,Math.sqrt(4800000/(w*h)));
       if(w===width&&h===height&&ratio===dpr)return;
       const oldWidth=width,oldHeight=height;width=w;height=h;dpr=ratio;canvas.width=frontCanvas.width=Math.round(w*dpr);canvas.height=frontCanvas.height=Math.round(h*dpr);
+      if(activeMode==='water')water=new WaterParticles(w,h);
       field=new FlowField(w,h);hashCols=Math.ceil(w/cell)+1;head=new Int32Array(hashCols*(Math.ceil(h/cell)+1));
       if(blocks.length&&oldWidth&&oldHeight)blocks.forEach(p=>{p.x=p.x/oldWidth*w;p.y=p.y/oldHeight*h;p.vx*=.5;p.vy*=.5;});
       syncParticleCount();
@@ -529,6 +577,7 @@
       if(resolveContacts)contacts();for(const ripple of ripples)ripple.age+=dt;ripples=ripples.filter(ripple=>ripple.age<1.25);canvas.dataset.tideLevel=String(Math.round(height*.63));canvas.dataset.ripples=String(ripples.length);canvas.dataset.rippleLayers='2';
     }
     function simulate(dt,resolveContacts=true){
+      if(activeMode==='water'){clock+=dt;water?.step(dt);return;}
       if(activeMode==='snow'){simulateSnow(dt,resolveContacts);return;}if(activeMode==='tide'){simulateTide(dt,resolveContacts);return;}
       clock+=dt;field.step(dt);
       for(const p of blocks){
@@ -653,6 +702,7 @@
     function draw(){
       if(disposed||!width)return;
       ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);frontCtx.setTransform(dpr,0,0,dpr,0,0);frontCtx.clearRect(0,0,width,height);
+      if(activeMode==='water'){water?.draw(ctx,dpr,ink);return;}
       if(formation>.05){
         const ghostAlpha=.055*Math.min(1,formation*1.8),stride=Math.max(4,Math.round(blocks.length/90));
         for(let i=0;i<blocks.length;i+=stride){const p=blocks[i];if(!Number.isFinite(p.gx))continue;const angle=p.angle*.35,c=Math.cos(angle),s=Math.sin(angle),size=p.r*.72,x=p.gx+Math.sin(clock*.22+i)*5,y=p.gy+Math.cos(clock*.18+i*.7)*4;ctx.setTransform(dpr*c*size,dpr*s*size,-dpr*s*size,dpr*c*size,dpr*x,dpr*y);ctx.globalAlpha=ghostAlpha;ctx.fillStyle=p.tone?tone:ink;ctx.fill(shapes[p.kind]);if((p.depth??0)>.74){frontCtx.setTransform(dpr*c*size,dpr*s*size,-dpr*s*size,dpr*c*size,dpr*x,dpr*y);frontCtx.globalAlpha=ghostAlpha*.68;frontCtx.fillStyle=p.tone?tone:ink;frontCtx.fill(shapes[p.kind]);}}
@@ -682,6 +732,7 @@
       frame=0;if(disposed||document.hidden||modalOpen||reduce.matches)return;
       const dt=last?Math.min((now-last)/1000,.034):1/60;last=now;
       if(now<handoffUntil){draw();frame=requestAnimationFrame(tick);return;}
+      if(activeMode==='water'){water?.step(dt);draw();frame=requestAnimationFrame(tick);return;}
       updateFormation(now,dt);
       updateFirefly(dt,now);
       if(activeMode==='snow'||activeMode==='tide'){simulate(dt/2,false);simulate(dt/2,true);}else{simulate(dt/2);simulate(dt/2);}updateParticleTransitions(dt);updateTraces(dt);morph();draw();frame=requestAnimationFrame(tick);
@@ -704,6 +755,7 @@
     function move(event){
       if(!inputAllowed(event)){previous=null;return;}
       const now=performance.now(),x=event.clientX,y=event.clientY;
+      if(activeMode==='water'){if(previous){const dt=clamp((now-previous.time)/1000,.012,.06);water?.stir(x,y,previous.x,previous.y,(x-previous.x)/dt,(y-previous.y)/dt);}previous={x,y,time:now,id:event.pointerId};return;}
       if(!previous&&activeMode==='form'&&formation>=.98&&formationHit(x,y,x,y)){beginCycle(now);field.stir(x,y,0,-90,width<600?108:160,360);}
       if(previous&&previous.id===event.pointerId){
          const dt=clamp((now-previous.time)/1000,.008,.05),dx=x-previous.x,dy=y-previous.y,distance=Math.hypot(dx,dy),steps=clamp(Math.ceil(distance/24),1,18),vx=clamp(dx/dt,-2200,2200),vy=clamp(dy/dt,-2200,2200);
@@ -723,7 +775,7 @@
       formation=1;morphStep=1;lastStir=now-FORM_END;lastGesture=-Infinity;firefly.hold=0;firefly.attack=0;firefly.target=null;traces=[];lastTracePoint=null;previous=null;
       assignFormation();settleEntryForm();cover.dataset.nextForm=FORM_NAMES[formationIndex];canvas.dataset.traces='0';delete canvas.dataset.traceGlyph;draw();
     }
-    function tap(event){if(inputAllowed(event)){const now=performance.now(),hit=activeMode==='form'&&formationHit(event.clientX,event.clientY,event.clientX,event.clientY);if(hit){canvas.dataset.formHit='true';beginCycle(now);}else if(activeMode==='form'&&formation>=.98)canvas.dataset.formHit='false';field.stir(event.clientX,event.clientY,0,activeMode==='tide'?-520:-90,width<600?108:160,activeMode==='tide'?620:360);if(activeMode==='tide')dropRipple(event.clientX,event.clientY,1,now,true);else dropTrace(event.clientX,event.clientY,0,-1,now,true);}}
+    function tap(event){if(inputAllowed(event)){if(activeMode==='water'){water?.stir(event.clientX,event.clientY,event.clientX,event.clientY,0,-600);return;}const now=performance.now(),hit=activeMode==='form'&&formationHit(event.clientX,event.clientY,event.clientX,event.clientY);if(hit){canvas.dataset.formHit='true';beginCycle(now);}else if(activeMode==='form'&&formation>=.98)canvas.dataset.formHit='false';field.stir(event.clientX,event.clientY,0,activeMode==='tide'?-520:-90,width<600?108:160,activeMode==='tide'?620:360);if(activeMode==='tide')dropRipple(event.clientX,event.clientY,1,now,true);else dropTrace(event.clientX,event.clientY,0,-1,now,true);}}
     function leave(){previous=null;lastRipplePoint=null;lastTracePoint=null;}
     cover.addEventListener('pointermove',move,{passive:true});cover.addEventListener('pointerdown',tap,{passive:true});cover.addEventListener('pointerleave',leave);
     const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(cover);
