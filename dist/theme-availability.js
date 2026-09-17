@@ -1,5 +1,6 @@
 (function(){
- let enabled=new Set(),order=[],installed=false
+ const retired=new Set(['reading','projection','wallfilm'])
+ let order=Object.keys(THEMES).filter(id=>id!=='wallfilm'&&!retired.has(id)),enabled=new Set(order),installed=false
  const configId=id=>id==='wallfilm'?'projection':id
  const allowed=id=>enabled.has(configId(id))
  const visible=id=>id!=='wallfilm'&&enabled.has(id)
@@ -41,9 +42,10 @@
  async function refresh(){
   try{
    const response=await fetch('/api/shiyu/themes',{cache:'no-store'});if(!response.ok)return
-   const data=await response.json(),items=(data.items||[]).filter(item=>THEMES[item.id]);const nextOrder=items.map(item=>item.id),next=new Set(items.filter(item=>item.enabled).map(item=>item.id));if(!next.size)return
+   const data=await response.json(),items=(data.items||[]).filter(item=>THEMES[item.id]&&!retired.has(item.id));const nextOrder=items.map(item=>item.id),next=new Set(items.filter(item=>item.enabled).map(item=>item.id));if(!next.size)return
    const changed=nextOrder.join('|')!==order.join('|')||[...next].join('|')!==[...enabled].join('|');order=nextOrder;enabled=next;install();if(changed){sanitize();render()}else prune()
   }catch{}
  }
+ install();if(sanitize())render();else prune()
  refresh();window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});setInterval(refresh,15000)
 })()

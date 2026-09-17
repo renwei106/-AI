@@ -38,9 +38,10 @@
   const systems = () => state.mode==='3d'&&state.scene3d==='systems';
   const orbital = () => solar()||systems();
   const galaxy = () => !classicOrbits&&orbital()&&get(state.focus)?.kind==='space';
-  let orbits=[], satelliteOrbits=[];
+  let orbits=[], satelliteOrbits=[],cameraReturn=null;
+  const orbitPhase=orbit=>state.orbitClock*orbit.speed+(orbit.focusOffset||0);
   let dialog, index=new Map(), root, visible=[], nodeEls=new Map(), edgeEls=[], activeFlow=null, raf=0, lastFrame=0, needsPaint=true, returnFocus, resizeObserver, noticeTimer, compactLayout=false, modeMenu, menuTimer, menuTrigger, viewMenuTimer=0, editorBusy=false, atlasTransitionTimer=0, atlasClosing=false;
-  let leavingForHome=false,sharedHeading;
+  let leavingForHome=false,sharedHeading,sharedModeButton;
   const get = key => index.get(key);
   const query = s => dialog.querySelector(s);
   const label = kind => ({space:'空间',scene:'场景',group:'分组',link:'网址',bundle:'分支'}[kind]);
@@ -91,11 +92,13 @@
     if(heading){
       sharedHeading??=modeButton(space().name);
       if(sharedHeading.parentElement!==heading)heading.replaceChildren(sharedHeading);
-      const current=space(),atlas=!!dialog?.open,switcher=sharedHeading.querySelector('.corner-space-switch'),button=sharedHeading.querySelector('.space-mode-entry');
+      const current=space(),atlas=!!dialog?.open,switcher=sharedHeading.querySelector('.corner-space-switch'),button=sharedModeButton;
       switcher.querySelector('.space-detail-icon').innerHTML=typeof entityIcon==='function'?entityIcon(current.icon||'work'):icons.space;
       switcher.querySelector('span').textContent=current.name;switcher.setAttribute('aria-label','切换空间：'+current.name);
       button.querySelector('.space-mode-indicator').innerHTML=atlas?icons.graph:icons.grid;
       button.setAttribute('aria-label','切换视图，当前'+(atlas?'图谱视图':'常规视图'));
+      const host=atlas?query('.at-view-tools'):document.querySelector('.workspace-tools .group-view-controls');
+      if(host)host.insertBefore(button,atlas?host.querySelector('.at-layout-picker'):host.firstChild);
     }
     mountGlobalSearch(document.querySelector('.workspace .space-top-actions'));
     const field=document.querySelector('.workspace #filter');if(field){field.hidden=true;const mark=field.previousElementSibling;if(mark?.tagName==='SPAN')mark.hidden=true}
@@ -132,12 +135,12 @@
     const s=data.find(s=>s.id===(atlas?state.sid:spaceId)),mark=typeof entityIcon==='function'?entityIcon(s?.icon||'work'):icons.space;
     b.innerHTML='<i class="space-detail-icon">'+mark+'</i><span class="space-mode-name">'+esc(name)+'</span><i class="space-mode-indicator" title="'+(atlas?'图谱视图':'常规视图')+'">'+(atlas?icons.graph:icons.grid)+'</i>'+icons.down;
     b.setAttribute('aria-label',name+'，当前'+(atlas?'图谱视图':'常规视图')+'，切换空间展示方式');b.setAttribute('aria-expanded','false');b.setAttribute('aria-haspopup','true');
-    b.onpointerenter=()=>showModeMenu(b);b.onclick=()=>showModeMenu(b);b.onpointerleave=()=>{menuTimer=setTimeout(hideModeMenu,240)};
+    b.onpointerenter=()=>showModeMenu(b);b.onclick=()=>{hideModeMenu();if(dialog?.open)closeAtlas('daily');else open(spaceId,b)};b.onpointerleave=()=>{menuTimer=setTimeout(hideModeMenu,240)};
     const controls=document.createElement('div');controls.className='space-heading-controls';
     const switcher=document.createElement('button');switcher.type='button';switcher.className='corner-space-switch';switcher.dataset.cornerSwitch='';switcher.setAttribute('aria-label','切换空间：'+name);switcher.setAttribute('aria-expanded','false');switcher.setAttribute('aria-haspopup','true');
     switcher.innerHTML='<i class="space-detail-icon">'+mark+'</i><span>'+esc(name)+'</span>'+icons.down;
     b.innerHTML='<i class="space-mode-indicator">'+(atlas?icons.graph:icons.grid)+'</i>';b.title='切换视图';b.setAttribute('aria-label','切换视图，当前'+(atlas?'图谱视图':'常规视图'));
-    controls.append(switcher,b);return controls;
+    sharedModeButton=b;controls.append(switcher);return controls;
   }
   function hideModeMenu(){if(modeMenu)modeMenu.hidden=true;document.querySelectorAll('.space-mode-entry').forEach(b=>b.setAttribute('aria-expanded','false'))}
   function showModeMenu(button){
@@ -145,7 +148,7 @@
     if(!modeMenu){modeMenu=document.createElement('div');modeMenu.id='space-mode-menu';document.body.append(modeMenu);modeMenu.onpointerenter=()=>clearTimeout(menuTimer);modeMenu.onpointerleave=()=>{menuTimer=setTimeout(hideModeMenu,240)};modeMenu.onkeydown=e=>{if(e.key==='Escape'){hideModeMenu();menuTrigger?.focus()}}}
     const active=!!dialog?.open;
     modeMenu.innerHTML=`<p>空间展示方式</p><button data-space-mode="daily" aria-pressed="${!active}"><span class="mode-preview mode-preview-daily"><i></i><i></i><i></i><i></i></span><span><b>常规视图</b><small>按场景和分组整齐呈现，适合日常浏览、搜索与管理</small></span></button><button data-space-mode="atlas" aria-pressed="${active}"><span class="mode-preview mode-preview-atlas">${icons.graph}</span><span><b>图谱视图</b><small>用节点和连线展开层级，适合查看上下级与整体关系</small></span></button>`;
-    const rect=button.getBoundingClientRect();modeMenu.style.left=clamp(rect.left,12,innerWidth-304)+'px';modeMenu.style.top=rect.bottom+9+'px';modeMenu.hidden=false;button.setAttribute('aria-expanded','true');
+    const rect=button.getBoundingClientRect();modeMenu.hidden=false;modeMenu.style.left=clamp(rect.right-modeMenu.offsetWidth,12,innerWidth-modeMenu.offsetWidth-12)+'px';modeMenu.style.top=Math.max(12,rect.top-modeMenu.offsetHeight-9)+'px';button.setAttribute('aria-expanded','true');
     modeMenu.onclick=e=>{const choice=e.target.closest('[data-space-mode]');if(!choice)return;hideModeMenu();if(choice.dataset.spaceMode==='atlas'){if(!dialog?.open)open(spaceId,button)}else if(dialog?.open)closeAtlas('daily')};
   }
   document.addEventListener('click',e=>{if(!e.target.closest('#space-mode-menu,.space-mode-entry'))hideModeMenu()});
@@ -168,6 +171,7 @@
       dialog.addEventListener('pointercancel',pointerUp);
       dialog.addEventListener('lostpointercapture',()=>{if(state.drag)pointerUp({type:'pointercancel'})});
       dialog.addEventListener('mouseover',hover);
+      dialog.addEventListener('pointerover',e=>{const button=e.target.closest('.at-node-menu');if(button&&!button.contains(e.relatedTarget))linkMenu(button,true)});
       dialog.addEventListener('mouseout',unhover);
       dialog.addEventListener('focusin',hover);
       dialog.addEventListener('focusout',unhover);
@@ -181,7 +185,16 @@
     else requestAnimationFrame(()=>requestAnimationFrame(()=>{if(!dialog.open||atlasClosing)return;positionChrome();paint(0);dialog.classList.add('atlas-ready');atlasTransitionTimer=setTimeout(()=>{if(dialog.open&&!atlasClosing){document.body.classList.add('atlas-active');document.body.classList.remove('atlas-transitioning')}},reduceMotion.matches?0:110)}));
     rememberPresentation(sid,'atlas');writeSaved();
   }
-  function resetCamera(){state.zoom=1;state.yaw=0;state.pitch=0;state.panX=0;state.panY=0;state.phase=0;state.orbitClock=0;needsPaint=true}
+  function resetCamera(){cameraReturn=null;state.zoom=1;state.yaw=0;state.pitch=0;state.panX=0;state.panY=0;state.phase=0;state.orbitClock=0;needsPaint=true}
+  function returnToDefaultView(){
+    const fields=['zoom','yaw','pitch','panX','panY','phase','orbitClock'],snapshot=()=>Object.fromEntries(fields.map(key=>[key,state[key]])),shortAngle=a=>Math.atan2(Math.sin(a),Math.cos(a)),from=snapshot();
+    const phases=new Map([...orbits,...satelliteOrbits].map(orbit=>[orbit.parentKey+':'+orbit.id,shortAngle(orbitPhase(orbit))]));
+    resetCamera();layout(true);const to=snapshot();
+    if(reduceMotion.matches)return;
+    from.yaw=shortAngle(from.yaw+from.phase);from.pitch=shortAngle(from.pitch);from.phase=0;from.orbitClock=0;
+    for(const orbit of [...orbits,...satelliteOrbits])orbit.focusOffset=phases.get(orbit.parentKey+':'+orbit.id)||0;
+    Object.assign(state,from);cameraReturn={from,to,phases,started:performance.now(),duration:650};needsPaint=true;paint(0);
+  }
   function renderAtlas() {
     if(!classicOrbits&&state.scene3d==='systems')state.scene3d='solar';
     const n=get(state.focus)||root;
@@ -206,7 +219,7 @@
     if(heading){dialog.style.setProperty('--chrome-left',heading.left+'px');dialog.style.setProperty('--chrome-top',heading.top+'px')}
     if(actions)dialog.style.setProperty('--chrome-right',Math.max(24,innerWidth-actions.right)+'px');
   }
-  const layoutName=id=>({radial:'径向环绕',organization:'层级结构',mindmap:'思维脉络',spatial:'星际漫游',solar:classicOrbits?'行星轨道':'银河星系',systems:'场景星系'}[id]);
+  const layoutName=id=>({radial:'径向环绕',organization:'层级结构',mindmap:'思维脉络',spatial:'微观结构',solar:classicOrbits?'行星轨道':'银河星系',systems:'场景星系'}[id]);
   const viewOptions=mode=>mode==='2d'?['radial','organization','mindmap']:classicOrbits?['spatial','solar','systems']:['spatial','solar'];
   function layoutPicker(){
     const current=state.mode==='2d'?state.layout:state.scene3d;
@@ -244,6 +257,7 @@
     return result;
   }
   function renderGraph(n) {
+    window.ShiyuBookmarkActions?.close();
     compactLayout=query('.at-canvas').clientWidth<650;
     visible=collect(n);nodeEls=new Map();edgeEls=[];activeFlow=null;orbits=[];satelliteOrbits=[];
     const canvas=query('.at-canvas');canvas.innerHTML='<svg class="at-lines" aria-hidden="true"></svg><svg class="at-flows" aria-hidden="true"></svg>';
@@ -263,6 +277,7 @@
       el.innerHTML=r.kind==='link'?`<a class="at-node-main" href="${esc(safeURL(r.item[1])||'#')}" target="_blank" rel="noopener noreferrer" title="打开 ${name}" data-at-link="${esc(r.key)}">${content}</a>`:`<button class="at-node-main" data-at-focus="${esc(r.key)}" title="${name}" aria-label="${r.isParent?'返回':rootNode?'当前':'进入'}${name}">${content}</button>`;
       if(r.kind==='add'){el.querySelector('button').removeAttribute('data-at-focus');el.querySelector('button').setAttribute('data-at-create',r.owner);el.querySelector('button').setAttribute('aria-label',r.name)}
       if(!['bundle','add'].includes(r.kind)&&!r.isParent)el.insertAdjacentHTML('beforeend',`<button class="at-node-menu" data-at-details="${esc(r.key)}" aria-label="管理 ${name}" title="管理">${icons.more}</button>`);
+      if(state.mode==='3d'&&r.kind==='link')linkMenu(el.querySelector('.at-node-menu'));
       canvas.append(el);nodeEls.set(r.key,el);
       const symbol=el.querySelector('.at-orb,.at-logo,.at-bundle-mark,.at-add-mark')||el.querySelector('.at-node-main'),nodeBox=el.getBoundingClientRect(),symbolBox=symbol.getBoundingClientRect();
       r.anchorX=symbolBox.left-nodeBox.left+symbolBox.width/2;r.anchorY=symbolBox.top-nodeBox.top+symbolBox.height/2;
@@ -278,6 +293,7 @@
     if(!reduceMotion.matches)canvas.animate([{opacity:.25},{opacity:1}],{duration:340,easing:'ease-out'});
   }
   function layout(fit=false) {
+    cameraReturn=null;
     if(!dialog?.open)return;
     const canvas=query('.at-canvas'),w=canvas.clientWidth,h=canvas.clientHeight,n=visible.find(x=>x.level===0);if(!w||!h||!n)return;
     const top=compactLayout?190:145,bottom=compactLayout?180:155,usableH=Math.max(220,h-top-bottom),centerY=top+usableH/2;
@@ -430,7 +446,7 @@
   }
   function galaxyPoint(orbit,t,jitter=0){
     // Zero radial derivative at the root joins each arm tangentially to the inner ring.
-    const radius=orbit.inner+(orbit.radius-orbit.inner)*t*t,angle=orbit.angle-t*Math.PI*2+state.orbitClock*orbit.speed+jitter;
+    const radius=orbit.inner+(orbit.radius-orbit.inner)*t*t,angle=orbit.angle-t*Math.PI*2+orbitPhase(orbit)+jitter;
     return {x:Math.cos(angle)*radius,y:Math.sin(angle)*radius*Math.cos(orbit.tilt),z:Math.sin(angle)*radius*Math.sin(orbit.tilt)};
   }
   function galaxySlots(orbit,count){
@@ -444,8 +460,8 @@
     return orbit.isSatellite?{x:orbit.parent.bx+local.x,y:orbit.parent.by+local.y,z:orbit.parent.bz+local.z}:local;
   }
   function updateSolarPositions(){
-    for(const r of visible){if(r.orbit){const o=r.orbit,p=o.galaxy?galaxyPoint(o,r.orbitAngle):orbitPoint(o,r.orbitAngle+state.orbitClock*o.speed);r.bx=p.x;r.by=p.y;r.bz=p.z}}
-    for(const orbit of satelliteOrbits)for(const r of orbit.members){const p=orbitPoint(orbit,r.orbitAngle+state.orbitClock*orbit.speed);r.bx=p.x;r.by=p.y;r.bz=p.z}
+    for(const r of visible){if(r.orbit){const o=r.orbit,p=o.galaxy?galaxyPoint(o,r.orbitAngle):orbitPoint(o,r.orbitAngle+orbitPhase(o));r.bx=p.x;r.by=p.y;r.bz=p.z}}
+    for(const orbit of satelliteOrbits)for(const r of orbit.members){const p=orbitPoint(orbit,r.orbitAngle+orbitPhase(orbit));r.bx=p.x;r.by=p.y;r.bz=p.z}
     for(const r of visible){if(r.satellite&&!r.satellite.orbit){const {parent}=r.satellite;r.bx=parent.bx;r.by=parent.by;r.bz=parent.bz}}
   }
   function project(x,y,z,fixed=false){
@@ -460,7 +476,7 @@
     if(arm&&gradient){const c=project(0,0,0),x=project(arm.radius,0,0),y=project(0,arm.radius*Math.cos(arm.tilt),arm.radius*Math.sin(arm.tilt));gradient.setAttribute('gradientTransform',`matrix(${x.x-c.x} ${x.y-c.y} ${y.x-c.x} ${y.y-c.y} ${c.x} ${c.y})`)}
     for(const orbit of [...orbits,...satelliteOrbits]){let d='';orbit.screenPoints=[];for(let i=0;i<=80;i++){const a=i/80*Math.PI*2,world=orbit.galaxy?galaxyPoint(orbit,i/80):orbitPoint(orbit,a),p=project(world.x,world.y,world.z);if(orbit.isSatellite){p.x+=orbit.parent.ox||0;p.y+=orbit.parent.oy||0}orbit.screenPoints.push(p);d+=(i?' L':'M')+p.x+','+p.y}orbit.el.setAttribute('d',d);
       if(orbit.galaxy){orbit.halo.setAttribute('d',d);orbit.halo.style.strokeWidth=54*state.zoom;let dust='';for(let i=0;i<75;i++){const t=(i+.5)/75,jitter=((hash(orbit.id+':'+i)%1000)/1000-.5)*.23,world=galaxyPoint(orbit,t,jitter),p=project(world.x,world.y,world.z);dust+='M'+p.x+','+p.y+'h.1'}orbit.stars.setAttribute('d',dust);orbit.stars.style.strokeWidth=1.5*state.zoom}
-      if(orbit.marker){const world=orbitPoint(orbit,state.orbitClock*orbit.speed+orbit.angle+.5),p=project(world.x,world.y,world.z);orbit.marker.setAttribute('transform','translate('+(p.x-1.5)+' '+(p.y-1.5)+') rotate(45 1.5 1.5)')}
+      if(orbit.marker){const world=orbitPoint(orbit,orbitPhase(orbit)+orbit.angle+.5),p=project(world.x,world.y,world.z);orbit.marker.setAttribute('transform','translate('+(p.x-1.5)+' '+(p.y-1.5)+') rotate(45 1.5 1.5)')}
     }
   }
   // Use the visible circle/rounded card, not its icon centre, as the connection boundary.
@@ -513,7 +529,9 @@
   }
   function paint(dt) {
     const canvas=query('.at-canvas');if(!canvas)return;const w=canvas.clientWidth,h=canvas.clientHeight,top=compactLayout?190:145,bottom=compactLayout?180:155;
-    const animate=state.mode==='3d'&&!reduceMotion.matches&&!state.hover&&!state.drag&&!state.settling&&query('.at-drawer').hidden&&query('.at-layout-menu').hidden&&!document.querySelector('dialog[open]:not(#space-atlas)');
+    const returning=!!cameraReturn;
+    if(cameraReturn){const transition=cameraReturn,t=clamp((performance.now()-transition.started)/transition.duration,0,1),ease=t*t*(3-2*t);for(const key of Object.keys(transition.to))state[key]=transition.from[key]+(transition.to[key]-transition.from[key])*ease;for(const orbit of [...orbits,...satelliteOrbits])orbit.focusOffset=(transition.phases.get(orbit.parentKey+':'+orbit.id)||0)*(1-ease);if(t===1)cameraReturn=null;needsPaint=true}
+    const animate=state.mode==='3d'&&!returning&&!reduceMotion.matches&&!state.hover&&!state.drag&&!state.settling&&query('.at-drawer').hidden&&query('.at-layout-menu').hidden&&!document.querySelector('#bookmark-action-menu:popover-open,dialog[open]:not(#space-atlas)');
     if(animate){if(orbital())state.orbitClock+=dt;else state.phase+=dt*.000028;needsPaint=true}
     if(state.drag?.type==='branch'&&state.drag.moved){const d=state.drag,amount=reduceMotion.matches?1:1-Math.exp(-dt/100);for(const r of visible){if(d.keys.has(r.key))continue;r.ox+=(r.previewX-r.ox)*amount;r.oy+=(r.previewY-r.oy)*amount}needsPaint=true}
     if(state.settling){const keep=reduceMotion.matches?0:Math.exp(-dt/115);let unfinished=false;for(const r of visible){r.ox=(r.ox||0)*keep;r.oy=(r.oy||0)*keep;if(Math.abs(r.ox)+Math.abs(r.oy)<.08){r.ox=0;r.oy=0}else unfinished=true}state.settling=unfinished;needsPaint=true;canvas.classList.toggle('is-settling',unfinished)}
@@ -610,8 +628,14 @@
     aside.querySelector('button')?.focus({preventScroll:true});return aside;
   }
   function closeDrawer(){query('.at-drawer').hidden=true;query('.at-canvas').focus({preventScroll:true})}
+  function linkMenu(button,show=false){
+    const n=get(button?.dataset.atDetails);if(state.mode!=='3d'||n?.kind!=='link'||!window.ShiyuBookmarkActions)return false;
+    const s=data.find(s=>s.id===n.sid),c=s?.scenes.find(c=>c.id===n.cid),g=c?.groups.find(g=>g.id===n.gid),ctx={s,c,g,item:n.item,atlas:true};
+    window.ShiyuBookmarkActions.attach(button,ctx);if(show)window.ShiyuBookmarkActions.open(button,ctx);return true;
+  }
   function details(key) {
     const n=get(key);if(!n)return;
+    if(n.kind==='link'&&linkMenu(nodeEls.get(key)?.querySelector('.at-node-menu'),true))return;
     const actions=n.kind==='link'?[['open','打开网址',icons.open],['edit','编辑收藏',icons.edit],['move','移动到…',icons.move],['delete','删除收藏',icons.trash]]:[['add','新增'+(n.kind==='space'?'场景':n.kind==='scene'?'分组':'网址'),icons.add],['edit','重命名',icons.edit],...(n.kind==='space'?[]:[['move','移动到…',icons.move]]),['delete','删除'+label(n.kind),icons.trash]];
     drawer('管理'+label(n.kind),`<h3 class="at-detail-title">${esc(n.name)}</h3><p class="at-detail-path">${esc(pathOf(n).slice(0,-1).map(x=>x.name).join(' / ')||'我的空间')}</p><p class="at-detail-note">${esc(n.kind==='link'?(n.item[2]||host(n.item[1])):countText(n))}</p>${actions.map(([id,name,ic])=>`<button class="at-drawer-action" data-at-manage="${id}" data-at-key="${esc(key)}">${ic}${name}</button>`).join('')}`);
   }
@@ -668,7 +692,7 @@
     if(action==='home'){leaveAtlasForHome();return}
     if(action==='toggle-dimension'){selectGraphView(viewOptions(state.mode==='3d'?'2d':'3d')[0],'toggle-dimension');return}
     if(action==='views'){const options=viewOptions(state.mode),current=state.mode==='2d'?state.layout:state.scene3d;selectGraphView(options[(options.indexOf(current)+1)%options.length]);return}
-    if(action==='focus-scene'){closeViewPicker();resetCamera();layout(true);query('.at-canvas').focus({preventScroll:true});return}
+    if(action==='focus-scene'){closeViewPicker();returnToDefaultView();query('.at-canvas').focus({preventScroll:true});return}
     if(action==='back'){const p=get(state.focus).parent;if(p)focus(p);return}
     if(action==='spaces'){drawer('切换空间',`<div class="at-drawer-list">${data.map(s=>`<button data-at-space="${esc(s.id)}" aria-current="${s.id===state.sid}">${esc(s.name)}<small>${s.scenes.length} 个场景</small></button>`).join('')}</div>`);return}
     if(action==='add'){addChild(get(state.focus));return}
@@ -691,6 +715,7 @@
   function openViewPicker(){clearTimeout(viewMenuTimer);const pop=query('.at-layout-menu');if(!pop)return;pop.hidden=false;query('.at-view-picker')?.querySelectorAll('[aria-haspopup=dialog]').forEach(b=>b.setAttribute('aria-expanded','true'))}
   function closeViewPicker(){clearTimeout(viewMenuTimer);const pop=query('.at-layout-menu');if(pop)pop.hidden=true;query('.at-view-picker')?.querySelectorAll('[aria-haspopup=dialog]').forEach(b=>b.setAttribute('aria-expanded','false'))}
   function zoomBy(ratio,point){
+    cameraReturn=null;
     const before=state.zoom;state.zoom=clamp(before*ratio,(!classicOrbits&&orbital()) ? .25 : .35,3);
     const canvas=query('.at-canvas'),top=compactLayout?190:145,bottom=compactLayout?180:155,cx=canvas.clientWidth/2,cy=galaxy()?canvas.clientHeight/2:top+(canvas.clientHeight-top-bottom)/2;
     const x=point?.x??cx,y=point?.y??cy,scale=state.zoom/before;
@@ -717,7 +742,7 @@
   function clearOrbitTargets(){for(const orbit of [...orbits,...satelliteOrbits])orbit.el?.classList.remove('is-drop-target');query('.at-orbit-slot')?.remove()}
   function nearestOrbitGap(orbit,clientX,clientY){
     const box=query('.at-canvas').getBoundingClientRect(),pointer={x:clientX-box.left,y:clientY-box.top},members=orbit.members,gaps=[];
-    const screenAt=t=>{const world=orbit.galaxy?galaxyPoint(orbit,t):orbitPoint(orbit,t+state.orbitClock*orbit.speed);return project(world.x,world.y,world.z)};
+    const screenAt=t=>{const world=orbit.galaxy?galaxyPoint(orbit,t):orbitPoint(orbit,t+orbitPhase(orbit));return project(world.x,world.y,world.z)};
     if(!members.length)gaps.push({start:orbit.galaxy?0:orbit.angle,end:orbit.galaxy?1:orbit.angle+Math.PI*2});
     else if(orbit.galaxy&&members.length===1){gaps.push({start:0,end:members[0].orbitAngle,before:members[0]},{start:members[0].orbitAngle,end:1,after:members[0]})}
     else for(let i=0;i<(orbit.galaxy?members.length-1:members.length);i++){const next=(i+1)%members.length;gaps.push({start:members[i].orbitAngle,end:members[next].orbitAngle+(next===0?Math.PI*2:0),after:members[i],before:members[next]})}
@@ -762,10 +787,12 @@
   function restoreMotion(positions,camera){refresh();query('.at-canvas').getAnimations().forEach(animation=>animation.cancel());Object.assign(state,camera);needsPaint=true;paint(0);for(const r of visible){const prev=positions.get(r.entity);if(prev){r.ox=prev.x-r.baseX;r.oy=prev.y-r.baseY}}state.settling=true;needsPaint=true}
   function pointerDown(e){
     const canvas=e.target.closest('.at-canvas');if(!canvas||e.button!==0||e.target.closest('.at-node-menu'))return;
+    cameraReturn=null;
     const node=e.target.closest('.at-node');
     if(node&&['add','bundle'].includes(node.dataset.kind))return;
-    if(state.mode==='3d'&&node?.dataset.level==='0'){state.drag={type:'canvas',fromFocus:true,moved:false,x:e.clientX,y:e.clientY,panX:state.panX,panY:state.panY,pan:true};return}
-    if(node&&!node.classList.contains('is-parent')){const keys=branchKeys(node.dataset.key);state.drag={type:'branch',key:node.dataset.key,keys,x:e.clientX,y:e.clientY,moved:false,offsets:new Map(visible.map(r=>[r.key,{x:r.ox||0,y:r.oy||0}])),slots:new Map(visible.map(r=>[r.key,{x:r.baseX,y:r.baseY}]))};for(const r of visible){r.previewX=0;r.previewY=0}return}
+    if(node?.dataset.level==='0'){state.drag={type:'canvas',fromFocus:true,moved:false,x:e.clientX,y:e.clientY,panX:state.panX,panY:state.panY,pan:true};return}
+    if(node&&!node.classList.contains('is-parent')){const keys=branchKeys(node.dataset.key);state.drag={type:'branch',key:node.dataset.key,keys,x:e.clientX,y:e.clientY,moved:false,offsets:new Map(visible.map(r=>[r.key,{x:r.ox||0,y:r.oy||0}])),slots:new Map(visible.map(r=>[r.key,{x:r.baseX,y:r.baseY}]))};for(const r of visible){r.previewX=0;r.previewY=0}
+      if(node.dataset.kind==='link'&&get(state.focus)?.kind==='group'){const d=state.drag;d.waitForHold=true;d.holdTimer=setTimeout(()=>{if(state.drag!==d)return;d.holdReady=true;node.classList.add('is-held');pointerMove({clientX:d.lastX??d.x,clientY:d.lastY??d.y,pointerId:e.pointerId,preventDefault(){}})},350)}return}
     if(e.target.closest('button,a'))return;
     e.preventDefault();
     state.drag={type:'canvas',x:e.clientX,y:e.clientY,yaw:state.yaw,pitch:state.pitch,panX:state.panX,panY:state.panY,pan:e.shiftKey||state.mode==='2d'};canvas.setPointerCapture(e.pointerId);canvas.classList.add('is-dragging');
@@ -776,6 +803,7 @@
   }
   function pointerMove(e){
     const d=state.drag;if(!d)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;
+    if(d.waitForHold&&!d.holdReady){d.lastX=e.clientX;d.lastY=e.clientY;if(Math.hypot(dx,dy)>=6)d.preventOpen=true;e.preventDefault();return}
     if(d.fromFocus){if(!d.moved&&Math.hypot(dx,dy)<6)return;if(!d.moved){d.moved=true;clearHover();query('.at-canvas').setPointerCapture(e.pointerId);query('.at-canvas').classList.add('is-dragging')}e.preventDefault()}
     if(d.type==='branch'){
       if(!d.moved&&Math.hypot(dx,dy)<6)return;
@@ -795,6 +823,8 @@
     needsPaint=true;
   }
   function pointerUp(e){
+    clearTimeout(state.drag?.holdTimer);
+    if(state.drag?.holdReady||state.drag?.preventOpen){state.suppressClickUntil=performance.now()+400;nodeEls.forEach(el=>el.classList.remove('is-held'))}
     if(state.drag?.fromFocus&&state.drag.moved)state.suppressClickUntil=performance.now()+400;
     const d=state.drag;if(d?.type==='branch'&&d.moved){state.suppressClickUntil=performance.now()+400;state.settling=true;needsPaint=true;nodeEls.forEach(el=>el.classList.remove('is-held'));query('.at-canvas').classList.add('is-settling')}
     state.drag=null;query('.at-canvas')?.classList.remove('is-dragging','is-node-dragging');
@@ -878,5 +908,6 @@
     if(active&&!editorBusy){if(view!=='space'){dialog.close();return}if(entering&&preferred?.view==='daily'){dialog.close();return}if(state.sid!==spaceId){state.sid=spaceId;state.focus='s:'+spaceId;preferences();if(preferred?.view==='atlas')for(const field of ['mode','layout','scene3d'])if(preferred[field]!==undefined)state[field]=preferred[field];resetCamera()}if(buildIndex())renderAtlas();else dialog.close()}
     else if(!active&&entering&&preferred?.view==='atlas')open(spaceId,null,preferred,true);
   };
+  const groupsBeforeModeEntry=renderGroups;renderGroups=function(...args){const result=groupsBeforeModeEntry(...args);mountEntry();return result};
   mountEntry();
 })();

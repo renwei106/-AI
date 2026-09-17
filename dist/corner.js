@@ -93,6 +93,7 @@
       panel=dialog('my-corner','我的一隅');
       panel.addEventListener('close',()=>{finishDrag(true);restoreEntry();flipped.clear();cancelAnimationFrame(motionFrame);cancelAnimationFrame(fanMotion.frame);fanMotion.frame=0;panel.classList.remove('corner-animating');wheelConsumed=false;swipe=null;});
       panel.addEventListener('pointerdown',startDrag);
+      panel.addEventListener('dragstart',e=>{if(e.target.closest('.corner-inbox [data-corner-ref]'))e.preventDefault();});
       panel.addEventListener('cancel',e=>{if(flipped.size){e.preventDefault();flipCard([...flipped][0],false);}});
       panel.addEventListener('click',onPanelClick);
       panel.addEventListener('change',onPanelChange);
@@ -108,7 +109,7 @@
       panel.addEventListener('pointerup',e=>{if(!swipe||drag?.active)return;const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;swipe=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3){navigate(Math.sign(-dx));swallowClickUntil=performance.now()+400;}});
       panel.addEventListener('pointercancel',()=>{swipe=null;});
     }
-    entryAnchor=null;inboxExpanded=null;flipped.clear();wheelLast=0;wheelConsumed=false;wheelSum=0;wheelLock=0;const groups=collection().groups;activeId=groups.find(g=>g.id===groupId)?.id||groups.find(g=>g.name==='常用')?.id||groups[0]?.id||ADD_CARD;panel.dataset.cornerTheme=cornerTheme();renderPanel();panel.showModal();moveEntry();
+    entryAnchor=null;inboxExpanded=null;flipped.clear();wheelLast=0;wheelConsumed=false;wheelSum=0;wheelLock=0;const groups=collection().groups;activeId=groups.find(g=>g.id===groupId)?.id||groups.find(g=>!isInbox(g))?.id||ADD_CARD;panel.dataset.cornerTheme=cornerTheme();renderPanel();panel.showModal();moveEntry();
     syncCornerCords();requestAnimationFrame(layoutFan);
   }
   function cycleCornerTheme(){
@@ -171,7 +172,7 @@
   function card(g,index,entries) {
     const live=orderedRefs(g).map(r=>({ref:r,source:resolve(r,entries)})).filter(x=>x.source);
 
-    const markup='<article class="corner-card '+(isInbox(g)?'corner-inbox ':'')+(flipped.has(g.id)?'is-flipped':'')+'" data-corner-card="'+g.id+'" style="--card-order:'+index+'"><div class="corner-card-turn"><section class="corner-card-front" tabindex="0" aria-label="'+esc(g.name)+'，点击卡牌翻面编辑"><div class="corner-card-cover" '+(isInbox(g)?'title="暂存 · 点击翻面编辑"':'data-corner-drag-group="'+g.id+'" title="点击翻面 · 长按拖动排序"')+'><span class="corner-card-number">'+(isInbox(g)?'默认':String(index).padStart(2,'0'))+'</span><span class="corner-card-logo">'+cardIcon(g)+'</span><h3>'+esc(g.name)+'</h3><small>'+live.length+' 个网址</small></div><div class="corner-links">'+live.map(({ref:r,source:x})=>'<div class="corner-link" data-corner-ref="'+r.id+'"><button class="corner-grip" data-corner-drag-ref="'+r.id+'" title="长按拖动网址" aria-label="拖动 '+esc(x.item[0])+'">'+grip+'</button><a href="'+esc(safeURL(x.url))+'" target="_blank" rel="noopener noreferrer" title="'+esc(x.item[0]+' · '+x.url+' · '+x.path)+'"><i>'+bookmarkMark(x.item)+'</i><span>'+esc(x.item[0])+'</span><small>'+glyph('<path d="M6 18 18 6M7 6h11v11"/>')+'</small></a><button class="corner-link-remove" data-corner-remove="'+r.id+'" title="移出一隅" aria-label="移出一隅：'+esc(x.item[0])+'">'+glyph('<path d="M17 8V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16l6-4 3 2M15 12h7"/>')+'</button></div>').join('')+(!live.length?'<div class="corner-card-empty"><div class="corner-empty-lines">'+cardIcon(g)+'</div><p>'+(isInbox(g)?'还没想好放哪里，先留在这里':'把常去的地方，收进来')+'</p><small>'+(isInbox(g)?'之后可拖动网址到其他卡牌':'在原网址的编辑窗口中<br>选择「收进我的一隅」')+'</small></div>':'')+'</div><span class="corner-flip-hint">点击卡牌翻面编辑 '+'<button type="button" data-corner-add-links="'+g.id+'" aria-label="为'+esc(g.name)+'添加网址" title="添加网址，可批量添加">'+glyph('<path d="M12 5v14M5 12h14"/>')+'</button></span></section><section class="corner-card-back" tabindex="-1" aria-label="编辑 '+esc(g.name)+'">'+backCard(g,live,entries)+'</section></div></article>';
+    const markup='<article class="corner-card '+(isInbox(g)?'corner-inbox ':'')+(flipped.has(g.id)?'is-flipped':'')+'" data-corner-card="'+g.id+'" style="--card-order:'+index+'"><div class="corner-card-turn"><section class="corner-card-front" tabindex="0" aria-label="'+esc(g.name)+'，点击卡牌翻面编辑"><div class="corner-card-cover" '+(isInbox(g)?'title="暂存 · 点击翻面编辑"':'data-corner-drag-group="'+g.id+'" title="点击翻面 · 长按拖动排序"')+'><span class="corner-card-number">'+(isInbox(g)?'默认':String(index).padStart(2,'0'))+'</span><span class="corner-card-logo">'+cardIcon(g)+'</span><h3>'+esc(g.name)+'</h3><small>'+live.length+' 个网址</small></div><div class="corner-links">'+live.map(({ref:r,source:x})=>'<div class="corner-link" data-corner-ref="'+r.id+'"><button class="corner-grip" data-corner-drag-ref="'+r.id+'" title="长按拖动网址" aria-label="拖动 '+esc(x.item[0])+'">'+grip+'</button><a href="'+esc(safeURL(x.url))+'" target="_blank" rel="noopener noreferrer" title="'+esc(x.item[0]+' · '+x.url+' · '+x.path)+'"><i>'+bookmarkMark(x.item)+'</i><span>'+esc(x.item[0])+'</span></a><button class="corner-link-remove" data-corner-remove="'+r.id+'" title="移出一隅" aria-label="移出一隅：'+esc(x.item[0])+'">移出一隅</button><a class="corner-link-open" href="'+esc(safeURL(x.url))+'" target="_blank" rel="noopener noreferrer" aria-label="打开 '+esc(x.item[0])+'">'+glyph('<path d="M6 18 18 6M7 6h11v11"/>')+'</a></div>').join('')+(!live.length?'<div class="corner-card-empty"><div class="corner-empty-lines">'+cardIcon(g)+'</div><p>'+(isInbox(g)?'还没想好放哪里，先留在这里':'把常去的地方，收进来')+'</p><small>'+(isInbox(g)?'之后可拖动网址到其他卡牌':'在原网址的编辑窗口中<br>选择「收进我的一隅」')+'</small></div>':'')+'</div><span class="corner-flip-hint"><span class="corner-flip-copy">点击卡牌翻面编辑</span> '+'<button type="button" data-corner-add-links="'+g.id+'" aria-label="为'+esc(g.name)+'添加网址" title="添加网址，可批量添加">'+glyph('<path d="M12 5v14M5 12h14"/>')+'</button></span></section><section class="corner-card-back" tabindex="-1" aria-label="编辑 '+esc(g.name)+'">'+backCard(g,live,entries)+'</section></div></article>';
     if(!isInbox(g))return markup;
     const template=document.createElement('template');template.innerHTML=markup;
     const front=template.content.querySelector('.corner-card-front');front.setAttribute('aria-label','暂存');
@@ -179,7 +180,6 @@
     const back=template.content.querySelector('.corner-card-back');back.classList.add('corner-inbox-lid');back.setAttribute('aria-label','展开暂存');back.setAttribute('role','button');back.tabIndex=0;back.dataset.inboxUnfold='';
     back.innerHTML='<div class="corner-inbox-note"><span>把片刻留在这里</span><p>有些遇见，不必急着安放。<br>留一处空白，等日子慢慢作答。</p></div>';
     template.content.querySelector('.corner-inbox').classList.toggle('is-inbox-open',inboxExpanded??live.length>0);
-    template.content.querySelectorAll('.corner-grip').forEach(el=>el.remove());
     const hint=template.content.querySelector('.corner-flip-hint');hint.textContent='点击空白处，暂且收起';
     const empty=template.content.querySelector('.corner-card-empty small');if(empty)empty.textContent='随时打开，也可以移出';
     return template.innerHTML;
@@ -258,7 +258,7 @@
     if(b?.hasAttribute('data-corner-cancel-delete')){el.querySelector('.corner-delete-confirm').hidden=true;return;}
     if(b?.dataset.cornerConfirmDelete){if(isInbox(g))return;collection().groups=collection().groups.filter(x=>x.id!==g.id);flipped.delete(g.id);persist();renderPanel();return;}
     if(b?.dataset.cornerAddLinks){if(!isInbox(g))openPicker(g.id);return;}
-    if(b?.dataset.cornerRemove){g.refs=g.refs.filter(r=>r.id!==b.dataset.cornerRemove);persist();refreshLinks([g.id]);return;}
+    if(b?.dataset.cornerRemove){g.refs=g.refs.filter(r=>r.id!==b.dataset.cornerRemove);persist();refreshLinks([g.id]);if(isInbox(g)){panel.querySelector('.corner-feedback')?.remove();const notice=document.createElement('div');notice.className='corner-feedback';notice.setAttribute('role','status');notice.textContent='已移出成功';panel.append(notice);setTimeout(()=>notice.remove(),2800);}return;}
     const ref=b?.dataset.cornerRefUp||b?.dataset.cornerRefDown;
     if(ref){const at=g.refs.findIndex(r=>r.id===ref),to=at+(b.dataset.cornerRefUp?-1:1);if(to>=0&&to<g.refs.length){[g.refs[at],g.refs[to]]=[g.refs[to],g.refs[at]];persist();renderPanel();}return;}
     if(e.target.closest('.corner-card-back')&&!e.target.closest('a,button,input,select,label,fieldset,.corner-appearance-tabs,.corner-icon-choices,.corner-color-options,.corner-delete-confirm')){flipCard(g.id,false);return;}
@@ -374,8 +374,9 @@
     };
   }
   function startDrag(e) {
-    const handle=e.target.closest('[data-corner-drag-group],[data-corner-drag-ref]');if(!handle||e.button!==0||flipped.size||e.target.closest('a,input,select,.corner-card-logo'))return;
-    const type=handle.hasAttribute('data-corner-drag-group')?'group':'ref',id=type==='group'?handle.dataset.cornerDragGroup:handle.dataset.cornerDragRef;
+    const inboxRow=e.target.closest('.corner-inbox [data-corner-ref]');
+    const handle=inboxRow||e.target.closest('[data-corner-drag-group],[data-corner-drag-ref]');if(!handle||e.button!==0||flipped.size||e.target.closest('input,select,.corner-card-logo')||(!inboxRow&&e.target.closest('a'))||(inboxRow&&e.target.closest('button:not([data-corner-drag-ref]),.corner-link-open')))return;
+    const type=handle.hasAttribute('data-corner-drag-group')?'group':'ref',id=type==='group'?handle.dataset.cornerDragGroup:(inboxRow?.dataset.cornerRef||handle.dataset.cornerDragRef);
     drag={id,type,x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,pid:e.pointerId,active:false,snapshot:JSON.stringify(collection().groups),originalActive:activeId};
     drag.timer=setTimeout(()=>{
       if(!drag)return;drag.active=true;const groups=collection().groups;drag.anchorIndex=[...groups.map(g=>g.id),ADD_CARD].indexOf(activeId);cancelAnimationFrame(fanMotion.frame);fanMotion.frame=0;panel.classList.remove('corner-animating');
@@ -465,16 +466,172 @@
     entry.onclick=e=>{e.stopPropagation();closePeek();openCorner(entry);};
     peek.onclick=e=>{const b=e.target.closest('[data-corner-peek]');if(b){closePeek();openCorner(entry,b.dataset.cornerPeek);}};
   };
-  // Put the new action inside the existing editor, without adding another card-hover button.
+  // A website action adds only that website; card-level collection tools stay separate.
+  window.ShiyuCorner=Object.freeze({
+    cards:()=>collection().groups.map(g=>({id:g.id,name:g.name,icon:cardIcon(g),inbox:isInbox(g)})),
+    addBookmark(source,gid){
+      const x=sources().find(x=>x.sid===source.sid&&x.cid===source.cid&&x.gid===source.gid&&x.url===source.url);
+      if(!x){toast('这个网址已被移动或删除，请重新选择');return}
+      const groups=collection().groups,target=gid?groups.find(g=>g.id===gid):groups.find(isInbox);if(!target){toast('这张卡片已不存在，请重新选择');return}
+      if(target.refs.some(r=>r.gid===x.gid&&r.url===x.url)){toast('已在「'+target.name+'」中');return}
+      let existing;for(const g of groups){const ref=g.refs.find(r=>r.gid===x.gid&&r.url===x.url);if(ref){existing??=ref;g.refs=g.refs.filter(r=>r!==ref)}}
+      target.refs.push(existing||{id:uid(),sid:x.sid,cid:x.cid,gid:x.gid,url:x.url});persist();
+      if(panel?.open)refreshLinks(groups.map(g=>g.id));refreshDockPreview();toast('已添加到「'+target.name+'」');
+    }
+  });
   const previousEdit=editBookmark;
   editBookmark=function(index){
     const group=currentGroup(),item=group.items[index],source={sid:spaceId,cid:sceneId,gid:group.id,url:item[1]};previousEdit(index);
     const form=document.querySelector('#bookmark-editor-form');if(!form)return;
-    const row=document.createElement('div');row.className='corner-editor-action';row.innerHTML=`<button type="button">${cardsIcon}收进我的一隅</button><small>保留原收藏，在一隅中快速打开</small>`;form.append(row);row.querySelector('button').onclick=()=>openPicker(undefined,source);
     const submit=form.onsubmit;form.onsubmit=function(e){submit.call(this,e);if(document.querySelector('#bookmark-editor').open)return;const next=group.items[index];if(!next)return;
       for(const library of Object.values(prefs.cornerCollections||{}))for(const g of library.groups)for(const r of g.refs)if(r.gid===source.gid&&r.url===source.url)r.url=next[1];persist();
     };
   };
   const renderBeforeSwitchCleanup=render;render=function(){closeSwitch();return renderBeforeSwitchCleanup();};
   dock();
+})();
+
+/* Actions for the existing website cards. Keep collection data and editors shared. */
+(()=>{
+ 'use strict';
+ const svg=path=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+path+'</svg>';
+ const icons={more:svg('<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'),edit:svg('<path d="m4 16 11-11 4 4L8 20H4zM13 7l4 4"/>'),corner:svg('<rect x="5" y="3" width="15" height="17" rx="2"/><path d="M2 7v14h14M9 11h7m-3-3v6"/>'),move:svg('<path d="M4 6h10m-4-4 4 4-4 4M20 18H10m4-4-4 4 4 4"/>'),batch:svg('<rect x="3" y="4" width="7" height="7" rx="1"/><path d="m4 7 2 2 3-3M14 7h7M3 15h7m-7 5h7m5-5 5 3-5 3m-2-3h7"/>'),delete:svg('<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/>')};
+ let menu,anchor,source,leaveTimer;
+ icons.open=svg('<path d="M14 3h7v7M21 3 10 14M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"/>');
+ const contexts=()=>data.flatMap(s=>s.scenes.flatMap(c=>c.groups.map(g=>({s,c,g}))));
+ const context=()=>({s:space(),c:scene(),g:currentGroup()});
+ function valid(ctx){return contexts().some(x=>x.g===ctx.g)&&ctx.g.items.includes(ctx.item)}
+ function authorize(ctx,fn){authorizeOrganization(()=>{if(!valid(ctx)){toast('这个网址已被移动或删除，请重新选择');return}if(memberReadOnly()){memberGate('space');return}fn()})}
+ function closeMenu(focus=false){clearTimeout(leaveTimer);if(!menu)return;hideCornerTargets();if(menu.matches(':popover-open'))menu.hidePopover();menu.hidden=true;anchor?.setAttribute('aria-expanded','false');if(focus&&anchor?.isConnected)anchor.focus();anchor=null;source=null}
+ function hideCornerTargets(){const sub=menu?.querySelector('.bookmark-corner-targets');if(sub)sub.hidden=true;menu?.querySelector('[data-bookmark-action=corner]')?.setAttribute('aria-expanded','false')}
+ function showCornerTargets(button,keyboard=false){
+   clearTimeout(leaveTimer);let sub=menu.querySelector('.bookmark-corner-targets');
+   if(!sub){sub=document.createElement('div');sub.className='bookmark-corner-targets';sub.id='bookmark-corner-targets';sub.setAttribute('role','menu');sub.setAttribute('aria-label','添加到我的一隅卡片');menu.append(sub)}
+   if(sub.hidden||!sub.childElementCount)sub.innerHTML=window.ShiyuCorner.cards().map(g=>'<button type="button" role="menuitem" data-corner-target="'+esc(g.id)+'">'+g.icon+'<span>'+esc(g.name)+'</span>'+(g.inbox?'<small>默认</small>':'')+'</button>').join('');
+   sub.hidden=false;button.setAttribute('aria-expanded','true');
+   const r=button.getBoundingClientRect(),m=menu.getBoundingClientRect(),width=sub.offsetWidth;
+   const left=m.right+4+width<=innerWidth-8?m.right+4:m.left-width-4>=8?m.left-width-4:Math.max(8,innerWidth-width-8);
+   sub.style.left=left+'px';sub.style.top=Math.max(8,Math.min(r.top,innerHeight-sub.offsetHeight-8))+'px';
+   if(keyboard)sub.querySelector('button')?.focus();
+ }
+ function deferClose(){clearTimeout(leaveTimer);leaveTimer=setTimeout(()=>{if(!menu?.matches(':hover')&&!anchor?.matches(':hover')&&!menu?.contains(document.activeElement))closeMenu()},180)}
+ function openMenu(button,ctx,keyboard=false){
+   clearTimeout(leaveTimer);if(anchor===button&&menu&&!menu.hidden){if(keyboard)menu.querySelector('button').focus();return}
+   closeMenu();anchor=button;source=ctx;
+   if(!menu){menu=document.createElement('div');menu.id='bookmark-action-menu';menu.className='bookmark-action-menu';menu.setAttribute('popover','manual');menu.setAttribute('role','menu');document.body.append(menu);menu.onpointerenter=()=>clearTimeout(leaveTimer);menu.onpointerleave=deferClose;menu.onfocusout=deferClose;
+     menu.onclick=event=>{const target=event.target.closest('[data-corner-target]'),b=event.target.closest('[data-bookmark-action]');if(!b&&!target)return;const ctx=source,gid=target?.dataset.cornerTarget;closeMenu();if(b?.dataset.bookmarkAction==='open'){run('open',ctx);return}authorize(ctx,()=>target?addToCorner(ctx,gid):run(b.dataset.bookmarkAction,ctx))};
+     menu.onkeydown=event=>{const corner=menu.querySelector('[data-bookmark-action=corner]'),sub=event.target.closest('.bookmark-corner-targets');if(event.key==='ArrowRight'&&event.target===corner){event.preventDefault();showCornerTargets(corner,true);return}if(event.key==='ArrowLeft'&&sub){event.preventDefault();hideCornerTargets();corner.focus();return}const buttons=[...(sub||menu).querySelectorAll(sub?'button':':scope>[data-bookmark-action]')],at=buttons.indexOf(document.activeElement);if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();buttons[event.key==='Home'?0:event.key==='End'?buttons.length-1:(at+(event.key==='ArrowUp'?-1:1)+buttons.length)%buttons.length].focus()}};
+   }
+   menu.innerHTML=[['open','打开网址'],['edit','修改编辑'],['corner','添加到我的一隅'],['move','移动位置'],['batch','批量移动网址'],...(ctx.atlas?[['batch-edit','批量修改网址']]:[]),['delete','删除']].map(([key,label])=>'<button type="button" role="menuitem" data-bookmark-action="'+key+'">'+(icons[key]||icons.edit)+'<span>'+label+'</span></button>').join('');
+   const corner=menu.querySelector('[data-bookmark-action=corner]');corner.setAttribute('aria-haspopup','menu');corner.setAttribute('aria-controls','bookmark-corner-targets');corner.setAttribute('aria-expanded','false');corner.insertAdjacentHTML('beforeend','<i class="bookmark-submenu-arrow" aria-hidden="true">›</i>');corner.onpointerenter=()=>showCornerTargets(corner);
+   for(const b of menu.querySelectorAll('[data-bookmark-action]:not([data-bookmark-action=corner])')){b.onpointerenter=hideCornerTargets;b.onfocus=hideCornerTargets}
+   menu.hidden=false;menu.showPopover();button.setAttribute('aria-expanded','true');
+   const r=button.getBoundingClientRect(),m=menu.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(r.right-m.width,innerWidth-m.width-8))+'px';menu.style.top=(r.bottom+6+m.height<=innerHeight-8?r.bottom+6:Math.max(8,r.top-m.height-6))+'px';
+   if(keyboard)menu.querySelector('button').focus();
+ }
+ function attachMenus(){
+   document.querySelectorAll('.workspace .bookmark [data-bookmark-edit]').forEach(b=>{
+     const ctx={...context(),item:currentGroup().items[Number(b.dataset.bookmarkEdit)]};if(!ctx.item)return;
+     b.removeAttribute('data-bookmark-edit');b.dataset.bookmarkMenu='';b.innerHTML=icons.more;b.title='网址操作';b.setAttribute('aria-label','管理 '+ctx.item[0]);b.setAttribute('aria-haspopup','menu');b.setAttribute('aria-controls','bookmark-action-menu');b.setAttribute('aria-expanded','false');
+     b.onpointerenter=()=>openMenu(b,ctx);b.onpointerleave=deferClose;b.onclick=event=>{event.preventDefault();event.stopPropagation();openMenu(b,ctx,event.detail===0)};
+     b.onkeydown=event=>{if(event.key==='ArrowDown'){event.preventDefault();openMenu(b,ctx,true)}};
+   });
+ }
+ window.ShiyuBookmarkActions=Object.freeze({attach(button,ctx){
+   button.setAttribute('aria-haspopup','menu');button.setAttribute('aria-controls','bookmark-action-menu');button.setAttribute('aria-expanded','false');
+   button.onpointerenter=()=>openMenu(button,ctx);button.onpointerleave=deferClose;
+   button.onclick=event=>{event.preventDefault();event.stopPropagation();openMenu(button,ctx,event.detail===0)};
+   button.onkeydown=event=>{if(event.key==='ArrowDown'){event.preventDefault();event.stopPropagation();openMenu(button,ctx,true)}};
+ },open:openMenu,close:closeMenu});
+ const previousGroups=renderGroups;renderGroups=function(...args){closeMenu();const result=previousGroups(...args);attachMenus();return result};
+ function createDialog(id,title){let d=document.getElementById(id);if(!d){d=document.createElement('dialog');d.id=id;d.className='bookmark-action-dialog';document.body.append(d)}d.innerHTML='<div class="dialog-heading"><h2>'+esc(title)+'</h2><button data-action="close" aria-label="关闭">×</button></div>';return d}
+ function refresh(){persist();render()}
+ function deleteDialog(ctx){
+   const d=createDialog('bookmark-delete-dialog','删除网址');d.insertAdjacentHTML('beforeend','<p>确认删除「'+esc(ctx.item[0])+'」？</p><div class="bookmark-dialog-footer"><button data-action="close">取消</button><button class="primary" data-confirm-delete>确认删除</button></div>');
+   d.querySelector('[data-confirm-delete]').onclick=()=>authorize(ctx,()=>{ctx.g.items.splice(ctx.g.items.indexOf(ctx.item),1);d.close();document.querySelector('#bookmark-editor[open]')?.close();refresh();toast('已删除网址')});d.showModal();
+ }
+ function addToCorner(ctx,gid){window.ShiyuCorner.addBookmark({sid:ctx.s.id,cid:ctx.c.id,gid:ctx.g.id,url:ctx.item[1]},gid)}
+ function run(action,ctx){
+   if(action==='open'){if(!valid(ctx)){toast('这个网址已被移动或删除，请重新选择');return}let url;try{url=new URL(ctx.item[1])}catch{}if(!url||!['http:','https:'].includes(url.protocol)){toast('这个网址地址无效，请先编辑');return}window.open(url.href,'_blank','noopener,noreferrer');return}
+   if(action==='edit'){spaceId=ctx.s.id;sceneId=ctx.c.id;activeGroups[sceneId]=ctx.g.id;editBookmark(ctx.g.items.indexOf(ctx.item));return}
+   if(action==='corner'){addToCorner(ctx);return}
+   if(action==='delete'){deleteDialog(ctx);return}
+   if(action==='batch-edit'){batchEditDialog(ctx);return}
+   moveDialog(ctx,action==='batch');
+ }
+ function selectionStep(d,items,selected,onNext){
+   const panel=document.createElement('section');panel.className='bookmark-selection-step';
+   panel.innerHTML='<div class="bookmark-batch-list"></div><div class="bookmark-selection-footer"><button type="button" data-select-page aria-pressed="false">全选本页</button><span data-page-count></span><span data-selection-count aria-live="polite"></span><div class="bookmark-batch-pagination"><button type="button" data-page-prev aria-label="上一页">‹</button><span data-page-number></span><button type="button" data-page-next aria-label="下一页">›</button></div><button type="button" class="primary" data-batch-next>下一步</button></div>';
+   d.querySelector('.dialog-heading').after(panel);let page=0;const pageSize=50,pages=Math.max(1,Math.ceil(items.length/pageSize));
+   function update(){
+     const current=items.slice(page*pageSize,(page+1)*pageSize);
+     const button=panel.querySelector('[data-select-page]'),count=current.filter(x=>selected.has(x)).length;button.setAttribute('aria-pressed',count===current.length&&count>0?'true':count>0?'mixed':'false');button.disabled=!current.length;
+     panel.querySelector('[data-selection-count]').textContent='已选 '+selected.size+' 条';
+     panel.querySelector('[data-batch-next]').disabled=!selected.size;
+   }
+   function listing(){
+     panel.querySelector('.bookmark-batch-list').innerHTML=items.slice(page*pageSize,(page+1)*pageSize).map((item,i)=>'<label><input type="checkbox" value="'+(page*pageSize+i)+'" '+(selected.has(item)?'checked':'')+'><span><b>'+esc(item[0])+'</b><small>'+esc(item[1])+'</small></span></label>').join('')||'<p>当前分组暂无网址</p>';
+     panel.querySelector('.bookmark-batch-list').scrollTop=0;
+     panel.querySelector('[data-page-count]').textContent='共 '+items.length+' 条 · '+pages+' 页';panel.querySelector('[data-page-number]').textContent=(page+1)+' / '+pages;
+     panel.querySelector('[data-page-prev]').disabled=page===0;panel.querySelector('[data-page-next]').disabled=page===pages-1;update();
+   }
+   panel.querySelector('.bookmark-batch-list').onchange=e=>{const item=items[Number(e.target.value)];if(!item)return;e.target.checked?selected.add(item):selected.delete(item);update()};
+   panel.querySelector('[data-select-page]').onclick=()=>{const current=items.slice(page*pageSize,(page+1)*pageSize),all=current.every(item=>selected.has(item)),scroll=panel.querySelector('.bookmark-batch-list').scrollTop;for(const item of current)all?selected.delete(item):selected.add(item);listing();panel.querySelector('.bookmark-batch-list').scrollTop=scroll};
+   panel.querySelector('[data-page-prev]').onclick=()=>{page--;listing()};panel.querySelector('[data-page-next]').onclick=()=>{page++;listing()};
+   panel.querySelector('[data-batch-next]').onclick=()=>{if(selected.size)onNext()};listing();return panel;
+ }
+ function batchEditDialog(ctx){
+   const d=createDialog('bookmark-batch-edit-dialog','第一步 · 选择网址'),items=[...ctx.g.items],selected=new Set([ctx.item]),drafts=new Map();d.classList.add('is-batch');
+   const form=document.createElement('form');form.hidden=true;form.innerHTML='<div class="bookmark-batch-edit-list"></div><p class="edit-error" role="alert"></p><div class="bookmark-dialog-footer"><button type="button" data-batch-back>上一步</button><button type="submit" class="primary">保存修改</button></div>';d.append(form);
+   const panel=selectionStep(d,items,selected,()=>{
+     panel.hidden=true;form.hidden=false;d.querySelector('h2').textContent='第二步 · 修改网址';
+     form.querySelector('.bookmark-batch-edit-list').innerHTML=items.filter(x=>selected.has(x)).map(item=>{const i=items.indexOf(item),draft=drafts.get(item)||item;return '<fieldset data-edit-item="'+i+'"><legend>'+esc(item[0])+'</legend><label>名称<input name="name-'+i+'" data-field="0" required value="'+esc(draft[0])+'"></label><label>链接<input name="url-'+i+'" data-field="1" type="url" required value="'+esc(draft[1])+'"></label><label>描述<input name="description-'+i+'" data-field="2" value="'+esc(draft[2]||'')+'"></label></fieldset>'}).join('');
+     form.querySelector('input')?.focus();
+   });
+   form.oninput=e=>{const row=e.target.closest('[data-edit-item]');if(!row||!e.target.hasAttribute('data-field'))return;const item=items[Number(row.dataset.editItem)],draft=drafts.get(item)||[...item];draft[Number(e.target.dataset.field)]=e.target.value;drafts.set(item,draft)};
+   form.querySelector('[data-batch-back]').onclick=()=>{form.hidden=true;panel.hidden=false;d.querySelector('h2').textContent='第一步 · 选择网址';panel.querySelector('[data-batch-next]').focus()};
+   form.onsubmit=e=>{e.preventDefault();authorize(ctx,()=>{
+     const chosen=items.filter(x=>selected.has(x)),error=form.querySelector('.edit-error');
+     if(chosen.some(x=>!ctx.g.items.includes(x))){error.textContent='网址已发生变化，请关闭后重新选择。';return}
+     const changes=chosen.map(item=>({item,draft:(drafts.get(item)||item).slice(0,3).map(x=>(x||'').trim())}));
+     if(changes.some(({draft})=>{try{return !draft[0]||!['http:','https:'].includes(new URL(draft[1]).protocol)}catch{return true}})){error.textContent='请填写名称和有效的 HTTP / HTTPS 网址。';return}
+     const changedURLs=new Map(changes.map(({item,draft})=>[item[1],draft[1]]));
+     for(const library of Object.values(prefs.cornerCollections||{}))for(const group of library.groups||[])for(const ref of group.refs||[])if(ref.gid===ctx.g.id&&changedURLs.has(ref.url))ref.url=changedURLs.get(ref.url);
+     for(const {item,draft} of changes)item.splice(0,3,...draft);
+     d.close();refresh();toast('已修改 '+chosen.length+' 个网址');
+   })};d.showModal();
+ }
+ function moveDialog(ctx,batch){
+   const d=createDialog('bookmark-move-dialog',batch?'批量移动网址':'移动位置'),items=[...ctx.g.items],selected=new Set([ctx.item]);let target={...ctx};d.classList.toggle('is-batch',batch);
+   d.insertAdjacentHTML('beforeend',(batch?'':'<p class="bookmark-action-note">选择新的分类分组，或调整在分组中的顺序。</p><p class="bookmark-moving-name">'+esc(ctx.item[0])+'</p>')+'<form><div class="destination-cascade bookmark-move-cascade"><label>空间<select name="space" aria-label="目标空间"></select></label><label>场景<select name="scene" aria-label="目标场景"></select></label><label>分组<select name="group" aria-label="目标分组"></select></label></div><label class="bookmark-move-position">放置位置<select name="position" aria-label="放置位置"></select></label><p class="edit-error" role="alert"></p><div class="bookmark-dialog-footer">'+(batch?'<button type="button" data-batch-back>上一步</button>':'<button type="button" data-action="close">取消</button>')+'<button type="submit" class="primary">确认移动</button></div></form>');
+   const form=d.querySelector('form'),select=name=>form.elements.namedItem(name),options=(list,current)=>list.map(x=>'<option value="'+esc(x.id)+'" '+(x===current?'selected':'')+'>'+esc(x.name)+'</option>').join('');
+   function positions(){select('position').innerHTML='<option value="end">末尾</option><option value="start">最前面</option>';form.querySelector('[type=submit]').disabled=!selected.size||!target.g;enhanceControls()}
+   function destinations(level){
+     if(level==='space'){select('space').innerHTML=options(data,target.s);select('scene').innerHTML=options(target.s.scenes,target.c)}
+     if(level==='scene')select('scene').innerHTML=options(target.s.scenes,target.c);
+     select('group').innerHTML=options(target.c?.groups||[],target.g);positions();
+   }
+   select('space').onchange=()=>{target.s=data.find(s=>s.id===select('space').value);target.c=target.s.scenes[0];target.g=target.c?.groups[0];destinations('scene')};
+   select('scene').onchange=()=>{target.c=target.s.scenes.find(c=>c.id===select('scene').value);target.g=target.c?.groups[0];destinations('group')};
+   select('group').onchange=()=>{target.g=target.c.groups.find(g=>g.id===select('group').value);positions()};
+   destinations('space');
+   if(batch){
+     const heading=d.querySelector('h2'),panel=selectionStep(d,items,selected,()=>{panel.hidden=true;form.hidden=false;heading.textContent='第二步 · 选择目标位置';positions();form.querySelector('select').focus()});
+     form.hidden=true;heading.textContent='第一步 · 选择网址';
+     form.querySelector('[data-batch-back]').onclick=()=>{form.hidden=true;panel.hidden=false;heading.textContent='第一步 · 选择网址';panel.querySelector('[data-batch-next]').focus()};
+   }
+   form.onsubmit=event=>{event.preventDefault();authorize(ctx,()=>{
+     const moving=items.filter(x=>selected.has(x));if(!moving.length||!target.g)return;
+     if(!contexts().some(x=>x.g===target.g)||moving.some(x=>!ctx.g.items.includes(x))){form.querySelector('.edit-error').textContent='网址或分组已发生变化，请关闭后重新选择。';return}
+     const rest=target.g.items.filter(x=>!selected.has(x)),position=select('position').value,at=position==='end'?rest.length:position==='start'?0:Number(position);
+     ctx.g.items=ctx.g.items.filter(x=>!selected.has(x));rest.splice(at,0,...moving);target.g.items=rest;
+     if(target.g!==ctx.g)for(const library of Object.values(prefs.cornerCollections||{}))for(const group of library.groups||[])for(const ref of group.refs||[])if(ref.gid===ctx.g.id&&moving.some(x=>x[1]===ref.url)){ref.sid=target.s.id;ref.cid=target.c.id;ref.gid=target.g.id}
+     d.close();refresh();toast('已移动 '+moving.length+' 个网址');
+   })};d.showModal();
+ }
+ const previousEdit=editBookmark;editBookmark=function(index){const ctx={...context(),item:currentGroup().items[index]};previousEdit(index);const form=document.querySelector('#bookmark-editor-form');if(!form||!ctx.item)return;const button=document.createElement('button');button.type='button';button.className='bookmark-editor-delete';button.textContent='删除网址';button.onclick=()=>deleteDialog(ctx);form.append(button)};
+ document.addEventListener('pointerdown',event=>{if(menu&&!menu.hidden&&!menu.contains(event.target)&&!anchor?.contains(event.target))closeMenu()},true);
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&menu&&!menu.hidden){event.preventDefault();event.stopImmediatePropagation();closeMenu(true)}},true);
+ addEventListener('resize',()=>closeMenu());addEventListener('scroll',event=>{if(!menu?.contains(event.target))closeMenu()},true);
+ if(view==='space')attachMenus();
 })();

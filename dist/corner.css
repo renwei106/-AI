@@ -293,6 +293,9 @@ body[data-dark=true] #my-corner .corner-card-logo{color:color-mix(in srgb,var(--
 #my-corner .corner-held-card{z-index:60!important;transition:none!important;pointer-events:none;cursor:grabbing;opacity:1!important}
 #my-corner .corner-ref-ghost{position:fixed;z-index:65;pointer-events:none;margin:0;height:43px;min-height:43px;box-sizing:border-box;background:var(--surface);color:var(--ink);border-radius:7px;box-shadow:0 6px 16px #0002}
 #my-corner .corner-held-ref{opacity:.35}
+#my-corner .corner-feedback{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:70;padding:11px 20px;border-radius:10px;background:var(--surface);color:var(--ink);box-shadow:0 4px 18px #0002;font-size:13px;pointer-events:none}
+#my-corner .corner-inbox .corner-link{-webkit-user-select:none;user-select:none}
+#my-corner.corner-dragging .corner-inbox .corner-link{cursor:grabbing}
 #my-corner .corner-card-front:hover,#my-corner .corner-card-back:hover{animation-play-state:inherit}
 
 /* One original themed dock symbol, opening the common collection. */
@@ -484,3 +487,73 @@ body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-fi
 #my-corner[data-corner-theme=flip]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%2227%22%20y%3D%2222%22%20width%3D%22106%22%20height%3D%22112%22%20rx%3D%228%22%2F%3E%3Cpath%20d%3D%22M27%2048h106M48%2013v21m64-21v21M40%2084h80%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2291%22%20r%3D%2225%22%2F%3E%3Cpath%20d%3D%22M80%2072v19l13%208%22%2F%3E%3C%2Fsvg%3E")}
 #my-corner[data-corner-theme=flow]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M-15%2030Q40-10%2085%2040T180%2032M-15%2046Q40%206%2085%2056T180%2048M-15%20105Q40%2065%2085%20115T180%20107M-15%20121Q40%2081%2085%20131T180%20123%22%2F%3E%3C%2Fsvg%3E")}
 #my-corner[data-corner-theme=poly]{--inbox-pattern:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%20fill%3D%22none%22%20stroke%3D%22%23888%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M0%200h160v160H0ZM0%200l80%2042%2080-42M80%2042v77L0%20160m80-41%2080%2041M0%200v84l80%2035m80-119v84l-80%2035M0%2084l80-42%2080%2042%22%2F%3E%3C%2Fsvg%3E")}
+
+.bookmark-action-menu{position:fixed;inset:auto;margin:0;width:184px;padding:6px;border:0;border-radius:12px;background:var(--surface);color:var(--ink);box-shadow:0 8px 28px #0002;font:13px var(--font)}
+.bookmark-action-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 10px;border:0;border-radius:7px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.bookmark-action-menu button:is(:hover,:focus-visible){background:var(--soft);color:var(--accent);outline:none}
+.bookmark-action-menu svg{width:17px;height:17px;flex-shrink:0}
+.bookmark-action-menu [data-bookmark-action=delete]{color:#b96759}
+.bookmark-action-menu{overflow:visible}
+.bookmark-action-menu [data-bookmark-action=corner]{gap:7px}
+.bookmark-submenu-arrow{margin-left:auto;font-style:normal;color:var(--muted)}
+.bookmark-corner-targets{position:fixed;width:190px;max-width:calc(100vw - 16px);max-height:calc(100svh - 16px);overflow-y:auto;overscroll-behavior:contain;padding:6px;background:var(--surface);color:var(--ink);border-radius:12px;box-shadow:0 8px 28px #0002}
+.bookmark-corner-targets[hidden]{display:none}
+.bookmark-corner-targets button>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bookmark-corner-targets button>small{flex:none;color:var(--muted);font-size:10px}
+.bookmark-action-dialog{width:min(520px,calc(100vw - 32px));max-height:calc(100svh - 32px);overflow:auto;color:var(--ink)}
+.bookmark-action-note{font-size:12px;line-height:1.8;color:var(--muted)}
+.bookmark-moving-name{font-size:14px;overflow-wrap:anywhere}
+.bookmark-dialog-footer{display:flex;justify-content:flex-end;align-items:center;gap:18px;margin-top:24px}
+.bookmark-dialog-footer>button:not(.primary){background:none;color:var(--muted);padding:10px}
+.bookmark-move-cascade label,.bookmark-move-position{display:grid;gap:8px;font-size:12px;margin-top:16px}
+.bookmark-action-dialog select,.bookmark-batch-tools input{width:100%;min-width:0;padding:11px;border:0;border-radius:8px;background:var(--soft);color:var(--ink);font:12px var(--font)}
+.bookmark-batch-tools{display:flex;align-items:center;gap:12px;margin:16px 0 10px}
+.bookmark-batch-tools button{white-space:nowrap;font:11px var(--font);color:var(--accent);background:none}
+.bookmark-batch-list{max-height:240px;overflow:auto;background:var(--soft);border-radius:10px;padding:8px}
+.bookmark-batch-list label{display:flex;gap:10px;align-items:center;padding:8px;font-size:13px;cursor:pointer}
+.bookmark-batch-list input{width:16px;height:16px;flex-shrink:0;accent-color:var(--accent)}
+.bookmark-batch-list span{min-width:0;overflow-wrap:anywhere}
+.bookmark-batch-list small{display:block;font-size:10px;color:var(--muted);margin-top:4px;word-break:break-all}
+#bookmark-editor-form .bookmark-editor-delete{justify-self:start;background:none;color:#b96759;font:12px var(--font);padding:6px 0}
+.bookmark-action-dialog.is-batch{width:min(660px,calc(100vw - 32px))}
+.bookmark-action-dialog:has(.bookmark-selection-step:not([hidden])){height:min(880px,calc(100svh - 32px));padding:20px;overflow:hidden}
+.bookmark-action-dialog[open]:has(.bookmark-selection-step:not([hidden])){display:flex;flex-direction:column}
+.bookmark-action-dialog:has(.bookmark-selection-step:not([hidden]))>.dialog-heading{flex:none;align-items:center;margin:0 0 12px}
+.bookmark-action-dialog:has(.bookmark-selection-step:not([hidden]))>.dialog-heading h2{margin:0;font-size:20px}
+.bookmark-selection-step{display:flex;flex-direction:column;flex:1;min-height:0}
+.bookmark-selection-step input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);flex:none}
+.bookmark-selection-step .bookmark-batch-list{flex:1;height:auto;min-height:0;max-height:none;padding:4px 8px;overscroll-behavior:contain}
+.bookmark-selection-step .bookmark-batch-list label{padding:6px;min-height:44px;margin:0}
+.bookmark-selection-step .bookmark-batch-list span{flex:1;overflow:hidden}
+.bookmark-selection-step .bookmark-batch-list b{display:block;font-size:14px;font-weight:400;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.bookmark-selection-step .bookmark-batch-list small{font-size:11px;margin-top:2px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.bookmark-selection-footer{display:flex;align-items:center;flex-wrap:wrap;flex:none;gap:10px;margin-top:12px;font-size:12px;color:var(--muted)}
+.bookmark-selection-footer>span{white-space:nowrap}
+.bookmark-selection-footer>[data-select-page]{padding:8px;border-radius:7px;background:var(--soft);color:var(--ink);font:inherit;white-space:nowrap}
+.bookmark-selection-footer>[data-select-page][aria-pressed=true]{background:var(--space-accent-soft);color:var(--accent)}
+.bookmark-selection-footer>[data-batch-next]{margin-left:auto;padding:8px 12px;white-space:nowrap}
+.bookmark-batch-pagination{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}
+.bookmark-batch-pagination button{width:28px;height:28px;background:var(--soft);color:var(--ink);border-radius:6px}
+.bookmark-batch-pagination button:disabled{opacity:.35;cursor:default}
+@media(max-width:540px){.bookmark-selection-footer{gap:6px;font-size:11px}.bookmark-selection-footer>.bookmark-batch-pagination{margin-right:auto}.bookmark-selection-footer>[data-selection-count]{margin-right:auto}}
+.bookmark-action-dialog [hidden]{display:none!important}
+#my-corner .corner-link>.corner-link-remove{width:auto;padding:4px 6px;font:10px var(--font);white-space:nowrap}
+#my-corner .corner-link>.corner-link-open{flex:0 0 24px;justify-content:flex-end;padding:0 2px 0 0;color:var(--muted)}
+#my-corner .corner-link>.corner-link-open svg{width:15px;height:15px;flex:none}
+#my-corner .corner-flip-copy{opacity:.4}
+/* Align drag handles optically with the link emblem and its text. */
+#my-corner .corner-grip{display:grid;place-items:center;align-self:center;width:16px;height:28px;padding:0;line-height:1;box-sizing:border-box}
+#my-corner .corner-grip svg{display:block;width:14px;height:18px}
+#my-corner .corner-link:is(:hover,:focus-within) .corner-grip{opacity:.85}
+#my-corner .corner-grip:is(:hover,:focus-visible){color:var(--ink);background:color-mix(in srgb,var(--ink) 8%,transparent);border-radius:5px}
+/* Use flat rendering for settled cards; the existing flip keeps its 3D perspective. */
+#my-corner .corner-card:is(.is-settled,.corner-inbox){transform-style:flat;transform:translate(calc(-50% + var(--fan-x,0px)),calc(-50% + var(--fan-y,0px))) rotate(var(--fan-angle,0deg)) scale(var(--fan-scale,1))}
+#my-corner .corner-card-empty small{font-size:13px;line-height:1.9;color:color-mix(in srgb,var(--ink) 88%,var(--corner-face,var(--surface)))}
+#bookmark-move-dialog label>.select-wrap{border-radius:8px}
+#bookmark-move-dialog .select-trigger>small{display:grid;place-items:center;flex:0 0 14px;width:14px;height:14px;font-size:0;line-height:1}
+#bookmark-move-dialog .select-trigger>small:after{content:'';width:6px;height:6px;box-sizing:border-box;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-1.5px) rotate(45deg)}
+.bookmark-batch-edit-list{max-height:calc(100svh - 250px);overflow:auto;overscroll-behavior:contain}
+.bookmark-batch-edit-list fieldset{border:0;margin:0 0 12px;padding:12px;background:var(--soft);border-radius:8px;min-width:0}
+.bookmark-batch-edit-list legend{font-size:12px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bookmark-batch-edit-list label{display:flex;align-items:center;gap:10px;font-size:12px;margin:6px 0}
+.bookmark-batch-edit-list input{flex:1;min-width:0;border:0;border-radius:6px;background:var(--surface);color:var(--ink);padding:8px;font:12px var(--font)}

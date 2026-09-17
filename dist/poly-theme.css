@@ -73,3 +73,27 @@ body[data-theme=poly][data-dark=true] .workspace .cards[data-display=cards] .sit
 .workspace .cards[data-display=poly] { --poly-facet:color-mix(in srgb,var(--accent) 10%,transparent); display:grid; grid-template-columns:repeat(var(--group-columns,3),minmax(0,1fr)); gap:14px; }
 @media(max-width:760px) { .workspace .cards[data-display=poly] { grid-template-columns:repeat(min(var(--group-columns,3),2),minmax(0,1fr)); } }
 @media(prefers-reduced-motion:reduce) { .workspace .cards[data-display=poly] .bookmark { transition:none; } }
+
+/* In-place wallpaper controls and their compact effects popover. */
+.poly-tools { position:absolute; right:4.5%; bottom:76px; display:flex; align-items:center; gap:6px; pointer-events:auto; }
+.poly-tools .poly-change { position:static; opacity:.9; background:rgba(16,30,38,.3); }
+.poly-tools .poly-change:hover,.poly-tools .poly-change:focus-visible { opacity:1; background:rgba(16,30,38,.48); }
+.poly-tools .poly-tool-icon { padding:11px; }
+.poly-tools .poly-progress { position:absolute; right:0; bottom:calc(100% + 10px); width:max-content; max-width:min(330px,90vw); margin:0; padding:7px 11px; border-radius:10px; background:var(--surface); color:var(--ink); }
+.poly-effects { position:fixed; inset:auto 4.5% 130px auto; margin:0; width:180px; max-width:calc(100vw - 32px); max-height:calc(100svh - 180px); overflow:auto; padding:8px; border:0; border-radius:14px; background:var(--surface); color:var(--ink); box-shadow:0 8px 28px #0002,0 0 0 1px color-mix(in srgb,var(--ink) 8%,transparent); }
+.poly-effect-group { display:grid; gap:2px; }
+.poly-effect-group + .poly-effect-group { margin-top:7px; padding-top:7px; border-top:1px solid var(--line); }
+.poly-effect-group>span { padding:5px 10px; color:var(--muted); font-size:10px; }
+.poly-effect-group button { display:flex; justify-content:space-between; align-items:center; padding:9px 10px; border-radius:8px; color:var(--ink); font-size:12px; background:transparent; }
+.poly-effect-group button>span { visibility:hidden; }
+.poly-effect-group button[aria-pressed=true] { color:var(--accent); background:var(--soft); }
+.poly-effect-group button[aria-pressed=true]>span { visibility:visible; }
+.poly-effect-group button:hover { background:var(--soft); }
+.poly-effect-group button:disabled { opacity:.6; cursor:wait; }
+.poly-effects { --ink:color-mix(in srgb,var(--accent) 12%,#25302c); }
+body[data-dark=true] .poly-effects { --ink:color-mix(in srgb,var(--accent) 6%,#f1f2eb); }
+.poly-effects .poly-remove { width:100%; margin-top:7px; padding:9px 10px; text-align:left; border-radius:8px; color:var(--muted); font-size:11px; }
+.poly-effects .poly-remove:hover { background:var(--soft); }
+.poly-menu-status { margin:6px 10px; color:var(--muted); font-size:11px; line-height:1.6; }
+.poly-menu-status:empty { display:none; }
+@media(max-width:720px) { .poly-tools { bottom:190px; right:5%; }.poly-effects { right:5%; bottom:242px; max-height:calc(100svh - 266px); }[data-poly-caption] { bottom:196px; } }

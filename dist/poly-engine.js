@@ -3,7 +3,7 @@
   'use strict';
   function random(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t ^= t + Math.imul(t ^ t >>> 7, 61 | t); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
   function convert({ pixels, width: w, height: h, detail = 'balanced', tone = 'original', accent = '#648b83' }) {
-    const rng = random(187), count = ({simple:420, balanced:1100, fine:2500})[detail] || 1100;
+    const rng = random(187), count = ({simple:1600, balanced:3800, fine:7600})[detail] || 3800;
     const points = [[0,0],[w,0],[w,h],[0,h]], grid = new Set();
     const spacing = Math.sqrt(w*h/count), cell = Math.max(2, spacing * .48);
     function add(x,y) { const key = Math.floor(x/cell)+':'+Math.floor(y/cell); if(grid.has(key)) return false; grid.add(key); points.push([x,y]); return true; }

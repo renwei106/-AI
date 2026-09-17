@@ -73,7 +73,7 @@
   };
   function normalizeMode(value){return value==='surge'?'snow':value==='flow'?'chaos':MODE_KEYS.includes(value)?value:'chaos';}
   function modeCopy(mode){const custom=prefs.sharedHomeCopy?.mode==='custom'||prefs.homeCopy?.flow?.mode==='custom';return custom?currentCopy('flow'):MODE_COPY[mode]||MODE_COPY.chaos;}
-  const CHROME_IDLE_AFTER=10000;
+  const CHROME_IDLE_AFTER=15000;
   let chromeIdleTimer=0;
   function homeChromeActive(){return view==='home';}
   function resetChromeIdle(){
@@ -81,7 +81,7 @@
     if(!homeChromeActive()||!matchMedia('(pointer:fine)').matches)return;
     chromeIdleTimer=setTimeout(()=>{
       if(!homeChromeActive())return;
-      if(document.querySelector('dialog[open],.brand:hover,.header-right:hover,.dock:hover,.dock-trigger[aria-expanded=true],.utility-search:hover,.scroll-invitation:hover,.mode-pull-cord:hover,.color-pull-cord:hover')){resetChromeIdle();return;}
+      if(document.querySelector('dialog[open],.brand:hover,.header-right:hover,.dock:hover,.dock-trigger[aria-expanded=true],.utility-search:hover,.scroll-invitation:hover,.mode-pull-cord:hover,.color-pull-cord:hover,.world-entry:hover')){resetChromeIdle();return;}
       document.body.classList.add('global-chrome-idle');
     },CHROME_IDLE_AFTER);
   }
@@ -208,7 +208,7 @@
       cover.querySelector('[data-flow-title]').textContent=copy.title;cover.querySelector('[data-flow-intro]').textContent=copy.intro;cover.querySelector('.flow-touch-hint').textContent=touchHints[activeMode];
     }
     function resetParticleForMode(p,index){
-      p.sleeping=false;p.sleep=0;p.rest=0;p.life=activeMode==='snow'?10+(p.snowLayer??.5)*15+rand()*7:18;p.snowLayer=p.snowLayer??Math.pow(rand(),1.25);p.snowLane=p.snowLane??((index+.5)/Math.max(1,blocks.length));p.fluidDepth=p.fluidDepth??rand();p.depth=p.depth??rand();p.wanderA=p.wanderA??rand()*Math.PI*2;p.wanderB=p.wanderB??rand()*Math.PI*2;p.renderX=p.x;p.renderY=p.y;
+      p.sleeping=false;p.sleep=0;p.rest=0;p.life=activeMode==='snow'?18+rand()*45:18;p.snowLayer=p.snowLayer??Math.pow(rand(),1.25);p.snowLane=p.snowLane??((index+.5)/Math.max(1,blocks.length));p.fluidDepth=p.fluidDepth??rand();p.depth=p.depth??rand();p.wanderA=p.wanderA??rand()*Math.PI*2;p.wanderB=p.wanderB??rand()*Math.PI*2;p.renderX=p.x;p.renderY=p.y;
       if(p.retiring){p.vx*=.16;p.vy*=.16;p.spin*=.35;p.justCreated=false;return;}
       if(activeMode==='snow'){p.vx*=.36;p.vy=Math.max(22,p.vy*.24);if(!p.justCreated)p.delay=0;}
       else if(activeMode==='tide'){p.vx*=.6;p.vy=Math.max(72,p.vy*.45+42);}
@@ -216,7 +216,7 @@
       p.justCreated=false;
     }
     function particleCounts(w=width,h=height){
-      const base=clamp(Math.round(w*h/1500),190,1150),snow=w<600?clamp(Math.round(w*h/900),360,900):clamp(Math.round(w*h/1050),760,1600),dense=w<600?clamp(Math.round(w*h/390),760,1850):clamp(Math.round(w*h/390),1450,3600);
+      const base=clamp(Math.round(w*h/1500),190,1150),snow=w<600?clamp(Math.round(w*h/3200),100,220):clamp(Math.round(w*h/3200),240,620),dense=w<600?clamp(Math.round(w*h/390),760,1850):clamp(Math.round(w*h/390),1450,3600);
       return{base,snow,dense};
     }
     function createParticle(w,h,index,targetCount){
@@ -285,7 +285,7 @@
         for(let yy=Math.max(0,cy-1);yy<=cy+1;yy++)for(let xx=Math.max(0,cx-1);xx<=Math.min(hashCols-1,cx+1);xx++){
           const bucket=yy*hashCols+xx;if(bucket>=head.length)continue;
           for(let j=head[bucket];j!==-1;j=next[j]){
-            const b=blocks[j];if(a.retiring||b.retiring)continue;const dx=b.x-a.x,dy=b.y-a.y,formedPair=Number.isFinite(a.tx)&&Number.isFinite(b.tx),spacing=formedPair?1-formation*.56:1,min=(a.r+b.r)*.92*spacing,sq=dx*dx+dy*dy;if(sq>=min*min)continue;
+            const b=blocks[j];if(a.retiring||b.retiring)continue;const dx=b.x-a.x,dy=b.y-a.y,formedPair=Number.isFinite(a.tx)&&Number.isFinite(b.tx),spacing=formedPair?1-formation*.56:1,min=(a.r+b.r)*(activeMode==='snow'?.72:.92)*spacing,sq=dx*dx+dy*dy;if(sq>=min*min)continue;
             if(activeMode==='snow'&&a.sleeping&&b.sleeping)continue;
             const distance=Math.sqrt(sq)||.01,nx=sq?dx/distance:1,ny=sq?dy/distance:0,overlap=(min-distance)*.52,mobileA=activeMode==='snow'&&a.sleeping?0:1,mobileB=activeMode==='snow'&&b.sleeping?0:1,mobility=mobileA+mobileB||1,massShare=b.m/(a.m+b.m),shareA=activeMode==='snow'?mobileA/mobility:massShare,shareB=activeMode==='snow'?mobileB/mobility:1-massShare;
             a.x-=nx*overlap*shareA;a.y-=ny*overlap*shareA;b.x+=nx*overlap*shareB;b.y+=ny*overlap*shareB;
@@ -333,24 +333,33 @@
       cover.dataset.flowState=elapsed<FORM_START?'chaos':formation>=1?'formed':'forming';
       cover.dataset.formLocked=String(formation>=1);
     }
+    let snowColumns=[];
     function snowGround(p){
-      const maxDepth=height*.34,growth=clamp((clock-modeStartedAt)/28,.06,1),texture=Math.sin(p.x*.035+(p.snowLayer||0)*11)*4;
-      return height-p.r-(24+(maxDepth-24)*growth)*(p.snowLayer||0)-texture;
+      let ground=height-p.r;
+      const column=Math.floor(p.x/cell);
+      for(let i=Math.max(0,column-1);i<=Math.min(snowColumns.length-1,column+1);i++)for(const support of snowColumns[i]){
+        if(support===p||!support.sleeping||support.y<=p.y+.5)continue;
+        const distance=(p.r+support.r)*.72,dx=p.x-support.x;
+        if(Math.abs(dx)<distance)ground=Math.min(ground,support.y-Math.sqrt(distance*distance-dx*dx));
+      }
+      return ground;
     }
-    function respawnSnow(p){p.y=-18-rand()*height*.28;p.x=clamp((p.snowLane??rand())*width+(rand()-.5)*width*.045,p.r,width-p.r);p.vx=(rand()-.5)*13;p.vy=24+rand()*42;p.rest=0;p.sleep=0;p.sleeping=false;p.snowLayer=Math.pow(rand(),1.18);p.life=10+p.snowLayer*15+rand()*7;p.delay=.25+rand()*1.55;}
+    function respawnSnow(p){p.y=-18-rand()*height*.28;p.x=clamp((p.snowLane??rand())*width+(rand()-.5)*width*.045,p.r,width-p.r);p.vx=(rand()-.5)*13;p.vy=24+rand()*42;p.rest=0;p.sleep=0;p.sleeping=false;p.snowLayer=Math.pow(rand(),1.18);p.life=18+rand()*45;p.delay=.25+rand()*1.55;}
     function simulateSnow(dt,resolveContacts=true){
       clock+=dt;field.step(dt);
       let highest=height;
+      snowColumns=Array.from({length:Math.ceil(width/cell)+1},()=>[]);
+      for(const p of blocks)if(p.sleeping&&!p.retiring)snowColumns[clamp(Math.floor(p.x/cell),0,snowColumns.length-1)].push(p);
       for(const p of blocks){
         if(p.retiring){p.vx*=1-dt*1.4;p.vy*=1-dt*1.4;p.angle+=p.spin*dt*.25;continue;}
         const ground=snowGround(p);highest=Math.min(highest,ground);
         if(p.delay>0){p.delay=Math.max(0,p.delay-dt);continue;}
-        if(p.sleeping){p.rest+=dt;p.y+=(ground-p.y)*Math.min(1,dt*.7);p.x+=Math.sin(clock*.34+p.snowLayer*17)*dt*.18;if(p.rest>p.life)respawnSnow(p);continue;}
+        if(p.sleeping){p.rest+=dt;if(p.rest>p.life){respawnSnow(p);continue;}if(ground>p.y+1){p.sleeping=false;p.sleep=0;p.vy=0;}else{p.y=ground;continue;}}
         const x=p.x/field.dx+1,y=p.y/field.dy+1,currentX=field.sample(field.u,x,y),currentY=field.sample(field.v,x,y),curl=field.sample(field.curl,x,y),drag=1-Math.exp(-dt*1.8/p.m),flutter=Math.sin(clock*.8+p.y*.012+p.snowLayer*13);
         p.vx+=(currentX+flutter*9-p.vx)*drag;p.vy+=(currentY+32+Math.cos(clock*.45+p.x*.008)*8-p.vy)*drag+38*p.m*dt;
         p.vx=clamp(p.vx,-800,800);p.vy=clamp(p.vy,-680,720);p.x+=p.vx*dt;p.y+=p.vy*dt;p.spin=clamp(p.spin+(curl*.65-p.spin)*Math.min(1,dt),-8,8);p.angle+=p.spin*dt;p.tilt+=(p.spin*.34+p.vx*.002)*dt;
         if(p.x<p.r){p.x=p.r;p.vx=Math.abs(p.vx)*.3;}if(p.x>width-p.r){p.x=width-p.r;p.vx=-Math.abs(p.vx)*.3;}
-        if(p.y>=ground){p.y=ground;p.vy=0;p.vx*=.78;p.spin*=.55;p.sleep+=dt;if(p.sleep>.12){p.sleeping=true;p.rest=0;}}
+        if(p.y>=ground){p.y=ground;p.vy=0;p.vx*=.78;p.spin*=.55;p.sleep+=dt;if(p.sleep>.12){p.sleeping=true;p.rest=0;snowColumns[clamp(Math.floor(p.x/cell),0,snowColumns.length-1)].push(p);}}
       }
       if(resolveContacts)contacts();const settled=blocks.filter(p=>p.sleeping),settledTop=settled.length?Math.min(...settled.map(p=>p.y-p.r)):height;canvas.dataset.snowTargetDepth=String(Math.round(height-highest));canvas.dataset.snowMaxDepth=String(Math.round(height*.34));canvas.dataset.snowDepth=String(Math.round(height-settledTop));canvas.dataset.snowSettled=String(settled.length);canvas.dataset.snowMelting=String(settled.filter(p=>p.life-p.rest<3).length);
     }

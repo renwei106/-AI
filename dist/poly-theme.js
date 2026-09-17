@@ -18,10 +18,11 @@
     const cards=main.querySelector('[data-link-view=cards]');
     if(cards)cards.after(choice);else main.append(choice);
   };
-  const svgCache=new Map(); let shapeId=0, custom=null, loadDone=false, dialog, draft, job=0, worker=null, originURL=null, opener=null;
+  const svgCache=new Map(); let shapeId=0, custom=null, loadDone=false, menu, upload, job=0, worker=null, rejectWorker=null, busy=false;
   const options=()=>({preset:'mountain',detail:'balanced',tone:'original',...(prefs.polyScene||{})});
   COPY_DEFAULTS.poly={title:'把喜欢，拾成风景',intro:'一片山海，一点灵感。让日常有自己的形状。'};
   function faceted(points,palette,seed,density=50) {
+    density*=({simple:3,balanced:6,fine:10})[options().detail]||6;
     const rng=ShiyuPolyEngine.random(seed), xs=points.map(p=>p[0]),ys=points.map(p=>p[1]),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
     const dots=points.slice();for(let i=0;i<density;i++)dots.push([x0+rng()*(x1-x0),y0+rng()*(y1-y0)]);
     const indices=Delaunator.from(dots).triangles,id='poly-facet-'+(++shapeId);let result=`<defs><clipPath id="${id}"><polygon points="${points.map(p=>p.join(',')).join(' ')}"/></clipPath></defs><g clip-path="url(#${id})" stroke-linejoin="round" stroke-width=".8">`;
@@ -29,7 +30,8 @@
     return result+'</g>';
   }
   function subjectArtwork(id='mountain') {
-    if(svgCache.has(id))return svgCache.get(id);
+    const key=`subject:${id}:${options().detail}`;
+    if(svgCache.has(key))return svgCache.get(key);
     let art='';const shape=(p,c,s,n)=>faceted(p,c,s,n);
     if(id==='mountain') {
       art='<circle cx="738" cy="174" r="62" fill="#d5b77f" opacity=".64"/>';
@@ -75,10 +77,10 @@
       art+='<path d="m608 313 29 6-14 7-15-2Z" fill="#536252"/><path d="m642 407 25-7-23-1Z" fill="#9f7a64"/>';
     }
     const result=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 760" role="img" aria-label="${PRESETS.find(p=>p[0]===id)?.[1]||'棱光拾景'}，三角切面插画">${art}</svg>`;
-    svgCache.set(id,result);return result;
+    svgCache.set(key,result);return result;
   }
   function artwork(id='mountain') {
-    const dark=document.body.dataset.dark==='true',narrow=innerWidth/innerHeight<.8,key=`wallpaper:${id}:${dark}:${narrow}`;
+    const opt=options(),dark=document.body.dataset.dark==='true',narrow=innerWidth/innerHeight<.8,key=`wallpaper:${id}:${dark}:${narrow}:${opt.detail}:${opt.tone}:${effective().color}`;
     if(svgCache.has(key))return svgCache.get(key);
     const shape=(p,light,night,seed,n)=>faceted(p,dark?night:light,seed,n);
     const canvas=[[0,0],[1600,0],[1600,1000],[0,1000]];
@@ -116,6 +118,10 @@
       const transform=narrow?(person?'translate(132,170) scale(1.18)':warm?'translate(393,120) scale(.84)':'translate(450,235) scale(.70)'):(person?'translate(-60,-35) scale(1.55)':warm?'translate(74,0) scale(1.42)':'translate(80,56) scale(1.37)');
       art+=`<g transform="${transform}"${dark?' opacity=".86"':''}>${subject}</g>`;
     }
+    if(opt.tone==='theme'){
+      const tint=effective().color.match(/[a-f\d]{2}/gi)?.map(v=>parseInt(v,16)/255)||[.39,.55,.51],id='poly-tone-'+(++shapeId);
+      art=`<defs><filter id="${id}" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values=".77 0 0 0 ${tint[0]*.23} 0 .77 0 0 ${tint[1]*.23} 0 0 .77 0 ${tint[2]*.23} 0 0 0 1 0"/></filter></defs><g filter="url(#${id})">${art}</g>`;
+    }
     const result=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${PRESETS.find(p=>p[0]===id)?.[1]||'棱光拾景'}，全景三角切面壁纸">${art}</svg>`;
     svgCache.set(key,result);return result;
   }
@@ -131,7 +137,7 @@
   }
   const homeBefore=home;home=function(){
     homeBefore();if(effective().theme!=='poly')return;const root=$('.home-poly');if(!root)return;
-    root.insertAdjacentHTML('afterbegin',`<figure class="poly-wallpaper"><div class="poly-art" data-poly-art></div><figcaption><span data-poly-caption></span><button class="poly-change" data-poly-open aria-label="更换壁纸">${gem}<span>换一幅</span></button></figcaption></figure>`);
+    root.insertAdjacentHTML('afterbegin',`<figure class="poly-wallpaper"><div class="poly-art" data-poly-art></div><figcaption><span data-poly-caption></span><div class="poly-tools"><span class="poly-progress" role="status" aria-live="polite"></span><button class="poly-change" data-poly-next aria-label="更换壁纸">${gem}<span>换一幅</span></button><button class="poly-change poly-tool-icon" data-poly-file aria-label="上传本地图片" title="上传本地图片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5 9.5 3h5L16 5h4a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/><circle cx="12" cy="12" r="4"/></svg></button><button class="poly-change" data-poly-open popovertarget="poly-effects" aria-expanded="false" aria-controls="poly-effects">${icon('settings')}<span>效果</span></button></div></figcaption></figure>`);
     paintArt();
   };
   const applyBefore=apply;apply=function(){applyBefore();if(view==='home'&&effective().theme==='poly')paintArt();};
@@ -139,34 +145,78 @@
   window.addEventListener('resize',()=>{const narrow=innerWidth/innerHeight<.8;if(narrow===narrowViewport)return;narrowViewport=narrow;if(view==='home'&&effective().theme==='poly')paintArt();});
   // Only the new theme receives the faceted dock symbol; action and accessible label are unchanged.
   const dockBefore=dock;dock=function(){dockBefore();if(dockTheme()!=='poly')return;const trigger=$('.dock-trigger');if(!trigger)return;const label=trigger.querySelector('.dock-label')?.outerHTML||'<span class="dock-label">我的空间</span>';trigger.innerHTML=`<span class="poly-dock-gem">${gem}</span>${label}`;};
-  const settingsBefore=renderSettings;renderSettings=function(){settingsBefore();if(effective().theme!=='poly'||settingsTab!=='themes')return;const panel=$('#settings-body .settings-panel');if(panel&&!panel.querySelector('[data-poly-open]'))panel.insertAdjacentHTML('beforeend',`<button class="poly-settings-entry" data-poly-open>${gem}<span>棱光拾景 · 画面设置</span><span>↗</span></button>`);};
+  const settingsBefore=renderSettings;renderSettings=function(){settingsBefore();if(effective().theme!=='poly'||settingsTab!=='themes')return;const panel=$('#settings-body .settings-panel');if(panel&&!panel.querySelector('[data-poly-open]'))panel.insertAdjacentHTML('beforeend',`<button class="poly-settings-entry" data-poly-open popovertarget="poly-effects">${gem}<span>棱光拾景 · 画面设置</span><span>↗</span></button>`);};
   const dbPromise=new Promise((resolve,reject)=>{try{const req=indexedDB.open('shiyu-local-art',1);req.onupgradeneeded=()=>req.result.createObjectStore('images');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);}catch(error){reject(error);}});
   function dbAccess(mode,work){return dbPromise.then(db=>new Promise((resolve,reject)=>{const tx=db.transaction('images',mode),req=work(tx.objectStore('images'));tx.oncomplete=()=>resolve(req.result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);}));}
   const ready=dbAccess('readonly',s=>s.get('poly-cover')).then(value=>{custom=value||null;}).catch(()=>{}).finally(()=>{loadDone=true;paintArt();});
-  function cancelJob(){job++;worker?.terminate();worker=null;}
-  function release(){cancelJob();if(originURL)URL.revokeObjectURL(originURL);originURL=null;draft=null;}
-  function showPreview(){if(!dialog?.open||!draft)return;const preset=PRESETS.find(p=>p[0]===draft.preset)||PRESETS[0];const visual=dialog.querySelector('.poly-editor-preview');visual.innerHTML=draft.preset==='custom'&&draft.svg?draft.svg:artwork(preset[0]);visual.querySelector('svg')?.setAttribute('preserveAspectRatio','xMidYMid meet');visual.classList.toggle('poly-custom-art',draft.preset==='custom');dialog.querySelectorAll('[data-poly-preset]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.polyPreset===draft.preset));dialog.querySelector('.poly-upload-controls').hidden=draft.preset!=='custom';dialog.querySelector('[data-poly-remove]').hidden=!!draft.remove||!(custom||draft.file);dialog.querySelector('[data-poly-compare]').setAttribute('aria-pressed','false');dialog.querySelector('[data-poly-compare]').textContent='查看原图';dialog.querySelector('[data-poly-compare]').disabled=!draft.file||draft.busy;dialog.querySelector('[data-poly-save]').disabled=!!draft.busy||draft.preset==='custom'&&!draft.svg;}
-  async function openPicker(button){await ready;opener=button;release();draft={...options(),svg:custom?.svg,file:custom?.file};if(draft.preset==='custom'&&!draft.svg)draft.preset='mountain';if(!dialog){dialog=document.createElement('dialog');dialog.id='poly-scene-picker';dialog.setAttribute('aria-labelledby','poly-picker-title');document.body.append(dialog);dialog.addEventListener('close',()=>{release();if(opener?.isConnected)opener.focus();});dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});}
-    dialog.innerHTML=`<div class="dialog-heading"><div><span class="eyebrow">A LITTLE CHANGE OF SCENERY</span><h2 id="poly-picker-title">换一幅心情</h2></div><button class="icon-button" data-poly-cancel aria-label="关闭画面设置">×</button></div><div class="poly-editor-body"><div class="poly-preview-wrap"><div class="poly-editor-preview"></div><button data-poly-compare aria-pressed="false">查看原图</button></div><div class="poly-preset-grid">${PRESETS.map(([id,name])=>`<button data-poly-preset="${id}" aria-pressed="false"><span>${artwork(id)}</span><b>${name}</b></button>`).join('')}${custom?`<button data-poly-preset="custom" aria-pressed="false"><span>${custom.svg}</span><b>我的图片</b></button>`:''}<label class="poly-upload-tile">${gem}<b>我的风景</b><span>选择照片，拼成三角切面</span><input type="file" accept="image/jpeg,image/png,image/webp" data-poly-upload aria-label="选择一张本地图片"></label></div><div class="poly-upload-controls" hidden><div class="poly-control-row"><span>切面细节</span><div class="poly-segmented">${[['simple','简约'],['balanced','均衡'],['fine','精细']].map(([v,n])=>`<button data-poly-detail="${v}" aria-pressed="${draft.detail===v}">${n}</button>`).join('')}</div></div><div class="poly-control-row"><span>画面配色</span><div class="poly-segmented">${[['original','接近原图'],['theme','融入主题']].map(([v,n])=>`<button data-poly-tone="${v}" aria-pressed="${draft.tone===v}">${n}</button>`).join('')}</div></div></div><p class="poly-local-note">照片仅在当前浏览器处理和保存，不上传云端。支持 JPG、PNG、WebP，最大 15 MB。</p><p class="poly-progress" role="status" aria-live="polite"></p></div><div class="poly-editor-footer"><button data-poly-remove>删除我的图片</button><span></span><button data-poly-cancel>取消</button><button class="primary" data-poly-save>用这幅风景</button></div>`;
-    dialog.querySelectorAll('.poly-preset-grid svg').forEach(el=>el.setAttribute('preserveAspectRatio','xMidYMid meet'));
-    dialog.onclick=pickerClick;dialog.onchange=async e=>{if(e.target.matches('[data-poly-upload]')){const file=e.target.files[0];e.target.value='';if(file)await acceptFile(file);}};dialog.showModal();showPreview();
+  function cancelJob(){job++;worker?.terminate();worker=null;rejectWorker?.(new Error('cancelled'));rejectWorker=null;busy=false;}
+  function status(message){document.querySelectorAll('.poly-tools .poly-progress').forEach(el=>el.textContent=message);}
+  function syncMenu(){
+    const opt=options();
+    menu?.querySelectorAll('[data-poly-detail],[data-poly-tone]').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.polyDetail?opt.detail===b.dataset.polyDetail:opt.tone===b.dataset.polyTone);b.disabled=busy;});
+    const remove=menu?.querySelector('[data-poly-remove]');if(remove)remove.hidden=!custom;
+    document.querySelectorAll('[data-poly-open]').forEach(b=>b.setAttribute('aria-expanded',!!menu?.matches(':popover-open')));
   }
-  function status(text){if(dialog?.open)dialog.querySelector('.poly-progress').textContent=text;}
-  async function acceptFile(file){if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>15*1024*1024){status('请选择 15 MB 以内的 JPG、PNG 或 WebP 图片');return;}draft.file=file;draft.preset='custom';draft.svg=null;draft.remove=false;await generate();}
-  async function decode(file){const url=URL.createObjectURL(file);try{const image=new Image();image.src=url;await image.decode();const scale=Math.min(1,1000/Math.max(image.naturalWidth,image.naturalHeight));const canvas=document.createElement('canvas');canvas.width=Math.max(4,Math.round(image.naturalWidth*scale));canvas.height=Math.max(4,Math.round(image.naturalHeight*scale));const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0,canvas.width,canvas.height);return ctx.getImageData(0,0,canvas.width,canvas.height);}finally{URL.revokeObjectURL(url);}}
-  async function generate(){cancelJob();const token=job;draft.busy=true;status('正在把照片拼成风景…');showPreview();try{const image=await decode(draft.file);if(token!==job)return;const payload={pixels:image.data,width:image.width,height:image.height,detail:draft.detail,tone:draft.tone,accent:effective().color};let svg;
-      try{svg=await new Promise((resolve,reject)=>{worker=new Worker(new URL('poly-worker.js',document.baseURI));worker.onmessage=e=>e.data.error?reject(new Error(e.data.error)):resolve(e.data.svg);worker.onerror=reject;worker.postMessage(payload);});}catch(error){if(token!==job)return;await new Promise(r=>setTimeout(r,30));svg=ShiyuPolyEngine.convert(payload);}
-      if(token!==job)return;worker?.terminate();worker=null;draft.svg=svg;draft.busy=false;status('已生成，可以调整细节与配色');showPreview();
-    }catch(error){if(token!==job)return;draft.busy=false;status('这张图片未能读取，请换一张 JPG、PNG 或 WebP 图片');showPreview();}}
-  async function pickerClick(e){const b=e.target.closest('button');if(!b||!draft)return;
-    if(b.hasAttribute('data-poly-cancel')){dialog.close();return;}
-    if(b.dataset.polyPreset){cancelJob();draft.busy=false;draft.preset=b.dataset.polyPreset;if(draft.preset==='custom'&&custom){draft.file=custom.file;draft.svg=custom.svg;draft.remove=false;}status('');showPreview();return;}
-    if(b.dataset.polyDetail||b.dataset.polyTone){const prop=b.dataset.polyDetail?'detail':'tone';draft[prop]=b.dataset.polyDetail||b.dataset.polyTone;dialog.querySelectorAll(`[data-poly-${prop}]`).forEach(el=>el.setAttribute('aria-pressed',el.dataset[prop==='detail'?'polyDetail':'polyTone']===draft[prop]));await generate();return;}
-    if(b.hasAttribute('data-poly-compare')){const pressed=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',pressed);b.textContent=pressed?'返回切面':'查看原图';const stage=dialog.querySelector('.poly-editor-preview');if(pressed&&draft.file){if(originURL)URL.revokeObjectURL(originURL);originURL=URL.createObjectURL(draft.file);stage.innerHTML=`<img src="${originURL}" alt="本地原图">`;}else showPreview();return;}
-    if(b.hasAttribute('data-poly-remove')){cancelJob();draft.file=null;draft.svg=null;draft.busy=false;draft.remove=true;draft.preset='mountain';status('点击「用这幅风景」后删除；取消则保留');showPreview();return;}
-    if(b.hasAttribute('data-poly-save')){b.disabled=true;try{if(draft.remove){await dbAccess('readwrite',s=>s.delete('poly-cover'));custom=null;}else if(draft.file&&draft.svg){const value={file:draft.file,svg:draft.svg};await dbAccess('readwrite',s=>s.put(value,'poly-cover'));custom=value;}prefs.polyScene={preset:draft.preset,detail:draft.detail,tone:draft.tone};persist();dialog.close();paintArt();toast('已换好风景');}catch(error){status('浏览器暂时无法保存图片，请检查本地存储空间后重试');b.disabled=false;}}
+  function initEffects(){
+    if(!menu){
+      menu=document.createElement('div');menu.id='poly-effects';menu.className='poly-effects';menu.setAttribute('popover','auto');menu.setAttribute('aria-label','棱光拾景效果');
+      menu.innerHTML=`<div class="poly-effect-group"><span>切面细节</span>${[['simple','简约'],['balanced','均衡'],['fine','精细']].map(([value,label])=>`<button data-poly-detail="${value}" aria-pressed="false">${label}<span aria-hidden="true">✓</span></button>`).join('')}</div><div class="poly-effect-group"><span>画面配色</span>${[['original','接近原图'],['theme','融入主题']].map(([value,label])=>`<button data-poly-tone="${value}" aria-pressed="false">${label}<span aria-hidden="true">✓</span></button>`).join('')}</div><button class="poly-remove" data-poly-remove hidden>删除我的图片</button><p class="poly-menu-status" role="status" aria-live="polite"></p>`;
+      document.body.append(menu);menu.addEventListener('toggle',syncMenu);
+    }
+    syncMenu();
   }
-  document.addEventListener('click',e=>{const b=e.target.closest('[data-poly-open]');if(b)openPicker(b);});
+  function report(message){status(message);const el=menu?.querySelector('.poly-menu-status');if(el)el.textContent=message;}
+  async function decode(file){
+    const url=URL.createObjectURL(file);
+    try{const image=new Image();image.src=url;await image.decode();const scale=Math.min(1,1400/Math.max(image.naturalWidth,image.naturalHeight));const canvas=document.createElement('canvas');canvas.width=Math.max(4,Math.round(image.naturalWidth*scale));canvas.height=Math.max(4,Math.round(image.naturalHeight*scale));const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0,canvas.width,canvas.height);return ctx.getImageData(0,0,canvas.width,canvas.height);}finally{URL.revokeObjectURL(url);}
+  }
+  async function generate(file,opt){
+    cancelJob();const token=job;busy=true;syncMenu();report('正在处理图片…');
+    try{
+      const image=await decode(file);if(token!==job)return;
+      const payload={pixels:image.data,width:image.width,height:image.height,detail:opt.detail,tone:opt.tone,accent:effective().color};let svg;
+      try{svg=await new Promise((resolve,reject)=>{rejectWorker=reject;worker=new Worker(new URL('poly-worker.js',document.baseURI));worker.onmessage=e=>e.data.error?reject(new Error(e.data.error)):resolve(e.data.svg);worker.onerror=reject;worker.postMessage(payload);});}
+      catch(error){if(token!==job)return;svg=ShiyuPolyEngine.convert(payload);}
+      if(token!==job)return;worker?.terminate();worker=null;rejectWorker=null;
+      const value={file,svg};await dbAccess('readwrite',s=>s.put(value,'poly-cover'));
+      if(token!==job)return;custom=value;prefs.polyScene={...opt,preset:'custom'};persist();paintArt();syncMenu();report('');toast('已换好风景');
+    }catch(error){if(token===job)report('图片处理或保存失败，请换一张图片重试');}
+    finally{if(token===job){busy=false;syncMenu();}}
+  }
+  async function acceptFile(file){
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>15*1024*1024){report('请选择 15 MB 以内的 JPG、PNG 或 WebP 图片');return;}
+    await ready;await generate(file,options());
+  }
+  function chooseFile(){
+    if(!upload){upload=document.createElement('input');upload.type='file';upload.accept='image/jpeg,image/png,image/webp';upload.hidden=true;upload.dataset.polyUpload='';upload.setAttribute('aria-label','选择一张本地图片');document.body.append(upload);upload.addEventListener('change',()=>{const file=upload.files[0];upload.value='';if(file)acceptFile(file);});}
+    upload.click();
+  }
+  async function nextPicture(){
+    cancelJob();report('');await ready;
+    const ids=PRESETS.map(p=>p[0]);if(custom)ids.push('custom');
+    prefs.polyScene={...options(),preset:ids[(ids.indexOf(options().preset)+1)%ids.length]};persist();paintArt();syncMenu();
+  }
+  async function chooseEffect(button){
+    if(busy)return;
+    const opt=options(),prop=button.dataset.polyDetail?'detail':'tone',value=button.dataset.polyDetail||button.dataset.polyTone;
+    if(opt[prop]===value)return;opt[prop]=value;
+    await ready;
+    if(opt.preset==='custom'&&custom)await generate(custom.file,opt);
+    else{prefs.polyScene=opt;persist();paintArt();syncMenu();report('');}
+  }
+  document.addEventListener('click',async e=>{
+    const b=e.target.closest('button');if(!b)return;
+    if(b.hasAttribute('data-poly-next'))nextPicture();
+    else if(b.hasAttribute('data-poly-file'))chooseFile();
+    else if(b.hasAttribute('data-poly-open')){
+      const parent=b.closest('dialog')||document.body;if(menu.parentElement!==parent)parent.append(menu);
+    }
+    else if(b.dataset.polyDetail||b.dataset.polyTone)chooseEffect(b);
+    else if(b.hasAttribute('data-poly-remove')){
+      cancelJob();try{await dbAccess('readwrite',s=>s.delete('poly-cover'));custom=null;if(options().preset==='custom'){prefs.polyScene={...options(),preset:'mountain'};persist();}paintArt();syncMenu();report('');toast('已删除我的图片');}catch{report('暂时无法删除图片，请重试');}
+    }
+  });
+  initEffects();
   // A shareable local preview link opts in without changing other users' defaults.
   const preview=new URL(location.href).searchParams.get('theme');if(preview==='poly'){scope='global';changeTheme('poly');}else if(effective().theme==='poly')render();
 })();
