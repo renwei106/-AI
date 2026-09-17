@@ -57,7 +57,7 @@
   const shapes=makeShapes();
   const FORM_START=10000,FORM_END=30000;
   const FORM_NAMES=['城堡','鲨影','远行','地球','银河','太阳系','玫瑰','奔马','飞鸟','帆船','埃菲尔铁塔','飞机','上海天际线','东方明珠','金字塔','蒲公英','参天大树','蒙娜丽莎','一字雁阵','人字雁阵','天鹅左岸','天鹅右岸'];
-  const FORM_ORDER=[10,20,21,19,9,16,17,0,1,2,3,4,5,6,7,8,11,12,13,14,15];
+  const FORM_ORDER=[9,20,19,10,16,17,0,1,2,3,4,5,6,7,8,11,12,13,14,15];
   const MODE_KEYS=['form','snow','tide','chaos'];
   const STYLE_NAMES={chaos:'混沌漫游',form:'万象成形',snow:'灵感落雪',tide:'潮汐涌动'};
   const FLOW_DOCK_ICON='<span class="flow-dock-gateway" aria-hidden="true"><svg viewBox="0 0 52 42" fill="none"><path class="flow-dock-gate" d="M26 2.5 44 12.7v16.6L26 39.5 8 29.3V12.7Z" stroke="currentColor" stroke-width="1.35"/><g class="flow-dock-enter" fill="currentColor"><circle cx="20.5" cy="16.5" r="2.5"/><rect x="27.5" y="14" width="5" height="5" rx="1"/><path d="m21 23.5 3.4 5.7h-6.8Z"/><path d="M28.9 22.7h2.2v2.2h2.2v2.2h-2.2v2.2h-2.2v-2.2h-2.2v-2.2h2.2Z"/></g></svg></span>';
@@ -243,6 +243,7 @@
     let width=0,height=0,dpr=1,field,blocks=[],head,next,hashCols,frame=0,last=0,clock=0,disposed=false,previous=null,ink='#fff',tone='#d9e1ff',detailInk='#142154',modalOpen=false;
     let formation=activeMode==='form'?1:0,formationIndex=activeMode==='form'?FORM_ORDER[0]:-1,formationTargets=[],formationCenter={x:0,y:0},formationAssignedClock=0,solarOrbits=[],lastStir=performance.now()-(activeMode==='form'?FORM_END:0),lastGesture=-Infinity,morphStep=0,inherited=transition?.particles||null,modeStartedAt=0,handoffUntil=0;
     let ripples=[],lastRipple=0,lastRipplePoint=null,traces=[],lastTracePoint=null,lastTrace=0;
+    const firefly={x:0,y:0,time:0,hold:0,attack:0,target:null,ready:false};
     const cell=24,pixel=document.createElement('canvas');pixel.width=pixel.height=1;const pixelContext=pixel.getContext('2d',{willReadFrequently:true});
     const touchHints={chaos:'轻触或滑动，让粒子在空间里漫游',form:'轻触或滑动，打乱后等待万象成形',snow:'轻触或滑动，拨开一场落雪',tide:'轻触或滑动，掀起一阵潮汐'};
     function updateModeUI(){
@@ -280,6 +281,7 @@
       while(blocks.length<target)blocks.push(createParticle(width,height,blocks.length,target));next=new Int32Array(blocks.length);canvas.dataset.particles=String(blocks.length);canvas.dataset.desiredParticles=String(target);canvas.dataset.retiringParticles=String(blocks.filter(p=>p.retiring).length);canvas.dataset.baseParticles=String(counts.base);canvas.dataset.snowParticles=String(counts.snow);canvas.dataset.denseParticles=String(counts.dense);
     }
     function setMode(nextMode){
+      firefly.hold=0;firefly.attack=0;firefly.target=null;
       nextMode=normalizeMode(nextMode);if(nextMode===activeMode)return;
       if(activeMode==='form')bakeFormationMotion();
       activeMode=nextMode;prefs.flowStyle=nextMode;persist();previous=null;ripples=[];lastRipplePoint=null;traces=[];lastTracePoint=null;formation=0;morphStep=0;solarOrbits=[];formationTargets=[];formationIndex=activeMode==='form'?FORM_ORDER[0]:-1;lastStir=performance.now()-(activeMode==='form'?FORM_END:0);lastGesture=-Infinity;modeStartedAt=clock;handoffUntil=performance.now()+160;
@@ -372,6 +374,7 @@
         cover.dataset.nextForm=FORM_NAMES[formationIndex];
       }else return false;
       lastGesture=lastStir=now;formation=0;morphStep=0;canvas.dataset.formation='0';cover.dataset.flowState='chaos';
+      firefly.hold=0;firefly.attack=0;firefly.target=null;
       cover.dataset.formLocked='false';return true;
     }
     function updateFormation(now){
@@ -381,6 +384,30 @@
       canvas.dataset.formation=formation.toFixed(3);
       cover.dataset.flowState=elapsed<FORM_START?'chaos':formation>=1?'formed':'forming';
       cover.dataset.formLocked=String(formation>=1);
+    }
+    function updateFirefly(dt,now){
+      if(activeMode!=='form')return;
+      firefly.time+=dt;
+      if(!firefly.ready){firefly.x=width*.18;firefly.y=height*.56;firefly.ready=true;}
+      if(formation>=1)firefly.hold+=dt;else{firefly.hold=0;firefly.attack=0;firefly.target=null;}
+      if(firefly.hold>=60&&!firefly.target){
+        let nearest=null,distance=Infinity;for(const p of blocks){if(p.retiring||!Number.isFinite(p.tx))continue;const pos=displayPosition(p,0),d=Math.hypot(pos.x-firefly.x,pos.y-firefly.y);if(d<distance){nearest=p;distance=d;}}
+        if(nearest){firefly.target=nearest;firefly.fromX=firefly.x;firefly.fromY=firefly.y;}
+      }
+      if(firefly.target){
+        firefly.attack+=dt;const t=clamp(firefly.attack/2,0,1),ease=t*t*(3-2*t),pos=displayPosition(firefly.target,0);
+        firefly.x=firefly.fromX+(pos.x-firefly.fromX)*ease;firefly.y=firefly.fromY+(pos.y-firefly.fromY)*ease-Math.sin(t*Math.PI)*Math.min(48,height*.06);
+        if(t>=1){const x=firefly.x,y=firefly.y;if(beginCycle(now)){field.stir(x,y,0,-150,width<600?108:160,360);dropTrace(x,y,0,-1,now,true);}}
+      }else{
+        const x=width*(.5+.36*Math.sin(firefly.time*.17)+.06*Math.sin(firefly.time*.53)),y=height*(.52+.29*Math.sin(firefly.time*.13+.4)+.06*Math.cos(firefly.time*.41)),ease=1-Math.exp(-dt*.8);
+        firefly.x+=(x-firefly.x)*ease;firefly.y+=(y-firefly.y)*ease;
+      }
+      canvas.dataset.fireflyState=firefly.target?'approaching':'wandering';canvas.dataset.fireflyHold=firefly.hold.toFixed(1);
+    }
+    function drawFirefly(){
+      if(activeMode!=='form'||!firefly.ready)return;ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.translate(firefly.x,firefly.y);
+      const pulse=.22+.08*Math.sin(firefly.time*2.3),glow=ctx.createRadialGradient(0,0,0,0,0,11);glow.addColorStop(0,'rgba(240,238,179,.45)');glow.addColorStop(.3,'rgba(230,234,168,.16)');glow.addColorStop(1,'rgba(230,234,168,0)');ctx.globalAlpha=.7;ctx.fillStyle=glow;ctx.fillRect(-11,-11,22,22);
+      ctx.globalAlpha=pulse;ctx.fillStyle='#f3efc1';ctx.beginPath();ctx.ellipse(0,0,1.7,2.3,.3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=.12;ctx.fillStyle=ink;const wing=1.4+Math.abs(Math.sin(firefly.time*18))*1.3;for(const side of [-1,1]){ctx.beginPath();ctx.ellipse(side*2,-1,wing,1,side*.45,0,Math.PI*2);ctx.fill();}ctx.restore();
     }
     // Accumulation is a persistent raster plus a compact height map, not an ever-growing particle list.
     const snowBed=document.createElement('canvas'),snowPaint=snowBed.getContext('2d');
@@ -552,6 +579,14 @@
         ctx.beginPath();ctx.moveTo(0,-size);ctx.lineTo(0,size);ctx.stroke();for(const [y,r] of [[-.5,.22],[0,.34],[.46,.16]]){ctx.beginPath();ctx.arc(0,size*y,size*r,0,Math.PI*2);ctx.fill();}ctx.beginPath();ctx.moveTo(-size*.1,size*.5);ctx.lineTo(-size*.5,size);ctx.moveTo(size*.1,size*.5);ctx.lineTo(size*.5,size);ctx.stroke();
       }else if(index===14){
         ctx.beginPath();ctx.moveTo(-size,size*.72);ctx.lineTo(0,-size*.82);ctx.lineTo(size,size*.72);ctx.closePath();ctx.fill();ctx.strokeStyle=detailInk;for(let y=-.35;y<.65;y+=.3){ctx.beginPath();ctx.moveTo((-y*.4-.65)*size,y*size);ctx.lineTo((y*.4+.65)*size,y*size);ctx.stroke();}
+      }else if(index===16){
+        ctx.fillRect(-size*.1,size*.12,size*.2,size*.78);for(const [x,y,r]of [[-.45,-.1,.43],[0,-.4,.5],[.45,-.1,.43],[0,.05,.48]]){ctx.beginPath();ctx.arc(x*size,y*size,r*size,0,Math.PI*2);ctx.fill();}ctx.beginPath();ctx.moveTo(-size*.4,size*.9);ctx.lineTo(0,size*.75);ctx.lineTo(size*.4,size*.9);ctx.stroke();
+      }else if(index===17){
+        ctx.beginPath();ctx.ellipse(0,-size*.35,size*.4,size*.6,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.moveTo(-size*.3,0);ctx.quadraticCurveTo(-size*.8,size*.25,-size*.7,size*.9);ctx.lineTo(size*.7,size*.9);ctx.quadraticCurveTo(size*.8,size*.25,size*.3,0);ctx.fill();ctx.fillStyle=detailInk;ctx.beginPath();ctx.ellipse(0,-size*.35,size*.22,size*.32,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle=detailInk;ctx.beginPath();ctx.moveTo(-size*.4,size*.5);ctx.lineTo(size*.32,size*.65);ctx.moveTo(size*.4,size*.42);ctx.lineTo(-size*.25,size*.68);ctx.stroke();
+      }else if(index===18||index===19){
+        for(let i=0;i<7;i++){const rank=Math.ceil(i/2),side=i%2?-1:1,x=index===18?(i-3)*.29:side*rank*.29,y=index===18?0:-.5+rank*.32;ctx.beginPath();ctx.moveTo((x-.22)*size,(y-.14)*size);ctx.quadraticCurveTo((x-.08)*size,(y-.12)*size,x*size,(y+.09)*size);ctx.quadraticCurveTo((x+.08)*size,(y-.12)*size,(x+.22)*size,(y-.14)*size);ctx.moveTo(x*size,(y-.1)*size);ctx.lineTo(x*size,(y+.13)*size);ctx.stroke();}
+      }else if(index===20||index===21){
+        ctx.save();if(index===21)ctx.scale(-1,1);ctx.beginPath();ctx.ellipse(size*.12,size*.48,size*.76,size*.37,-.08,0,Math.PI*2);ctx.fill();ctx.lineWidth=size*.16;ctx.beginPath();ctx.moveTo(-size*.4,size*.5);ctx.bezierCurveTo(-size*.9,size*.05,-size*.8,-size*.85,-size*.47,-size*.83);ctx.quadraticCurveTo(-size*.24,-size*.83,-size*.3,-size*.51);ctx.stroke();ctx.beginPath();ctx.moveTo(-size*.3,-size*.61);ctx.lineTo(-size*.04,-size*.49);ctx.lineTo(-size*.33,-size*.45);ctx.fill();ctx.beginPath();ctx.moveTo(size*.55,size*.42);ctx.lineTo(size*.98,size*.18);ctx.lineTo(size*.8,size*.62);ctx.fill();ctx.restore();
       }else{
         ctx.beginPath();ctx.moveTo(0,-size*.35);ctx.quadraticCurveTo(size*.08,size*.35,0,size);ctx.stroke();for(let spoke=0;spoke<14;spoke++){const angle=spoke*Math.PI*2/14,r=size*.55,x=Math.cos(angle)*r,y=-size*.36+Math.sin(angle)*r;ctx.beginPath();ctx.moveTo(0,-size*.36);ctx.lineTo(x,y);ctx.stroke();ctx.beginPath();ctx.arc(x,y,size*.045,0,Math.PI*2);ctx.fill();}
       }
@@ -598,7 +633,7 @@
         frontCtx.setTransform(dpr*c*sx,dpr*s*sx,-dpr*s*sy,dpr*c*sy,dpr*position.x,dpr*position.y);frontCtx.globalAlpha=(formLight?.36:p.tone?.44:.74)*presence*meltAlpha*transitionAlpha;frontCtx.fillStyle=formLight||p.tone?tone:ink;frontCtx.fill(shapes[p.kind]);frontCtx.globalAlpha=.1*transitionAlpha;frontCtx.strokeStyle=ink;frontCtx.lineWidth=.08;frontCtx.stroke(shapes[p.kind]);
       }
       canvas.dataset.frontParticles=String(frontParticles);frontCtx.globalAlpha=1;frontCtx.setTransform(dpr,0,0,dpr,0,0);
-      drawModeTraces();drawTide();drawSnowPlow();
+      drawModeTraces();drawTide();drawSnowPlow();drawFirefly();
       ctx.globalAlpha=1;ctx.setTransform(dpr,0,0,dpr,0,0);
     }
     function tick(now){
@@ -606,6 +641,7 @@
       const dt=last?Math.min((now-last)/1000,.034):1/60;last=now;
       if(now<handoffUntil){draw();frame=requestAnimationFrame(tick);return;}
       updateFormation(now,dt);
+      updateFirefly(dt,now);
       if(activeMode==='snow'||activeMode==='tide'){simulate(dt/2,false);simulate(dt/2,true);}else{simulate(dt/2);simulate(dt/2);}updateParticleTransitions(dt);updateTraces(dt);morph();draw();frame=requestAnimationFrame(tick);
     }
     function run(){
