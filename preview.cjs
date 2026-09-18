@@ -24,7 +24,7 @@ const routes={
   '/feedback.css':'feedback.css','/feedback.js':'feedback.js',
   '/memoir-theme.css':'memoir-theme.css','/memoir-theme.js':'memoir-theme.js',
   '/corner.css':'corner.css','/corner.js':'corner.js',
-  '/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.js':'app.js','/v4.js':'v4.js','/v4.css':'v4.css',
+  '/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.js':'app.js','/v4.js':'v4.js','/v4.css':'v4.css','/account-access.js':'account-access.js',
   '/space-atlas.js':'space-atlas.js','/space-atlas.css':'space-atlas.css','/assets/reading/valley-closed.webp':'assets/reading/valley-closed.webp','/assets/reading/valley-open.webp':'assets/reading/valley-open.webp',
   '/surge-theme.css':'surge-theme.css','/surge-theme.js':'surge-theme.js','/flow-theme.css':'flow-theme.css','/flow-theme.js':'flow-theme.js','/reading-theme.css':'reading-theme.css','/reading-theme.js':'reading-theme.js',
   '/poly-theme.css':'poly-theme.css','/poly-theme.js':'poly-theme.js','/poly-engine.js':'poly-engine.js','/poly-worker.js':'poly-worker.js','/theme-availability.js':'theme-availability.js',

@@ -729,7 +729,10 @@
       ctx.globalAlpha=1;ctx.setTransform(dpr,0,0,dpr,0,0);
     }
     function tick(now){
-      frame=0;if(disposed||document.hidden||modalOpen||reduce.matches)return;
+      // A modal dialog blocks interaction, but it must not pause the live
+      // fluid canvas behind it. Keep the simulation clock running so opening
+      // login does not freeze the current inspiration state.
+      frame=0;if(disposed||document.hidden||reduce.matches)return;
       const dt=last?Math.min((now-last)/1000,.034):1/60;last=now;
       if(now<handoffUntil){draw();frame=requestAnimationFrame(tick);return;}
       if(activeMode==='water'){water?.step(dt);draw();frame=requestAnimationFrame(tick);return;}
@@ -740,7 +743,7 @@
     function run(){
       if(disposed)return;cancelAnimationFrame(frame);frame=0;last=0;previous=null;
       modalOpen=!!document.querySelector('dialog[open]');
-      const active=!document.hidden&&!modalOpen&&!reduce.matches;canvas.dataset.active=String(active);
+      const active=!document.hidden&&!reduce.matches;canvas.dataset.active=String(active);
       if(active)frame=requestAnimationFrame(tick);else draw();
     }
     function inputAllowed(event){return !disposed&&!reduce.matches&&!document.hidden&&!modalOpen&&!event.target.closest('button,a,input,textarea,select,dialog,.dock,.header-right');}

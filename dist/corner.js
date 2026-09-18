@@ -467,13 +467,19 @@
     const entry=dockEl.querySelector('.dock-trigger');if(!entry)return;
     entry.removeAttribute('data-action');entry.classList.add('corner-entry','corner-themed-entry');entry.title='点击打开我的常用';entry.setAttribute('aria-label','打开我的一隅');entry.setAttribute('aria-haspopup','dialog');entry.querySelector('.dock-label').textContent='我的一隅';
     const peek=document.createElement('div');peek.className='corner-dock-preview';dockEl.prepend(peek);dockEl.classList.add('corner-unified');refreshDockPreview();
-    const closePeek=()=>{dockEl.classList.remove('corner-peeking','open');entry.setAttribute('aria-expanded','false');};
-    dockEl.addEventListener('pointerenter',()=>{if(panel?.open||entry.disabled)return;refreshDockPreview();dockEl.classList.add('corner-peeking');entry.setAttribute('aria-expanded','true');});
+    let closePeekTimer=0;
+    const hidePeek=()=>{clearTimeout(closePeekTimer);dockEl.classList.remove('corner-peeking','open');entry.setAttribute('aria-expanded','false');};
+    // Wait briefly before collapsing the preview. The preview is positioned
+    // above the entry, so collapsing it immediately while the pointer is
+    // leaving can move the entry under the pointer and retrigger its hover
+    // animation, which looks like a flicker or a second train arrival.
+    const closePeek=()=>{clearTimeout(closePeekTimer);closePeekTimer=setTimeout(()=>{if(!dockEl.matches(':hover'))hidePeek();},160);};
+    dockEl.addEventListener('pointerenter',()=>{clearTimeout(closePeekTimer);if(panel?.open||entry.disabled)return;refreshDockPreview();dockEl.classList.add('corner-peeking');entry.setAttribute('aria-expanded','true');});
     dockEl.addEventListener('pointerleave',closePeek);
     dockEl.addEventListener('focusin',()=>{if(!panel?.open&&!entry.disabled){dockEl.classList.add('corner-peeking');entry.setAttribute('aria-expanded','true');}});
     dockEl.addEventListener('focusout',e=>{if(!dockEl.contains(e.relatedTarget)&&!dockEl.matches(':hover'))closePeek();});
-    entry.onclick=e=>{if(entry.disabled)return;e.stopPropagation();closePeek();openCorner(entry);};
-    peek.onclick=e=>{if(entry.disabled)return;const b=e.target.closest('[data-corner-peek]');if(b){closePeek();openCorner(entry,b.dataset.cornerPeek);}};
+    entry.onclick=e=>{if(entry.disabled)return;e.stopPropagation();hidePeek();openCorner(entry);};
+    peek.onclick=e=>{if(entry.disabled)return;const b=e.target.closest('[data-corner-peek]');if(b){hidePeek();openCorner(entry,b.dataset.cornerPeek);}};
     syncCornerAvailability();
   };
   // A website action adds only that website; card-level collection tools stay separate.
