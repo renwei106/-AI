@@ -1,56 +1,47 @@
 (function(){
- const retired=new Set(['reading','projection','wallfilm'])
- let order=Object.keys(THEMES).filter(id=>!retired.has(id)),enabled=new Set(order),free=new Set(['base']),member=false,ready=false,installed=false,defaultTheme='base',selection=0,refreshing=null,expiryTimer=null
- const deadlines=new Map(),configId=id=>id==='wallfilm'?'projection':id
- const visible=id=>!retired.has(id)&&enabled.has(id)
- const selectable=()=>order.filter(visible)
- const fallback=()=>defaultTheme
- const allowed=id=>{id=configId(id);return id===fallback()||enabled.has(id)&&(member||free.has(id)||(deadlines.get(id)||0)>performance.now())}
- const beforeChangeTheme=changeTheme
- function sanitize(){
-  if(!ready)return false
-  let changed=false;const next=fallback()
-  if(!allowed(prefs.theme)){prefs.theme=next;changed=true}
-  for(const value of Object.values(overrides||{}))if(value?.theme&&!allowed(value.theme)){value.theme=next;changed=true}
-  if(typeof copyEditingTheme!=='undefined'&&copyEditingTheme&&!visible(copyEditingTheme))copyEditingTheme=next
-  if(changed)persist();return changed
+ const retired=new Set(['reading','projection','wallfilm']),DAILY_MS=10*60*1000,PRESENCE_INTERVAL=5000;
+ const COPY={active:'今天还可以体验 ',activeSuffix:'',expiredTitle:'今天的体验先到这里',expiredBody:'你已经体验过这个主题了，开通会员后可以继续使用。'};
+ let order=Object.keys(THEMES).filter(id=>!retired.has(id)),enabled=new Set(order),free=new Set(['base']),member=false,memberExpired=false,ready=false,installed=false,defaultTheme='base',selection=0,refreshing=null,expiryTimer=null,noticeTimer=null,presenceTimer=null;
+ let previews={},deadlines={},notice=null,lockedVisual=false,lockedTheme='',activeTheme='',presenceQueue=Promise.resolve();
+ const configId=id=>id==='wallfilm'?'projection':id;
+ const visible=id=>!retired.has(id)&&enabled.has(id);
+ const selectable=()=>order.filter(visible);
+ const fallback=()=>defaultTheme;
+ const originalEffective=effective,originalChangeTheme=changeTheme,originalChangeView=changeView,originalGoSpace=goSpace,originalNavigationGesture=navigationGesture;
+ const emptyState=()=>({day:'',startedAt:0,expiresAt:0,remainingMs:DAILY_MS,consumedMs:0,active:false,started:false,expired:false});
+ const stateFor=id=>previews[id]||emptyState();
+ const premium=id=>ready&&visible(id)&&!free.has(configId(id));
+ const currentId=()=>configId(originalEffective().theme);
+ const currentState=()=>stateFor(currentId());
+ const themePage=()=>view==='home'&&premium(currentId())&&!member;
+ const remainingFor=id=>{const state=stateFor(id),deadline=deadlines[id];if(state.active&&deadline)return Math.max(0,deadline-performance.now());return Math.max(0,Number(state.remainingMs)||0)};
+ const formatRemaining=ms=>{const total=Math.max(0,Math.ceil(ms/1000)),minutes=Math.floor(total/60).toString().padStart(2,'0'),seconds=(total%60).toString().padStart(2,'0');return `${minutes}:${seconds}`};
+ const currentExpired=()=>{const id=currentId(),state=stateFor(id);return themePage()&&(lockedVisual&&lockedTheme===id||state.expired||state.started&&remainingFor(id)<=0)};
+ const updateCornerAvailability=()=>{const locked=ready&&!member&&(memberExpired||currentExpired());document.body.classList.toggle('theme-preview-corner-disabled',locked);window.dispatchEvent(new CustomEvent('shiyu-theme-preview-state',{detail:{theme:currentId(),themePage:themePage(),expired:currentExpired(),member,memberExpired,cornerLocked:locked}}));};
+ function ensureNotice(){if(notice||!document.body)return;notice=document.createElement('button');notice.type='button';notice.className='theme-preview-notice';notice.dataset.themePreviewNotice='true';notice.setAttribute('aria-live','polite');notice.setAttribute('aria-label','查看会员方案');notice.addEventListener('click',()=>{if(typeof memberGate==='function')memberGate('themes');else if(typeof openMemberCenter==='function')openMemberCenter()});document.body.append(notice)}
+ function renderNotice(expired,remaining){ensureNotice();if(!notice)return;notice.classList.toggle('is-expired',expired);if(expired)notice.innerHTML=`<strong class="theme-preview-notice-title">${COPY.expiredTitle}</strong><span class="theme-preview-notice-copy">${COPY.expiredBody}</span><span class="theme-preview-notice-action">查看会员方案</span>`;else notice.innerHTML=`<span class="theme-preview-notice-copy">${COPY.active}${formatRemaining(remaining)}</span>`;}
+ function expireCurrent(){const id=currentId(),state=stateFor(id);if(!themePage()||!state.started||lockedVisual)return;lockedVisual=true;lockedTheme=id;previews[id]={...state,remainingMs:0,expiresAt:0,active:false,expired:true};deadlines[id]=0;renderNotice(true,0);updateNotice();void updatePresence(true)}
+ function schedule(){clearTimeout(expiryTimer);if(!themePage())return;const state=currentState(),remaining=remainingFor(currentId());if(!state.started||state.expired||!state.active)return;if(remaining<=0){expireCurrent();return}expiryTimer=setTimeout(()=>{if(remainingFor(currentId())<=0)expireCurrent();else schedule()},Math.min(remaining+30,60000));}
+ function updateNotice(){ensureNotice();if(!notice)return;const id=currentId(),page=themePage(),state=stateFor(id),remaining=remainingFor(id);if(page&&state.active&&remaining<=0){expireCurrent();return}const expired=page&&currentExpired(),show=page&&(expired||remaining>0);notice.hidden=!show;document.body.classList.toggle('theme-preview-notice-active',show);if(show)renderNotice(expired,remaining);if(show&&!noticeTimer)noticeTimer=setInterval(updateNotice,1000);if(!show&&noticeTimer){clearInterval(noticeTimer);noticeTimer=null}updateCornerAvailability();schedule();}
+ function allowed(id){id=configId(id);return id===fallback()||visible(id)&&(member||free.has(id)||remainingFor(id)>0&&!stateFor(id).expired)}
+ function sanitize(){if(!ready)return false;const current=currentId();if(lockedVisual&&view==='home'&&current===lockedTheme)return false;let changed=false,next=fallback();if(!allowed(prefs.theme)){prefs.theme=next;changed=true}for(const value of Object.values(overrides||{}))if(value?.theme&&!allowed(value.theme)){value.theme=next;changed=true}if(typeof copyEditingTheme!=='undefined'&&copyEditingTheme&&!visible(copyEditingTheme))copyEditingTheme=next;if(changed)persist();return changed}
+ function reorder(selector,key){const groups=new Map();document.querySelectorAll(selector).forEach(node=>{if(!groups.has(node.parentElement))groups.set(node.parentElement,[]);groups.get(node.parentElement).push(node)});const rank=new Map(order.map((id,index)=>[id,index]));groups.forEach((nodes,parent)=>{const sorted=[...nodes].sort((a,b)=>(rank.get(a.dataset[key])??999)-(rank.get(b.dataset[key])??999)),other=[...parent.children].filter(node=>!nodes.includes(node)),tail=other.filter(node=>node.matches('.brand-origin-link')),desired=[...other.filter(node=>!tail.includes(node)),...sorted,...tail];let cursor=parent.firstElementChild;for(const node of desired){if(node!==cursor)parent.insertBefore(node,cursor);cursor=node.nextElementSibling}})}
+ function prune(){document.querySelectorAll('[data-v2-theme],[data-brand-theme],[data-copy-theme]').forEach(button=>{const id=button.dataset.v2Theme||button.dataset.brandTheme||button.dataset.copyTheme;if(id&&!visible(id))button.remove()});reorder('[data-v2-theme]','v2Theme');reorder('[data-brand-theme]','brandTheme');reorder('[data-copy-theme]','copyTheme');document.querySelectorAll('[data-brand-theme],[data-v2-theme]').forEach(button=>{const id=button.dataset.brandTheme||button.dataset.v2Theme,premiumTheme=ready&&!free.has(id);button.querySelector('.theme-member-badge')?.remove();if(premiumTheme){const badge=document.createElement('small');badge.className='theme-member-badge';badge.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a.5.5 0 0 1 .876 0z"/><path d="M5 21h14"/></svg>';badge.setAttribute('aria-label','会员主题');badge.setAttribute('title','会员主题');badge.style.cssText='display:inline-grid;place-items:center;flex:none;width:16px;height:16px;margin-left:auto;opacity:.85;white-space:nowrap';const label=button.querySelector('b');if(label)label.after(badge);else button.append(badge)}});updateNotice()}
+ function apply(data,requestStarted=performance.now()){
+   const items=(data.items||[]).filter(x=>THEMES[x.id]&&!retired.has(x.id));order=items.map(x=>x.id);enabled=new Set(items.filter(x=>x.enabled).map(x=>x.id));free=new Set(items.filter(x=>!x.memberOnly).map(x=>x.id));member=data.member===true;memberExpired=data.memberExpired===true;defaultTheme=THEMES[data.fallback]?data.fallback:'base';ready=true;
+   if(data.previews)previews={...data.previews};if(data.preview?.theme&&data.preview.state)previews[data.preview.theme]=data.preview.state;if(data.presence?.day){const presenceTheme=data.presenceTheme||currentId();previews[presenceTheme]=data.presence;if(data.presence.expired&&view==='home'&&configId(originalEffective().theme)===presenceTheme&&document.body.dataset.theme===presenceTheme){lockedVisual=true;lockedTheme=presenceTheme;}}
+   for(const [id,state] of Object.entries(previews)){if(state?.active&&Number(state.remainingMs)>0)deadlines[id]=requestStarted+Number(state.remainingMs);else deadlines[id]=0;}
+   if(member){lockedVisual=false;lockedTheme='';}updateNotice();
  }
- function reorder(selector,key){
-  const groups=new Map();document.querySelectorAll(selector).forEach(node=>{if(!groups.has(node.parentElement))groups.set(node.parentElement,[]);groups.get(node.parentElement).push(node)})
-  const rank=new Map(order.map((id,index)=>[id,index]));groups.forEach((nodes,parent)=>{const sorted=[...nodes].sort((a,b)=>(rank.get(a.dataset[key])??999)-(rank.get(b.dataset[key])??999)),other=[...parent.children].filter(node=>!nodes.includes(node)),tail=other.filter(node=>node.matches('.brand-origin-link')),desired=[...other.filter(node=>!tail.includes(node)),...sorted,...tail];let cursor=parent.firstElementChild;for(const node of desired){if(node!==cursor)parent.insertBefore(node,cursor);cursor=node.nextElementSibling}})
+ async function fetchAccess(theme){const requestStarted=performance.now(),response=await fetch('/api/shiyu/theme-access'+(theme?'/preview':''),{cache:'no-store',...(theme?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({theme})}:{})}),data=await response.json();data.requestStarted=requestStarted;if(data.items)apply(data,requestStarted);if(!response.ok)throw Error(data.message||'主题权限暂时无法校验');return data}
+ async function postPresence(theme,active){const requestStarted=performance.now(),response=await fetch('/api/shiyu/theme-access/presence',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({theme,active}),keepalive:!active}),data=await response.json();if(data.items)apply(data,requestStarted);if(!response.ok)throw Error(data.message||'主题体验状态暂时无法更新');return data}
+ function updatePresence(force=false){const next=themePage()&&!currentExpired()?currentId():'';const active=!!next&&!document.hidden&&(!document.hasFocus||document.hasFocus());presenceQueue=presenceQueue.then(async()=>{if(activeTheme&&(activeTheme!==next||!active)){await postPresence(activeTheme,false);activeTheme='';}if(active&&next&&(force||activeTheme!==next)){await postPresence(next,true);activeTheme=next;}if(!active&&!next)activeTheme='';}).catch(()=>{});return presenceQueue;}
+ async function select(id){id=configId(id);const ticket=++selection;if(ready&&visible(id)&&(member||free.has(id))){lockedVisual=false;lockedTheme='';originalChangeTheme(id);await updatePresence(true);prune();return}try{const data=await fetchAccess(id);if(ticket!==selection)return;if(!allowed(id))throw Error('今天的体验先到这里，开通会员后可以继续使用。');lockedVisual=false;lockedTheme='';originalChangeTheme(id);await updatePresence(true);prune()}catch(error){if(ticket!==selection)return;toast(error.message);if(sanitize())render()}}
+ function install(){if(installed)return;installed=true;effective=function(){const value=originalEffective();if(lockedVisual&&view==='home'&&configId(value.theme)===lockedTheme)return value;return allowed(value.theme)?value:{...value,theme:fallback()}};changeTheme=function(id){id=configId(id);if(ready&&visible(id)&&(member||free.has(id))){lockedVisual=false;lockedTheme='';const result=originalChangeTheme(id);void updatePresence(true);return result}return select(id)};const beforeSettings=renderSettings;renderSettings=function(){beforeSettings();prune()};const beforeDiscovery=addBrandDiscovery;addBrandDiscovery=function(){beforeDiscovery();prune()};const beforeRender=render;render=function(){sanitize();beforeRender();prune();updateNotice()};
+   const beforeChangeView=originalChangeView;changeView=function(...args){const result=beforeChangeView(...args);void updatePresence(true);setTimeout(updateNotice,0);return result};const beforeGoSpace=originalGoSpace;goSpace=function(...args){const result=beforeGoSpace(...args);void updatePresence(true);setTimeout(updateNotice,0);return result};
+   navigationGesture=function(delta){if(view==='home'&&premium(currentId()))return;return originalNavigationGesture(delta)};
+   window.addEventListener('click',event=>{const manual=event.target.closest?.('[data-brand-theme]'),cycle=event.target.closest?.('[data-action="next-theme"]');if(manual||cycle){event.preventDefault();event.stopImmediatePropagation();if(manual){void select(manual.dataset.brandTheme);return}const ids=selectable().filter(id=>free.has(id));if(!ready||!ids.length)return;const index=ids.indexOf(configId(originalEffective().theme));changeTheme(ids[(index+1)%ids.length]);return}if(event.target.closest?.('[data-account-signout]')){member=false;memberExpired=false;activeTheme='';lockedVisual=false;lockedTheme='';void fetch('/api/shiyu/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}).then(()=>refresh());setTimeout(()=>{if(sanitize())render()},0)}},true);
  }
- function prune(){
-  document.querySelectorAll('[data-v2-theme],[data-brand-theme],[data-copy-theme]').forEach(button=>{const id=button.dataset.v2Theme||button.dataset.brandTheme||button.dataset.copyTheme;if(id&&!visible(id))button.remove()})
-  reorder('[data-v2-theme]','v2Theme');reorder('[data-brand-theme]','brandTheme');reorder('[data-copy-theme]','copyTheme')
-  document.querySelectorAll('[data-brand-theme]').forEach(button=>{const premium=ready&&!free.has(button.dataset.brandTheme);button.querySelector('.theme-member-badge')?.remove();if(premium){const badge=document.createElement('small');badge.className='theme-member-badge';badge.textContent='会员';badge.setAttribute('aria-label','会员主题');badge.style.cssText='font-size:10px;line-height:1.5;padding:1px 5px;border:1px solid currentColor;border-radius:4px;opacity:.8;margin-left:auto;white-space:nowrap';button.querySelector('b')?.after(badge)}})
- }
- function schedule(){clearTimeout(expiryTimer);if(member)return;const pending=[...deadlines.values()].filter(t=>t>performance.now());if(pending.length)expiryTimer=setTimeout(()=>{if(sanitize()){render();toast('主题预览已结束，已返回默认主题')}schedule()},Math.max(0,Math.min(...pending)-performance.now())+20)}
- function apply(data){
-  const items=data.items.filter(x=>THEMES[x.id]&&!retired.has(x.id));order=items.map(x=>x.id);enabled=new Set(items.filter(x=>x.enabled).map(x=>x.id));free=new Set(items.filter(x=>!x.memberOnly).map(x=>x.id));member=data.member===true;defaultTheme=THEMES[data.fallback]?data.fallback:'base';ready=true
-  for(const [id,expiresAt]of Object.entries(data.previews||{})){const deadline=data.requestStarted+Math.max(0,expiresAt-data.serverTime);deadlines.set(id,Math.min(deadlines.get(id)??Infinity,deadline))}schedule()
- }
- async function fetchAccess(theme){const requestStarted=performance.now();const r=await fetch('/api/shiyu/theme-access'+(theme?'/preview':''),{cache:'no-store',...(theme?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({theme})}:{})});const data=await r.json();if(!r.ok)throw Error(data.message||'主题权限暂时无法校验');data.requestStarted=requestStarted;return data}
- async function select(id){
-  id=configId(id);const ticket=++selection
-  if(ready&&visible(id)&&(member||free.has(id))){beforeChangeTheme(id);prune();return}
-  try{const data=await fetchAccess(id);if(ticket!==selection)return;apply(data);if(!allowed(id))throw Error('该主题的 30 秒预览已结束');beforeChangeTheme(id);prune();if(!member&&!free.has(id))toast('会员主题可预览 30 秒')}
-  catch(error){if(ticket!==selection)return;toast(error.message);if(sanitize())render()}
- }
- function install(){
-  if(installed)return;installed=true
-  const beforeEffective=effective;effective=function(){const value=beforeEffective();return allowed(value.theme)?value:{...value,theme:fallback()}}
-  changeTheme=function(id){if(ready&&(member||free.has(configId(id)))&&visible(configId(id))){++selection;return beforeChangeTheme(configId(id))}return select(id)}
-  const beforeSettings=renderSettings;renderSettings=function(){beforeSettings();prune()}
-  const beforeDiscovery=addBrandDiscovery;addBrandDiscovery=function(){beforeDiscovery();prune()}
-  const beforeRender=render;render=function(){sanitize();beforeRender();prune()}
-  window.addEventListener('click',event=>{
-   const manual=event.target.closest?.('[data-brand-theme]'),cycle=event.target.closest?.('[data-action="next-theme"]');if(manual||cycle){event.preventDefault();event.stopImmediatePropagation();if(manual){void select(manual.dataset.brandTheme);return}const ids=selectable().filter(id=>free.has(id));if(!ready||!ids.length)return;const index=ids.indexOf(configId(effective().theme));changeTheme(ids[(index+1)%ids.length]);return}
-   if(event.target.closest?.('[data-account-signout]')){member=false;deadlines.clear();void fetch('/api/shiyu/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}).then(()=>refresh());setTimeout(()=>{if(sanitize())render()},0)}
-  },true)
- }
- async function refresh(){
-  if(refreshing)return refreshing
-  refreshing=(async()=>{try{const old=JSON.stringify([order,[...enabled],[...free],member]),data=await fetchAccess();apply(data);const changed=sanitize();if(changed||old!==JSON.stringify([order,[...enabled],[...free],member]))render();else prune()}catch{member=false;if(sanitize())render()}finally{refreshing=null}})();return refreshing
- }
- install();prune();void refresh();window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(sanitize())render();void refresh()}});setInterval(()=>{if(!document.hidden)void refresh()},5000)
-})()
+ async function refresh(){if(refreshing)return refreshing;refreshing=(async()=>{try{const old=JSON.stringify([order,[...enabled],[...free],member,memberExpired]),data=await fetchAccess();apply(data);const changed=sanitize();if(changed||old!==JSON.stringify([order,[...enabled],[...free],member,memberExpired]))render();else prune();await updatePresence(true)}catch{member=false;memberExpired=false;if(sanitize())render();updateNotice()}finally{refreshing=null}})();return refreshing}
+ install();prune();void refresh();window.addEventListener('focus',()=>{void refresh();void updatePresence(true)});window.addEventListener('blur',()=>{void updatePresence(true)});document.addEventListener('visibilitychange',()=>{void updatePresence(true);if(!document.hidden){if(sanitize())render();void refresh()}});presenceTimer=setInterval(()=>{if(!document.hidden)void updatePresence(true)},PRESENCE_INTERVAL);window.addEventListener('beforeunload',()=>{if(activeTheme)void postPresence(activeTheme,false)});
+})();

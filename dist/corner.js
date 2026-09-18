@@ -450,6 +450,15 @@
     rail.addEventListener('scroll',sync,{passive:true});for(const b of peek.querySelectorAll('[data-peek-scroll]'))b.onclick=e=>{e.stopPropagation();rail.scrollBy({left:Number(b.dataset.peekScroll)*rail.clientWidth*.75,behavior:reduced()?'instant':'smooth'});};requestAnimationFrame(sync);
   }
   addEventListener('resize',refreshDockPreview);
+  function syncCornerAvailability(){
+    const entry=document.querySelector('#dock .corner-entry'),peek=document.querySelector('#dock .corner-dock-preview'),dockEl=document.querySelector('#dock .dock');
+    if(!entry)return;
+    const locked=document.body.classList.contains('theme-preview-corner-disabled');
+    entry.disabled=locked;entry.setAttribute('aria-disabled',String(locked));entry.classList.toggle('is-disabled',locked);entry.tabIndex=locked?-1:0;
+    if(peek)peek.hidden=locked;
+    if(locked){dockEl?.classList.remove('corner-peeking','open');entry.setAttribute('aria-expanded','false');}
+  }
+  addEventListener('shiyu-theme-preview-state',syncCornerAvailability);
   const previousDock=dock;
   dock=function(){
     previousDock();const dockEl=document.querySelector('#dock .dock');if(!dockEl)return;
@@ -459,12 +468,13 @@
     entry.removeAttribute('data-action');entry.classList.add('corner-entry','corner-themed-entry');entry.title='点击打开我的常用';entry.setAttribute('aria-label','打开我的一隅');entry.setAttribute('aria-haspopup','dialog');entry.querySelector('.dock-label').textContent='我的一隅';
     const peek=document.createElement('div');peek.className='corner-dock-preview';dockEl.prepend(peek);dockEl.classList.add('corner-unified');refreshDockPreview();
     const closePeek=()=>{dockEl.classList.remove('corner-peeking','open');entry.setAttribute('aria-expanded','false');};
-    dockEl.addEventListener('pointerenter',()=>{if(panel?.open)return;refreshDockPreview();dockEl.classList.add('corner-peeking');entry.setAttribute('aria-expanded','true');});
+    dockEl.addEventListener('pointerenter',()=>{if(panel?.open||entry.disabled)return;refreshDockPreview();dockEl.classList.add('corner-peeking');entry.setAttribute('aria-expanded','true');});
     dockEl.addEventListener('pointerleave',closePeek);
-    dockEl.addEventListener('focusin',()=>{if(!panel?.open){dockEl.classList.add('corner-peeking');entry.setAttribute('aria-expanded','true');}});
+    dockEl.addEventListener('focusin',()=>{if(!panel?.open&&!entry.disabled){dockEl.classList.add('corner-peeking');entry.setAttribute('aria-expanded','true');}});
     dockEl.addEventListener('focusout',e=>{if(!dockEl.contains(e.relatedTarget)&&!dockEl.matches(':hover'))closePeek();});
-    entry.onclick=e=>{e.stopPropagation();closePeek();openCorner(entry);};
-    peek.onclick=e=>{const b=e.target.closest('[data-corner-peek]');if(b){closePeek();openCorner(entry,b.dataset.cornerPeek);}};
+    entry.onclick=e=>{if(entry.disabled)return;e.stopPropagation();closePeek();openCorner(entry);};
+    peek.onclick=e=>{if(entry.disabled)return;const b=e.target.closest('[data-corner-peek]');if(b){closePeek();openCorner(entry,b.dataset.cornerPeek);}};
+    syncCornerAvailability();
   };
   // A website action adds only that website; card-level collection tools stay separate.
   window.ShiyuCorner=Object.freeze({
