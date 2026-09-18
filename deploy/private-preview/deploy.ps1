@@ -17,7 +17,7 @@ if (-not (Test-Path -LiteralPath $KeyPath)) {
 
 Push-Location $repoRoot
 try {
-  & tar.exe -czf $archive dist preview.cjs share-server.cjs
+  & tar.exe -czf $archive dist preview.cjs share-server.cjs theme-config-proxy.cjs extension-routes.cjs shiyu-user-proxy.cjs feedback-server.cjs theme-access i18n payments config
   if ($LASTEXITCODE -ne 0) { throw 'Failed to build the deployment archive.' }
 
   & scp.exe -i $KeyPath -o StrictHostKeyChecking=accept-new $archive "${target}:/tmp/shiyu-preview.tgz"
