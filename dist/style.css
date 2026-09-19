@@ -35,3 +35,6 @@ body[data-theme=cinema][data-view=home] header{color:#f4eedb}body[data-theme=cin
 @media(prefers-reduced-motion:reduce){.tonearm{transition:none}}
 
 .music-info .player-controls>button.mute-control{font-size:11px}
+
+/* Keep the avatar slot stable while the server membership snapshot hydrates. */
+html:not(.shiyu-account-ready) .header-right .account-entry{visibility:hidden}

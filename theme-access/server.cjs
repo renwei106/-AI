@@ -11,7 +11,7 @@ async function handler(req,res){
     const isPreview=pathname.endsWith('/preview'),isPresence=pathname.endsWith('/presence');
     if((isPreview||isPresence)&&req.method!=='POST'||!isPreview&&!isPresence&&req.method!=='GET'){send(405,{message:'不支持该操作'});return true}
     const [themes,plans,identity]=await Promise.all([upstream('/api/shiyu/themes',req),upstream('/api/shiyu/plans',req),upstream('/api/shiyu/auth/session',req)]);
-    const result=policy(themes.items,plans.items),now=Date.now(),member=identity.authenticated===true&&identity.user?.blacklisted!==true&&identity.user?.member===true&&Date.parse(identity.user.memberExpiresAt)>now,memberExpired=identity.authenticated===true&&Number.isFinite(Date.parse(identity.user?.memberExpiresAt))&&Date.parse(identity.user.memberExpiresAt)<=now;
+    const result=policy(themes.items,plans.items),now=Date.now(),memberExpiry=identity.user?.memberExpiresAt,member=identity.authenticated===true&&identity.user?.blacklisted!==true&&identity.user?.member===true&&(memberExpiry==='永久'||Date.parse(memberExpiry)>now),memberExpired=identity.authenticated===true&&memberExpiry!=='永久'&&Number.isFinite(Date.parse(memberExpiry))&&Date.parse(memberExpiry)<=now;
     const token=store.visitor(req,res);let preview=null,presence=null,payload={};
     if(req.method==='POST'){
       if(![`http://${req.headers.host}`,`https://${req.headers.host}`].includes(req.headers.origin)){send(403,{message:'请求来源无效'});return true}

@@ -3,9 +3,9 @@
 #bookmark-editor .bookmark-editor-logo-preview{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;padding:9px;box-sizing:border-box;border-radius:10px;background:var(--soft);overflow:hidden;color:var(--accent);font-size:20px}
 #bookmark-editor .bookmark-editor-logo-preview :is(img,svg){display:block;width:100%;height:100%;object-fit:contain}
 #bookmark-editor .bookmark-editor-logo-row input{flex:1;min-width:0}
-@font-face{font-family:'Shiyu Youfeng Preview';font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/shiyu-youfeng/ShiyuYoufeng-Preview-Regular.woff2') format('woff2')}
-@font-face{font-family:'Shiyu Qingya Song Preview';font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/shiyu-qingya-song/ShiyuQingyaSong-Preview-Regular.woff2') format('woff2')}
-@font-face{font-family:'Shiyu Wenrun Kai Preview';font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/shiyu-wenrun-kai/ShiyuWenrunKai-Preview-Regular.woff2') format('woff2')}
+@font-face{font-family:'Shiyu Youfeng Preview';font-style:normal;font-weight:400;font-display:block;src:url('assets/fonts/shiyu-youfeng/ShiyuYoufeng-Preview-Regular.woff2') format('woff2')}
+@font-face{font-family:'Shiyu Qingya Song Preview';font-style:normal;font-weight:400;font-display:block;src:url('assets/fonts/shiyu-qingya-song/ShiyuQingyaSong-Preview-Regular.woff2') format('woff2')}
+@font-face{font-family:'Shiyu Wenrun Kai Preview';font-style:normal;font-weight:400;font-display:block;src:url('assets/fonts/shiyu-wenrun-kai/ShiyuWenrunKai-Preview-Regular.woff2') format('woff2')}
 .film-road .poster-title,.film-road .poster-title .eyebrow,.film-road .poster-title p{color:#34302a!important}.film-road .poster-title h1{text-shadow:none!important}body[data-poster=road][data-view=home] header,body[data-poster=road][data-view=home] .brand-mark,body[data-poster=road][data-view=home] .poster-top{color:#34302a!important}
 .settings-panel .mini-cinema{background-image:linear-gradient(#00152233,#00152266),url('poster-sea.png');background-size:cover;background-position:center}.poster-photo{filter:brightness(.9)}body[data-dark=false] .poster-photo{filter:brightness(1.05)}.home-cinema .film-poster:before{content:'';position:absolute;inset:0;background:var(--accent);opacity:.1;mix-blend-mode:color;pointer-events:none;z-index:1}.poster-title,.poster-top,.poster-bottom{z-index:2}
 .header-right{gap:12px}.header-right .icon-button{display:grid;place-items:center;width:38px;height:38px}.settings-tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin:18px 0 22px}.settings-tabs button{font-size:12px;padding:10px 0;color:var(--muted);border-bottom:2px solid transparent}.settings-tabs [aria-selected=true]{color:var(--ink);border-color:var(--accent)}.settings-panel{min-height:330px}.settings-panel .theme-preview{height:65px}.settings-panel .theme-gallery{gap:10px}.dialog-done{position:sticky;bottom:-28px;background:var(--surface);padding:18px 0 0;margin-top:24px;display:flex;justify-content:flex-end;z-index:9}.dialog-done button{background:var(--accent);color:#fff;padding:10px 28px;border-radius:9px;font-size:12px}.font-specimen{padding:50px 0;font-size:27px;line-height:1.8}.font-specimen.serif{font-family:'SimSun',serif}.font-specimen.sans{font-family:'Microsoft YaHei',sans-serif}.font-specimen small{display:block;font-size:15px;color:var(--muted)}.width-specimen{display:flex;gap:10px;margin:40px 0;padding:20px 40px;background:var(--bg);border-radius:10px}.width-specimen.wide{padding:20px 10px}.width-specimen i{height:100px;background:var(--soft);border-radius:6px;flex:1}
@@ -728,3 +728,9 @@ body[data-dark=true] #agreement-required-dialog>.member-primary{background:var(-
 #birthday-dialog .birth-column::before{content:"";position:absolute;z-index:0;left:6px;right:6px;top:50%;height:36px;transform:translateY(-50%);border-radius:7px;background:var(--accent);pointer-events:none}
 #birthday-dialog .birth-column button{position:relative;z-index:1;background:transparent;color:var(--ink)}
 #birthday-dialog .birth-column button[aria-selected=true],#birthday-dialog .birth-column button.birth-center{background:transparent;color:var(--selection-contrast,#fff);font-weight:600}
+
+/* Membership marker stays compact and anchored to the avatar corner. */
+.header-membership-badge{right:-2px;top:-2px;bottom:auto;width:13px;height:13px}
+.header-membership-badge svg{width:9px;height:9px}
+.menu-avatar i{right:-2px;top:-2px;bottom:auto;width:13px;height:13px;font-size:0}
+.menu-avatar i svg{width:9px;height:9px}

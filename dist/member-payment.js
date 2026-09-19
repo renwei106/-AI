@@ -44,7 +44,10 @@
   }
  }
  openMemberCenter = function () { originalCenter(); decorate(); void refreshStatus(); };
- isMember = function () { return status?.enabled ? !!account && account.memberExpiresAt > Date.now() : originalMember(); };
+  // The payment session is only an optional checkout identity. A normal
+  // Shiyu account can already have a membership granted by the admin, so a
+  // missing payment-session cookie must not downgrade that server entitlement.
+  isMember = function () { return originalMember() || !!account && account.memberExpiresAt > Date.now(); };
  async function refreshAccount() {
   if (!status?.enabled) return;
   try { account = await request('/account'); } catch { account = null; }
