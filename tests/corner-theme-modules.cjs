@@ -41,6 +41,8 @@ const themes=[
     assert(await page.locator('.corner-card-front').count()>0);
     const target=page.locator('.corner-card[data-corner-card]:not(.corner-inbox)').first();
     assert(await target.count());
+    const dimensions=await target.evaluate(el=>({card:el.getBoundingClientRect().height,front:el.querySelector('.corner-card-front').getBoundingClientRect().height}));
+    assert(Math.abs(dimensions.card-dimensions.front)<1,`${theme.id} front face should retain the full card height`);
     assert.equal(await target.evaluate(el=>el.classList.contains('is-cover-open')),false);
     await page.evaluate(()=>document.querySelector('.corner-card[data-corner-card]:not(.corner-inbox) .corner-card-cover').click());
     await page.waitForTimeout(180);

@@ -792,7 +792,7 @@ body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-fi
 /* Drawer covers for the first three collection themes. Normal cards begin as
    full-scene covers; the focused card leaves a dark header so its lower face
    remains the familiar route back to editing. The permanent inbox is excluded. */
-#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-card-front{position:relative}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-card-front{position:absolute}
 #my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-card-cover{
   position:absolute;
   inset:0;
