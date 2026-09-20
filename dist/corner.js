@@ -645,6 +645,9 @@
   function syncOrbitPreviewTheme(preview){
     if(!preview?.contentDocument)return;
     const documentInOrbit=preview.contentDocument;
+    // A new iframe exposes about:blank before its actual document loads.
+    // Never reveal that frame until the real menu can be themed.
+    if(!documentInOrbit.querySelector('#liquidMenu .core'))return;
     const orbitThemeIcon={base:'lib-Leaf',music:'lib-Disc3',reading:'lib-BookOpen',flow:'lib-Waves',poly:'lib-Triangle',cosmos:'lib-Atom',flip:'lib-Calendar',rain:'lib-Droplets',projection:'lib-Presentation',cinema:'lib-Clapperboard',paper:'lib-Newspaper'};
     const themeIconId=orbitThemeIcon[cornerTheme()]||orbitThemeIcon.base;
     const logo=documentInOrbit.querySelector('.logo-mark');
@@ -655,11 +658,19 @@
     const coreTitle=documentInOrbit.querySelector('.core-title');if(coreTitle)coreTitle.textContent='我的一隅';
     const coreSubtitle=documentInOrbit.querySelector('.core-subtitle');if(coreSubtitle){coreSubtitle.textContent='';coreSubtitle.hidden=true;}
     const orbit=documentInOrbit.querySelector('#orbit'),items=[...documentInOrbit.querySelectorAll('.menu-item')],activeItems=items.slice(0,3);
+    const sectorModuleIds=['common','memo','todo'];
     const threeLabels=['我的收藏','我的小记','我的待办'];
     activeItems.forEach((item,index)=>{
       item.querySelector('span')?.replaceChildren(documentInOrbit.createTextNode(threeLabels[index]));
       item.setAttribute('aria-label',threeLabels[index]);
       item.style.setProperty('--angle',`${index*120}deg`);
+      const iconMarkup=moduleIcon(sectorModuleIds[index]);
+      if(item.dataset.shiyuModuleIcon!==sectorModuleIds[index]){
+        const holder=documentInOrbit.createElement('template');holder.innerHTML=iconMarkup;
+        const icon=holder.content.firstElementChild,source=item.querySelector('svg');
+        if(icon&&source)source.replaceWith(icon);
+        item.dataset.shiyuModuleIcon=sectorModuleIds[index];
+      }
     });
     items.slice(3).forEach(item=>{item.hidden=true;item.classList.remove('is-selected');});
     if(orbit&&items.length&&!orbit.dataset.shiyuTextOrientation){
@@ -674,28 +685,65 @@
     }
     if(orbit&&!orbit.dataset.shiyuThreeMenu){
       const stage=documentInOrbit.querySelector('.stage'),mod=(value,length)=>((value%length)+length)%length;
-      const setThreeRotation=(nextRotation)=>{
+      const openOrbitModule=(index,event)=>{
+        const trigger=document.querySelector('#dock .corner-entry');if(!trigger)return;
+        const frameRect=preview.getBoundingClientRect();
+        const point={detail:{orbit:true},clientX:frameRect.left+(event?.clientX||frameRect.width/2),clientY:frameRect.top+(event?.clientY||frameRect.height/2)};
+        openCorner(trigger,null,point,sectorModuleIds[mod(index,sectorModuleIds.length)]);
+      };
+      const setThreeRotation=(nextRotation,announce=false)=>{
+        const previous=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
         const rotation=Math.round(nextRotation/120)*120;
         orbit.style.setProperty('--rotation',`${rotation}deg`);
         const selected=mod(Math.round(-rotation/120),activeItems.length);
         activeItems.forEach((item,index)=>item.classList.toggle('is-selected',index===selected));
+        if(announce&&rotation!==previous)playCardSound();
       };
       stage?.addEventListener('wheel',event=>{
         if(!stage.classList.contains('is-hover'))return;
         event.preventDefault();event.stopImmediatePropagation();
         const rotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
-        setThreeRotation(rotation+(event.deltaY>0?-120:120));
+        setThreeRotation(rotation+(event.deltaY>0?-120:120),true);
       },{capture:true,passive:false});
       orbit.addEventListener('click',event=>{
         if(!stage?.classList.contains('is-hover'))return;
+        if(event.target?.closest?.('.core-hit,.core'))return;
         event.preventDefault();event.stopImmediatePropagation();
         const rect=orbit.getBoundingClientRect(),x=event.clientX-(rect.left+rect.width/2),y=event.clientY-(rect.top+rect.height/2);
         let worldAngle=Math.atan2(x,-y)*180/Math.PI;if(worldAngle<0)worldAngle+=360;
         const rotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
         const localAngle=mod(worldAngle-rotation,360),index=Math.floor((localAngle+60)/120)%activeItems.length;
-        setThreeRotation(-index*120);
+        setThreeRotation(-index*120,true);
+        openOrbitModule(index,event);
       },{capture:true});
       setThreeRotation(0);orbit.dataset.shiyuThreeMenu='true';
+      orbit._shiyuOpenOrbitModule=openOrbitModule;
+    }
+    const coreHit=documentInOrbit.querySelector('.core-hit');
+    if(coreHit&&!coreHit.dataset.shiyuDragBound){
+      let pressTimer=0,dragging=false,suppressClick=false,startX=0,startY=0,startLeft=0,startTop=0;
+      const endDrag=()=>{clearTimeout(pressTimer);if(dragging){dragging=false;suppressClick=true;setTimeout(()=>{suppressClick=false},0)}};
+      coreHit.addEventListener('pointerdown',event=>{
+        if(event.button!==0)return;
+        const rect=preview.getBoundingClientRect();
+        startX=event.screenX;startY=event.screenY;startLeft=rect.left;startTop=rect.top;
+        pressTimer=window.setTimeout(()=>{dragging=true;coreHit.setPointerCapture?.(event.pointerId);preview.dataset.orbitDragged='true';},280);
+      });
+      coreHit.addEventListener('pointermove',event=>{
+        if(!dragging)return;event.preventDefault();
+        // screen coordinates stay stable when the iframe itself moves.
+        preview.style.left=`${startLeft+event.screenX-startX}px`;preview.style.top=`${startTop+event.screenY-startY}px`;preview.style.right='auto';preview.style.bottom='auto';
+      });
+      coreHit.addEventListener('pointerup',endDrag);coreHit.addEventListener('pointercancel',endDrag);
+      coreHit.addEventListener('click',event=>{
+        if(suppressClick||dragging)return;
+        event.preventDefault();event.stopImmediatePropagation();
+        const rotation=Number.parseFloat(orbit?.style.getPropertyValue('--rotation'))||0;
+        const selected=((Math.round(-rotation/120)%sectorModuleIds.length)+sectorModuleIds.length)%sectorModuleIds.length;
+        orbit?._shiyuOpenOrbitModule?.(selected,event);
+      });
+      documentInOrbit.addEventListener('click',event=>{if(suppressClick){event.preventDefault();event.stopImmediatePropagation();}},true);
+      coreHit.dataset.shiyuDragBound='true';
     }
     const root=getComputedStyle(document.documentElement),bodyStyle=getComputedStyle(document.body);
     const read=(name,fallback)=>{
@@ -730,26 +778,48 @@
       .orbit::after{border-color:color-mix(in srgb,var(--orbit-accent) 36%,transparent)!important}
       /* Only the visible center disc is slightly smaller; keep the original
          invisible core hit area so the hover interaction does not move. */
-      .core{inset:28%!important}
+      .core{inset:31%!important}
       .menu-item{color:var(--orbit-ink)!important;background:conic-gradient(from -60deg,color-mix(in srgb,var(--orbit-accent) 22%,var(--orbit-surface)) 0 120deg,transparent 120deg 360deg)!important;-webkit-mask:radial-gradient(circle at center,transparent 0 31%,#000 31.5% 100%),conic-gradient(from -60deg,#000 0 120deg,transparent 120deg 360deg)!important;mask:radial-gradient(circle at center,transparent 0 31%,#000 31.5% 100%),conic-gradient(from -60deg,#000 0 120deg,transparent 120deg 360deg)!important;-webkit-mask-composite:source-in!important;mask-composite:intersect!important;filter:drop-shadow(0 10px 18px #0001)!important}
       .menu-item[hidden]{display:none!important}
       .menu-item:hover,.menu-item.is-selected{color:var(--orbit-ink)!important;background:conic-gradient(from -60deg,color-mix(in srgb,var(--orbit-accent) 36%,var(--orbit-surface)) 0 120deg,transparent 120deg 360deg)!important;filter:drop-shadow(0 0 9px color-mix(in srgb,var(--orbit-accent) 32%,transparent)) drop-shadow(0 12px 20px #0002)!important}
       .core{background:color-mix(in srgb,var(--orbit-surface) 96%,transparent)!important;border-color:color-mix(in srgb,var(--orbit-accent) 46%,transparent)!important;box-shadow:0 0 0 10px color-mix(in srgb,var(--orbit-accent) 6%,transparent),0 0 44px color-mix(in srgb,var(--orbit-accent) 18%,transparent),inset 0 0 38px color-mix(in srgb,var(--orbit-accent) 10%,transparent)!important;transition:opacity .62s ease,border-color .3s ease,box-shadow .3s ease}
       .stage:not(.is-hover) .core{opacity:.52!important}
       .stage.is-hover .core{opacity:1!important}
+      .core-hit{cursor:grab!important}
       .core::before{border-color:color-mix(in srgb,var(--orbit-accent) 32%,transparent)!important}
       .core::after{border-color:color-mix(in srgb,var(--orbit-accent) 28%,transparent)!important}
       .logo-mark circle,.logo-mark path{stroke:var(--orbit-ink)!important}
       .logo-mark :is(circle,path,rect,line,polyline,polygon,ellipse){fill:none!important;stroke:var(--orbit-ink)!important}
       .logo-mark .accent{stroke:color-mix(in srgb,var(--orbit-accent) 60%,var(--orbit-ink))!important}
-      .core-title{color:var(--orbit-ink)!important;letter-spacing:.12em!important;text-indent:.12em!important}
+      .core-title{color:var(--orbit-ink)!important;font-size:clamp(12px,2vw,17px)!important;letter-spacing:.1em!important;text-indent:.1em!important}
       .core-subtitle,.status-line{display:none!important}
       .water-fill{background:linear-gradient(180deg,color-mix(in srgb,var(--orbit-accent) 40%,var(--orbit-surface)),color-mix(in srgb,var(--orbit-accent) 26%,var(--orbit-surface)) 48%,color-mix(in srgb,var(--orbit-accent) 18%,var(--orbit-surface)))!important}
     `;
     let style=preview.contentDocument.getElementById('shiyu-orbit-adapter');
     if(!style){style=preview.contentDocument.createElement('style');style.id='shiyu-orbit-adapter';preview.contentDocument.head.append(style)}
-    style.textContent=css;
-    preview.dataset.themeReady='true';
+    if(style.textContent!==css)style.textContent=css;
+    if(preview.dataset.themeReady!=='true'&&!preview._orbitRevealPending){
+      preview._orbitRevealPending=true;
+      const core=documentInOrbit.querySelector('.core');
+      core.style.setProperty('transition','none','important');
+      const titleStyle=preview.contentWindow.getComputedStyle(coreTitle);
+      const fonts=documentInOrbit.fonts.load(`${titleStyle.fontSize} ${titleStyle.fontFamily}`,'我的一隅');
+      fonts.catch(()=>{}).then(()=>{
+        if(preview.contentDocument!==documentInOrbit)return;
+        alignOrbitPreview(preview);
+        preview.contentWindow.getComputedStyle(core).opacity;
+        preview.dataset.themeReady='true';
+        requestAnimationFrame(()=>requestAnimationFrame(()=>core.style.removeProperty('transition')));
+      });
+    }
+  }
+  function alignOrbitPreview(preview){
+    if(!preview||preview.dataset.orbitDragged==='true'||document.body.dataset.view!=='home')return;
+    const entry=document.querySelector('#dock .corner-entry');
+    if(!entry)return;
+    const entryRect=entry.getBoundingClientRect(),stage=preview.contentDocument?.querySelector('.stage'),stageRect=stage?.getBoundingClientRect(),stageHeight=stageRect?.height||entryRect.height,stageOffset=stageRect?.top||0;
+    preview.style.top=`${Math.round(entryRect.top+entryRect.height/2-stageOffset-stageHeight/2)}px`;
+    preview.style.bottom='auto';
   }
   function wakeOrbitPreview(preview){
     if(!preview)return;
@@ -772,6 +842,7 @@
       document.body.append(preview);
     }
     syncOrbitPreviewTheme(preview);
+    alignOrbitPreview(preview);
     if(!document.documentElement.dataset.shiyuOrbitThemeWatch){
       const themeWatch=new MutationObserver(()=>{
         const current=document.querySelector('#corner-orbit-preview');
@@ -789,6 +860,7 @@
     wakeOrbitPreview(preview);
   }
   addEventListener('resize',refreshDockPreview);
+  addEventListener('resize',refreshOrbitPreview);
   let lastCardLimit=cardLimit();
   addEventListener('shiyu-user-entitlements',()=>{const next=cardLimit();if(next===lastCardLimit)return;lastCardLimit=next;refreshDockPreview();if(panel?.open)renderPanel()});
   function syncCornerAvailability(){
