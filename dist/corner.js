@@ -13,7 +13,7 @@
   let panel, picker, origin, switchMenu, switchOrigin, entrySlot, entrySnapshot, entryAnchor, motionFrame=0;
   let cornerRevealAnimation=null, cornerClosing=false;
   let drag = null, swallowClickUntil = 0, inboxExpanded=null;
-  const flipped=new Set(),flipTimers=new WeakMap();
+  const flipped=new Set(),coverOpen=new Set(),flipTimers=new WeakMap();
   const fanMotion={position:null,target:0,frame:0,last:0,tau:100};
   const ADD_CARD="__corner_add__";
   const cornerTheme=()=>({wallfilm:'projection',surge:'flow'}[dockTheme()]||dockTheme());
@@ -162,7 +162,7 @@
     origin=trigger||document.activeElement;
     if(!panel){
       panel=dialog('my-corner','我的一隅');
-      panel.addEventListener('close',()=>{cornerRevealAnimation?.cancel();cornerRevealAnimation=null;cornerClosing=false;panel.style.clipPath='';panel.style.removeProperty('--corner-backdrop-from');panel.classList.remove('corner-reveal-opening','corner-reveal-closing');finishDrag(true);restoreEntry();flipped.clear();cancelAnimationFrame(motionFrame);cancelAnimationFrame(fanMotion.frame);fanMotion.frame=0;panel.classList.remove('corner-animating');wheelConsumed=false;swipe=null;});
+      panel.addEventListener('close',()=>{cornerRevealAnimation?.cancel();cornerRevealAnimation=null;cornerClosing=false;panel.style.clipPath='';panel.style.removeProperty('--corner-backdrop-from');panel.classList.remove('corner-reveal-opening','corner-reveal-closing');finishDrag(true);restoreEntry();flipped.clear();coverOpen.clear();cancelAnimationFrame(motionFrame);cancelAnimationFrame(fanMotion.frame);fanMotion.frame=0;panel.classList.remove('corner-animating');wheelConsumed=false;swipe=null;});
       panel.addEventListener('pointerdown',startDrag);
       panel.addEventListener('dragstart',e=>{if(e.target.closest('.corner-inbox [data-corner-ref]'))e.preventDefault();});
       panel.addEventListener('cancel',e=>{e.preventDefault();if(cornerClosing)return;if(flipped.size)flipCard([...flipped][0],false);else closeCorner();});
@@ -180,7 +180,7 @@
       panel.addEventListener('pointerup',e=>{if(!swipe||drag?.active)return;const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;swipe=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3){navigate(Math.sign(-dx));swallowClickUntil=performance.now()+400;}});
       panel.addEventListener('pointercancel',()=>{swipe=null;});
     }
-    entryAnchor=null;inboxExpanded=null;flipped.clear();wheelLast=0;wheelConsumed=false;wheelSum=0;wheelLock=0;const groups=collection().groups;activeId=groups.find(g=>g.id===groupId)?.id||groups.find(g=>!isInbox(g))?.id||ADD_CARD;syncCornerThemePresentation();renderPanel();
+    entryAnchor=null;inboxExpanded=null;flipped.clear();coverOpen.clear();wheelLast=0;wheelConsumed=false;wheelSum=0;wheelLock=0;const groups=collection().groups;activeId=groups.find(g=>g.id===groupId)?.id||groups.find(g=>!isInbox(g))?.id||ADD_CARD;syncCornerThemePresentation();renderPanel();
     const r=origin?.getBoundingClientRect()||{left:innerWidth/2,top:innerHeight,width:0,height:0};
     const point=event?.detail&&Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?{x:event.clientX,y:event.clientY}:{x:r.left+r.width/2,y:r.top+r.height/2};
     const shape=cornerRevealGeometry(point),animateReveal=!reduced()&&typeof panel.animate==='function';
@@ -204,6 +204,7 @@
     const ids=[...document.querySelectorAll('[data-brand-theme]')].map(el=>el.dataset.brandTheme);if(ids.length<2)return;
     const next=ids[(ids.indexOf(cornerTheme())+1)%ids.length],previousScope=scope;
     restoreEntry();try{scope='global';changeTheme(next);}finally{scope=previousScope;}
+    coverOpen.clear();
     syncCornerThemePresentation();
     for(const el of panel.querySelectorAll('[data-corner-card]')){const g=collection().groups.find(g=>g.id===el.dataset.cornerCard);if(!g)continue;el.querySelector('.corner-card-logo').innerHTML=cardIcon(g);const empty=el.querySelector('.corner-empty-lines');if(empty)empty.innerHTML=cardIcon(g);const tmp=document.createElement('template');tmp.innerHTML=backCard(g);const choices=el.querySelector('.corner-icon-choices');if(choices)choices.innerHTML=tmp.content.querySelector('.corner-icon-choices').innerHTML;applyCardColor(el,g);}
     origin=document.querySelector('#dock .corner-entry');moveEntry();syncCornerCords();cornerNotice('已切换为「'+(THEMES[cornerTheme()]?.name||THEMES[dockTheme()]?.name||cornerTheme())+'」');panel.querySelector('[data-corner-next-theme]').blur();
@@ -262,7 +263,7 @@
     const skin=cornerThemeSkin();
     const live=orderedRefs(g).map(r=>({ref:r,source:resolve(r,entries)})).filter(x=>x.source);
 
-    const markup='<article class="corner-card '+(isInbox(g)?'corner-inbox ':'')+(flipped.has(g.id)?'is-flipped':'')+'" data-corner-card="'+g.id+'" data-corner-object="'+skin.object+'" data-corner-cover="'+skin.cover+'" data-corner-flip="'+skin.flip+'" style="--card-order:'+index+'"><div class="corner-card-turn"><section class="corner-card-front" tabindex="0" aria-label="'+esc(g.name)+'，点击卡牌翻面编辑"><div class="corner-card-cover" '+(isInbox(g)?'title="暂存 · 点击翻面编辑"':'data-corner-drag-group="'+g.id+'" title="点击翻面 · 长按拖动排序"')+'><span class="corner-card-number">'+(isInbox(g)?'默认':String(index).padStart(2,'0'))+'</span><span class="corner-card-logo">'+cardIcon(g)+'</span><h3>'+esc(g.name)+'</h3><small>'+live.length+' 个网址</small></div><div class="corner-links">'+live.map(({ref:r,source:x})=>'<div class="corner-link" data-corner-ref="'+r.id+'"><button class="corner-grip" data-corner-drag-ref="'+r.id+'" title="长按拖动网址" aria-label="拖动 '+esc(x.item[0])+'">'+grip+'</button><a href="'+esc(safeURL(x.url))+'" target="_blank" rel="noopener noreferrer" title="'+esc(x.item[0]+' · '+x.url+' · '+x.path)+'"><i>'+bookmarkMark(x.item)+'</i><span>'+esc(x.item[0])+'</span></a><button class="corner-link-remove" data-corner-remove="'+r.id+'" title="移出一隅" aria-label="移出一隅：'+esc(x.item[0])+'">移出一隅</button><a class="corner-link-open" href="'+esc(safeURL(x.url))+'" target="_blank" rel="noopener noreferrer" aria-label="打开 '+esc(x.item[0])+'">'+glyph('<path d="M6 18 18 6M7 6h11v11"/>')+'</a></div>').join('')+(!live.length?'<div class="corner-card-empty"><div class="corner-empty-lines">'+cardIcon(g)+'</div><p>'+(isInbox(g)?'还没想好放哪里，先留在这里':'把常去的地方，收进来')+'</p><small>'+(isInbox(g)?'之后可拖动网址到其他卡牌':'在原网址的编辑窗口中<br>选择「收进我的一隅」')+'</small></div>':'')+'</div><span class="corner-flip-hint"><span class="corner-flip-copy">点击卡牌翻面编辑</span> '+'<button type="button" data-corner-add-links="'+g.id+'" aria-label="为'+esc(g.name)+'添加网址" title="添加网址，可批量添加">'+glyph('<path d="M12 5v14M5 12h14"/>')+'</button></span></section><section class="corner-card-back" tabindex="-1" aria-label="编辑 '+esc(g.name)+'">'+backCard(g,live,entries)+'</section></div></article>';
+    const markup='<article class="corner-card '+(isInbox(g)?'corner-inbox ':'')+(flipped.has(g.id)?'is-flipped ':'')+(coverOpen.has(g.id)?'is-cover-open':'')+'" data-corner-card="'+g.id+'" data-corner-object="'+skin.object+'" data-corner-cover="'+skin.cover+'" data-corner-flip="'+skin.flip+'" style="--card-order:'+index+'"><div class="corner-card-turn"><section class="corner-card-front" tabindex="0" aria-label="'+esc(g.name)+'，点击卡牌翻面编辑"><div class="corner-card-cover" '+(isInbox(g)?'title="暂存 · 点击翻面编辑"':'data-corner-drag-group="'+g.id+'" title="点击封面展开，点击下方编辑"')+'><span class="corner-card-number">'+(isInbox(g)?'默认':String(index).padStart(2,'0'))+'</span><span class="corner-card-logo">'+cardIcon(g)+'</span><h3>'+esc(g.name)+'</h3><small>'+live.length+' 个网址</small></div><div class="corner-links">'+live.map(({ref:r,source:x})=>'<div class="corner-link" data-corner-ref="'+r.id+'"><button class="corner-grip" data-corner-drag-ref="'+r.id+'" title="长按拖动网址" aria-label="拖动 '+esc(x.item[0])+'">'+grip+'</button><a href="'+esc(safeURL(x.url))+'" target="_blank" rel="noopener noreferrer" title="'+esc(x.item[0]+' · '+x.url+' · '+x.path)+'"><i>'+bookmarkMark(x.item)+'</i><span>'+esc(x.item[0])+'</span></a><button class="corner-link-remove" data-corner-remove="'+r.id+'" title="移出一隅" aria-label="移出一隅：'+esc(x.item[0])+'">移出一隅</button><a class="corner-link-open" href="'+esc(safeURL(x.url))+'" target="_blank" rel="noopener noreferrer" aria-label="打开 '+esc(x.item[0])+'">'+glyph('<path d="M6 18 18 6M7 6h11v11"/>')+'</a></div>').join('')+(!live.length?'<div class="corner-card-empty"><div class="corner-empty-lines">'+cardIcon(g)+'</div><p>'+(isInbox(g)?'还没想好放哪里，先留在这里':'把常去的地方，收进来')+'</p><small>'+(isInbox(g)?'之后可拖动网址到其他卡牌':'在原网址的编辑窗口中<br>选择「收进我的一隅」')+'</small></div>':'')+'</div><span class="corner-flip-hint"><span class="corner-flip-copy">点击下方卡面翻面编辑</span> '+'<button type="button" data-corner-add-links="'+g.id+'" aria-label="为'+esc(g.name)+'添加网址" title="添加网址，可批量添加">'+glyph('<path d="M12 5v14M5 12h14"/>')+'</button></span></section><section class="corner-card-back" tabindex="-1" aria-label="编辑 '+esc(g.name)+'">'+backCard(g,live,entries)+'</section></div></article>';
     if(!isInbox(g))return markup;
     const template=document.createElement('template');template.innerHTML=markup;
     const front=template.content.querySelector('.corner-card-front');front.setAttribute('aria-label','暂存');
@@ -290,7 +291,9 @@
     return '<div class="corner-back-header"><span>编辑卡片</span></div><div class="corner-back-scroll"><label>卡片名称<input data-corner-name="'+g.id+'" maxlength="24" value="'+esc(g.name)+'"></label><div class="corner-appearance-tabs" role="tablist" aria-label="卡片外观"><button role="tab" aria-selected="true" aria-controls="corner-icons-'+g.id+'" data-corner-tab="icons">图标</button><button role="tab" aria-selected="false" aria-controls="corner-colors-'+g.id+'" data-corner-tab="colors">颜色</button></div><div class="corner-icon-choices" id="corner-icons-'+g.id+'" role="tabpanel" aria-label="图标">'+legacy+icons+'</div><div class="corner-color-options" id="corner-colors-'+g.id+'" role="tabpanel" aria-label="颜色" hidden>'+colors+'</div><fieldset class="corner-sort"><legend>网址排序</legend><div><button data-corner-sort="manual" aria-pressed="'+(g.sort!=='frequency')+'">手动</button><button data-corner-sort="frequency" aria-pressed="'+(g.sort==='frequency')+'">常用优先</button></div><small>'+(g.sort==='frequency'?'打开次数越多，排得越靠前':'在正面长按网址拖动柄调整顺序')+'</small></fieldset></div><div class="corner-back-footer">'+(isInbox(g)?'<span>默认卡片 · 不可删除</span>':'<button data-corner-delete="'+g.id+'">删除卡片</button>')+'<span>修改自动保存</span></div><div class="corner-delete-confirm" hidden><p>删除这张卡片？</p><small>这里的常用入口会移除，原空间收藏不受影响。</small><div><button data-corner-cancel-delete>保留</button><button data-corner-confirm-delete="'+g.id+'">删除</button></div></div>';
   }
   function syncFaces(el){const back=el.classList.contains('is-flipped');el.querySelector('.corner-card-front').inert=back;if(el.querySelector('.corner-card-back'))el.querySelector('.corner-card-back').inert=!back;el.querySelector('.corner-card-front').setAttribute('aria-hidden',String(back));el.querySelector('.corner-card-back')?.setAttribute('aria-hidden',String(!back));}
-  function activateCard(id){if(activeId!==id){activeId=id;layoutFan(true);return;}if(fanMotion.frame)return;flipCard(id,true);}
+  function syncCoverState(){if(!panel)return;for(const el of panel.querySelectorAll('[data-corner-card]'))el.classList.toggle('is-cover-open',coverOpen.has(el.dataset.cornerCard));}
+  function setCoverOpen(id,open=true){if(open){coverOpen.clear();coverOpen.add(id);}else coverOpen.delete(id);syncCoverState();}
+  function activateCard(id){if(activeId!==id){activeId=id;setCoverOpen(id,true);layoutFan(true);return;}if(fanMotion.frame)return;if(!coverOpen.has(id)){setCoverOpen(id,true);return;}flipCard(id,true);}
   function syncInbox(el){
     const open=el.classList.contains('is-inbox-open'),front=el.querySelector('.corner-card-front'),lid=el.querySelector('.corner-inbox-lid');
     front.inert=!open;front.setAttribute('aria-hidden',String(!open));lid.inert=open;lid.setAttribute('aria-hidden',String(open));
@@ -338,6 +341,12 @@
       if(e.target.closest('[data-inbox-fold],[data-inbox-unfold]')||el.classList.contains('is-inbox-open')&&!e.target.closest('a,button,input,select')){if(activeId!==g.id){activeId=g.id;layoutFan(true);}toggleInbox(el);return;}
       if(!e.target.closest('a,button'))return;
     }
+    const cover=e.target.closest('.corner-card-cover');
+    if(cover&&!isInbox(g)){
+      if(activeId!==g.id){activeId=g.id;setCoverOpen(g.id,true);layoutFan(true);return;}
+      setCoverOpen(g.id,!coverOpen.has(g.id));
+      return;
+    }
     if(b?.dataset.cornerTab){const tab=b.dataset.cornerTab;for(const t of el.querySelectorAll('[data-corner-tab]'))t.setAttribute('aria-selected',String(t===b));el.querySelector('.corner-icon-choices').hidden=tab!=='icons';el.querySelector('.corner-color-options').hidden=tab!=='colors';return;}
     if(b?.dataset.cornerColor){if(!window.ShiyuEntitlements?.require('corner-colors',b.dataset.cornerColor,'corner'))return;g.color=b.dataset.cornerColor==='theme'?'':b.dataset.cornerColor;persist();applyCardColor(el,g);for(const c of el.querySelectorAll('[data-corner-color]'))c.setAttribute('aria-pressed',String(c===b));return;}
     if(b?.hasAttribute('data-corner-custom')){if(!window.ShiyuEntitlements?.require('corner-colors','custom','corner'))return;el.querySelector('.corner-custom-color').click();return;}
@@ -378,7 +387,7 @@
     const settled=Math.abs(fanMotion.target-fanMotion.position)<.001;if(settled)fanMotion.position=fanMotion.target;paintFan(fanMotion.position);
     if(settled){fanMotion.frame=0;panel.classList.remove('corner-animating');}else fanMotion.frame=requestAnimationFrame(advanceFan);
   }
-  function navigate(direction,fast=false){if(flipped.size||drag?.active)return;const ids=[...collection().groups.map(g=>g.id),ADD_CARD],index=ids.indexOf(activeId),next=Math.max(0,Math.min(ids.length-1,index+direction));if(next===index||!ids[next])return;activeId=ids[next];layoutFan(true,fast);playCardSound();}
+  function navigate(direction,fast=false){if(flipped.size||drag?.active)return;const ids=[...collection().groups.map(g=>g.id),ADD_CARD],index=ids.indexOf(activeId),next=Math.max(0,Math.min(ids.length-1,index+direction));if(next===index||!ids[next])return;activeId=ids[next];setCoverOpen(activeId,true);layoutFan(true,fast);playCardSound();}
   function onWheel(e){
     if(e.ctrlKey||drag?.active)return;
     if(flipped.size){if(!e.target.closest('.corner-back-scroll'))e.preventDefault();e.stopPropagation();return;}

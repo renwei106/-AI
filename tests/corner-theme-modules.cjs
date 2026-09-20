@@ -39,20 +39,27 @@ const themes=[
     assert.equal(state.card.cornerCover,theme.cover);
     assert.equal(state.card.cornerFlip,theme.flip);
     assert(await page.locator('.corner-card-front').count()>0);
-    const center=page.locator('.corner-card.is-center:not(.corner-inbox):not(.corner-add-card)');
-    if(await center.count()){
-      await page.evaluate(()=>document.querySelector('.corner-card.is-center:not(.corner-inbox) .corner-card-cover').click());
-      await page.waitForTimeout(180);
-      assert(await center.evaluate(el=>el.classList.contains('is-flipped')&&el.classList.contains('is-settled')));
-      await page.keyboard.press('Escape');
-      await page.waitForTimeout(180);
-      assert.equal(await center.locator('.corner-card-front').getAttribute('aria-hidden'),'false');
-    }
+    const target=page.locator('.corner-card[data-corner-card]:not(.corner-inbox)').first();
+    assert(await target.count());
+    assert.equal(await target.evaluate(el=>el.classList.contains('is-cover-open')),false);
+    await page.evaluate(()=>document.querySelector('.corner-card[data-corner-card]:not(.corner-inbox) .corner-card-cover').click());
+    await page.waitForTimeout(180);
+    assert.equal(await target.evaluate(el=>el.classList.contains('is-cover-open')),true);
+    await page.evaluate(()=>document.querySelector('.corner-card.is-center[data-corner-card] .corner-card-cover,.corner-card[data-corner-card]:not(.corner-inbox).is-cover-open .corner-card-cover').click());
+    await page.waitForTimeout(120);
+    assert.equal(await target.evaluate(el=>el.classList.contains('is-cover-open')),false);
+    await page.evaluate(()=>document.querySelector('.corner-card[data-corner-card]:not(.corner-inbox) .corner-card-cover').click());
+    await page.evaluate(()=>document.querySelector('.corner-card.is-center[data-corner-card] .corner-links,.corner-card[data-corner-card]:not(.corner-inbox).is-cover-open .corner-links').dispatchEvent(new MouseEvent('click',{bubbles:true})));
+    await page.waitForTimeout(180);
+    assert(await target.evaluate(el=>el.classList.contains('is-flipped')&&el.classList.contains('is-settled')));
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(180);
+    assert.equal(await target.locator('.corner-card-front').getAttribute('aria-hidden'),'false');
     await page.evaluate(()=>document.querySelector('#my-corner')?.close());
     await page.waitForTimeout(80);
   }
   assert.deepEqual(errors,[]);
   await browser.close();
-  console.log('PASS black vinyl and cosmic theme adapters, art hooks, card metadata, and no page errors');
+  console.log('PASS first three theme adapters, full-cover drawer cycle, original edit flip, and no page errors');
 })().catch(error=>{console.error(error);process.exitCode=1});
 

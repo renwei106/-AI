@@ -788,3 +788,84 @@ body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-fi
   #my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox).is-center .corner-card-logo,
   #my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox).is-center .corner-card-logo{animation:none}
 }
+
+/* Drawer covers for the first three collection themes. Normal cards begin as
+   full-scene covers; the focused card leaves a dark header so its lower face
+   remains the familiar route back to editing. The permanent inbox is excluded. */
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-card-front{position:relative}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-card-cover{
+  position:absolute;
+  inset:0;
+  z-index:3;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 58px;
+  grid-template-rows:auto auto auto;
+  align-content:center;
+  min-height:0;
+  height:100%;
+  box-sizing:border-box;
+  border-radius:inherit;
+  overflow:hidden;
+  transition:height .72s cubic-bezier(.22,.75,.22,1),padding .72s cubic-bezier(.22,.75,.22,1),background .35s ease,box-shadow .35s ease;
+  cursor:pointer;
+}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-card-cover h3{grid-column:1;grid-row:2;align-self:end}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-card-cover small{grid-column:1;grid-row:3}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-card-cover .corner-card-number{grid-column:1 / -1;grid-row:1}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-card-logo{position:static;grid-column:2;grid-row:2;align-self:center;justify-self:end}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-links,
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-flip-hint{position:relative;z-index:1;opacity:0;pointer-events:none;transition:opacity .3s ease}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox).is-cover-open .corner-card-cover{
+  height:84px;
+  min-height:84px;
+  padding:16px 25px 12px;
+  align-content:center;
+  box-shadow:0 10px 24px #0003;
+}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox).is-cover-open .corner-links{
+  padding-top:96px;
+  opacity:1;
+  pointer-events:auto;
+}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox).is-cover-open .corner-flip-hint{opacity:1;pointer-events:auto}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox).is-cover-open .corner-card-cover h3{font-size:22px;line-height:1.25}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox).is-cover-open .corner-card-cover small{display:none}
+#my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox).is-cover-open .corner-card-logo{width:38px;height:38px}
+
+/* 留白日常 keeps its paper face, with a deeper ink header only while open. */
+#my-corner[data-corner-theme=base] .corner-card:not(.corner-inbox) .corner-card-cover{
+  background:
+    radial-gradient(circle at 82% 22%,color-mix(in srgb,var(--accent) 16%,transparent) 0 1px,transparent 2px),
+    linear-gradient(145deg,color-mix(in srgb,var(--accent) 9%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)) 72%);
+  color:var(--ink);
+}
+#my-corner[data-corner-theme=base] .corner-card:not(.corner-inbox).is-cover-open .corner-card-cover{
+  background:linear-gradient(145deg,color-mix(in srgb,var(--ink) 78%,var(--accent)),color-mix(in srgb,var(--ink) 65%,var(--accent)));
+  color:var(--surface);
+}
+#my-corner[data-corner-theme=base] .corner-card:not(.corner-inbox).is-cover-open .corner-card-cover :is(.corner-card-number,.corner-card-cover h3,.corner-card-cover small){color:inherit}
+
+/* Black vinyl keeps the sleeve and record rings visible in the full cover. */
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox) .corner-card-cover{background:
+    radial-gradient(circle at 82% 25%,color-mix(in srgb,var(--accent) 42%,transparent) 0 2px,transparent 2.5px),
+    repeating-radial-gradient(circle at 82% 27%,transparent 0 15px,color-mix(in srgb,var(--corner-vinyl-paper) 12%,transparent) 16px 17px,transparent 18px 28px),
+    linear-gradient(135deg,var(--corner-vinyl-ink),color-mix(in srgb,var(--corner-vinyl-ink) 72%,var(--accent)));}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox).is-cover-open .corner-card-cover{background:linear-gradient(135deg,var(--corner-vinyl-ink),color-mix(in srgb,var(--corner-vinyl-ink) 72%,var(--accent)));}
+
+/* 星际漫游 uses the same lid motion over a starfield and orbit map. */
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-cover{background:
+    radial-gradient(circle at 18% 25%,#fff 0 1px,transparent 1.6px),
+    radial-gradient(circle at 42% 76%,color-mix(in srgb,var(--corner-star) 86%,transparent) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 74% 31%,color-mix(in srgb,var(--accent) 88%,#fff) 0 1.4px,transparent 2px),
+    linear-gradient(140deg,var(--corner-space-ink),color-mix(in srgb,var(--corner-space-ink) 65%,var(--accent)));}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox).is-cover-open .corner-card-cover{background:linear-gradient(140deg,var(--corner-space-ink),color-mix(in srgb,var(--corner-space-ink) 65%,var(--accent)));}
+
+@media(max-width:760px){
+  #my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox).is-cover-open .corner-card-cover{height:78px;min-height:78px;padding:14px 22px 10px}
+  #my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox).is-cover-open .corner-links{padding-top:88px}
+}
+@media(prefers-reduced-motion:reduce){
+  #my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-card-cover,
+  #my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-links,
+  #my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-flip-hint{transition:none}
+}
