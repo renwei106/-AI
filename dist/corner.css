@@ -638,3 +638,153 @@ body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-fi
 .bookmark-batch-edit-list legend{font-size:12px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bookmark-batch-edit-list label{display:flex;align-items:center;gap:10px;font-size:12px;margin:6px 0}
 .bookmark-batch-edit-list input{flex:1;min-width:0;border:0;border-radius:6px;background:var(--surface);color:var(--ink);padding:8px;font:12px var(--font)}
+
+/* Generated theme modules. The adapter owns the visual object while the shared
+   card keeps its dimensions, links, drag targets, and flip controls. */
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox){
+  --corner-vinyl-ink:color-mix(in srgb,var(--ink) 84%,#0b0d0d);
+  --corner-vinyl-paper:color-mix(in srgb,var(--surface) 90%,#f5ead1);
+}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox) .corner-card-front{
+  border-radius:10px;
+  background:linear-gradient(150deg,color-mix(in srgb,var(--accent) 10%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)) 58%);
+}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox) .corner-card-cover{
+  min-height:164px;
+  margin:0;
+  padding:29px 25px 20px;
+  border:0;
+  border-radius:10px 10px 0 0;
+  color:var(--corner-vinyl-paper);
+  background:
+    radial-gradient(circle at 86% 25%,color-mix(in srgb,var(--accent) 42%,transparent) 0 2px,transparent 2.5px),
+    repeating-radial-gradient(circle at 83% 28%,transparent 0 11px,color-mix(in srgb,var(--corner-vinyl-paper) 12%,transparent) 12px 13px,transparent 14px 20px),
+    linear-gradient(135deg,var(--corner-vinyl-ink),color-mix(in srgb,var(--corner-vinyl-ink) 72%,var(--accent)));
+  box-shadow:inset 0 -1px 0 color-mix(in srgb,var(--corner-vinyl-paper) 20%,transparent);
+}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox) .corner-card-cover::before{
+  content:"";
+  position:absolute;
+  right:15px;
+  top:17px;
+  width:92px;
+  height:92px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--accent) 85%,#e2bd6d) 0 9px,var(--corner-vinyl-ink) 9.5px 13px,transparent 13.5px),
+    repeating-radial-gradient(circle,var(--corner-vinyl-ink) 0 3px,color-mix(in srgb,var(--corner-vinyl-paper) 17%,var(--corner-vinyl-ink)) 4px 5px);
+  box-shadow:0 9px 14px #0006;
+  transform:rotate(-9deg);
+  pointer-events:none;
+}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox) .corner-card-number{color:var(--corner-vinyl-paper);opacity:.72}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox) .corner-card-cover h3{color:var(--corner-vinyl-paper);text-shadow:0 1px 3px #0008}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox) .corner-card-cover small{color:color-mix(in srgb,var(--corner-vinyl-paper) 78%,transparent)}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox) .corner-card-cover::after{
+  content:"33⅓ · SIDE A";
+  right:24px;
+  bottom:15px;
+  color:color-mix(in srgb,var(--corner-vinyl-paper) 72%,transparent);
+  letter-spacing:1.8px;
+}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox) .corner-card-logo{
+  z-index:1;
+  border-radius:50%;
+  color:var(--corner-vinyl-paper);
+  background:transparent;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--corner-vinyl-paper) 18%,transparent),0 7px 14px #0005;
+}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox) .corner-card-logo svg{filter:drop-shadow(0 1px 2px #0008)}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox) .corner-links{padding-top:8px}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox) .corner-card-back{
+  border-radius:10px;
+  background:
+    radial-gradient(circle at 87% 14%,color-mix(in srgb,var(--accent) 27%,transparent) 0 42px,transparent 43px),
+    var(--corner-face,var(--surface));
+}
+#my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox).is-center .corner-card-logo{animation:corner-record-label 8s linear infinite}
+@keyframes corner-record-label{to{transform:rotate(351deg)}}
+
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox){
+  --corner-space-ink:color-mix(in srgb,#101d38 83%,var(--ink));
+  --corner-star:color-mix(in srgb,var(--surface) 92%,#dfeaff);
+}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-front{
+  border-radius:11px;
+  background:
+    radial-gradient(circle at 18% 76%,color-mix(in srgb,var(--accent) 12%,transparent) 0 1px,transparent 1.5px),
+    radial-gradient(circle at 73% 70%,color-mix(in srgb,var(--accent) 16%,transparent) 0 1px,transparent 1.5px),
+    linear-gradient(145deg,color-mix(in srgb,var(--accent) 7%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)) 62%);
+}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-cover{
+  min-height:164px;
+  margin:0;
+  padding:29px 25px 20px;
+  border:0;
+  border-radius:11px 11px 0 0;
+  overflow:hidden;
+  color:var(--corner-star);
+  background:
+    radial-gradient(circle at 18% 25%,#fff 0 1px,transparent 1.6px),
+    radial-gradient(circle at 38% 75%,color-mix(in srgb,var(--corner-star) 86%,transparent) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 72% 32%,color-mix(in srgb,var(--accent) 88%,#fff) 0 1.4px,transparent 2px),
+    radial-gradient(circle at 91% 79%,color-mix(in srgb,var(--corner-star) 72%,transparent) 0 1px,transparent 1.5px),
+    linear-gradient(140deg,var(--corner-space-ink),color-mix(in srgb,var(--corner-space-ink) 65%,var(--accent)));
+  box-shadow:inset 0 -1px 0 color-mix(in srgb,var(--corner-star) 18%,transparent);
+}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-cover::before{
+  content:"";
+  position:absolute;
+  right:-37px;
+  top:-34px;
+  width:180px;
+  height:122px;
+  border:1px solid color-mix(in srgb,var(--corner-star) 44%,transparent);
+  border-radius:50%;
+  transform:rotate(-20deg);
+  box-shadow:0 0 0 15px color-mix(in srgb,var(--accent) 10%,transparent),0 0 0 31px color-mix(in srgb,var(--corner-star) 13%,transparent);
+  pointer-events:none;
+}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-number{color:var(--corner-star);opacity:.72}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-cover h3{color:var(--corner-star);text-shadow:0 1px 5px #0009}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-cover small{color:color-mix(in srgb,var(--corner-star) 74%,transparent)}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-cover::after{
+  content:"MISSION 03 · ORBIT";
+  right:24px;
+  bottom:15px;
+  color:color-mix(in srgb,var(--corner-star) 72%,transparent);
+  letter-spacing:1.5px;
+}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-logo{
+  z-index:1;
+  color:var(--corner-star);
+  border-radius:50%;
+  background:color-mix(in srgb,var(--corner-space-ink) 62%,transparent);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--corner-star) 55%,transparent),0 7px 15px #0006;
+}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-logo::before,
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-logo::after{
+  content:"";
+  position:absolute;
+  inset:-6px;
+  border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);
+  border-radius:50%;
+  transform:rotate(-22deg) scaleX(1.55);
+  pointer-events:none;
+}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-logo::after{inset:-11px;opacity:.45;transform:rotate(-22deg) scaleX(1.55)}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-links{padding-top:8px}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox) .corner-card-back{
+  border-radius:11px;
+  background:
+    radial-gradient(circle at 84% 15%,color-mix(in srgb,var(--accent) 24%,transparent) 0 2px,transparent 3px),
+    radial-gradient(circle at 76% 14%,color-mix(in srgb,var(--ink) 18%,transparent) 0 1px,transparent 2px),
+    var(--corner-face,var(--surface));
+}
+#my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox).is-center .corner-card-logo{animation:corner-orbit-pulse 6s ease-in-out infinite}
+@keyframes corner-orbit-pulse{0%,100%{transform:rotate(-2deg) scale(1)}50%{transform:rotate(3deg) scale(1.04)}}
+
+@media(prefers-reduced-motion:reduce){
+  #my-corner[data-corner-theme=music] .corner-card:not(.corner-inbox).is-center .corner-card-logo,
+  #my-corner[data-corner-theme=cosmos] .corner-card:not(.corner-inbox).is-center .corner-card-logo{animation:none}
+}

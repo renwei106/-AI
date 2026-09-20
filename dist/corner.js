@@ -20,17 +20,17 @@
   // The collection keeps one interaction engine and swaps only this visual skin.
   // `depth` is deliberately explicit so each future theme can choose flat or layered cards.
   const CORNER_THEME_SKINS={
-    base:{depth:'flat',object:'paper',art:'line'},
-    paper:{depth:'flat',object:'newspaper',art:'masthead'},
-    reading:{depth:'depth',object:'book',art:'book'},
-    music:{depth:'depth',object:'record',art:'record'},
-    cinema:{depth:'depth',object:'film',art:'film'},
-    projection:{depth:'depth',object:'screen',art:'screen'},
-    cosmos:{depth:'depth',object:'orbit',art:'orbit'},
-    flip:{depth:'flat',object:'calendar',art:'calendar'},
-    rain:{depth:'depth',object:'rain',art:'rain'},
-    flow:{depth:'flat',object:'wave',art:'wave'},
-    poly:{depth:'flat',object:'poly',art:'poly'}
+    base:{depth:'flat',object:'paper',art:'line',cover:'paper',flip:'soft'},
+    paper:{depth:'flat',object:'newspaper',art:'masthead',cover:'newspaper',flip:'soft'},
+    reading:{depth:'depth',object:'book',art:'book',cover:'book',flip:'book'},
+    music:{depth:'depth',object:'record',art:'record',cover:'sleeve',flip:'record'},
+    cinema:{depth:'depth',object:'film',art:'film',cover:'film',flip:'film'},
+    projection:{depth:'depth',object:'screen',art:'screen',cover:'screen',flip:'screen'},
+    cosmos:{depth:'depth',object:'orbit',art:'orbit',cover:'constellation',flip:'orbit'},
+    flip:{depth:'flat',object:'calendar',art:'calendar',cover:'calendar',flip:'soft'},
+    rain:{depth:'depth',object:'rain',art:'rain',cover:'rain',flip:'rain'},
+    flow:{depth:'flat',object:'wave',art:'wave',cover:'wave',flip:'soft'},
+    poly:{depth:'flat',object:'poly',art:'poly',cover:'poly',flip:'soft'}
   };
   const cornerThemeSkin=()=>CORNER_THEME_SKINS[cornerTheme()]||CORNER_THEME_SKINS.base;
   const cornerThemeArt=()=>({
@@ -259,9 +259,10 @@
     requestAnimationFrame(updateArrows);
   }
   function card(g,index,entries) {
+    const skin=cornerThemeSkin();
     const live=orderedRefs(g).map(r=>({ref:r,source:resolve(r,entries)})).filter(x=>x.source);
 
-    const markup='<article class="corner-card '+(isInbox(g)?'corner-inbox ':'')+(flipped.has(g.id)?'is-flipped':'')+'" data-corner-card="'+g.id+'" style="--card-order:'+index+'"><div class="corner-card-turn"><section class="corner-card-front" tabindex="0" aria-label="'+esc(g.name)+'，点击卡牌翻面编辑"><div class="corner-card-cover" '+(isInbox(g)?'title="暂存 · 点击翻面编辑"':'data-corner-drag-group="'+g.id+'" title="点击翻面 · 长按拖动排序"')+'><span class="corner-card-number">'+(isInbox(g)?'默认':String(index).padStart(2,'0'))+'</span><span class="corner-card-logo">'+cardIcon(g)+'</span><h3>'+esc(g.name)+'</h3><small>'+live.length+' 个网址</small></div><div class="corner-links">'+live.map(({ref:r,source:x})=>'<div class="corner-link" data-corner-ref="'+r.id+'"><button class="corner-grip" data-corner-drag-ref="'+r.id+'" title="长按拖动网址" aria-label="拖动 '+esc(x.item[0])+'">'+grip+'</button><a href="'+esc(safeURL(x.url))+'" target="_blank" rel="noopener noreferrer" title="'+esc(x.item[0]+' · '+x.url+' · '+x.path)+'"><i>'+bookmarkMark(x.item)+'</i><span>'+esc(x.item[0])+'</span></a><button class="corner-link-remove" data-corner-remove="'+r.id+'" title="移出一隅" aria-label="移出一隅：'+esc(x.item[0])+'">移出一隅</button><a class="corner-link-open" href="'+esc(safeURL(x.url))+'" target="_blank" rel="noopener noreferrer" aria-label="打开 '+esc(x.item[0])+'">'+glyph('<path d="M6 18 18 6M7 6h11v11"/>')+'</a></div>').join('')+(!live.length?'<div class="corner-card-empty"><div class="corner-empty-lines">'+cardIcon(g)+'</div><p>'+(isInbox(g)?'还没想好放哪里，先留在这里':'把常去的地方，收进来')+'</p><small>'+(isInbox(g)?'之后可拖动网址到其他卡牌':'在原网址的编辑窗口中<br>选择「收进我的一隅」')+'</small></div>':'')+'</div><span class="corner-flip-hint"><span class="corner-flip-copy">点击卡牌翻面编辑</span> '+'<button type="button" data-corner-add-links="'+g.id+'" aria-label="为'+esc(g.name)+'添加网址" title="添加网址，可批量添加">'+glyph('<path d="M12 5v14M5 12h14"/>')+'</button></span></section><section class="corner-card-back" tabindex="-1" aria-label="编辑 '+esc(g.name)+'">'+backCard(g,live,entries)+'</section></div></article>';
+    const markup='<article class="corner-card '+(isInbox(g)?'corner-inbox ':'')+(flipped.has(g.id)?'is-flipped':'')+'" data-corner-card="'+g.id+'" data-corner-object="'+skin.object+'" data-corner-cover="'+skin.cover+'" data-corner-flip="'+skin.flip+'" style="--card-order:'+index+'"><div class="corner-card-turn"><section class="corner-card-front" tabindex="0" aria-label="'+esc(g.name)+'，点击卡牌翻面编辑"><div class="corner-card-cover" '+(isInbox(g)?'title="暂存 · 点击翻面编辑"':'data-corner-drag-group="'+g.id+'" title="点击翻面 · 长按拖动排序"')+'><span class="corner-card-number">'+(isInbox(g)?'默认':String(index).padStart(2,'0'))+'</span><span class="corner-card-logo">'+cardIcon(g)+'</span><h3>'+esc(g.name)+'</h3><small>'+live.length+' 个网址</small></div><div class="corner-links">'+live.map(({ref:r,source:x})=>'<div class="corner-link" data-corner-ref="'+r.id+'"><button class="corner-grip" data-corner-drag-ref="'+r.id+'" title="长按拖动网址" aria-label="拖动 '+esc(x.item[0])+'">'+grip+'</button><a href="'+esc(safeURL(x.url))+'" target="_blank" rel="noopener noreferrer" title="'+esc(x.item[0]+' · '+x.url+' · '+x.path)+'"><i>'+bookmarkMark(x.item)+'</i><span>'+esc(x.item[0])+'</span></a><button class="corner-link-remove" data-corner-remove="'+r.id+'" title="移出一隅" aria-label="移出一隅：'+esc(x.item[0])+'">移出一隅</button><a class="corner-link-open" href="'+esc(safeURL(x.url))+'" target="_blank" rel="noopener noreferrer" aria-label="打开 '+esc(x.item[0])+'">'+glyph('<path d="M6 18 18 6M7 6h11v11"/>')+'</a></div>').join('')+(!live.length?'<div class="corner-card-empty"><div class="corner-empty-lines">'+cardIcon(g)+'</div><p>'+(isInbox(g)?'还没想好放哪里，先留在这里':'把常去的地方，收进来')+'</p><small>'+(isInbox(g)?'之后可拖动网址到其他卡牌':'在原网址的编辑窗口中<br>选择「收进我的一隅」')+'</small></div>':'')+'</div><span class="corner-flip-hint"><span class="corner-flip-copy">点击卡牌翻面编辑</span> '+'<button type="button" data-corner-add-links="'+g.id+'" aria-label="为'+esc(g.name)+'添加网址" title="添加网址，可批量添加">'+glyph('<path d="M12 5v14M5 12h14"/>')+'</button></span></section><section class="corner-card-back" tabindex="-1" aria-label="编辑 '+esc(g.name)+'">'+backCard(g,live,entries)+'</section></div></article>';
     if(!isInbox(g))return markup;
     const template=document.createElement('template');template.innerHTML=markup;
     const front=template.content.querySelector('.corner-card-front');front.setAttribute('aria-label','暂存');
