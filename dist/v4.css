@@ -637,6 +637,7 @@ body[data-view=space] :is(.workspace-tools [data-link-settings],#space-atlas .at
 /* Home/space transition: a solid home cover over a stationary space layer.
    These rules exist only while this specific page transition is active. */
 html[data-home-cover] body{transition:none}
+html[data-home-cover] #toast,html[data-home-cover] .scroll-invitation,#toast.navigation-transition,.scroll-invitation.navigation-transition{opacity:0!important}
 html[data-home-cover]::view-transition{pointer-events:none}
 html[data-home-cover]::view-transition-group(root){animation:none}
 html[data-home-cover]::view-transition-image-pair(root){isolation:isolate}
@@ -646,18 +647,16 @@ html[data-home-cover]::view-transition-old(root),html[data-home-cover]::view-tra
 html[data-home-cover=leaving]::view-transition-new(root),html[data-home-cover=returning]::view-transition-old(root){
   z-index:1;transform:none;
 }
-html[data-home-cover=leaving]::view-transition-old(root),html[data-home-cover=returning]::view-transition-new(root){filter:brightness(.94)}
-html[data-home-cover=leaving]:has(body[data-dark=true])::view-transition-old(root),html[data-home-cover=returning]:has(body[data-dark=true])::view-transition-new(root){filter:brightness(1.16)}
-html[data-home-cover=leaving]::view-transition-old(root){z-index:2;animation:home-cover-lift 650ms cubic-bezier(.22,.72,.18,1) both,home-cover-ripple 650ms ease-in-out both}
-html[data-home-cover=returning]::view-transition-new(root){z-index:2;animation:home-cover-lower 650ms cubic-bezier(.22,.72,.18,1) both,home-cover-ripple 650ms ease-in-out both}
+html[data-home-cover=leaving]::view-transition-old(root){z-index:2;animation:home-cover-lift 1050ms cubic-bezier(.22,.72,.18,1) both,home-cover-ripple 1050ms ease-in-out both}
+html[data-home-cover=returning]::view-transition-new(root){z-index:2;animation:home-cover-lower 1050ms cubic-bezier(.22,.72,.18,1) both,home-cover-ripple 1050ms ease-in-out both}
 @keyframes home-cover-lift{from{transform:translateY(0)}to{transform:translateY(-100%)}}
 @keyframes home-cover-lower{from{transform:translateY(-100%)}to{transform:translateY(0)}}
 /* Only the moving cover edge ripples; the page and its existing motion stay intact. */
 @keyframes home-cover-ripple{
   0%{clip-path:polygon(0 0,100% 0,100.000% calc(100% - 0.0px),95.833% calc(100% - 0.0px),91.667% calc(100% - 0.0px),87.500% calc(100% - 0.0px),83.333% calc(100% - 0.0px),79.167% calc(100% - 0.0px),75.000% calc(100% - 0.0px),70.833% calc(100% - 0.0px),66.667% calc(100% - 0.0px),62.500% calc(100% - 0.0px),58.333% calc(100% - 0.0px),54.167% calc(100% - 0.0px),50.000% calc(100% - 0.0px),45.833% calc(100% - 0.0px),41.667% calc(100% - 0.0px),37.500% calc(100% - 0.0px),33.333% calc(100% - 0.0px),29.167% calc(100% - 0.0px),25.000% calc(100% - 0.0px),20.833% calc(100% - 0.0px),16.667% calc(100% - 0.0px),12.500% calc(100% - 0.0px),8.333% calc(100% - 0.0px),4.167% calc(100% - 0.0px),0.000% calc(100% - 0.0px))}
-  24%{clip-path:polygon(0 0,100% 0,100.000% calc(100% - 54.0px),95.833% calc(100% - 51.7px),91.667% calc(100% - 36.7px),87.500% calc(100% - 19.3px),83.333% calc(100% - 11.1px),79.167% calc(100% - 13.7px),75.000% calc(100% - 19.8px),70.833% calc(100% - 23.0px),66.667% calc(100% - 25.1px),62.500% calc(100% - 32.4px),58.333% calc(100% - 45.1px),54.167% calc(100% - 54.4px),50.000% calc(100% - 50.8px),45.833% calc(100% - 35.0px),41.667% calc(100% - 18.1px),37.500% calc(100% - 11.0px),33.333% calc(100% - 14.3px),29.167% calc(100% - 20.3px),25.000% calc(100% - 23.1px),20.833% calc(100% - 25.5px),16.667% calc(100% - 33.4px),12.500% calc(100% - 46.3px),8.333% calc(100% - 54.7px),4.167% calc(100% - 49.7px),0.000% calc(100% - 33.3px))}
-  52%{clip-path:polygon(0 0,100% 0,100.000% calc(100% - 37.6px),95.833% calc(100% - 41.2px),91.667% calc(100% - 41.9px),87.500% calc(100% - 45.5px),83.333% calc(100% - 49.1px),79.167% calc(100% - 44.3px),75.000% calc(100% - 28.5px),70.833% calc(100% - 10.5px),66.667% calc(100% - 3.4px),62.500% calc(100% - 11.8px),58.333% calc(100% - 27.3px),54.167% calc(100% - 38.3px),50.000% calc(100% - 41.3px),45.833% calc(100% - 42.1px),41.667% calc(100% - 45.9px),37.500% calc(100% - 49.1px),33.333% calc(100% - 43.3px),29.167% calc(100% - 26.8px),25.000% calc(100% - 9.3px),20.833% calc(100% - 3.6px),16.667% calc(100% - 13.1px),12.500% calc(100% - 28.6px),8.333% calc(100% - 38.8px),4.167% calc(100% - 41.3px),0.000% calc(100% - 42.3px))}
-  78%{clip-path:polygon(0 0,100% 0,100.000% calc(100% - 6.2px),95.833% calc(100% - 3.9px),91.667% calc(100% - 10.4px),87.500% calc(100% - 22.3px),83.333% calc(100% - 31.5px),79.167% calc(100% - 32.6px),75.000% calc(100% - 27.6px),70.833% calc(100% - 22.6px),66.667% calc(100% - 20.4px),62.500% calc(100% - 18.1px),58.333% calc(100% - 12.5px),54.167% calc(100% - 5.7px),50.000% calc(100% - 4.1px),45.833% calc(100% - 11.3px),41.667% calc(100% - 23.4px),37.500% calc(100% - 32.0px),33.333% calc(100% - 32.3px),29.167% calc(100% - 27.1px),25.000% calc(100% - 22.3px),20.833% calc(100% - 20.2px),16.667% calc(100% - 17.7px),12.500% calc(100% - 11.9px),8.333% calc(100% - 5.3px),4.167% calc(100% - 4.4px),0.000% calc(100% - 12.4px))}
+  24%{clip-path:polygon(0 0,100% 0,100.000% calc(100% - 81.0px),95.833% calc(100% - 77.6px),91.667% calc(100% - 55.1px),87.500% calc(100% - 29.0px),83.333% calc(100% - 16.6px),79.167% calc(100% - 20.5px),75.000% calc(100% - 29.7px),70.833% calc(100% - 34.5px),66.667% calc(100% - 37.7px),62.500% calc(100% - 48.6px),58.333% calc(100% - 67.7px),54.167% calc(100% - 81.6px),50.000% calc(100% - 76.2px),45.833% calc(100% - 52.5px),41.667% calc(100% - 27.2px),37.500% calc(100% - 16.5px),33.333% calc(100% - 21.5px),29.167% calc(100% - 30.5px),25.000% calc(100% - 34.7px),20.833% calc(100% - 38.3px),16.667% calc(100% - 50.1px),12.500% calc(100% - 69.4px),8.333% calc(100% - 82.1px),4.167% calc(100% - 74.6px),0.000% calc(100% - 49.9px))}
+  52%{clip-path:polygon(0 0,100% 0,100.000% calc(100% - 56.4px),95.833% calc(100% - 61.8px),91.667% calc(100% - 62.8px),87.500% calc(100% - 68.3px),83.333% calc(100% - 73.7px),79.167% calc(100% - 66.4px),75.000% calc(100% - 42.8px),70.833% calc(100% - 15.8px),66.667% calc(100% - 5.1px),62.500% calc(100% - 17.7px),58.333% calc(100% - 41.0px),54.167% calc(100% - 57.4px),50.000% calc(100% - 61.9px),45.833% calc(100% - 63.2px),41.667% calc(100% - 68.8px),37.500% calc(100% - 73.7px),33.333% calc(100% - 64.9px),29.167% calc(100% - 40.2px),25.000% calc(100% - 14.0px),20.833% calc(100% - 5.4px),16.667% calc(100% - 19.6px),12.500% calc(100% - 42.9px),8.333% calc(100% - 58.2px),4.167% calc(100% - 61.9px),0.000% calc(100% - 63.4px))}
+  78%{clip-path:polygon(0 0,100% 0,100.000% calc(100% - 9.3px),95.833% calc(100% - 5.8px),91.667% calc(100% - 15.6px),87.500% calc(100% - 33.5px),83.333% calc(100% - 47.3px),79.167% calc(100% - 48.9px),75.000% calc(100% - 41.4px),70.833% calc(100% - 33.9px),66.667% calc(100% - 30.6px),62.500% calc(100% - 27.2px),58.333% calc(100% - 18.8px),54.167% calc(100% - 8.6px),50.000% calc(100% - 6.1px),45.833% calc(100% - 17.0px),41.667% calc(100% - 35.1px),37.500% calc(100% - 48.0px),33.333% calc(100% - 48.4px),29.167% calc(100% - 40.7px),25.000% calc(100% - 33.5px),20.833% calc(100% - 30.3px),16.667% calc(100% - 26.5px),12.500% calc(100% - 17.9px),8.333% calc(100% - 7.9px),4.167% calc(100% - 6.6px),0.000% calc(100% - 18.6px))}
   100%{clip-path:polygon(0 0,100% 0,100.000% calc(100% - 0.0px),95.833% calc(100% - 0.0px),91.667% calc(100% - 0.0px),87.500% calc(100% - 0.0px),83.333% calc(100% - 0.0px),79.167% calc(100% - 0.0px),75.000% calc(100% - 0.0px),70.833% calc(100% - 0.0px),66.667% calc(100% - 0.0px),62.500% calc(100% - 0.0px),58.333% calc(100% - 0.0px),54.167% calc(100% - 0.0px),50.000% calc(100% - 0.0px),45.833% calc(100% - 0.0px),41.667% calc(100% - 0.0px),37.500% calc(100% - 0.0px),33.333% calc(100% - 0.0px),29.167% calc(100% - 0.0px),25.000% calc(100% - 0.0px),20.833% calc(100% - 0.0px),16.667% calc(100% - 0.0px),12.500% calc(100% - 0.0px),8.333% calc(100% - 0.0px),4.167% calc(100% - 0.0px),0.000% calc(100% - 0.0px))}
 }
 @media(prefers-reduced-motion:reduce){
@@ -833,33 +832,21 @@ body[data-dark=true] #agreement-required-dialog>.member-primary{background:var(-
 @media(prefers-reduced-motion:reduce){.welcome-gift-dialog,.welcome-gift-symbol span,.welcome-gift-arrived{animation:none}.welcome-gift-accept{transition:none}}
 
 /* A quiet, fixed return notch for every space view; existing return controls remain untouched. */
-.space-home-tab{display:none;position:fixed;top:0;left:50%;z-index:29;width:108px;height:46px;padding:0;transform:translateX(-50%);opacity:.8;isolation:isolate;transition:opacity .2s ease}
+.space-home-tab{display:none;position:fixed;top:0;left:50%;z-index:29;width:120px;height:48px;padding:0;transform:translateX(-50%);opacity:.58;isolation:isolate;transition:opacity .2s ease}
 body[data-view=space] .space-home-tab{display:block}
-.space-home-tab-shape{position:absolute;inset:0;width:100%;height:100%;overflow:visible;fill:color-mix(in srgb,var(--accent) 14%,var(--surface));filter:drop-shadow(0 4px 7px #00000020);transition:fill .2s ease,filter .2s ease}
-.space-home-tab-icon{position:absolute;top:7px;left:50%;display:grid;place-items:center;width:22px;height:22px;color:var(--ink);transform:translateX(-50%);transition:opacity .18s ease,transform .18s ease}
-.space-home-tab-icon svg{display:block;width:19px;height:19px}
+#space-atlas>.space-home-tab{display:block;z-index:90;pointer-events:auto}
+#space-atlas>.space-home-tab .space-home-tab-shape{width:100%;height:100%}
+#space-atlas>.space-home-tab .space-home-tab-icon svg{width:15px;height:15px}
+.space-home-tab-shape{position:absolute;inset:0;width:100%;height:100%;overflow:visible;fill:color-mix(in srgb,var(--accent) 10%,var(--surface));filter:drop-shadow(0 3px 5px #00000012);transition:fill .2s ease,filter .2s ease}
+.space-home-tab-icon{position:absolute;top:7px;left:50%;display:grid;place-items:center;width:20px;height:20px;color:var(--muted);transform:translateX(-50%);transition:color .18s ease,opacity .18s ease,transform .18s ease}
+.space-home-tab-icon svg{display:block;width:15px;height:15px}
 .space-home-tab-arrow{opacity:0;transform:translate(-50%,6px)}
 .space-home-tab:is(:hover,:focus-visible){opacity:1}
+.space-home-tab:is(:hover,:focus-visible) .space-home-tab-icon{color:var(--ink)}
 .space-home-tab:is(:hover,:focus-visible) .space-home-tab-shape{fill:color-mix(in srgb,var(--accent) 38%,var(--surface));filter:drop-shadow(0 5px 10px color-mix(in srgb,var(--accent) 30%,transparent))}
 .space-home-tab:is(:hover,:focus-visible) .space-home-tab-house{opacity:0;transform:translate(-50%,-6px)}
 .space-home-tab:is(:hover,:focus-visible) .space-home-tab-arrow{opacity:1;transform:translate(-50%,0)}
 .space-home-tab:focus-visible{outline:none}
 .space-home-tab:focus-visible .space-home-tab-shape{stroke:var(--accent);stroke-width:2px}
-@media(max-width:760px){.space-home-tab{width:94px;height:40px}.space-home-tab-icon{top:5px}}
+@media(max-width:760px){.space-home-tab{width:104px;height:42px}.space-home-tab-icon{top:5px}}
 @media(prefers-reduced-motion:reduce){.space-home-tab,.space-home-tab-shape,.space-home-tab-icon{transition:none}}
-
-/* The graph view is a dialog in the top layer, so its existing home control wears the same notch. */
-body[data-view=space]:has(#space-atlas[open])>.space-home-tab{visibility:hidden}
-body[data-view=space] #space-atlas .at-cover-return{top:0;width:108px;min-width:0;height:46px;padding:0;border-radius:0;background:transparent;color:var(--ink);opacity:.8;isolation:isolate;overflow:visible}
-#space-atlas .at-cover-return::before{content:"";position:absolute;inset:0;z-index:-1;background:color-mix(in srgb,var(--accent) 14%,var(--surface));clip-path:path("M0 0H108C82 0 77 6 69 23C63 37 60 42 54 42C48 42 45 37 39 23C31 6 26 0 0 0Z");filter:drop-shadow(0 4px 7px #00000020);transition:background .2s ease}
-#space-atlas .at-cover-return>span:first-child{position:absolute;top:7px;left:50%;width:22px;height:22px;display:grid;place-items:center;opacity:1;transform:translateX(-50%)}
-#space-atlas .at-cover-return>span:first-child svg{position:absolute;width:19px;height:19px;transition:opacity .18s ease,transform .18s ease}
-#space-atlas .at-cover-return .at-return-arrow-icon{opacity:0;transform:translateY(6px)}
-#space-atlas .at-cover-return>span:last-child{position:absolute;top:45px;left:50%;padding:7px 12px;border-radius:12px;background:var(--surface);color:var(--ink);white-space:nowrap;box-shadow:0 4px 12px #00000020;opacity:0;transform:translate(-50%,-4px);pointer-events:none}
-body[data-view=space] #space-atlas .at-cover-return:is(:hover,:focus-visible,.is-wheel-armed){background:transparent;color:var(--ink);opacity:1}
-#space-atlas .at-cover-return:is(:hover,:focus-visible,.is-wheel-armed)::before{background:color-mix(in srgb,var(--accent) 38%,var(--surface))}
-#space-atlas .at-cover-return:is(:hover,:focus-visible,.is-wheel-armed)>span:first-child{opacity:1;transform:translateX(-50%)}
-#space-atlas .at-cover-return:is(:hover,:focus-visible,.is-wheel-armed) .at-return-home-icon{opacity:0;transform:translateY(-6px)}
-#space-atlas .at-cover-return:is(:hover,:focus-visible,.is-wheel-armed) .at-return-arrow-icon{opacity:1;transform:translateY(0)}
-#space-atlas .at-cover-return:is(:hover,:focus-visible,.is-wheel-armed)>span:last-child{opacity:1;transform:translate(-50%,0)}
-@media(prefers-reduced-motion:reduce){#space-atlas .at-cover-return::before,#space-atlas .at-cover-return>span:first-child svg{transition:none}}

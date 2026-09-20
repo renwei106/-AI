@@ -86,9 +86,11 @@ function transitionHomeCover(previous,next,update){
     delete document.documentElement.dataset.homeCover;
   }
   const paired=(previous==='home'&&next==='space')||(previous==='space'&&next==='home');
-  if(!paired||document.readyState==='loading'||!document.startViewTransition||matchMedia('(prefers-reduced-motion: reduce)').matches){update();return}
+  const transitionOverlays=paired?[...document.querySelectorAll('#toast,.scroll-invitation')].map(node=>({node,hidden:node.hidden})):[];
+  transitionOverlays.forEach(({node})=>{node.classList.remove('show');node.classList.add('navigation-transition');node.hidden=true});
+  if(!paired||document.readyState==='loading'||!document.startViewTransition||matchMedia('(prefers-reduced-motion: reduce)').matches){update();transitionOverlays.forEach(({node,hidden})=>{node.hidden=hidden;node.classList.remove('navigation-transition')});return}
   const task={cancelled:false,animation:null};
-  const cleanup=()=>{if(homeCoverTransition===task){homeCoverTransition=null;delete document.documentElement.dataset.homeCover}};
+  const cleanup=()=>{transitionOverlays.forEach(({node,hidden})=>{node.hidden=hidden;node.classList.remove('navigation-transition')});if(homeCoverTransition===task){homeCoverTransition=null;delete document.documentElement.dataset.homeCover}};
   homeCoverTransition=task;
   document.documentElement.dataset.homeCover=next==='space'?'leaving':'returning';
   try{
@@ -100,7 +102,7 @@ function transitionHomeCover(previous,next,update){
   }
 }
 window.addEventListener('resize',()=>homeCoverTransition?.animation?.skipTransition());
-function changeView(next){if(view===next||Date.now()<transitionUntil)return;const previous=view;view=next;transitionUntil=Date.now()+850;upArmedAt=0;downArmedAt=0;gestureTotal=0;transitionHomeCover(previous,next,()=>{render();window.scrollTo({top:0,behavior:'instant'})})}
+function changeView(next){if(view===next||Date.now()<transitionUntil)return;const previous=view;view=next;transitionUntil=Date.now()+1250;upArmedAt=0;downArmedAt=0;gestureTotal=0;transitionHomeCover(previous,next,()=>{render();window.scrollTo({top:0,behavior:'instant'})})}
 function navigationGesture(delta){if(Date.now()<transitionUntil)return;const doc=document.documentElement,now=Date.now();if(view==='home'&&delta>0&&window.scrollY+innerHeight>=doc.scrollHeight-8){if(prefs.homeEntryGesture!=='double'){changeView('space');return}if(downArmedAt&&now-downArmedAt<2400){changeView('space');return}downArmedAt=now;toast('再向下滑动一次，进入我的空间','bottom');return}if(view==='space'&&delta<0&&window.scrollY<=2){if(upArmedAt&&now-upArmedAt>350&&now-upArmedAt<2600)changeView('home');else{upArmedAt=now;toast('再向上滑一次，回到封面','bottom')}}}
 window.addEventListener('wheel',e=>{if(document.querySelector('dialog[open]')||e.ctrlKey||Math.abs(e.deltaX)>Math.abs(e.deltaY)||e.target.closest('input,select,textarea,.results,.dock-options,.sidebar,.group-tabs'))return;const now=Date.now(),gap=now-lastWheelAt;lastWheelAt=now;if(gap>160){gestureTotal=0;wheelBurstHandled=false}gestureTotal+=e.deltaY*(e.deltaMode===1?16:1);const boundary=view==='home'?window.scrollY+innerHeight>=document.documentElement.scrollHeight-8:window.scrollY<=2;if(boundary&&((view==='home'&&e.deltaY>0)||(view==='space'&&e.deltaY<0))){e.preventDefault();if(Math.abs(gestureTotal)>65&&!wheelBurstHandled){navigationGesture(gestureTotal);wheelBurstHandled=true;gestureTotal=0}}},{passive:false});
 window.addEventListener('touchstart',e=>{if(e.touches.length===1&&!document.querySelector('dialog[open]')&&!e.target.closest('input,select,button,a,.results,.sidebar,.group-tabs'))touchStart={y:e.touches[0].clientY,top:scrollY};else touchStart=null},{passive:true});

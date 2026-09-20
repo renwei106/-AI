@@ -283,6 +283,57 @@ body[data-dark=true] #my-corner .corner-card-logo{color:color-mix(in srgb,var(--
 /* Crisp UI type and flat faces once the flip has finished. */
 #my-corner{font-family:var(--font);font-synthesis:none;text-shadow:none;--muted:color-mix(in srgb,var(--ink) 85%,var(--surface))}
 #my-corner button,#my-corner input{font-family:var(--font)}
+
+/* Theme card module: the shared card keeps its size and controls while the skin
+   chooses either a flat object or a shallow layered object. */
+#my-corner .corner-heading-title{display:flex;align-items:center;gap:16px;pointer-events:none}
+#my-corner .corner-heading-title h2{margin:0}
+#my-corner .corner-theme-art{display:grid;place-items:center;width:72px;height:42px;color:var(--accent);opacity:.64;transform:translateY(2px);pointer-events:none}
+#my-corner .corner-theme-art svg{width:68px;height:48px;overflow:visible}
+#my-corner[data-corner-depth=flat] .corner-theme-art{opacity:.46}
+#my-corner[data-corner-depth=depth] .corner-theme-art{filter:drop-shadow(0 4px 5px #0002);opacity:.78}
+#my-corner[data-corner-depth=flat] .corner-card-front,
+#my-corner[data-corner-depth=flat] .corner-card-back{box-shadow:0 8px 20px #0000000d,inset 0 0 0 1px color-mix(in srgb,var(--ink) 7%,transparent)}
+#my-corner[data-corner-depth=flat] .corner-card-front::after,
+#my-corner[data-corner-depth=flat] .corner-card-back::after{display:none}
+#my-corner[data-corner-depth=depth] .corner-card-front,
+#my-corner[data-corner-depth=depth] .corner-card-back{box-shadow:0 20px 40px #00000020,0 4px 0 color-mix(in srgb,var(--ink) 9%,var(--corner-face,var(--surface))),inset 0 0 0 1px color-mix(in srgb,var(--ink) 10%,transparent)}
+#my-corner[data-corner-depth=depth] .corner-card-front::after,
+#my-corner[data-corner-depth=depth] .corner-card-back::after{content:"";position:absolute;inset:8px;pointer-events:none;border:1px solid color-mix(in srgb,var(--surface) 52%,transparent);border-radius:inherit;opacity:.46}
+#my-corner[data-corner-depth=depth] .corner-card.is-center{filter:drop-shadow(0 10px 13px #0002)}
+#my-corner[data-corner-depth=depth] .corner-card-logo{box-shadow:0 5px 12px #0002}
+#my-corner[data-corner-depth=flat] .corner-card-logo{box-shadow:none}
+#my-corner[data-corner-object=paper] .corner-theme-art{color:color-mix(in srgb,var(--accent) 72%,#8b7860)}
+#my-corner[data-corner-object=record] .corner-theme-art{color:color-mix(in srgb,var(--accent) 82%,#242820)}
+#my-corner[data-corner-object=film] .corner-theme-art{color:color-mix(in srgb,var(--accent) 74%,#30383b)}
+#my-corner[data-corner-object=orbit] .corner-theme-art{color:color-mix(in srgb,var(--accent) 80%,#65769b)}
+#my-corner[data-corner-object=wave] .corner-theme-art{color:color-mix(in srgb,var(--accent) 86%,#6f9d9c)}
+#my-corner[data-corner-object=newspaper] .corner-card-front{background:linear-gradient(90deg,color-mix(in srgb,var(--ink) 5%,transparent) 1px,transparent 1px),var(--corner-face,var(--surface));background-size:18px 100%}
+#my-corner[data-corner-object=record] .corner-card-front{background:radial-gradient(circle at 84% 18%,color-mix(in srgb,var(--accent) 18%,transparent) 0 13%,transparent 14%),var(--corner-face,var(--surface))}
+#my-corner[data-corner-object=film] .corner-card-cover::before{content:"";position:absolute;left:0;right:0;top:0;height:7px;background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--ink) 38%,transparent) 0 7px,transparent 7px 14px);opacity:.38}
+#my-corner[data-corner-object=orbit] .corner-card-cover::before{content:"";position:absolute;right:-18px;top:-42px;width:130px;height:100px;border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-radius:50%;transform:rotate(-20deg);opacity:.6}
+#my-corner[data-corner-object=wave] .corner-card-cover::before{content:"";position:absolute;left:-20px;right:-20px;bottom:-15px;height:52px;background:radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--accent) 18%,transparent),transparent 70%);opacity:.65}
+@media(max-width:760px){#my-corner .corner-theme-art{width:58px;height:36px}#my-corner .corner-theme-art svg{width:54px;height:40px}}
+@media(prefers-reduced-motion:reduce){#my-corner[data-corner-depth=depth] .corner-card.is-center{filter:none}}
+
+/* Black vinyl skin: a sleeve edge, record rings and a restrained label glow. */
+#my-corner[data-corner-theme=music] .corner-card-front,
+#my-corner[data-corner-theme=music] .corner-card-back{border-radius:8px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 35%,var(--corner-face,var(--surface))) 0 8px,transparent 8px 100%),var(--corner-face,var(--surface))}
+#my-corner[data-corner-theme=music] .corner-card-front::before,
+#my-corner[data-corner-theme=music] .corner-card-back::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:color-mix(in srgb,var(--ink) 18%,transparent);opacity:.7;pointer-events:none}
+#my-corner[data-corner-theme=music] .corner-card-cover{min-height:150px;padding-top:30px;background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent 55%),repeating-radial-gradient(circle at 86% 10%,transparent 0 8px,color-mix(in srgb,var(--ink) 8%,transparent) 9px 10px,transparent 11px 15px);border-bottom:1px solid color-mix(in srgb,var(--ink) 18%,transparent)}
+#my-corner[data-corner-theme=music] .corner-card-cover::after{content:"SIDE A";position:absolute;right:20px;bottom:13px;font:9px/1 monospace;letter-spacing:2px;color:var(--muted);opacity:.7}
+#my-corner[data-corner-theme=music] .corner-card-logo{border-radius:50%;background:repeating-radial-gradient(circle,var(--corner-face,var(--surface)) 0 3px,color-mix(in srgb,var(--ink) 25%,var(--corner-face,var(--surface))) 4px 5px);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 15%,transparent),0 8px 14px #0003;transform:rotate(-8deg)}
+#my-corner[data-corner-theme=music] .corner-card-logo::after{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:var(--accent);opacity:.8}
+#my-corner[data-corner-theme=music] .corner-card-logo svg{position:relative;z-index:1;color:var(--ink);opacity:.7}
+#my-corner[data-corner-theme=music] .corner-links{padding-top:12px;background:linear-gradient(180deg,color-mix(in srgb,var(--ink) 3%,transparent),transparent 34px)}
+#my-corner[data-corner-theme=music] .corner-link{border-bottom-color:color-mix(in srgb,var(--accent) 22%,transparent)}
+#my-corner[data-corner-theme=music] .corner-card-back{background:radial-gradient(circle at 80% 16%,color-mix(in srgb,var(--accent) 16%,transparent) 0 10%,transparent 11%),var(--corner-face,var(--surface))}
+#my-corner[data-corner-theme=music] .corner-card-back::after{border-color:color-mix(in srgb,var(--accent) 34%,transparent)}
+#my-corner[data-corner-theme=music] .corner-card.is-flipped .corner-card-logo{animation:corner-record-spin .9s cubic-bezier(.2,.75,.25,1)}
+#my-corner[data-corner-theme=music] .corner-card-turn{transition:transform .92s cubic-bezier(.22,.72,.2,1)}
+@keyframes corner-record-spin{from{transform:rotate(-8deg) scale(.92)}to{transform:rotate(12deg) scale(1)}}
+@media(prefers-reduced-motion:reduce){#my-corner[data-corner-theme=music] .corner-card.is-flipped .corner-card-logo{animation:none}}
 #my-corner .corner-card{will-change:auto}
 #my-corner .corner-card.is-settled .corner-card-turn{transform:none;transform-style:flat;transition:none}
 #my-corner .corner-card.is-settled .corner-card-front,#my-corner .corner-card.is-settled .corner-card-back{transform:none;backface-visibility:visible}

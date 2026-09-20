@@ -42,7 +42,7 @@
   const orbitPhase=orbit=>state.orbitClock*orbit.speed+(orbit.focusOffset||0);
   let dialog, index=new Map(), root, visible=[], nodeEls=new Map(), edgeEls=[], activeFlow=null, raf=0, lastFrame=0, needsPaint=true, returnFocus, resizeObserver, noticeTimer, compactLayout=false, modeMenu, menuTimer, menuTrigger, viewMenuTimer=0, editorBusy=false, atlasTransitionTimer=0, atlasClosing=false;
   let leavingForHome=false,sharedHeading,sharedModeButton;
-  let returnWheelTop=120,returnWheelLast=0,returnWheelTotal=0,returnWheelHandled=false,returnWheelArmed=0,returnWheelTimer=0,returnWheelLabel='';
+  let returnWheelTop=120,returnWheelLast=0,returnWheelTotal=0,returnWheelHandled=false,returnWheelArmed=0,returnWheelTimer=0;
   const get = key => index.get(key);
   const query = s => dialog.querySelector(s);
   const label = kind => ({space:'空间',scene:'场景',group:'分组',link:'网址',bundle:'分支'}[kind]);
@@ -169,7 +169,7 @@
       dialog.addEventListener('input',input);
       dialog.addEventListener('keydown',keydown);
       dialog.addEventListener('close',resetReturnWheel);
-      dialog.addEventListener('close',()=>{const goHome=leavingForHome;leavingForHome=false;atlasClosing=false;clearTimeout(atlasTransitionTimer);atlasTransitionTimer=0;dialog.classList.remove('atlas-ready','atlas-direct-entry');cancelAnimationFrame(raf);resizeObserver?.disconnect();state.hover=null;state.drag=null;clearTimeout(noticeTimer);clearTimeout(viewMenuTimer);hideModeMenu();document.body.classList.remove('atlas-active','atlas-transitioning');if(view==='space'&&spaceId===state.sid){rememberPresentation(spaceId,goHome?'atlas':'daily');writeSaved()}if(goHome)return;render();requestAnimationFrame(()=>document.querySelector('.workspace .space-mode-entry')?.focus({preventScroll:true}))});
+      dialog.addEventListener('close',()=>{const goHome=leavingForHome;leavingForHome=false;atlasClosing=false;clearTimeout(atlasTransitionTimer);atlasTransitionTimer=0;dialog.classList.remove('atlas-ready','atlas-direct-entry');cancelAnimationFrame(raf);resizeObserver?.disconnect();state.hover=null;state.drag=null;clearTimeout(noticeTimer);clearTimeout(viewMenuTimer);hideModeMenu();document.body.classList.remove('atlas-active','atlas-transitioning');const sharedHomeTab=dialog.querySelector('.space-home-tab');if(sharedHomeTab)document.body.append(sharedHomeTab);if(view==='space'&&spaceId===state.sid){rememberPresentation(spaceId,goHome?'atlas':'daily');writeSaved()}if(goHome)return;render();requestAnimationFrame(()=>document.querySelector('.workspace .space-mode-entry')?.focus({preventScroll:true}))});
       dialog.addEventListener('cancel',e=>{if(!query('.at-drawer').hidden){e.preventDefault();closeDrawer()}else if(document.querySelector('.workspace .global-search-results:not([hidden])')){e.preventDefault();clearSearch()}});
       dialog.addEventListener('wheel',wheel,{passive:false});
       dialog.addEventListener('pointerdown',pointerDown);
@@ -207,11 +207,13 @@
     if(!classicOrbits&&state.scene3d==='systems')state.scene3d='solar';
     const n=get(state.focus)||root;
     state.hover=null;state.drag=null;state.settling=false;
+    const sharedHomeTab=document.querySelector('.space-home-tab');
     dialog.innerHTML=`<div class="at-shell at-full-page${orbital()?' at-orbital':''}${galaxy()?' at-galaxy':''}" data-mode="${state.mode}" data-layout="${state.layout}" data-presentation="${state.mode==='3d'?state.scene3d:'spatial'}">
-      <button class="at-cover-return" data-at="home" aria-label="返回首页"><span><svg class="at-return-home-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5M5.5 9.5V21h5v-6h3v6h5V9.5"/></svg><svg class="at-return-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V4m-7 7 7-7 7 7"/></svg></span><span>点击返回首页</span></button><div class="at-header-actions space-top-actions"></div>
+      <div class="at-header-actions space-top-actions"></div>
       <div class="at-canvas" aria-label="${esc(n.name)}关系图" tabindex="0"></div>
       <div class="at-footer"><div class="at-legend"><span><i></i>空间</span><span><i></i>场景</span><span><i></i>分组</span><span>${icons.link}网址</span><span class="at-parent-legend">┄ 上级</span><span class="at-child-legend">─ 下级</span></div><div class="at-view-tools"><button class="at-focus-scene" data-at="focus-scene" aria-label="聚焦场景" title="聚焦场景：恢复当前节点的默认视角">${icons.locate}</button>${layoutPicker()}</div></div>
       <aside class="at-drawer" hidden aria-label="图谱管理"></aside><div class="at-notice" hidden role="status"></div></div>`;
+    if(sharedHomeTab)dialog.append(sharedHomeTab);
     mountEntry();mountAtlasHeaderActions();query('.at-search')?.remove();positionChrome();
     resizeObserver?.disconnect();const observedCanvas=query('.at-canvas');let observedWidth=observedCanvas.clientWidth,observedHeight=observedCanvas.clientHeight;
     resizeObserver=new ResizeObserver(()=>{if(dialog.open){positionChrome();const resized=observedCanvas.clientWidth!==observedWidth||observedCanvas.clientHeight!==observedHeight;if(!resized)return;observedWidth=observedCanvas.clientWidth;observedHeight=observedCanvas.clientHeight;if((observedWidth<650)!==compactLayout)renderGraph(get(state.focus));else layout(true);needsPaint=true}});resizeObserver.observe(observedCanvas);
@@ -756,8 +758,6 @@
   }
   function resetReturnWheel(){
     clearTimeout(returnWheelTimer);returnWheelTimer=0;returnWheelLast=0;returnWheelTotal=0;returnWheelHandled=false;returnWheelArmed=0;
-    const button=dialog?.querySelector('.at-cover-return.is-wheel-armed');
-    if(button){button.classList.remove('is-wheel-armed');button.lastElementChild.textContent=returnWheelLabel}
   }
   // The shared heading/actions sit outside the graph dialog. Capture at window
   // level so the entire top strip, including its blank areas, uses one gesture.
@@ -770,11 +770,9 @@
     returnWheelTotal+=Math.abs(e.deltaY)*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1);
     if(returnWheelTotal<=65||returnWheelHandled)return;
     returnWheelHandled=true;returnWheelTotal=0;
-    if(returnWheelArmed&&now-returnWheelArmed>160&&now-returnWheelArmed<2200){leaveAtlasForHome();return}
-    returnWheelArmed=now;const button=query('.at-cover-return');
-    if(!button.classList.contains('is-wheel-armed'))returnWheelLabel=button.lastElementChild.textContent;
-    button.lastElementChild.textContent='继续向上滑动返回首页';button.classList.add('is-wheel-armed');
-    clearTimeout(returnWheelTimer);returnWheelTimer=setTimeout(resetReturnWheel,2200);
+    if(returnWheelArmed&&now-returnWheelArmed>160&&now-returnWheelArmed<2600){leaveAtlasForHome();return}
+    returnWheelArmed=now;toast('再向上滑一次，回到封面','bottom');
+    clearTimeout(returnWheelTimer);returnWheelTimer=setTimeout(resetReturnWheel,2600);
   },{capture:true,passive:false});
   function branchKeys(key){const keys=new Set([key]);for(let found=true;found;){found=false;for(const r of visible)if(keys.has(r.parent)&&!keys.has(r.key)){keys.add(r.key);found=true}}return keys}
   function segmentDistance(point,a,b){const dx=b.x-a.x,dy=b.y-a.y,length=dx*dx+dy*dy,t=length?clamp(((point.x-a.x)*dx+(point.y-a.y)*dy)/length,0,1):0;return Math.hypot(point.x-(a.x+dx*t),point.y-(a.y+dy*t))}

@@ -17,6 +17,40 @@
   const fanMotion={position:null,target:0,frame:0,last:0,tau:100};
   const ADD_CARD="__corner_add__";
   const cornerTheme=()=>({wallfilm:'projection',surge:'flow'}[dockTheme()]||dockTheme());
+  // The collection keeps one interaction engine and swaps only this visual skin.
+  // `depth` is deliberately explicit so each future theme can choose flat or layered cards.
+  const CORNER_THEME_SKINS={
+    base:{depth:'flat',object:'paper',art:'line'},
+    paper:{depth:'flat',object:'newspaper',art:'masthead'},
+    reading:{depth:'depth',object:'book',art:'book'},
+    music:{depth:'depth',object:'record',art:'record'},
+    cinema:{depth:'depth',object:'film',art:'film'},
+    projection:{depth:'depth',object:'screen',art:'screen'},
+    cosmos:{depth:'depth',object:'orbit',art:'orbit'},
+    flip:{depth:'flat',object:'calendar',art:'calendar'},
+    rain:{depth:'depth',object:'rain',art:'rain'},
+    flow:{depth:'flat',object:'wave',art:'wave'},
+    poly:{depth:'flat',object:'poly',art:'poly'}
+  };
+  const cornerThemeSkin=()=>CORNER_THEME_SKINS[cornerTheme()]||CORNER_THEME_SKINS.base;
+  const cornerThemeArt=()=>({
+    line:'<path d="M6 24c10-15 19-15 28 0s18 15 28 0"/><path d="M47 9v12m-6-6h12"/><circle cx="18" cy="11" r="4"/>',
+    masthead:'<rect x="7" y="7" width="54" height="32" rx="2"/><path d="M12 14h44M12 19h44M12 26h22m6 0h16M12 32h44"/>',
+    book:'<path d="M7 9c7-4 14-4 25 0v34c-11-4-18-4-25 0zM57 9c-7-4-14-4-25 0v34c11-4 18-4 25 0zM32 9v34"/>',
+    record:'<circle cx="32" cy="25" r="20"/><circle cx="32" cy="25" r="13"/><circle cx="32" cy="25" r="4"/><path d="M50 7v18l-10 5"/>',
+    film:'<rect x="7" y="10" width="50" height="30" rx="3"/><path d="M7 18h50M7 32h50M18 10v8m12-8v8m12-8v8M18 32v8m12-8v8m12-8v8"/>',
+    screen:'<rect x="8" y="8" width="48" height="32" rx="2"/><path d="m17 32 10-11 8 8 6-5 7 8M27 40v8m-7 0h14"/>',
+    orbit:'<circle cx="32" cy="25" r="8"/><ellipse cx="32" cy="25" rx="27" ry="10" transform="rotate(-22 32 25)"/><circle cx="53" cy="12" r="2"/>',
+    calendar:'<rect x="10" y="8" width="44" height="36" rx="4"/><path d="M10 18h44M20 5v8m24-8v8M21 27h4m7 0h4m7 0h4M21 35h4m7 0h4"/>',
+    rain:'<path d="M18 8v13m14-17v17m14-13v13M13 32l-4 10m18-10-4 10m18-10-4 10"/>',
+    wave:'<path d="M5 18c9-13 18-13 27 0s18 13 27 0M5 30c9-13 18-13 27 0s18 13 27 0"/>',
+    poly:'<path d="m32 6 23 14v10L32 44 9 30V20zM9 20l23 14 23-14M32 34v10"/>'
+  })[cornerThemeSkin().art]||'';
+  function syncCornerThemePresentation(){
+    if(!panel)return;
+    const skin=cornerThemeSkin();panel.dataset.cornerTheme=cornerTheme();panel.dataset.cornerDepth=skin.depth;panel.dataset.cornerObject=skin.object;
+    const art=panel.querySelector('.corner-theme-art');if(art)art.innerHTML='<svg viewBox="0 0 64 50" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+cornerThemeArt()+'</svg>';
+  }
   const cardLimit=()=>window.ShiyuEntitlements?.limit('corner')??null;
   const isInbox=g=>g?.system==='inbox';
   const customCount=()=>collection().groups.filter(g=>!isInbox(g)).length;
@@ -146,7 +180,7 @@
       panel.addEventListener('pointerup',e=>{if(!swipe||drag?.active)return;const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;swipe=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3){navigate(Math.sign(-dx));swallowClickUntil=performance.now()+400;}});
       panel.addEventListener('pointercancel',()=>{swipe=null;});
     }
-    entryAnchor=null;inboxExpanded=null;flipped.clear();wheelLast=0;wheelConsumed=false;wheelSum=0;wheelLock=0;const groups=collection().groups;activeId=groups.find(g=>g.id===groupId)?.id||groups.find(g=>!isInbox(g))?.id||ADD_CARD;panel.dataset.cornerTheme=cornerTheme();renderPanel();
+    entryAnchor=null;inboxExpanded=null;flipped.clear();wheelLast=0;wheelConsumed=false;wheelSum=0;wheelLock=0;const groups=collection().groups;activeId=groups.find(g=>g.id===groupId)?.id||groups.find(g=>!isInbox(g))?.id||ADD_CARD;syncCornerThemePresentation();renderPanel();
     const r=origin?.getBoundingClientRect()||{left:innerWidth/2,top:innerHeight,width:0,height:0};
     const point=event?.detail&&Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?{x:event.clientX,y:event.clientY}:{x:r.left+r.width/2,y:r.top+r.height/2};
     const shape=cornerRevealGeometry(point),animateReveal=!reduced()&&typeof panel.animate==='function';
@@ -170,7 +204,7 @@
     const ids=[...document.querySelectorAll('[data-brand-theme]')].map(el=>el.dataset.brandTheme);if(ids.length<2)return;
     const next=ids[(ids.indexOf(cornerTheme())+1)%ids.length],previousScope=scope;
     restoreEntry();try{scope='global';changeTheme(next);}finally{scope=previousScope;}
-    panel.dataset.cornerTheme=cornerTheme();
+    syncCornerThemePresentation();
     for(const el of panel.querySelectorAll('[data-corner-card]')){const g=collection().groups.find(g=>g.id===el.dataset.cornerCard);if(!g)continue;el.querySelector('.corner-card-logo').innerHTML=cardIcon(g);const empty=el.querySelector('.corner-empty-lines');if(empty)empty.innerHTML=cardIcon(g);const tmp=document.createElement('template');tmp.innerHTML=backCard(g);const choices=el.querySelector('.corner-icon-choices');if(choices)choices.innerHTML=tmp.content.querySelector('.corner-icon-choices').innerHTML;applyCardColor(el,g);}
     origin=document.querySelector('#dock .corner-entry');moveEntry();syncCornerCords();cornerNotice('已切换为「'+(THEMES[cornerTheme()]?.name||THEMES[dockTheme()]?.name||cornerTheme())+'」');panel.querySelector('[data-corner-next-theme]').blur();
   }
@@ -217,8 +251,9 @@
 
     const listScroll=new Map([...panel.querySelectorAll('[data-corner-card]')].map(el=>[el.dataset.cornerCard,el.querySelector('.corner-links')?.scrollTop||0]));
     const {groups}=collection(),entries=sources();
-    const content='<div class="corner-stage"><div class="corner-stage-heading"><h2><button type="button" data-corner-next-theme title="点击切换主题" aria-label="我的一隅，点击切换下一个主题">我的一隅</button></h2><p>把常去的地方，留在手边</p></div><button class="corner-deck-arrow previous" data-corner-page="-1" aria-label="上一组卡片">'+glyph('<path d="m15 5-7 7 7 7"/>')+'</button><div class="corner-deck" aria-label="常用分组卡牌" title="滚轮切换 · Shift + 滚轮快速切换">'+groups.map((g,i)=>card(g,i,entries)).join('')+newCardMarkup()+'</div><button class="corner-deck-arrow next" data-corner-page="1" aria-label="下一组卡片">'+glyph('<path d="m9 5 7 7-7 7"/>')+'</button></div>';
+    const content='<div class="corner-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2><button type="button" data-corner-next-theme title="点击切换主题" aria-label="我的一隅，点击切换下一个主题">我的一隅</button></h2><span class="corner-theme-art" aria-hidden="true"></span></div><p>把常去的地方，留在手边</p></div><button class="corner-deck-arrow previous" data-corner-page="-1" aria-label="上一组卡片">'+glyph('<path d="m15 5-7 7 7 7"/>')+'</button><div class="corner-deck" aria-label="常用分组卡牌" title="滚轮切换 · Shift + 滚轮快速切换">'+groups.map((g,i)=>card(g,i,entries)).join('')+newCardMarkup()+'</div><button class="corner-deck-arrow next" data-corner-page="1" aria-label="下一组卡片">'+glyph('<path d="m9 5 7 7-7 7"/>')+'</button></div>';
     let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';panel.append(body);}body.innerHTML=content;
+    syncCornerThemePresentation();
     layoutFan();
     for(const el of panel.querySelectorAll('[data-corner-card]')){el.querySelector('.corner-links').scrollTop=listScroll.get(el.dataset.cornerCard)||0;if(el.classList.contains('corner-inbox'))syncInbox(el);else{syncFaces(el);el.classList.add('is-settled');}applyCardColor(el,groups.find(g=>g.id===el.dataset.cornerCard));}
     requestAnimationFrame(updateArrows);
