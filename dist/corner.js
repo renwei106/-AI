@@ -310,7 +310,7 @@
   function memoNoteMarkup(note,index){const editing=memoEditingId===note.id,focused=memoFocusId===note.id;return '<article class="memo-note '+(editing?'is-editing ':'')+(focused?'is-focus':'')+'" data-memo-card="'+note.id+'" style="--memo-order:'+index+'"><div class="memo-note-paper"><div class="memo-note-rule" aria-hidden="true"></div><div class="memo-note-head"><span class="memo-note-icon" aria-hidden="true">'+esc(note.icon||'✦')+'</span><span class="memo-note-time">'+esc(memoTime(note.updatedAt))+'</span></div><h3>'+esc(note.title||'无题')+'</h3><p>'+esc(note.content||'还没有写下什么。')+'</p><footer><span>小记 · '+String(index+1).padStart(2,'0')+'</span><span>点击展开</span></footer></div></article>';}
   function memoEditorMarkup(note){if(!note)return '';return '<section class="memo-editor" aria-label="编辑小记"><div class="memo-editor-top"><span class="memo-editor-kicker">正在写下</span><button type="button" data-memo-done aria-label="完成编辑" title="完成">'+glyph('<path d="m5 12 4 4L19 6"/>')+'</button></div><label class="memo-editor-title"><span>标题</span><input data-memo-title="'+note.id+'" maxlength="60" value="'+esc(note.title||'')+'" placeholder="给这一刻留一个名字"></label><label class="memo-editor-content"><span>内容</span><textarea data-memo-content="'+note.id+'" maxlength="2000" placeholder="让想法慢慢展开……">'+esc(note.content||'')+'</textarea></label><div class="memo-editor-meta"><span>'+esc(note.icon||'✦')+'</span><span>最后编辑于 '+esc(memoTime(note.updatedAt))+'</span></div></section>';}
   function renderMemoPanel(){
-    const library=memoLibrary(),notes=(Array.isArray(library.notes)?library.notes:[]).map((note,index)=>({...note,__memoOriginalIndex:index})).sort((a,b)=>(Number(a.updatedAt)||0)-(Number(b.updatedAt)||0)||a.__memoOriginalIndex-b.__memoOriginalIndex),meta=moduleMeta();panel.dataset.cornerModule='memo';
+    const library=memoLibrary(),notes=Array.isArray(library.notes)?library.notes:[],meta=moduleMeta();panel.dataset.cornerModule='memo';
     if(notes.length&&!notes.some(note=>note.id===memoFocusId))memoFocusId=notes[0].id;
     const editor=memoEditingId?memoEditorMarkup(notes.find(note=>note.id===memoEditingId)):'';
     const content='<div class="corner-stage memo-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2><button type="button" data-corner-next-theme title="点击切换主题" aria-label="'+esc(meta.name)+'，点击切换下一个主题">'+esc(meta.name)+'</button></h2><span class="corner-theme-art" aria-hidden="true"></span></div><p>'+esc(meta.subtitle)+'</p></div><div class="memo-board" aria-label="小记卡片，滚轮移动"><div class="memo-track">'+(notes.length?notes.map(memoNoteMarkup).join(''):'<div class="memo-empty"><span>✦</span><p>还没有留下小记</p><small>把此刻的灵感，收进一张纸里</small></div>')+'<button type="button" class="memo-add" data-memo-new aria-label="新建小记"><span>＋</span><strong>写下一笔</strong><small>让念头有处可去</small></button></div></div>'+editor+'</div>';
@@ -335,12 +335,29 @@
     return template.innerHTML;
   }
   function applyCardColor(el,g){
-    if(!el||!g||isInbox(g))return;const palette=cardColors.find(c=>c.id===g.color),custom=/^#[0-9a-f]{6}$/i.test(g.color||'');
-    for(const key of ['--surface','--ink','--accent','--muted'])el.style.removeProperty(key);
-    if(!palette&&!custom)return;const dark=document.body.dataset.dark==='true';
-    if(palette){el.style.setProperty('--surface',dark?palette.dark:palette.light);el.style.setProperty('--ink',dark?palette.night:palette.ink);el.style.setProperty('--accent',palette.accent);}
-    else{el.style.setProperty('--surface','color-mix(in srgb,'+g.color+' '+(dark?'23% , #20252b':'16%, #ffffff')+')');el.style.setProperty('--ink',dark?'#f4f5f7':'#252b34');el.style.setProperty('--accent',g.color);}
+    if(!el||!g||isInbox(g))return;
+    const palette=cardColors.find(c=>c.id===g.color),custom=/^#[0-9a-f]{6}$/i.test(g.color||''),dark=document.body.dataset.dark==='true';
+    for(const key of ['--surface','--ink','--accent','--muted','--corner-cover-face','--corner-cover-ink','--corner-cover-muted','--corner-cover-header','--corner-cover-header-ink','--corner-vinyl-ink','--corner-vinyl-paper','--corner-space-ink','--corner-star'])el.style.removeProperty(key);
+    const root=getComputedStyle(document.body);
+    const fallbackSurface=root.getPropertyValue('--surface').trim()||(dark?'#242b29':'#ffffff');
+    const fallbackInk=root.getPropertyValue('--ink').trim()||(dark?'#f1f5f2':'#27312b');
+    const fallbackAccent=root.getPropertyValue('--accent').trim()||'#587b64';
+    const surface=palette?(dark?palette.dark:palette.light):custom?'color-mix(in srgb,'+g.color+' '+(dark?'23% , #20252b':'16%, #ffffff')+')':fallbackSurface;
+    const ink=palette?(dark?palette.night:palette.ink):custom?(dark?'#f4f5f7':'#252b34'):fallbackInk;
+    const accent=palette?palette.accent:custom?g.color:fallbackAccent;
+    el.style.setProperty('--surface',surface);el.style.setProperty('--ink',ink);el.style.setProperty('--accent',accent);
     el.style.setProperty('--muted','color-mix(in srgb,var(--ink) 78%,var(--surface))');
+    // Covers use their own contrast pair. This keeps the cover readable even
+    // when the card palette and the page theme switch at the same time.
+    const coverFace=dark?'color-mix(in srgb,'+surface+' 90%,#0b100d)':'color-mix(in srgb,'+surface+' 92%,#ffffff)';
+    const coverInk=ink;
+    const coverMuted=dark?'#cbd8d0':'#5d6a61';
+    const coverHeader=dark?'color-mix(in srgb,'+surface+' 58%,#080d0b)':'color-mix(in srgb,'+surface+' 88%,'+accent+')';
+    el.style.setProperty('--corner-cover-face',coverFace);el.style.setProperty('--corner-cover-ink',coverInk);el.style.setProperty('--corner-cover-muted',coverMuted);el.style.setProperty('--corner-cover-header',coverHeader);el.style.setProperty('--corner-cover-header-ink',coverInk);
+    el.style.setProperty('--corner-vinyl-ink',dark?'color-mix(in srgb,'+surface+' 68%,#080a0a)':'color-mix(in srgb,'+surface+' 70%,#d0ddd4)');
+    el.style.setProperty('--corner-vinyl-paper',dark?'#f5ead1':'#28332d');
+    el.style.setProperty('--corner-space-ink',dark?'color-mix(in srgb,'+surface+' 68%,#081329)':'color-mix(in srgb,'+surface+' 78%,#ffffff)');
+    el.style.setProperty('--corner-star',dark?'#e9f1ff':'#2b4059');
   }
   function backCard(g){
     const choices=themeChoices();if(!followsTheme(g)&&g.icon&&!choices.some(x=>x.id===g.icon))choices.push({id:g.icon,name:'当前图标'});
@@ -618,16 +635,158 @@
   function refreshDockPreview(){
     const peek=document.querySelector('.corner-dock-preview');if(!peek)return;
     const moduleIds=['memo','common','todo'];
-    let groups=peek.querySelector('.corner-peek-groups');
-    if(!groups||groups.children.length!==moduleIds.length||[...groups.children].some((button,i)=>button.dataset.cornerModule!==moduleIds[i])){
-      const buttons=moduleIds.map((id,i)=>{const meta=CORNER_MODULES[id];return '<button type="button" style="--peek-index:'+i+'" data-corner-module="'+id+'" aria-label="打开'+esc(meta.name)+'"><i>'+moduleIcon(id)+'</i><span>'+esc(meta.name)+'</span></button>';}).join('');
-      peek.innerHTML='<p>我的一隅</p><div class="corner-peek-rail"><div class="corner-peek-groups" aria-label="一隅模块">'+buttons+'</div></div>';
-      groups=peek.querySelector('.corner-peek-groups');
+    // This is the same floating menu markup used by the theme switcher.
+    // Only its three module records change; the layout and divider CSS stay shared.
+    const buttons=moduleIds.map(id=>{const meta=CORNER_MODULES[id];return '<button type="button" data-corner-module="'+id+'" aria-label="打开'+esc(meta.name)+'">'+moduleIcon(id)+'<b>'+esc(meta.name)+'</b><span aria-hidden="true">→</span></button>';}).join('');
+    peek.innerHTML='<div class="brand-theme-menu corner-bottom-menu" aria-label="一隅模块">'+buttons+'</div>';
+  }
+  // Exact standalone file from the "悬浮菜单对话" task. An iframe isolates
+  // its document-wide styles and wheel interaction from the existing home page.
+  function syncOrbitPreviewTheme(preview){
+    if(!preview?.contentDocument)return;
+    const documentInOrbit=preview.contentDocument;
+    const orbitThemeIcon={base:'lib-Leaf',music:'lib-Disc3',reading:'lib-BookOpen',flow:'lib-Waves',poly:'lib-Triangle',cosmos:'lib-Atom',flip:'lib-Calendar',rain:'lib-Droplets',projection:'lib-Presentation',cinema:'lib-Clapperboard',paper:'lib-Newspaper'};
+    const themeIconId=orbitThemeIcon[cornerTheme()]||orbitThemeIcon.base;
+    const logo=documentInOrbit.querySelector('.logo-mark');
+    if(logo&&logo.dataset.shiyuThemeIcon!==themeIconId){
+      const iconPaths=typeof ENTITY_ICONS==='object'&&ENTITY_ICONS[themeIconId]?ENTITY_ICONS[themeIconId][1]:'<circle cx="12" cy="12" r="8"/><path d="m8 13 3 3 5-7"/>';
+      logo.setAttribute('viewBox','0 0 24 24');logo.innerHTML='<g class="theme-icon">'+iconPaths+'</g>';logo.dataset.shiyuThemeIcon=themeIconId;
     }
-    [...groups.children].forEach((button,i)=>{
-      button.style.setProperty('--peek-index',i);
-      button.removeAttribute('data-peek-active');
+    const coreTitle=documentInOrbit.querySelector('.core-title');if(coreTitle)coreTitle.textContent='我的一隅';
+    const coreSubtitle=documentInOrbit.querySelector('.core-subtitle');if(coreSubtitle){coreSubtitle.textContent='';coreSubtitle.hidden=true;}
+    const orbit=documentInOrbit.querySelector('#orbit'),items=[...documentInOrbit.querySelectorAll('.menu-item')],activeItems=items.slice(0,3);
+    const threeLabels=['我的收藏','我的小记','我的待办'];
+    activeItems.forEach((item,index)=>{
+      item.querySelector('span')?.replaceChildren(documentInOrbit.createTextNode(threeLabels[index]));
+      item.setAttribute('aria-label',threeLabels[index]);
+      item.style.setProperty('--angle',`${index*120}deg`);
     });
+    items.slice(3).forEach(item=>{item.hidden=true;item.classList.remove('is-selected');});
+    if(orbit&&items.length&&!orbit.dataset.shiyuTextOrientation){
+      const updateTextOrientation=()=>{
+        // The item itself rotates around the center. Keep its label's local
+        // baseline horizontal so that the baseline stays perpendicular to
+        // the radius and the whole label follows the turntable naturally.
+        activeItems.forEach(item=>item.style.setProperty('--content-rotation','0deg'));
+      };
+      const observer=new preview.contentWindow.MutationObserver(updateTextOrientation);observer.observe(orbit,{attributes:true,attributeFilter:['style']});
+      orbit.dataset.shiyuTextOrientation='orbit';updateTextOrientation();
+    }
+    if(orbit&&!orbit.dataset.shiyuThreeMenu){
+      const stage=documentInOrbit.querySelector('.stage'),mod=(value,length)=>((value%length)+length)%length;
+      const setThreeRotation=(nextRotation)=>{
+        const rotation=Math.round(nextRotation/120)*120;
+        orbit.style.setProperty('--rotation',`${rotation}deg`);
+        const selected=mod(Math.round(-rotation/120),activeItems.length);
+        activeItems.forEach((item,index)=>item.classList.toggle('is-selected',index===selected));
+      };
+      stage?.addEventListener('wheel',event=>{
+        if(!stage.classList.contains('is-hover'))return;
+        event.preventDefault();event.stopImmediatePropagation();
+        const rotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
+        setThreeRotation(rotation+(event.deltaY>0?-120:120));
+      },{capture:true,passive:false});
+      orbit.addEventListener('click',event=>{
+        if(!stage?.classList.contains('is-hover'))return;
+        event.preventDefault();event.stopImmediatePropagation();
+        const rect=orbit.getBoundingClientRect(),x=event.clientX-(rect.left+rect.width/2),y=event.clientY-(rect.top+rect.height/2);
+        let worldAngle=Math.atan2(x,-y)*180/Math.PI;if(worldAngle<0)worldAngle+=360;
+        const rotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
+        const localAngle=mod(worldAngle-rotation,360),index=Math.floor((localAngle+60)/120)%activeItems.length;
+        setThreeRotation(-index*120);
+      },{capture:true});
+      setThreeRotation(0);orbit.dataset.shiyuThreeMenu='true';
+    }
+    const root=getComputedStyle(document.documentElement),bodyStyle=getComputedStyle(document.body);
+    const read=(name,fallback)=>{
+      const value=(bodyStyle.getPropertyValue(name)||root.getPropertyValue(name)||'').trim();
+      return value.replace(/[{}<>]/g,'')||fallback;
+    };
+    const accent=read('--accent','#48614c'),surface=read('--surface','#fff'),ink=read('--ink','#27312b'),muted=read('--muted','#69736b'),line=read('--line','#d8ddd8'),font=read('--font','Inter,"Segoe UI","Microsoft YaHei",sans-serif');
+    // The menu runs in its own iframe, so the parent page's @font-face rules
+    // do not cross the document boundary. Register the known Shiyu fonts in
+    // the iframe before applying the inherited --font stack.
+    const fontFace=/Shiyu Youfeng Preview/i.test(font)
+      ? "@font-face{font-family:'Shiyu Youfeng Preview';font-style:normal;font-weight:400;font-display:swap;src:url('/assets/fonts/shiyu-youfeng/ShiyuYoufeng-Preview-Regular.woff2') format('woff2')}"
+      :/Shiyu Qingya Song Preview/i.test(font)
+        ? "@font-face{font-family:'Shiyu Qingya Song Preview';font-style:normal;font-weight:400;font-display:swap;src:url('/assets/fonts/shiyu-qingya-song/ShiyuQingyaSong-Preview-Regular.woff2') format('woff2')}"
+        :/Shiyu Wenrun Kai Preview/i.test(font)
+          ? "@font-face{font-family:'Shiyu Wenrun Kai Preview';font-style:normal;font-weight:400;font-display:swap;src:url('/assets/fonts/shiyu-wenrun-kai/ShiyuWenrunKai-Preview-Regular.woff2') format('woff2')}"
+          :'';
+    const css=`
+      ${fontFace}
+      :root{color-scheme:light!important;--orbit-accent:${accent};--orbit-surface:${surface};--orbit-ink:${ink};--orbit-muted:${muted};--orbit-line:${line};--orbit-font:${font}}
+      html,body{background:transparent!important}
+      body,button,.menu-item span,.core-title,.core-subtitle,.status-line{color:var(--orbit-ink)!important;font-family:var(--orbit-font)!important}
+      body::before,body::after{display:none!important}
+      .stage::before{display:none!important}
+      .stage::after{display:none!important}
+      .orbit-track,.orbit-track::before,.orbit-track::after{display:none!important}
+      /* Keep the six interactive sectors, but clip their outer tips to one
+         shared circular envelope. This changes the silhouette only; the
+         source wheel/click handlers and their hit flow remain untouched. */
+      .orbit{clip-path:circle(40% at 50% 50%)!important}
+      .orbit::before{border-color:color-mix(in srgb,var(--orbit-accent) 42%,transparent)!important;box-shadow:0 0 30px color-mix(in srgb,var(--orbit-accent) 10%,transparent),inset 0 0 22px color-mix(in srgb,var(--orbit-accent) 8%,transparent)!important}
+      .orbit::after{border-color:color-mix(in srgb,var(--orbit-accent) 36%,transparent)!important}
+      /* Only the visible center disc is slightly smaller; keep the original
+         invisible core hit area so the hover interaction does not move. */
+      .core{inset:28%!important}
+      .menu-item{color:var(--orbit-ink)!important;background:conic-gradient(from -60deg,color-mix(in srgb,var(--orbit-accent) 22%,var(--orbit-surface)) 0 120deg,transparent 120deg 360deg)!important;-webkit-mask:radial-gradient(circle at center,transparent 0 31%,#000 31.5% 100%),conic-gradient(from -60deg,#000 0 120deg,transparent 120deg 360deg)!important;mask:radial-gradient(circle at center,transparent 0 31%,#000 31.5% 100%),conic-gradient(from -60deg,#000 0 120deg,transparent 120deg 360deg)!important;-webkit-mask-composite:source-in!important;mask-composite:intersect!important;filter:drop-shadow(0 10px 18px #0001)!important}
+      .menu-item[hidden]{display:none!important}
+      .menu-item:hover,.menu-item.is-selected{color:var(--orbit-ink)!important;background:conic-gradient(from -60deg,color-mix(in srgb,var(--orbit-accent) 36%,var(--orbit-surface)) 0 120deg,transparent 120deg 360deg)!important;filter:drop-shadow(0 0 9px color-mix(in srgb,var(--orbit-accent) 32%,transparent)) drop-shadow(0 12px 20px #0002)!important}
+      .core{background:color-mix(in srgb,var(--orbit-surface) 96%,transparent)!important;border-color:color-mix(in srgb,var(--orbit-accent) 46%,transparent)!important;box-shadow:0 0 0 10px color-mix(in srgb,var(--orbit-accent) 6%,transparent),0 0 44px color-mix(in srgb,var(--orbit-accent) 18%,transparent),inset 0 0 38px color-mix(in srgb,var(--orbit-accent) 10%,transparent)!important;transition:opacity .62s ease,border-color .3s ease,box-shadow .3s ease}
+      .stage:not(.is-hover) .core{opacity:.52!important}
+      .stage.is-hover .core{opacity:1!important}
+      .core::before{border-color:color-mix(in srgb,var(--orbit-accent) 32%,transparent)!important}
+      .core::after{border-color:color-mix(in srgb,var(--orbit-accent) 28%,transparent)!important}
+      .logo-mark circle,.logo-mark path{stroke:var(--orbit-ink)!important}
+      .logo-mark :is(circle,path,rect,line,polyline,polygon,ellipse){fill:none!important;stroke:var(--orbit-ink)!important}
+      .logo-mark .accent{stroke:color-mix(in srgb,var(--orbit-accent) 60%,var(--orbit-ink))!important}
+      .core-title{color:var(--orbit-ink)!important;letter-spacing:.12em!important;text-indent:.12em!important}
+      .core-subtitle,.status-line{display:none!important}
+      .water-fill{background:linear-gradient(180deg,color-mix(in srgb,var(--orbit-accent) 40%,var(--orbit-surface)),color-mix(in srgb,var(--orbit-accent) 26%,var(--orbit-surface)) 48%,color-mix(in srgb,var(--orbit-accent) 18%,var(--orbit-surface)))!important}
+    `;
+    let style=preview.contentDocument.getElementById('shiyu-orbit-adapter');
+    if(!style){style=preview.contentDocument.createElement('style');style.id='shiyu-orbit-adapter';preview.contentDocument.head.append(style)}
+    style.textContent=css;
+    preview.dataset.themeReady='true';
+  }
+  function wakeOrbitPreview(preview){
+    if(!preview)return;
+    preview.classList.remove('is-idle-hidden');
+    clearTimeout(preview._shiyuIdleTimer);
+    preview._shiyuIdleTimer=window.setTimeout(()=>{
+      if(document.body.dataset.view==='home')preview.classList.add('is-idle-hidden');
+    },10000);
+  }
+  function refreshOrbitPreview(){
+    let preview=document.querySelector('#corner-orbit-preview');
+    if(!preview){
+      preview=document.createElement('iframe');preview.id='corner-orbit-preview';
+      preview.dataset.themeReady='false';
+      preview.title='悬浮菜单原版组件预览';preview.src='liquid-orbit-menu.html';
+      preview.addEventListener('load',()=>{
+        syncOrbitPreviewTheme(preview);
+        preview.contentWindow?.addEventListener('pointermove',()=>wakeOrbitPreview(preview),{passive:true});
+      });
+      document.body.append(preview);
+    }
+    syncOrbitPreviewTheme(preview);
+    if(!document.documentElement.dataset.shiyuOrbitThemeWatch){
+      const themeWatch=new MutationObserver(()=>{
+        const current=document.querySelector('#corner-orbit-preview');
+        if(current)syncOrbitPreviewTheme(current);
+      });
+      themeWatch.observe(document.documentElement,{attributes:true,attributeFilter:['style']});
+      themeWatch.observe(document.body,{attributes:true,attributeFilter:['data-theme','data-dark']});
+      document.documentElement.dataset.shiyuOrbitThemeWatch='true';
+    }
+    if(!document.documentElement.dataset.shiyuOrbitIdleWatch){
+      window.addEventListener('pointermove',()=>wakeOrbitPreview(document.querySelector('#corner-orbit-preview')),{passive:true});
+      document.documentElement.dataset.shiyuOrbitIdleWatch='true';
+    }
+    preview.hidden=document.body.dataset.view!=='home';
+    wakeOrbitPreview(preview);
   }
   addEventListener('resize',refreshDockPreview);
   let lastCardLimit=cardLimit();
@@ -648,7 +807,7 @@
     const legacy=dockEl.querySelector('.dock-options');if(legacy){legacy.hidden=true;legacy.setAttribute('aria-hidden','true');legacy.inert=true;}
     const entry=dockEl.querySelector('.dock-trigger');if(!entry)return;
     entry.removeAttribute('data-action');entry.classList.add('corner-entry','corner-themed-entry');entry.title='点击打开我的一隅';entry.setAttribute('aria-label','打开我的一隅');entry.setAttribute('aria-haspopup','dialog');entry.querySelector('.dock-label').textContent='我的一隅';
-    const peek=document.createElement('div');peek.className='corner-dock-preview';dockEl.prepend(peek);dockEl.classList.add('corner-unified');refreshDockPreview();
+    const peek=document.createElement('div');peek.className='corner-dock-preview';dockEl.prepend(peek);dockEl.classList.add('corner-unified');refreshDockPreview();refreshOrbitPreview();
     let closePeekTimer=0;
     const hidePeek=()=>{clearTimeout(closePeekTimer);dockEl.classList.remove('corner-peeking','open');entry.setAttribute('aria-expanded','false');};
     // Wait briefly before collapsing the preview. The preview is positioned

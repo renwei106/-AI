@@ -831,9 +831,12 @@ body[data-dark=true] #agreement-required-dialog>.member-primary{background:var(-
 @media(max-width:540px){.welcome-gift-dialog{padding:34px 24px 28px}}
 @media(prefers-reduced-motion:reduce){.welcome-gift-dialog,.welcome-gift-symbol span,.welcome-gift-arrived{animation:none}.welcome-gift-accept{transition:none}}
 
-/* A quiet, fixed return notch for every space view; existing return controls remain untouched. */
+/* A quiet, fixed return notch for space and world views; existing return controls remain untouched. */
 .space-home-tab{display:none;position:fixed;top:0;left:50%;z-index:29;width:120px;height:48px;padding:0;transform:translateX(-50%);opacity:.58;isolation:isolate;transition:opacity .2s ease}
 body[data-view=space] .space-home-tab{display:block}
+body.world-active .space-home-tab{display:block;top:auto;bottom:0;z-index:130;pointer-events:auto}
+body.world-active .space-home-tab-shape{transform:rotate(180deg)}
+body.world-active .space-home-tab-icon{top:auto;bottom:7px}
 #space-atlas>.space-home-tab{display:block;z-index:90;pointer-events:auto}
 #space-atlas>.space-home-tab .space-home-tab-shape{width:100%;height:100%}
 #space-atlas>.space-home-tab .space-home-tab-icon svg{width:15px;height:15px}
@@ -848,5 +851,5 @@ body[data-view=space] .space-home-tab{display:block}
 .space-home-tab:is(:hover,:focus-visible) .space-home-tab-arrow{opacity:1;transform:translate(-50%,0)}
 .space-home-tab:focus-visible{outline:none}
 .space-home-tab:focus-visible .space-home-tab-shape{stroke:var(--accent);stroke-width:2px}
-@media(max-width:760px){.space-home-tab{width:104px;height:42px}.space-home-tab-icon{top:5px}}
+@media(max-width:760px){.space-home-tab{width:104px;height:42px}.space-home-tab-icon{top:5px}body.world-active .space-home-tab-icon{top:auto;bottom:5px}}
 @media(prefers-reduced-motion:reduce){.space-home-tab,.space-home-tab-shape,.space-home-tab-icon{transition:none}}
