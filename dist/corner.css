@@ -365,6 +365,7 @@ body[data-dark=true] #my-corner .corner-card-logo{color:color-mix(in srgb,var(--
 #dock .corner-dock-preview{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);padding:18px 20px 24px;box-sizing:border-box;border-radius:18px;background:var(--surface);color:var(--ink);box-shadow:0 12px 32px #0002;visibility:hidden;pointer-events:none;z-index:5}
 body.account-unsigned #dock .corner-dock-preview{visibility:hidden!important;pointer-events:none!important}
 #dock .corner-unified.corner-peeking .corner-dock-preview{visibility:visible;pointer-events:auto}
+body.account-unsigned #dock .corner-unified.corner-peeking .corner-dock-preview{visibility:visible!important;pointer-events:auto!important}
 #dock .corner-dock-preview>p{font-size:12px;margin:0 0 16px;text-align:left;color:var(--muted)}
 #dock .corner-peek-rail{display:flex;align-items:center;gap:6px;min-width:0;max-width:min(760px,calc(100vw - 72px))}
 #dock .corner-peek-groups{display:flex;gap:12px;min-width:0;max-width:min(680px,calc(100vw - 72px));overflow:auto;scrollbar-width:none}
