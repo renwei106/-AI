@@ -380,6 +380,9 @@ body.account-unsigned #dock .corner-unified.corner-peeking .corner-dock-preview{
 #dock .corner-peek-groups i{display:grid;place-items:center;width:38px;height:38px;color:var(--accent)}
 #dock .corner-peek-groups svg{width:32px;height:32px}
 #dock .corner-peek-groups span{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#dock .corner-peek-groups button[data-corner-module=memo] i{color:#ad8365}
+#dock .corner-peek-groups button[data-corner-module=common] i{color:var(--accent)}
+#dock .corner-peek-groups button[data-corner-module=todo] i{color:#6d8fb3}
 #my-corner .corner-add-card>button>.corner-member-badge{position:static;font-size:inherit}
 #my-corner .corner-add-card>button>.corner-member-badge svg{width:22px;height:22px}
 
@@ -869,4 +872,54 @@ body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-fi
   #my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-card-cover,
   #my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-links,
   #my-corner:is([data-corner-theme=base],[data-corner-theme=music],[data-corner-theme=cosmos]) .corner-card:not(.corner-inbox) .corner-flip-hint{transition:none}
+}
+
+/* The three homepage entries share the existing card engine. */
+#dock .corner-peek-groups button[data-corner-module=memo] i{color:#ad8365}
+#dock .corner-peek-groups button[data-corner-module=common] i{color:var(--accent)}
+#dock .corner-peek-groups button[data-corner-module=todo] i{color:#6d8fb3}
+#my-corner[data-corner-module=todo]{--module-accent:#6d8fb3}
+#my-corner[data-corner-module=memo]{--module-accent:#ad8365}
+#my-corner[data-corner-module=todo] .corner-card-front{background:linear-gradient(145deg,color-mix(in srgb,var(--module-accent) 14%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)) 58%);border-radius:15px 15px 26px 15px}
+#my-corner[data-corner-module=todo] .corner-card-back{background:linear-gradient(145deg,color-mix(in srgb,var(--module-accent) 9%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)));border-radius:15px 15px 26px 15px}
+#my-corner[data-corner-module=todo] .corner-card-cover{border-bottom:1px dashed color-mix(in srgb,var(--module-accent) 35%,transparent)}
+#my-corner[data-corner-module=todo] .corner-card-logo{color:var(--module-accent)}
+#my-corner[data-corner-module=memo] .corner-card-front{background:radial-gradient(circle at 88% 14%,color-mix(in srgb,var(--module-accent) 20%,transparent) 0 16%,transparent 17%),linear-gradient(155deg,color-mix(in srgb,var(--module-accent) 8%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)));border-radius:22px 8px 22px 8px}
+#my-corner[data-corner-module=memo] .corner-card-back{background:linear-gradient(155deg,color-mix(in srgb,var(--module-accent) 8%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)));border-radius:22px 8px 22px 8px}
+#my-corner[data-corner-module=memo] .corner-card-cover{border-bottom:1px solid color-mix(in srgb,var(--module-accent) 24%,transparent)}
+#my-corner[data-corner-module=memo] .corner-card-logo{color:var(--module-accent)}
+
+/* 小记 keeps the paper-stack interaction from the earlier module version. */
+#my-corner[data-corner-module=memo] .memo-stage{inset:clamp(102px,14vh,155px) 0 94px;display:block;perspective:none}
+#my-corner[data-corner-module=memo] .memo-board{position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-snap-type:x mandatory;padding:34px 0 28px}
+#my-corner[data-corner-module=memo] .memo-board::-webkit-scrollbar{display:none}
+#my-corner[data-corner-module=memo] .memo-track{display:flex;align-items:center;width:max-content;min-width:100%;height:100%;padding:0 clamp(28px,calc((100vw - 1150px)/2),120px) 0 clamp(28px,calc((100vw - 1150px)/2),120px);padding-right:clamp(180px,24vw,360px);box-sizing:border-box}
+#my-corner[data-corner-module=memo] .memo-note{position:relative;flex:0 0 344px;height:354px;margin-left:-198px;scroll-snap-align:center;z-index:calc(20 + var(--memo-order));cursor:pointer;transition:flex-basis .34s cubic-bezier(.2,.78,.22,1),margin .34s,opacity .25s}
+#my-corner[data-corner-module=memo] .memo-note:first-child{margin-left:0}
+#my-corner[data-corner-module=memo] .memo-note:hover,#my-corner[data-corner-module=memo] .memo-note:focus-within,#my-corner[data-corner-module=memo] .memo-note.is-focus{flex-basis:500px;margin-left:-112px;margin-right:-112px}
+#my-corner[data-corner-module=memo] .memo-note:first-child:hover,#my-corner[data-corner-module=memo] .memo-note:first-child:focus-within,#my-corner[data-corner-module=memo] .memo-note:first-child.is-focus{margin-left:0}
+#my-corner[data-corner-module=memo] .memo-note-paper{position:relative;box-sizing:border-box;width:100%;height:100%;padding:34px 31px 25px;border:1px solid color-mix(in srgb,var(--ink) 30%,transparent);border-radius:13px;background:color-mix(in srgb,var(--surface) 86%,var(--accent));box-shadow:0 10px 22px #00000018;color:var(--ink);overflow:hidden}
+#my-corner[data-corner-module=memo] .memo-note-paper::after{content:"";position:absolute;inset:15px;border:1px dashed color-mix(in srgb,var(--ink) 28%,transparent);border-radius:8px;pointer-events:none}
+#my-corner[data-corner-module=memo] .memo-note-rule{position:absolute;left:31px;right:31px;top:108px;border-top:1px solid color-mix(in srgb,var(--ink) 18%,transparent);opacity:.65}
+#my-corner[data-corner-module=memo] .memo-note-head{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;margin-bottom:35px;color:var(--muted);font:11px var(--font);letter-spacing:.06em}
+#my-corner[data-corner-module=memo] .memo-note-icon{display:grid;place-items:center;width:30px;height:30px;border:1px solid color-mix(in srgb,var(--accent) 42%,transparent);border-radius:50%;color:var(--accent);font-size:17px}
+#my-corner[data-corner-module=memo] .memo-note-time{font-size:10px;letter-spacing:.08em}
+#my-corner[data-corner-module=memo] .memo-note h3{position:relative;z-index:1;margin:0 0 24px;font:500 30px/1.25 Georgia,"Songti SC","Noto Serif SC",serif;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#my-corner[data-corner-module=memo] .memo-note p{position:relative;z-index:1;margin:0;max-width:100%;font:18px/1.75 Georgia,"Songti SC","Noto Serif SC",serif;letter-spacing:.02em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden}
+#my-corner[data-corner-module=memo] .memo-note footer{position:absolute;z-index:1;left:31px;right:31px;bottom:25px;display:flex;justify-content:space-between;color:var(--muted);font:10px var(--font);letter-spacing:.08em}
+#my-corner[data-corner-module=memo] .memo-add{position:relative;flex:0 0 220px;height:220px;margin-left:28px;border:1px dashed color-mix(in srgb,var(--ink) 25%,transparent);border-radius:13px;background:color-mix(in srgb,var(--surface) 45%,transparent);color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;scroll-snap-align:center}
+#my-corner[data-corner-module=memo] .memo-add span{font:28px/1 Georgia,serif;color:var(--accent)}
+#my-corner[data-corner-module=memo] .memo-add strong{font:500 17px Georgia,"Songti SC",serif;color:var(--ink)}
+#my-corner[data-corner-module=memo] .memo-add small{font:11px var(--font)}
+#my-corner[data-corner-module=memo] .memo-empty{display:flex;flex:0 0 340px;height:260px;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-family:Georgia,"Songti SC",serif}
+#my-corner[data-corner-module=memo] .memo-empty span{font-size:34px;color:var(--accent)}
+#my-corner[data-corner-module=memo] .memo-empty p{margin:16px 0 8px;font-size:20px;color:var(--ink)}
+#my-corner[data-corner-module=memo] .memo-empty small{font:12px var(--font)}
+@media(max-width:760px){
+  #my-corner[data-corner-module=memo] .memo-stage{inset:100px 0 68px}
+  #my-corner[data-corner-module=memo] .memo-note{flex-basis:270px;height:300px;margin-left:-150px}
+  #my-corner[data-corner-module=memo] .memo-note:hover,#my-corner[data-corner-module=memo] .memo-note:focus-within,#my-corner[data-corner-module=memo] .memo-note.is-focus{flex-basis:380px;margin-left:-86px;margin-right:-86px}
+  #my-corner[data-corner-module=memo] .memo-note-paper{padding:28px 24px 22px}
+  #my-corner[data-corner-module=memo] .memo-note h3{font-size:24px}
+  #my-corner[data-corner-module=memo] .memo-note p{font-size:16px}
 }
