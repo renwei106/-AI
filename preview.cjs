@@ -21,6 +21,7 @@ const routes={
   '/member-payment.js':'member-payment.js','/member-payment.css':'member-payment.css',
   '/world.css':'world.css','/world-config.js':'world-config.js','/world.js':'world.js',
   '/member-plan-config.js':'member-plan-config.js',
+  '/member-entitlements.js':'member-entitlements.js','/member-invitations.js':'member-invitations.js',
   '/feedback.css':'feedback.css','/feedback.js':'feedback.js',
   '/memoir-theme.css':'memoir-theme.css','/memoir-theme.js':'memoir-theme.js',
   '/corner.css':'corner.css','/corner.js':'corner.js',

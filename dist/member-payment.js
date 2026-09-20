@@ -4,7 +4,7 @@
  const API = '/api/shiyu/payments';
  let status = null, account = null, currentOrder = null, timer = null, submitting = false;
  let pendingRequest = null;
- const originalCenter = openMemberCenter, originalOrders = openMemberOrders, originalMember = isMember;
+ const originalCenter = openMemberCenter, originalOrders = openMemberOrders;
  const originalAgreement = simulatePayment;
  const text = value => esc(String(value ?? ''));
  const money = cents => (cents / 100).toFixed(2);
@@ -40,20 +40,17 @@
   }
   if (account) {
    const memberStatus = d.querySelector('.member-status>span');
-   if (memberStatus) memberStatus.textContent = account.memberExpiresAt > Date.now() ? '会员有效至 ' + new Date(account.memberExpiresAt).toLocaleDateString() : '免费账户';
+   if (memberStatus) memberStatus.textContent = account.member ? account.permanent ? '永久会员' : '会员有效至 ' + new Date(account.expiresAt).toLocaleDateString() : '免费账户';
   }
  }
  openMemberCenter = function () { originalCenter(); decorate(); void refreshStatus(); };
-  // The payment session is only an optional checkout identity. A normal
-  // Shiyu account can already have a membership granted by the admin, so a
-  // missing payment-session cookie must not downgrade that server entitlement.
-  isMember = function () { return originalMember() || !!account && account.memberExpiresAt > Date.now(); };
  async function refreshAccount() {
-  if (!status?.enabled) return;
-  try { account = await request('/account'); } catch { account = null; }
+  await window.refreshShiyuMembership?.();
+  account = window.__shiyuUserEntitlements || null;
   decorate();
   if (typeof updateHeader === 'function') updateHeader();
  }
+ window.addEventListener('shiyu-user-entitlements', () => { account = window.__shiyuUserEntitlements; decorate(); });
  async function purchase() {
   if (submitting) return;
   if (!status?.providers?.[memberPayment]?.ready) { toast('该支付方式暂未开放'); return; }
@@ -103,7 +100,7 @@
   const body = d.querySelector('.payment-order-body'), expired = order.expiresAt <= Date.now();
   let content = `<div class="member-order-summary"><h3>${text(order.planName)}</h3><strong>¥${money(order.amount)}</strong><p>${order.days} 天 · ${order.provider === 'wechat' ? '微信支付' : '支付宝'}</p></div>`;
   if (order.status === 'paid') {
-   content += `<h3 class="payment-confirmed">支付成功</h3><p class="member-sub">会员有效期至 ${text(new Date(order.memberExpiresAt).toLocaleString())}</p>`;
+   content += `<h3 class="payment-confirmed">支付成功</h3><p class="member-sub">${order.fulfillment === 'pending' ? '会员权益正在同步，请稍后刷新查看' : order.memberExpiresAt ? '会员有效期至 ' + text(new Date(order.memberExpiresAt).toLocaleString()) : '永久会员权益保持有效'}</p>`;
    pendingRequest = null;
   } else if (order.status === 'closed') content += '<p class="member-sub">订单已关闭，请返回会员中心重新下单。</p>';
   else if (expired) content += '<p class="member-sub">支付时间已结束。若你已完成付款，请查询支付结果。</p>';
@@ -126,7 +123,7 @@
   const id = currentOrder?.id;
   if (!id) return;
   try {
-   const data = await request('/orders/' + id);
+   const data = await request('/orders/' + id + '/query', { method: 'POST' });
    if (currentOrder?.id !== id) return;
    const changed = data.order.status !== currentOrder.status || (!currentOrder.checkout && data.order.checkout);
    currentOrder = data.order;
@@ -136,16 +133,19 @@
   pollSoon();
  }
  openMemberOrders = function () {
-  if (!status?.enabled) { originalOrders(); return; }
   const d = memberDialog('member-orders', '我的订单');
   d.innerHTML += '<div class="member-empty">正在加载订单…</div>'; d.showModal();
-  request('/orders').then(data => {
+  Promise.allSettled([request('/orders'), fetch('/api/shiyu/auth/membership-records', { credentials: 'same-origin', cache: 'no-store' }).then(async response => { const data = await response.json(); if (!response.ok) throw Error(data.message || '记录加载失败'); return data; })]).then(results => {
    if (!d.open) return;
-   const target = d.querySelector('.member-empty');
+   const target = d.querySelector('.member-empty'), payments = results[0].status === 'fulfilled' ? results[0].value.items : [];
+   const records = results[1].status === 'fulfilled' ? results[1].value.items : [];
+   if (results.every(item => item.status === 'rejected')) { target.textContent = results[1].reason.message; return; }
    const labels = { created: '待支付', pending: '待支付', unknown: '结果待确认', paid: '支付成功', closed: '已关闭' };
-   target.innerHTML = data.items.length ? data.items.map((o, i) => `<button class="member-order-row" data-real-order="${i}"><span>${text(o.planName)}<small>${text(new Date(o.createdAt).toLocaleString())}</small></span><span>¥${money(o.amount)}<small>${text(labels[o.status] || o.status)}　↗</small></span></button>`).join('') : '暂无订单';
-   target.querySelectorAll('[data-real-order]').forEach(button => button.onclick = () => showOrder(data.items[Number(button.dataset.realOrder)]));
-  }).catch(error => { if (d.open) d.querySelector('.member-empty').textContent = error.message; });
+   const paidRows = payments.map((o, i) => '<button class="member-order-row" data-real-order="'+i+'"><span>'+text(o.planName)+'<small>'+text(new Date(o.createdAt).toLocaleString())+'</small></span><span>¥'+money(o.amount)+'<small>'+text(labels[o.status] || o.status)+'　↗</small></span></button>').join('') + records.filter(r => r.source === 'payment' && !payments.some(o => o.id === r.orderId)).map(r => '<div class="member-order-row"><span>'+text(r.title)+'<small>'+text(new Date(r.time).toLocaleString())+'</small></span><span>¥'+Number(r.amount || 0).toFixed(2)+'<small>'+text(r.duration)+'</small></span></div>').join('');
+   const rewards = records.filter(r => r.source === 'reward').map(r => '<div class="member-order-row"><span>'+text(r.title)+'<small>'+text(new Date(r.time).toLocaleString())+'</small></span><span>'+text(r.duration)+'<small>活动奖励</small></span></div>').join('');
+   target.innerHTML = '<h3>购买与续费</h3>'+(paidRows || '<p>暂无购买记录</p>')+'<h3>活动奖励</h3>'+(rewards || '<p>暂无奖励记录</p>');
+   target.querySelectorAll('[data-real-order]').forEach(button => button.onclick = () => showOrder(payments[Number(button.dataset.realOrder)]));
+  });
  };
  async function initialize() {
   try { status = await request('/status'); } catch { status = { enabled: false, providers: {} }; }

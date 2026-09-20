@@ -64,6 +64,7 @@
     const p=saved[state.sid]||{};
     state.mode=p.mode==='3d'?'3d':'2d';state.motion=!reduceMotion.matches;state.layout=['radial','organization','mindmap'].includes(p.layout)?p.layout:'radial';
     state.scene3d=['spatial','solar','systems'].includes(p.scene3d)?p.scene3d:'spatial';
+    if(window.ShiyuEntitlements?.snapshot().ready&&!window.ShiyuEntitlements.allows('atlas-'+state.mode)&&window.ShiyuEntitlements.allows('atlas-2d'))state.mode='2d';
   }
   function savePreferences() {
     saved[state.sid]={...saved[state.sid],mode:state.mode,motion:state.motion,layout:state.layout,scene3d:state.scene3d};
@@ -156,6 +157,10 @@
   function open(sid,trigger,preset,directEntry=false) {
     returnFocus=trigger;state.sid=sid;state.focus='s:'+sid;preferences();resetCamera();
     if(preset)for(const field of ['mode','layout','scene3d'])if(preset[field]!==undefined)state[field]=preset[field];
+    if(!window.ShiyuEntitlements?.allows('atlas-'+state.mode)){
+      if(window.ShiyuEntitlements?.allows('atlas-2d'))state.mode='2d';
+      else {if(!directEntry)window.ShiyuEntitlements?.require('atlas-'+state.mode,undefined,'atlas');return;}
+    }
     if(!dialog){
       dialog=document.createElement('dialog');dialog.id='space-atlas';dialog.setAttribute('aria-label','空间关系视图');document.body.append(dialog);
       dialog.addEventListener('click',e=>{if(performance.now()<state.suppressClickUntil){e.preventDefault();e.stopImmediatePropagation()}},true);
@@ -197,12 +202,13 @@
     Object.assign(state,from);cameraReturn={from,to,phases,started:performance.now(),duration:650};needsPaint=true;paint(0);
   }
   function renderAtlas() {
+    if(!window.ShiyuEntitlements?.allows('atlas-'+state.mode)){if(window.ShiyuEntitlements?.allows('atlas-2d'))state.mode='2d';else{if(dialog?.open)dialog.close();return}}
     resetReturnWheel();
     if(!classicOrbits&&state.scene3d==='systems')state.scene3d='solar';
     const n=get(state.focus)||root;
     state.hover=null;state.drag=null;state.settling=false;
     dialog.innerHTML=`<div class="at-shell at-full-page${orbital()?' at-orbital':''}${galaxy()?' at-galaxy':''}" data-mode="${state.mode}" data-layout="${state.layout}" data-presentation="${state.mode==='3d'?state.scene3d:'spatial'}">
-      <button class="at-cover-return" data-at="home" aria-label="返回首页"><span>首页</span><span>点击返回首页</span></button><div class="at-header-actions space-top-actions"></div>
+      <button class="at-cover-return" data-at="home" aria-label="返回首页"><span><svg class="at-return-home-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5M5.5 9.5V21h5v-6h3v6h5V9.5"/></svg><svg class="at-return-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V4m-7 7 7-7 7 7"/></svg></span><span>点击返回首页</span></button><div class="at-header-actions space-top-actions"></div>
       <div class="at-canvas" aria-label="${esc(n.name)}关系图" tabindex="0"></div>
       <div class="at-footer"><div class="at-legend"><span><i></i>空间</span><span><i></i>场景</span><span><i></i>分组</span><span>${icons.link}网址</span><span class="at-parent-legend">┄ 上级</span><span class="at-child-legend">─ 下级</span></div><div class="at-view-tools"><button class="at-focus-scene" data-at="focus-scene" aria-label="聚焦场景" title="聚焦场景：恢复当前节点的默认视角">${icons.locate}</button>${layoutPicker()}</div></div>
       <aside class="at-drawer" hidden aria-label="图谱管理"></aside><div class="at-notice" hidden role="status"></div></div>`;
@@ -682,6 +688,7 @@
     const draw=q=>{const matches=available.filter(t=>t.name.toLowerCase().includes(q.toLowerCase()));aside.querySelector('.at-drawer-list').innerHTML=matches.slice(0,60).map(t=>`<button data-at-destination="${available.indexOf(t)}">${esc(t.name)}<small>${t.list.length} 项内容</small></button>`).join('')+(matches.length>60?'<p class="at-detail-note">输入名称查找更多目标</p>':!matches.length?'<p class="at-detail-note">还没有可用的目标位置</p>':'')};draw('');aside.querySelector('input').oninput=e=>draw(e.target.value);
     aside.onclick=e=>{const b=e.target.closest('[data-at-destination]');if(!b)return;const t=available[Number(b.dataset.atDestination)];writable(n,()=>{
       const from=sourceList(n),at=from.indexOf(n.entity);if(n.kind!=='link'&&from.length<2){notify('原位置需至少保留一个'+label(n.kind));return}if(at<0)return;
+      if(['scene','group'].includes(n.kind)&&!window.ShiyuEntitlements?.requireQuota(n.kind,t.list.length))return;
       from.splice(at,1);t.list.push(n.entity);undo=()=>{const i=t.list.indexOf(n.entity);if(i>=0){t.list.splice(i,1);from.splice(Math.min(at,from.length),0,n.entity);persist()}};persist();if(state.focus===n.key)state.focus=n.parent;repairContext();refresh();notify('已移动到 '+t.name,true);
     })};
   }
@@ -726,9 +733,10 @@
     dialog.classList.add('atlas-direct-entry');dialog.close();
   }
   function leaveAtlasForHome(){closeAtlas('home')}
-  function selectGraphView(id,trigger='views'){state.mode=viewOptions('3d').includes(id)?'3d':'2d';if(state.mode==='3d')state.scene3d=id;else state.layout=id;state.motion=!reduceMotion.matches;savePreferences();resetCamera();renderAtlas();query('[data-at="'+trigger+'"]').focus({preventScroll:true})}
+  function selectGraphView(id,trigger='views'){const mode=viewOptions('3d').includes(id)?'3d':'2d';if(!window.ShiyuEntitlements?.require('atlas-'+mode,undefined,'atlas'))return;state.mode=mode;if(state.mode==='3d')state.scene3d=id;else state.layout=id;state.motion=!reduceMotion.matches;savePreferences();resetCamera();renderAtlas();query('[data-at="'+trigger+'"]').focus({preventScroll:true})}
   function setViewDimension(mode,focusTab=false){
     if(!['2d','3d'].includes(mode))return;
+    if(!window.ShiyuEntitlements?.require('atlas-'+mode,undefined,'atlas'))return;
     query('.at-view-tabs')?.querySelectorAll('[data-at-dimension]').forEach(tab=>tab.setAttribute('aria-selected',String(tab.dataset.atDimension===mode)));
     query('.at-layout-menu')?.querySelectorAll('[data-at-view-panel]').forEach(panel=>panel.hidden=panel.dataset.atViewPanel!==mode);
     if(focusTab)query('[data-at-dimension="'+mode+'"]')?.focus({preventScroll:true});
@@ -916,6 +924,7 @@
     writable(n,()=>{
       const sameScene=n.parent===scene.key,from=sourceList(n),to=scene.entity.groups,at=from.indexOf(n.entity);if(at<0)return;
       if(!sameScene&&from.length<2){notify('原场景需至少保留一个分组');return}
+      if(!sameScene&&!window.ShiyuEntitlements?.requireQuota('group',to.length))return;
       paint(0);
       const beforeFrom=[...from],beforeTo=sameScene?null:[...to],positions=new Map(visible.filter(r=>r.entity).map(r=>[r.entity,{x:r.px,y:r.py}])),camera=Object.fromEntries(['zoom','yaw','pitch','panX','panY','phase','orbitClock'].map(k=>[k,state[k]]));
       const fromPlan=satelliteValuesFor(fromScene),toPlan=sameScene?fromPlan:satelliteValuesFor(scene),beforeFromPlan={...fromPlan.values},beforeToPlan=sameScene?null:{...toPlan.values},identity=orbitIdentity(source);
@@ -948,9 +957,10 @@
   render=function(){const entering=view==='space'&&(lastView!=='space'||lastSid!==spaceId),preferred=entering?entryPresentation(spaceId):null,active=dialog?.open;
     if(entering){if(preferred?.theme&&THEMES[preferred.theme])sessionThemes.set(spaceId,preferred.theme);else sessionThemes.delete(spaceId)}lastView=view;lastSid=spaceId;
     originalRender();mountEntry();
-    if(active&&!editorBusy){if(view!=='space'){dialog.close();document.body.classList.remove('atlas-active','atlas-transitioning');return}if(entering&&preferred?.view==='daily'){dialog.close();return}if(state.sid!==spaceId){state.sid=spaceId;state.focus='s:'+spaceId;preferences();if(preferred?.view==='atlas')for(const field of ['mode','layout','scene3d'])if(preferred[field]!==undefined)state[field]=preferred[field];resetCamera()}if(buildIndex())renderAtlas();else dialog.close()}
+    if(active&&!editorBusy){if(view!=='space'){dialog.close();document.body.classList.remove('atlas-active','atlas-transitioning');return}if(entering&&preferred?.view==='daily'){dialog.close();return}if(state.sid!==spaceId){state.sid=spaceId;state.focus='s:'+spaceId;preferences();if(preferred?.view==='atlas')for(const field of ['mode','layout','scene3d'])if(preferred[field]!==undefined)state[field]=preferred[field];resetCamera()}if(!window.ShiyuEntitlements?.allows('atlas-'+state.mode)){if(window.ShiyuEntitlements?.allows('atlas-2d'))state.mode='2d';else{dialog.close();return}}if(buildIndex())renderAtlas();else dialog.close()}
     else if(!active&&entering&&preferred?.view==='atlas')open(spaceId,null,preferred,true);
   };
+  window.addEventListener('shiyu-user-entitlements',()=>{if(dialog?.open&&!window.ShiyuEntitlements?.allows('atlas-'+state.mode)){if(window.ShiyuEntitlements?.allows('atlas-2d')){state.mode='2d';resetCamera();renderAtlas()}else dialog.close()}});
   const groupsBeforeModeEntry=renderGroups;renderGroups=function(...args){const result=groupsBeforeModeEntry(...args);mountEntry();return result};
   mountEntry();
 })();

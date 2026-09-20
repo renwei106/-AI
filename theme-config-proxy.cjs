@@ -1,6 +1,6 @@
 module.exports=async function themeConfigProxy(req,res){
   const url=new URL(req.url,'http://127.0.0.1')
-  if(!['/api/shiyu/themes','/api/shiyu/plans','/api/shiyu/operations','/api/shiyu/member-visual','/api/shiyu/i18n/public'].includes(url.pathname)||req.method!=='GET')return false
+  if(!['/api/shiyu/themes','/api/shiyu/plans','/api/shiyu/plans/catalog','/api/shiyu/operations','/api/shiyu/member-visual','/api/shiyu/i18n/public'].includes(url.pathname)||req.method!=='GET')return false
   try{
     const upstream=new URL(url.pathname,process.env.SHIYU_ADMIN_ORIGIN||'http://127.0.0.1:5175')
     const response=await fetch(upstream,{headers:{accept:'application/json'},cache:'no-store'})

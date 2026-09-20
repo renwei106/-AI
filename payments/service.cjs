@@ -4,10 +4,10 @@ function reject(message, code, status = 400) { throw new PaymentError(message, c
 function publicOrder(o) {
   return { id: o.id, provider: o.provider, planId: o.plan_id, planName: o.plan_name, amount: o.amount, days: o.days,
     status: o.status, createdAt: o.created_at, expiresAt: o.expires_at, paidAt: o.paid_at,
-    memberExpiresAt: o.member_expires_at, checkout: o.checkout && o.status !== 'paid' && o.expires_at > Date.now() ? JSON.parse(o.checkout) : null };
+    memberExpiresAt: o.member_expires_at, fulfillment: o.fulfillment_state, checkout: o.checkout && o.status !== 'paid' && o.expires_at > Date.now() ? JSON.parse(o.checkout) : null };
 }
 class PaymentService {
-  constructor({ config, store, providers, getPlans }) { Object.assign(this, { config, store, providers, getPlans }); this.creating = new Map(); this.querying = new Map(); }
+  constructor({ config, store, providers, getPlans, memberships }) { Object.assign(this, { config, store, providers, getPlans, memberships }); this.creating = new Map(); this.querying = new Map(); }
   provider(name) { if (!this.providers[name]) reject('该支付方式尚未配置完成，请稍后重试', 'NOT_CONFIGURED', 503); return this.providers[name]; }
   async create(user, input) {
     if (!input || input.accepted !== true) reject('请先阅读并同意会员服务协议', 'AGREEMENT_REQUIRED');
@@ -48,7 +48,8 @@ class PaymentService {
   }
   async query(user, id) {
     let order = this.owned(user, id);
-    if (['paid', 'closed'].includes(order.status) || Date.now() - order.last_checked_at < 4000) return publicOrder(order);
+    if (order.status === 'paid') return publicOrder(this.fulfill(order));
+    if (order.status === 'closed' || Date.now() - order.last_checked_at < 4000) return publicOrder(order);
     if (this.querying.has(id)) return this.querying.get(id);
     const promise = (async () => {
       this.store.checked(id);
@@ -68,8 +69,16 @@ class PaymentService {
     if (result.appId !== config.appId || result.merchantId !== merchant || result.amount !== order.amount || result.currency !== 'CNY') reject('支付通知的应用、商户或金额不匹配', 'PAYMENT_MISMATCH');
     if (result.status === 'closed') return this.store.closed(order.id);
     if (!result.transactionId || !Number.isFinite(result.paidAt) || result.paidAt < order.created_at - 300_000 || result.paidAt > Date.now() + 300_000) reject('支付成功通知缺少有效交易信息', 'INVALID_PAYMENT');
-    return this.store.paid(order.id, result.transactionId, result.paidAt);
+    const currentUser = this.memberships?.readUsers().find(user => user.id === order.user_id);
+    const expiry = this.memberships ? this.memberships.stateFor(currentUser || null).expiresAt : undefined;
+    return this.fulfill(this.store.paid(order.id, result.transactionId, result.paidAt, expiry));
   }
+  fulfill(order) {
+    if (!this.memberships || order.fulfillment_state !== 'pending' || order.user_id === 'payment-integration') return order;
+    const result = this.memberships.applyPayment(order);
+    return this.store.fulfilled(order.id, result.event.afterPermanent ? null : Date.parse(result.event.afterExpiresAt) || null);
+  }
+  retryFulfillment() { for (const order of this.store.pendingFulfillment()) { try { this.fulfill(order); } catch { /* durable pending order retries without duplicate grants */ } } }
   notification(provider, headers, raw) { return this.apply(provider, this.provider(provider).notification(headers, raw)); }
 }
 module.exports = { PaymentService, publicOrder };

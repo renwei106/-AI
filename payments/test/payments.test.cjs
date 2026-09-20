@@ -160,14 +160,20 @@ test('Alipay official SDK creates a signed desktop cashier URL and validates a r
   assert.throws(() => provider.notification({}, raw + '&seller_id=other'));
 });
 test('HTTP routes enforce authenticated ownership and Origin; signed callbacks are processed without browser cookies', async t => {
+  const fs = require('node:fs'), os = require('node:os'), path = require('node:path');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'shiyu-http-test-'));
+  const memberships = require('../membership.cjs').createMembershipService({ usersFile: path.join(dir,'users.json'), invitationsFile: path.join(dir,'invitations.json'), now:()=>now, readPlans:()=>plans });
+  memberships.writeUsers([{ ...user, name:'test', member:false, memberEvents:[] }]);
+  t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+
   const store = new PaymentStore(':memory:');
   const wx = new WechatProvider(wechat, { now: () => now });
   wx.create = async () => ({ kind: 'qr', image: 'data:image/png;base64,TEST' });
-  wx.query = async order => ({ orderId: order.id, status: 'pending' });
-  const handler = createPaymentHandler({ config, store, providers: { wechat: wx }, getPlans: async () => plans,
+  let queried=0;wx.query = async order => { queried++; return { orderId: order.id, status: 'pending' }; };
+  const handler = createPaymentHandler({ config, store, memberships, providers: { wechat: wx }, getPlans: async () => plans,
     authenticate: async req => req.headers.authorization === 'test-user-a' ? user : req.headers.authorization === 'test-user-b' ? { id: 'user-b' } : null });
   const server = http.createServer(async (req, res) => { if (!await handler(req, res)) { res.writeHead(404); res.end(); } }); server.listen(0, '127.0.0.1'); await once(server, 'listening');
-  t.after(() => { server.close(); server.closeAllConnections(); store.close(); });
+  t.after(() => { server.close(); server.closeAllConnections(); handler.close(); });
   const base = 'http://127.0.0.1:' + server.address().port + '/api/shiyu/payments';
   const headers = { 'Content-Type': 'application/json', Origin: 'http://localhost:4348', Authorization: 'test-user-a' };
   const post = (body, h = headers) => fetch(base + '/orders', { method: 'POST', headers: h, body: JSON.stringify(body) });
@@ -175,6 +181,8 @@ test('HTTP routes enforce authenticated ownership and Origin; signed callbacks a
   assert.equal((await post(input(), { ...headers, Authorization: '' })).status, 401);
   const response = await post(input()); assert.equal(response.status, 201); const { order } = await response.json();
   assert.equal((await fetch(base + '/orders/' + order.id, { headers: { Authorization: 'test-user-b' } })).status, 404);
+  const readOnly=await fetch(base+'/orders/'+order.id,{headers});assert.equal(readOnly.status,200);assert.equal(queried,0);
+  const query=await fetch(base+'/orders/'+order.id+'/query',{method:'POST',headers});assert.equal(query.status,200);assert.equal(queried,1);
   const raw = encryptedEvent(wechatSuccess(order));
   for (let i = 0; i < 2; i++) assert.equal((await fetch(base + '/notify/wechat', { method: 'POST', headers: signedHeaders(raw), body: raw })).status, 204);
   const account = await fetch(base + '/account', { headers: { Authorization: 'test-user-a' } }).then(r => r.json()); assert.equal(account.memberExpiresAt, now + 30 * 86_400_000);

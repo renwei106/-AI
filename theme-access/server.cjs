@@ -1,7 +1,26 @@
 'use strict';
 const store=require('./store.cjs');
 const retired=new Set(['reading','projection','wallfilm']);
-function policy(themes,plans){const free=plans.find(p=>p.id==='free');const granted=id=>free?.entitlements?.some(e=>e.key==='theme-'+id&&e.enabled===true)===true;const items=themes.filter(t=>!retired.has(t.id)).map(t=>({id:t.id,enabled:t.enabled===true,memberOnly:!granted(t.id)}));return {items,fallback:items.find(t=>t.enabled&&!t.memberOnly)?.id||'base'}}
+function themeGranted(entitlements,id){
+  const selection=entitlements?.find(item=>item.key==='themes');
+  if(selection)return selection.enabled===true&&Array.isArray(selection.value)&&selection.value.includes(id);
+  return entitlements?.some(item=>item.key==='theme-'+id&&item.enabled===true)===true;
+}
+function expiryTime(value){return typeof value==='number'?value:typeof value==='string'?Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(value)?value+'T23:59:59+08:00':value):NaN}
+function membershipState(identity,now=Date.now()){
+  const user=identity?.user,active=identity?.authenticated===true&&user?.blacklisted!==true;
+  const snapshot=user?.membership||identity?.membership;
+  const permanent=snapshot?.permanent===true||user?.memberExpiresAt==='永久';
+  const end=expiryTime(snapshot?.expiresAt??user?.memberExpiresAt);
+  return {member:active&&user?.member===true&&(permanent||end>now),memberExpired:active&&!permanent&&Number.isFinite(end)&&end<=now};
+}
+function policy(themes,plans,entitlements){
+  const free=plans.find(plan=>plan.id==='free');
+  const granted=id=>themeGranted(free?.entitlements,id);
+  const actual=Array.isArray(entitlements)?entitlements:free?.entitlements;
+  const items=themes.filter(theme=>!retired.has(theme.id)).map(theme=>({id:theme.id,enabled:theme.enabled===true,memberOnly:!granted(theme.id),allowed:theme.enabled===true&&themeGranted(actual,theme.id)}));
+  return {items,fallback:items.find(theme=>theme.enabled&&theme.allowed)?.id||items.find(theme=>theme.enabled&&!theme.memberOnly)?.id||'base'};
+}
 async function upstream(path,req){const r=await fetch(new URL(path,process.env.SHIYU_ADMIN_ORIGIN||'http://127.0.0.1:5175'),{headers:{cookie:req.headers.cookie||'',accept:'application/json'},signal:AbortSignal.timeout(4000)});if(!r.ok)throw Error('主题权限暂时无法校验');return r.json()}
 async function handler(req,res){
   const pathname=(req.url||'').split('?')[0];
@@ -11,7 +30,9 @@ async function handler(req,res){
     const isPreview=pathname.endsWith('/preview'),isPresence=pathname.endsWith('/presence');
     if((isPreview||isPresence)&&req.method!=='POST'||!isPreview&&!isPresence&&req.method!=='GET'){send(405,{message:'不支持该操作'});return true}
     const [themes,plans,identity]=await Promise.all([upstream('/api/shiyu/themes',req),upstream('/api/shiyu/plans',req),upstream('/api/shiyu/auth/session',req)]);
-    const result=policy(themes.items,plans.items),now=Date.now(),memberExpiry=identity.user?.memberExpiresAt,member=identity.authenticated===true&&identity.user?.blacklisted!==true&&identity.user?.member===true&&(memberExpiry==='永久'||Date.parse(memberExpiry)>now),memberExpired=identity.authenticated===true&&memberExpiry!=='永久'&&Number.isFinite(Date.parse(memberExpiry))&&Date.parse(memberExpiry)<=now;
+    const now=Date.now(),{member,memberExpired}=membershipState(identity,now);
+    const entitlementData=identity.entitlements||identity.user?.entitlements||identity.user?.membership?.entitlements;
+    const result=policy(themes.items,plans.items,member?entitlementData:undefined);
     const token=store.visitor(req,res);let preview=null,presence=null,payload={};
     if(req.method==='POST'){
       if(![`http://${req.headers.host}`,`https://${req.headers.host}`].includes(req.headers.origin)){send(403,{message:'请求来源无效'});return true}
@@ -19,14 +40,14 @@ async function handler(req,res){
       const theme=String(payload.theme||'');
       if(isPresence){
         const item=result.items.find(t=>t.id===theme&&t.enabled);if(!item){send(400,{message:'主题不可用'});return true}
-        if(member||!item.memberOnly)presence=store.preview(token,theme,now);else presence=store.updatePresence(token,theme,payload.active===true,now);
+        if(item.allowed)presence=store.preview(token,theme,now);else presence=store.updatePresence(token,theme,payload.active===true,now);
         send(200,{...result,member,memberExpired,serverTime:now,presence,presenceTheme:theme,previews:store.previews(token)});return true;
       }
       const item=result.items.find(t=>t.id===theme&&t.enabled);if(!item){send(400,{message:'主题不可用'});return true}
-      if(item.memberOnly&&!member){const state=store.preview(token,theme,now);if(state.expired){send(403,{message:'今天的体验先到这里，开通会员后可以继续使用。',...result,member,memberExpired,serverTime:now,previews:store.previews(token)});return true}preview={theme,state};}
+      if(!item.allowed){const state=store.preview(token,theme,now);if(state.expired){send(403,{message:member?'当前会员方案未包含这个主题，可以查看其他会员权益。':'今天的体验先到这里，开通会员后可以继续使用。',...result,member,memberExpired,serverTime:now,previews:store.previews(token)});return true}preview={theme,state};}
     }
     send(200,{...result,member,memberExpired,serverTime:now,previews:store.previews(token),preview});
   }catch{send(503,{message:'主题权限暂时无法校验，请稍后重试'})}
   return true;
 }
-module.exports={handler,policy};
+module.exports={handler,policy,membershipState};

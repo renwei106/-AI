@@ -104,6 +104,15 @@ body[data-dark=true] .corner-dialog .corner-toolbar button,body[data-dark=true] 
 /* The collection is a transparent stage over the current page, not a panel. */
 #my-corner{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;padding:0;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:hidden;color:var(--ink)}
 #my-corner::backdrop{background:color-mix(in srgb,var(--bg) 32%,transparent);backdrop-filter:blur(18px) saturate(.75)}
+#my-corner.corner-reveal-opening::backdrop{animation:corner-backdrop-enter 620ms ease-out both}
+#my-corner.corner-reveal-closing::backdrop{animation:corner-backdrop-leave 520ms ease-in both}
+#my-corner:is(.corner-reveal-opening,.corner-reveal-closing)::before{content:"";position:absolute;inset:0;pointer-events:none;background:color-mix(in srgb,var(--accent) 18%,var(--bg));z-index:0}
+#my-corner.corner-reveal-opening::before{animation:corner-reveal-wash-in 620ms linear both}
+#my-corner.corner-reveal-closing::before{animation:corner-reveal-wash-out 520ms linear both}
+@keyframes corner-backdrop-enter{from{opacity:0}to{opacity:1}}
+@keyframes corner-backdrop-leave{from{opacity:var(--corner-backdrop-from,1)}to{opacity:0}}
+@keyframes corner-reveal-wash-in{0%{opacity:.7}75%{opacity:.48}100%{opacity:0}}
+@keyframes corner-reveal-wash-out{0%{opacity:0}35%{opacity:.48}100%{opacity:.7}}
 #my-corner .corner-body{max-height:none;height:100%;overflow:visible}
 #my-corner .corner-stage{position:absolute;inset:clamp(48px,9vh,110px) 0 155px;display:flex;align-items:center;justify-content:center;perspective:1800px;--drift-x:0px;--drift-y:0px}
 #my-corner .corner-deck{box-sizing:border-box;width:min(1240px,calc(100vw - 156px));height:100%;max-height:740px;display:flex;align-items:center;gap:28px;padding:22px 12px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-snap-type:x proximity;perspective:1600px;transform:translate3d(var(--drift-x),var(--drift-y),0);transition:transform .6s cubic-bezier(.2,.8,.2,1)}

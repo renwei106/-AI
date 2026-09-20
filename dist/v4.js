@@ -178,7 +178,7 @@ document.addEventListener('keydown',e=>{const el=e.target.closest('.sidebar .sce
 
 const editBeforeInline=editOrganization;
 editOrganization=function(kind,id){if(id){editBeforeInline(kind,id);return}const d=organizationDialog();if(!d.open||d.dataset.listKind!==kind||!d.querySelector('.organization-list'))manageOrganization(kind);const existing=d.querySelector('.inline-create input');if(existing){existing.focus();return}const list=organizationList(kind),row=document.createElement('div');row.className='inline-create';row.innerHTML=`<input maxlength="24" aria-label="新${organizationLabels[kind]}名称" placeholder="输入${organizationLabels[kind]}名称"><small class="inline-create-hint">移开自动保存</small>`;d.querySelector('.organization-list').append(row);const input=row.querySelector('input');let saved=false,composing=false;
-function commit(){if(saved||composing||row.dataset.picking==='true'||!row.isConnected)return;const name=input.value.trim();if(!name)return;if(list.some(x=>x.name===name)){row.querySelector('small').textContent='名称已存在，请换一个';input.setAttribute('aria-invalid','true');return}saved=true;const uid=()=>crypto.randomUUID(),group=()=>({id:uid(),name:'未分类',items:[]}),newScene=()=>({id:uid(),name:'日常',description:'',groups:[group()]});const added=kind==='space'?{id:uid(),name,icon:'◈',scenes:[newScene()]}:kind==='scene'?{...newScene(),name}:{...group(),name};added.icon=row.dataset.icon||'folder';list.push(added);persist();render();manageOrganization(kind)}
+function commit(){if(saved||composing||row.dataset.picking==='true'||!row.isConnected)return;const name=input.value.trim();if(!name)return;if(list.some(x=>x.name===name)){row.querySelector('small').textContent='名称已存在，请换一个';input.setAttribute('aria-invalid','true');return}if(!window.ShiyuEntitlements?.requireQuota(kind,list.length))return;saved=true;const uid=()=>crypto.randomUUID(),group=()=>({id:uid(),name:'未分类',items:[]}),newScene=()=>({id:uid(),name:'日常',description:'',groups:[group()]});const added=kind==='space'?{id:uid(),name,icon:'◈',scenes:[newScene()]}:kind==='scene'?{...newScene(),name}:{...group(),name};added.icon=row.dataset.icon||'folder';list.push(added);persist();render();manageOrganization(kind)}
 input.addEventListener('compositionstart',()=>composing=true);input.addEventListener('compositionend',()=>composing=false);input.addEventListener('blur',commit);row.addEventListener('mouseleave',commit);input.addEventListener('keydown',e=>{if(e.isComposing)return;if(e.key==='Enter'){e.preventDefault();commit()}if(e.key==='Escape'){e.preventDefault();e.stopPropagation();row.remove()}});input.focus()};
 const manageBeforeInline=manageOrganization;manageOrganization=function(kind){manageBeforeInline(kind);organizationDialog().dataset.listKind=kind};
 
@@ -636,15 +636,18 @@ function memberCatalogItems(){const value=window.__shiyuMemberCatalog||MEMBER_CA
 function memberCatalogPlans(kind){const items=memberCatalogItems().filter(p=>p&&p.enabled!==false);if(!items.length)return [];const free=items.filter(p=>p.id==='free'||p.name==='免费版');const paid=items.filter(p=>!(p.id==='free'||p.name==='免费版'));return kind==='free'?free:(kind==='paid'?paid:items)}
 function memberCatalogBenefit(key,kind='paid'){return (memberCatalogPlans(kind)[0]?.entitlements||[]).find(item=>item?.key===key)||null}
 function memberCatalogQuantity(kind,member){
- const key=kind+'-limit',fallback=(member?MEMBER_CONFIG.paid:MEMBER_CONFIG.free)[kind],plans=memberCatalogPlans(member?'paid':'free'),first=memberCatalogBenefit(key,member?'paid':'free');
+ const key=kind+'-limit',fallback=null,plans=memberCatalogPlans(member?'paid':'free'),first=memberCatalogBenefit(key,member?'paid':'free');
  if(first?.enabled&&first.kind==='quantity'&&first.value!==''&&Number.isFinite(Number(first.value))&&Number(first.value)>=0){const differs=plans.slice(1).some(plan=>{const other=(plan.entitlements||[]).find(item=>item?.key===key);return !other?.enabled||String(other.value)!==String(first.value)||other.unit!==first.unit});return {value:Number(first.value),text:first.value+' '+(first.unit||'个')+(differs?'起':''),configured:true}}
  return {value:fallback,text:window.__shiyuMemberCatalog?.ready?'以当前套餐为准':'正在读取权益',configured:false};
 }
 function memberCatalogDescription(key,fallback){const benefit=memberCatalogBenefit(key);return benefit?.enabled?(benefit.description||benefit.name||fallback):window.__shiyuMemberCatalog?.ready?'具体权益以当前套餐为准。':fallback}
+function memberSelectionSummary(key,kind='paid'){const plan=memberCatalogPlans(kind)[0],benefit=plan?.entitlements?.find(item=>item.key===key),options=window.ShiyuEntitlements?.options(key).filter(item=>item.enabled!==false)||[];if(!window.__shiyuMemberCatalog?.ready||!window.__shiyuMemberResources)return '正在读取权益';const values=benefit?.enabled&&Array.isArray(benefit.value)?benefit.value.map(String):[],count=options.filter(item=>values.includes(String(item.id))).length,differs=kind==='paid'&&memberCatalogPlans('paid').slice(1).some(p=>JSON.stringify(p.entitlements?.find(item=>item.key===key)?.value)!==JSON.stringify(benefit?.value));return (kind==='paid'&&count>0&&count===options.length?'全部 '+count+' 种':count+' 种')+(differs?'起':'')}
+function memberEnabledNames(definitions,kind='paid'){const names=definitions.filter(([key])=>memberCatalogBenefit(key,kind)?.enabled).map(([,name])=>name);return names.length?names.join('、'):'具体功能以当前套餐为准'}
 function memberCatalogChanged(){markMemberEntries();decorateMemberMarkers();const d=$('#member-gate');if(d?.open){const key=d.querySelector('.member-benefits article[aria-current="true"]')?.dataset.feature||d.dataset.memberFeature;memberGate(key,memberGateContext)}}
 window.addEventListener('shiyu-member-catalog',memberCatalogChanged);
+window.addEventListener('shiyu-member-resources',memberCatalogChanged);
 const MEMBER_FEATURES=[['space','更多空间','让工作、生活与灵感，各有归处。','1 个空间','20 个空间'],['scene','更多场景','给每一种日常，留一个专属场景。','每空间 3 个','每空间 20 个'],['group','更多分组','把纷繁的收藏，整理成清晰的章节。','每场景 3 个','每场景 20 个'],['personal','空间独立外观','不同的空间，也可以有不同的气质。','跟随全局','独立字体、布局、配色和样式'],['share','分享保护','分享对所有人开放，重要内容可以多一层保护。','公开分享','密码与有效期']];
-function isMember(){return signed&&Number(prefs.membership?.expiresAt)>Date.now()}
+function isMember(){return Boolean(signed&&window.__shiyuUserEntitlements?.ready&&window.__shiyuUserEntitlements.member)}
 function memberDialog(id,title){let d=document.getElementById(id);if(!d){d=document.createElement('dialog');d.id=id;d.className='membership-dialog';document.body.append(d)}d.innerHTML=`<header class="member-heading"><span>SHIYU / MEMBERSHIP</span><button data-member-close aria-label="关闭">×</button></header><h2>${title}</h2>`;d.onclick=e=>{if(e.target.closest('[data-member-close]')||e.target===d)d.close()};return d}
 function memberGate(key){const index=Math.max(0,MEMBER_FEATURES.findIndex(f=>f[0]===key)),d=memberDialog('member-gate','给喜欢的，多一点空间。');d.innerHTML+=`<p class="member-sub">当前功能需要会员</p><div class="member-benefits">${MEMBER_FEATURES.map((f,i)=>`<article><span class="member-feature-number">0${i+1} / MEMBER BENEFIT</span><h3>${f[1]}</h3><p>${f[2]}</p><div class="member-limit"><span>免费用户<b>${f[3]}</b></span><span>会员<b>${f[4]}</b></span></div></article>`).join('')}</div><div class="member-carousel-nav"><button data-benefit-prev aria-label="上一项">←</button><span>左右滑动，发现更多权益</span><button data-benefit-next aria-label="下一项">→</button></div><button class="member-primary" data-member-center>查看会员方案</button>`;d.querySelector('[data-member-center]').onclick=()=>{d.close();openMemberCenter()};const row=d.querySelector('.member-benefits');d.querySelector('[data-benefit-prev]').onclick=()=>row.scrollBy({left:-row.clientWidth,behavior:'smooth'});d.querySelector('[data-benefit-next]').onclick=()=>row.scrollBy({left:row.clientWidth,behavior:'smooth'});d.showModal();row.scrollLeft=index*row.clientWidth}
 let selectedMemberPlan=1;
@@ -652,17 +655,14 @@ function openMemberCenter(){const d=memberDialog('member-center','为热爱，�
 function openMemberOrder(){const p=MEMBER_CONFIG.plans[selectedMemberPlan],d=memberDialog('member-order','确认你的相伴时光');d.innerHTML+=`<div class="member-order-summary"><h3>${p.name}</h3><p>有效期 ${p.days} 天 · 全部会员权益</p><strong>价格待公布</strong></div><h3>支付方式</h3><div class="member-payments"><button disabled>微信支付<small>暂未开通</small></button><button disabled>支付宝<small>暂未开通</small></button></div><p class="member-policy">套餐定价和支付服务确认后开放购买。当前不会创建扣款或开通会员。</p><button class="member-primary" disabled>暂未开放购买</button>`;d.showModal()}
 function openMemberInvite(){const d=memberDialog('member-invite-dialog','把好东西，分享给同频的人。');d.innerHTML+=`<p class="member-sub">邀请奖励 · 即将开启</p><div class="member-invite-stats"><span><strong>0</strong>有效邀请</span><span><strong>—</strong>累计奖励</span><span><strong>—</strong>可用奖励</span></div><div class="member-invite-rules"><h3>活动规则</h3><p>好友通过专属链接注册并完成活动要求后，邀请才计为有效。</p><p>每位好友仅计奖一次。奖励金额、到账时间及使用方式将在活动开放时公布。</p></div><button class="member-primary" disabled>活动开放后获取邀请链接</button><h3>邀请明细</h3><div class="member-empty">还没有邀请记录。<br><small>有效邀请、达标进度与奖励到账状态将在这里展示。</small></div>`;d.showModal()}
 const centerBeforeMembership=openAccountCenter;openAccountCenter=function(){centerBeforeMembership();const d=$('#account-center');if(signed&&d&&!d.querySelector('[data-membership-entry]')){const entry=document.createElement('button');entry.className='profile-membership';entry.dataset.membershipEntry='';entry.innerHTML='<span class="profile-membership-label"><span class="membership-badge" title="会员">'+MEMBER_VISUAL_CONFIG.badge+'</span>会员中心</span><small>给喜欢的，多一点空间 ↗</small>';entry.onclick=openMemberCenter;d.querySelector('.dialog-heading')?.after(entry)}};
-function memberQuota(kind){if(!['space','scene','group'].includes(kind))return false;const count=kind==='space'?data.length:kind==='scene'?space().scenes.length:(scene()?.groups.length||0);return count>=memberCatalogQuantity(kind,isMember()).value}
-const editBeforeMemberLimit=editOrganization;editOrganization=function(kind,id){if(!id&&memberQuota(kind)){if(isMember())toast('已达到当前数量上限');else memberGate(kind);return}editBeforeMemberLimit(kind,id)};
+function memberQuota(kind){if(!['space','scene','group'].includes(kind))return false;const count=kind==='space'?data.length:kind==='scene'?space().scenes.length:(scene()?.groups.length||0),limit=window.ShiyuEntitlements?.limit(kind);return limit==null||count>=limit}
+const editBeforeMemberLimit=editOrganization;editOrganization=function(kind,id){const count=kind==='space'?data.length:kind==='scene'?space().scenes.length:(scene()?.groups.length||0);if(!id&&!window.ShiyuEntitlements?.requireQuota(kind,count))return;editBeforeMemberLimit(kind,id)};
 const addBeforeMemberLimit=add;add=function(){addBeforeMemberLimit()};
 const shareBeforeMember=openSpaceShare;openSpaceShare=function(){shareBeforeMember()};
-document.addEventListener('click',e=>{const b=e.target.closest('[data-preference-mode][data-value="space"],[data-space-font],[data-space-width],[data-space-color]');if(b&&!isMember()){e.preventDefault();e.stopImmediatePropagation();memberGate('personal')}},true);
 function markMemberEntries(){
  document.querySelectorAll('[data-create]').forEach(b=>{
-  const kind=b.dataset.create,gated=!!kind&&!isMember()&&memberQuota(kind),badge=b.querySelector('.membership-badge');
-  if(gated&&!badge){const mark=document.createElement('span');mark.className='membership-badge';mark.title='会员可享更多额度与权益';mark.setAttribute('aria-label','会员专享');mark.innerHTML=MEMBER_VISUAL_CONFIG.badge;b.append(mark)}
-  if(!gated)badge?.remove();
-  if(kind)b.disabled=!!isMember()&&memberQuota(kind)
+  b.querySelector('.membership-badge')?.remove();
+  b.disabled=false;
  });
  document.querySelectorAll('[data-action="add"] .membership-badge').forEach(b=>b.remove());
 }
@@ -676,7 +676,7 @@ const centerBeforeFullPage=openMemberCenter;openMemberCenter=function(){centerBe
 const gateBeforeMemberCopy=memberGate;memberGate=function(key,context){gateBeforeMemberCopy(key,context);$('#member-gate [data-member-center]').textContent='去发现，更多会员可能'};render();
 MEMBER_CONFIG.plans=[{name:'月度会员',days:30,price:10,original:10,auto:false,saving:'按月购买，一年 ¥120'},{name:'连续包月',days:30,price:8,original:10,auto:true,saving:'每月省 ¥2，一年省 ¥24'},{name:'年度会员',days:365,price:99,original:120,auto:false,saving:'比按月购买一年省 ¥21'},{name:'连续包年',days:365,price:79,original:120,auto:true,saving:'比按月购买一年省 ¥41；比年度省 ¥20'}];
 let memberPayment='wechat';
-const headerBeforeMemberIdentity=updateHeader;updateHeader=function(){headerBeforeMemberIdentity();const menu=$('.account-menu');if(!menu)return;const p=accountProfile(),email=String(p.email||'').trim(),phone=String(p.phone||p.mobile||'').trim(),contact=email?esc(email):phone?esc(phone.replace(/^(\d{3})\d{4}(\d{4})$/,'$1****$2')):'暂未绑定邮箱',memberActive=isMember(),end=Math.max(Number(prefs.membership?.expiresAt)||0,Number(prefs.membershipDemo?.expiresAt)||0),label=String(prefs.membership?.label||'').trim(),memberPermanent=memberActive&&(end===Number.MAX_SAFE_INTEGER||/永久/.test(label)),memberMeta=memberActive?(memberPermanent?'永久会员':`有效期至 ${esc(label||new Date(end).toLocaleDateString('zh-CN'))}`):'开通会员，享受更多主题与专属权益';menu.querySelector('[data-menu-member]')?.remove();menu.insertAdjacentHTML('afterbegin',`<div class="menu-identity"><span class="menu-avatar">${avatarMarkup(p.avatar||ACCOUNT_AVATARS[0])}${memberActive?`<i title="会员">${MEMBER_VISUAL_CONFIG.badge}</i>`:''}</span><span><b>${esc(signed?p.name||'我':'访客')}</b><small>${signed?contact:'登录后收藏你的世界'}</small></span></div><button class="menu-membership-card${memberActive?' is-member':''}" data-menu-member role="menuitem"><span class="menu-membership-copy"><b><span class="membership-badge" aria-hidden="true">${MEMBER_VISUAL_CONFIG.badge}</span>会员服务</b><small>${memberMeta}</small></span><span class="menu-membership-arrow" aria-hidden="true">↗</span></button>`);menu.querySelector('[data-menu-member]')?.addEventListener('click',()=>openMemberCenter());const orders=document.createElement('button');orders.className='menu-orders';orders.textContent='我的订单';orders.onclick=()=>openMemberOrders();menu.querySelector('[data-account-signout]')?.before(orders);if(!orders.isConnected)menu.append(orders)};
+const headerBeforeMemberIdentity=updateHeader;updateHeader=function(){headerBeforeMemberIdentity();const menu=$('.account-menu');if(!menu)return;const p=accountProfile(),email=String(p.email||'').trim(),phone=String(p.phone||p.mobile||'').trim(),contact=email?esc(email):phone?esc(phone.replace(/^(\d{3})\d{4}(\d{4})$/,'$1****$2')):'暂未绑定邮箱',memberActive=isMember(),end=Number(prefs.membership?.expiresAt)||0,label=String(prefs.membership?.label||'').trim(),memberPermanent=memberActive&&window.__shiyuUserEntitlements?.permanent,memberMeta=memberActive?(memberPermanent?'永久会员':`有效期至 ${esc(new Date(Number(window.__shiyuUserEntitlements?.expiresAt)||end).toLocaleDateString('zh-CN',{timeZone:'Asia/Shanghai'}))}`):'开通会员，解锁更多权益';menu.querySelector('[data-menu-member]')?.remove();menu.insertAdjacentHTML('afterbegin',`<div class="menu-identity"><span class="menu-avatar">${avatarMarkup(p.avatar||ACCOUNT_AVATARS[0])}${memberActive?`<i title="会员">${MEMBER_VISUAL_CONFIG.badge}</i>`:''}</span><span><b>${esc(signed?p.name||'我':'访客')}</b><small>${signed?contact:'登录后收藏你的世界'}</small></span></div><button class="menu-membership-card${memberActive?' is-member':''}" data-menu-member role="menuitem"><span class="menu-membership-copy"><b><span class="membership-badge" aria-hidden="true">${MEMBER_VISUAL_CONFIG.badge}</span>会员服务</b><small>${memberMeta}</small></span><span class="menu-membership-arrow" aria-hidden="true">↗</span></button>`);menu.querySelector('[data-menu-member]')?.addEventListener('click',()=>openMemberCenter());const orders=document.createElement('button');orders.className='menu-orders';orders.textContent='我的订单';orders.onclick=()=>openMemberOrders();menu.querySelector('[data-account-signout]')?.before(orders);if(!orders.isConnected)menu.append(orders)};
 function openMemberOrders(){const d=memberDialog('member-orders','我的订单');d.innerHTML+='<div class="member-empty">暂无订单<small>支付完成后，可在这里查询套餐、金额及订单状态。</small></div>';d.showModal()}
 function memberComparisonGroups(){const groups=[['空间',[['可编辑空间','1','20'],['查看与打开收藏','✓','✓'],['空间分享','✓','✓'],['密码与有效期','—','✓']]],['场景',[['每空间场景','3','20'],['场景图标与描述','✓','✓']]],['分组',[['每场景分组','3','20'],['分组切换与搜索','✓','✓']]],['风格与个性化',[...Object.values(THEMES).map(t=>[t.name,'✓','✓']),['全局字体、布局、配色','✓','✓'],['空间独立设置','—','✓']]]];return groups.map(([name,rows])=>`<tbody><tr class="comparison-section"><th colspan="3">${name}</th></tr>${rows.map(r=>`<tr>${r.map((v,i)=>`<${i?'td':'th'} class="${v==='✓'?'benefit-check':''}">${v}</${i?'td':'th'}>`).join('')}</tr>`).join('')}</tbody>`).join('')}
 openMemberCenter=function(){const d=memberDialog('member-center','让每一份喜欢，都有余地。');d.classList.add('membership-page');d.querySelector('.member-heading').innerHTML='<span>拾隅 / 会员中心</span><button data-member-close>← 返回</button>';d.onclick=e=>{if(e.target.closest('[data-member-close]'))d.close()};d.oncancel=e=>e.preventDefault();d.innerHTML+=`<p class="member-sub">一种会员，全部权益。选择适合你的相伴方式。</p><div class="member-plans">${MEMBER_CONFIG.plans.map((p,i)=>`<button data-member-plan="${i}" aria-pressed="${i===selectedMemberPlan}"><small>${p.auto?'订阅更优惠':'灵活购买'}</small><h3>${p.name}</h3><strong><em>¥</em>${p.price}<em>/${p.days===30?'月':'年'}</em></strong>${p.original>p.price?`<del>¥${p.original}</del>`:'<del class="price-placeholder">—</del>'}<span>${p.saving}</span><b>${i===selectedMemberPlan?'✓ 已选择':'选择套餐'}</b></button>`).join('')}</div><section class="member-purchase-options"><div><h3>支付方式</h3><div class="member-payments">${[['wechat','微信支付'],['alipay','支付宝']].map(([key,name])=>`<button data-payment="${key}" aria-pressed="${key===memberPayment}">${name}${key===memberPayment?'　✓':''}</button>`).join('')}</div><p class="member-policy">${MEMBER_CONFIG.plans[selectedMemberPlan].auto?'订阅方案：到期按所选周期续费，可取消后续续费。当前支付未开放，不会自动扣款。':'一次购买，到期不自动续费。'}</p></div><button class="member-invite" data-invite-entry><span><b>邀请奖励</b><small>好友注册 +3 天 · 首次购买 +7 天</small><small>拟定活动，开放后生效</small></span><span>去看看 ↗</span></button></section><div class="member-comparison"><h3>每一种日常，都被照顾</h3><p class="member-policy">四种套餐权益完全一致，以下对比免费账户与全部会员套餐。</p><table><thead><tr><th>功能权益</th><th>免费账户</th><th>全部会员套餐</th></tr></thead>${memberComparisonGroups()}</table><p class="member-policy member-expiry-policy">会员到期后，已有空间、场景、分组和收藏仍可编辑、排序与移动；网址可继续收藏。新增空间、场景和分组按免费版额度执行。</p></div><footer class="member-checkout"><span><b>${MEMBER_CONFIG.plans[selectedMemberPlan].name}</b><small>${MEMBER_CONFIG.plans[selectedMemberPlan].days} 天 · ${memberPayment==='wechat'?'微信支付':'支付宝'}</small></span><strong>¥ ${MEMBER_CONFIG.plans[selectedMemberPlan].price}</strong><button class="member-primary" disabled>支付暂未开放</button></footer>`;d.querySelectorAll('[data-member-plan]').forEach(b=>b.onclick=()=>{selectedMemberPlan=Number(b.dataset.memberPlan);openMemberCenter()});d.querySelectorAll('[data-payment]').forEach(b=>b.onclick=()=>{memberPayment=b.dataset.payment;openMemberCenter()});d.querySelector('[data-invite-entry]').onclick=openMemberInvite;if(!d.open)d.showModal()};
@@ -699,12 +699,12 @@ const centerBeforePolishedMembership=openMemberCenter;openMemberCenter=function(
 if(new URLSearchParams(location.search).get('page')==='membership')openMemberCenter();
 
 function extendDemoMembership(days,source){const now=Date.now(),start=Math.max(now,Number(prefs.membershipDemo?.expiresAt)||0);prefs.membershipDemo={expiresAt:start+days*86400000};prefs.demoMemberLedger??=[];prefs.demoMemberLedger.push({source,days,time:now,expiresAt:prefs.membershipDemo.expiresAt});persist();return prefs.membershipDemo.expiresAt}
-const memberBeforeDemo=isMember;isMember=function(){return memberBeforeDemo()||(signed&&Number(prefs.membershipDemo?.expiresAt)>Date.now())};
+const memberBeforeDemo=isMember;isMember=function(){return memberBeforeDemo()};
 const resultBeforeDetailedPayment=paymentDemoResult;paymentDemoResult=function(success){resultBeforeDetailedPayment(success);const p=MEMBER_CONFIG.plans[selectedMemberPlan],order=prefs.demoMemberOrders[0];Object.assign(order,{id:'DEMO-'+Date.now(),paidAt:success?Date.now():null,days:p.days,payment:memberPayment,auto:p.auto,expiresAt:success?extendDemoMembership(p.days,'模拟购买'):null});persist();const d=$('#payment-demo');if(success){d.querySelector('.member-sub').textContent='模拟会员已开通，仅在本机体验生效，不产生扣款。';d.querySelector('.member-order-summary').insertAdjacentHTML('beforeend',`<p>支付成功时间：${new Date(order.paidAt).toLocaleString()}</p><p>会员有效期至：${new Date(order.expiresAt).toLocaleString()}</p><small>再次购买或活动奖励到账，均从当前有效期往后累加。</small>`);updateHeader()}};
 function openDemoOrderDetail(order){let d=$('#member-order-detail');if(!d){d=document.createElement('dialog');d.id='member-order-detail';d.className='membership-dialog order-detail-drawer';document.body.append(d)}d.innerHTML=`<header class="member-heading"><span>订单详情 / 演示</span><button data-detail-close>×</button></header><h2>${esc(order.name)}</h2><p class="member-sub">${esc(order.status)}</p><dl>${[['订单编号',order.id||'历史演示订单'],['订单金额','¥'+order.price],['支付方式',order.payment==='wechat'?'微信支付':'支付宝'],['创建时间',order.time],['支付成功时间',order.paidAt?new Date(order.paidAt).toLocaleString():'—'],['会员时长',order.days?order.days+' 天':'—'],['有效期至',order.expiresAt?new Date(order.expiresAt).toLocaleString():'—'],['续费方式',order.auto?'按周期续费（模拟）':'单次购买']].map(([k,v])=>`<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl><p class="member-policy">此订单仅为本机演示记录，未实际扣款。</p>`;d.querySelector('[data-detail-close]').onclick=()=>d.close();d.showModal()}
 const ordersBeforeDetails=openMemberOrders;openMemberOrders=function(){ordersBeforeDetails();const d=$('#member-orders'),items=prefs.demoMemberOrders||[];if(items.length){d.querySelector('.member-empty').innerHTML=items.slice(0,10).map((r,i)=>`<button class="member-order-row" data-order-detail="${i}"><span>${esc(r.name)}<small>${esc(r.time)}</small></span><span>¥${r.price}<small>${esc(r.status)}　↗</small></span></button>`).join('');d.querySelectorAll('[data-order-detail]').forEach(b=>b.onclick=()=>openDemoOrderDetail(items[Number(b.dataset.orderDetail)]))}};
 const headerBeforeDemoBadge=updateHeader;updateHeader=function(){headerBeforeDemoBadge();const badge=$('.menu-avatar i');if(badge)badge.innerHTML=MEMBER_VISUAL_CONFIG.badge;const button=$('[data-account-open]');if(button){button.querySelector('.header-membership-badge')?.remove();if(signed&&isMember())button.insertAdjacentHTML('beforeend','<span class="header-membership-badge" title="会员">'+MEMBER_VISUAL_CONFIG.badge+'</span>')}};
-function decorateMemberMarkers(){document.querySelectorAll('.membership-badge').forEach(e=>e.innerHTML=MEMBER_VISUAL_CONFIG.badge);document.querySelectorAll('[data-preference-mode][data-value="space"]').forEach(b=>{if(!b.querySelector('.membership-badge'))b.insertAdjacentHTML('beforeend','<span class="membership-badge" title="会员权益">'+MEMBER_VISUAL_CONFIG.badge+'</span>')});document.querySelectorAll('#display-scope-dialog [data-space-settings-tab]').forEach(b=>{const key={font:'font',layout:'width',colors:'color'}[b.dataset.spaceSettingsTab],badge=b.querySelector('[data-member-space-appearance]');if(!key||unifiedField(key)){badge?.remove();return}if(!badge)b.insertAdjacentHTML('beforeend','<span class="membership-badge" data-member-space-appearance title="会员权益 · 空间独立外观" aria-label="会员权益">'+MEMBER_VISUAL_CONFIG.badge+'</span>')})}
+function decorateMemberMarkers(){document.querySelectorAll('.membership-badge:not([data-entitlement-badge])').forEach(e=>{if(e.dataset.memberSvg!==MEMBER_VISUAL_CONFIG.badge){e.innerHTML=MEMBER_VISUAL_CONFIG.badge;e.dataset.memberSvg=MEMBER_VISUAL_CONFIG.badge}});window.ShiyuEntitlements?.decorate()}
 const settingsBeforeMemberMarkers=renderSettings;renderSettings=function(){settingsBeforeMemberMarkers();decorateMemberMarkers()};
 const gateBeforeIllustration=memberGate;memberGate=function(key){gateBeforeIllustration(key);const d=$('#member-gate');d.querySelector('h2').textContent='让喜欢，拥有更多可能。';d.querySelectorAll('.member-benefits article').forEach((a,i)=>a.insertAdjacentHTML('afterbegin',`<div class="member-benefit-art" aria-hidden="true">${MEMBER_VISUAL_CONFIG.badge}<span>${['SPACE','SCENES','COLLECTIONS','PERSONALIZE','SHARE'][i]}</span><div><i></i><i></i><i></i></div></div>`))};
 // Keep the demo entitlement in sync across the homepage and membership tab.
@@ -741,13 +741,14 @@ memberGate=function(key,context={}){
  const normalized=key==='link'?'group':key,quotaText=kind=>{const free=memberCatalogQuantity(kind,false),paid=memberCatalogQuantity(kind,true);return free.configured&&paid.configured?'免费版 '+free.text+'，会员 '+paid.text:paid.configured?'会员 '+paid.text:'具体数量以当前会员套餐为准'},
  themes=(window.__shiyuThemeCatalog||Object.keys(THEMES).filter(id=>!['reading','projection','wallfilm'].includes(id)).map(id=>({id}))).filter(t=>THEMES[t.id]),
  features=[
-  ['themes','让首页，有不同的心情','在同一处发现不同主题，选择适合当下的那一款。',context.themeId&&THEMES[context.themeId]?'你正在了解「'+THEMES[context.themeId].name+'」。会员主题与后续上架内容，以当前套餐权益为准。':'集中预览已上架主题，会员可使用的主题以当前套餐权益为准。'],
-  ['space','给喜欢，多一些空间','工作、生活与灵感，各有自己的归处。','空间数量：'+quotaText('space')+'。'],
+  ['themes','让首页，有不同的心情','在同一处发现不同主题，选择适合当下的那一款。',(context.themeId&&THEMES[context.themeId]?'你正在了解「'+THEMES[context.themeId].name+'」。':'')+'免费版 '+memberSelectionSummary('themes','free')+'，会员 '+memberSelectionSummary('themes')+'。'],
+  ['personal','让日常，有自己的模样','从首页字体与配色，到常规视图的网址样式，自由搭配。','会员字体 '+memberSelectionSummary('global-fonts')+'、配色 '+memberSelectionSummary('global-colors')+'、布局 '+memberSelectionSummary('global-layouts')+'、网址样式 '+memberSelectionSummary('regular-styles')+'。'+(memberCatalogBenefit('global-custom-color')?.enabled?'还可选择自定义颜色。':'')],
+  ['space','给喜欢，多一些空间','工作、生活与灵感，各有自己的归处。','空间数量：'+quotaText('space')+'。空间可独立设置：'+memberEnabledNames([['space-font','字体'],['space-layout','布局'],['space-color','配色'],['space-style-scene','场景样式'],['space-style-group','分组样式']])+'。'],
   ['scene','把日常，分成不同场景','在同一空间，轻松切换工作、阅读与生活。','每个空间的场景数量：'+quotaText('scene')+'。'],
   ['group','让收藏，有条不紊','同一类网址放在一起，让每次寻找更从容。','每个场景的分组数量：'+quotaText('group')+'。'],
-  ['personal','让样式，贴合你的喜好','独立外观与多种卡片样式，让收藏更有自己的模样。',memberCatalogDescription('space-appearance','为空间独立搭配字体、布局、配色和样式。')],
-  ['corner','给常用的，多一点位置','把每天会用到的网址，收进触手可及的卡片。','更多常用卡片，分类收纳日常所需。暂存不占自建卡片额度，已有收藏可继续使用。'],
-  ['share','把珍藏，安心分享','给想分享的内容，多一份访问保护。',memberCatalogDescription('share-protection','为分享内容设置访问密码和有效期。')]
+  ['corner','给常用的，多一点位置','把每天会用到的网址，收进触手可及的卡片。','常用卡片：'+quotaText('corner')+'。会员卡片配色 '+memberSelectionSummary('corner-colors')+'。暂存不占卡片额度，已有收藏可继续使用。'],
+  ['atlas','换个角度，看见关联','从清晰的二维脉络，到立体展开的收藏世界。','免费版：'+memberEnabledNames([['atlas-2d','2D 图谱'],['atlas-3d','3D 图谱']],'free')+'。会员：'+memberEnabledNames([['atlas-2d','2D 图谱'],['atlas-3d','3D 图谱']])+'。同一份收藏，切换不同的浏览方式。'],
+  ['share','把珍藏，安心分享','给想分享的内容，多一份访问保护。','会员可配置：'+memberEnabledNames([['share-password','访问密码'],['share-expiry','分享有效期']])+'。普通公开分享仍可使用。']
  ];
  const links=names=>names.map(name=>'<div class="gate-demo-link"><i></i><span>'+esc(name)+'</span><em></em></div>').join(''),
  previews={
@@ -755,8 +756,9 @@ memberGate=function(key,context={}){
   space:'<div class="gate-space-preview">'+['工作空间','生活空间','灵感空间'].map((name,i)=>'<div class="gate-demo-window"><b>'+MEMBER_FEATURE_ART.Layers+esc(name)+'</b>'+links([['设计工具','项目资料'],['旅行计划','生活清单'],['灵感库','稍后阅读']][i])+'</div>').join('')+'</div>',
   scene:'<div class="gate-demo-window gate-demo-board"><div class="gate-demo-tabs"><b>工作</b><span>阅读</span><span>学习</span><span>生活</span></div>'+links(['今天的工作','项目与文档','常用工具'])+'</div>',
   group:'<div class="gate-demo-groups">'+['常用工具','灵感收藏','待阅读'].map((name,i)=>'<div class="gate-demo-window"><b>'+MEMBER_FEATURE_ART.Folders+name+'</b>'+links([['文档协作','工作台'],['设计参考','灵感手册'],['精选文章','知识笔记']][i])+'</div>').join('')+'</div>',
-  personal:'<div class="gate-style-grid"><div><i class="gate-record"></i><span>唱片</span></div><div><i class="gate-note">灵感便签</i><span>便签</span></div><div><i class="gate-simple"><b></b><em></em><em></em></i><span>简约</span></div></div>',
+  personal:'<div class="gate-style-grid"><div><i class="gate-record"></i><span>网址样式</span></div><div><i class="gate-note">拾一份喜欢</i><span>字体与配色</span></div><div><i class="gate-simple"><b></b><em></em><em></em></i><span>布局与留白</span></div></div>',
   corner:'<div class="gate-demo-groups gate-corner-preview">'+['常用','灵感','阅读'].map((name,i)=>'<div class="gate-demo-window"><b>'+MEMBER_FEATURE_ART.LayoutDashboard+name+'</b>'+links([['常用网址','快捷打开'],['留住灵感','随时回看'],['阅读清单','继续发现']][i])+'</div>').join('')+'</div>',
+  atlas:'<div class="gate-atlas-preview">'+svgIcon('<path d="M32 60 70 26 108 60 70 94 32 60M70 26v68M32 60h76"/><circle cx="70" cy="60" r="15"/><circle cx="32" cy="60" r="7"/><circle cx="70" cy="26" r="7"/><circle cx="108" cy="60" r="7"/><circle cx="70" cy="94" r="7"/>').replace('viewBox="0 0 24 24"','viewBox="0 0 140 120"')+'<span>2D 脉络 · 3D 关联</span></div>',
   share:'<div class="gate-demo-window gate-demo-board"><b>'+MEMBER_FEATURE_ART.Share2+'空间分享</b><div class="gate-share-link">shiyubox.com / … <span>↗</span></div><div class="gate-share-options"><span>访问密码 <b>••••••</b></span><span>有效期 <b>由你设定</b></span></div></div>'
  };
  let index=Math.max(0,features.findIndex(f=>f[0]===normalized));
@@ -770,20 +772,9 @@ memberGate=function(key,context={}){
  d.querySelector('[data-member-center]').onclick=()=>{d.close();openMemberCenter()};if(!d.open)d.showModal();row.scrollLeft=index*row.clientWidth;update();
 };
 // Member-only scoped appearance and additional website styles.
-function markPaidStyleOptions(){
- document.querySelectorAll('#display-scope-dialog [data-display-scope="scene"],#display-scope-dialog [data-display-scope="group"],#link-view-settings .more-link-views [data-link-view]').forEach(button=>{
-  if(button.querySelector('.membership-badge'))return;
-  const badge=document.createElement('span');badge.className='membership-badge';badge.title='会员专享';badge.setAttribute('aria-label','会员专享');badge.innerHTML=MEMBER_VISUAL_CONFIG.badge;
-  (button.querySelector('b')||button).append(badge);
- });
-}
+function markPaidStyleOptions(){window.ShiyuEntitlements?.decorate()}
 const scopeBeforePaidStyles=scopeDialog;scopeDialog=function(){scopeBeforePaidStyles();markPaidStyleOptions();decorateMemberMarkers()};
 const linksBeforePaidStyles=openLinkSettings;openLinkSettings=function(){linksBeforePaidStyles();markPaidStyleOptions()};
-document.addEventListener('click',e=>{
- const button=e.target.closest('[data-display-scope],[data-link-view]');if(!button||isMember())return;
- const paidScope=['scene','group'].includes(button.dataset.displayScope),paidStyle=button.hasAttribute('data-link-view')&&!!button.closest('.more-link-views');
- if(!paidScope&&!paidStyle)return;e.preventDefault();e.stopImmediatePropagation();memberGate('personal');
-},true);
 
 const MORE_STYLE_ICONS={"poker":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 18v4\"/><path d=\"M2 14.499a5.5 5.5 0 0 0 9.591 3.675.6.6 0 0 1 .818.001A5.5 5.5 0 0 0 22 14.5c0-2.29-1.5-4-3-5.5l-5.492-5.312a2 2 0 0 0-3-.02L5 8.999c-1.5 1.5-3 3.2-3 5.5\"/></svg>","book":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 7v14\"/><path d=\"M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z\"/></svg>","note":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 9a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z\"/><path d=\"M15 3v5a1 1 0 0 0 1 1h5\"/></svg>","icons":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\"/><rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\"/></svg>"};
 const markBeforeSpecificStyleIcons=markPaidStyleOptions;markPaidStyleOptions=function(){markBeforeSpecificStyleIcons();document.querySelectorAll("#link-view-settings .more-link-views [data-link-view]").forEach(button=>{const artwork=button.querySelector("span:not(.membership-badge)");if(artwork&&MORE_STYLE_ICONS[button.dataset.linkView])artwork.innerHTML=MORE_STYLE_ICONS[button.dataset.linkView];const badge=button.querySelector(".membership-badge");if(badge)button.append(badge)})};
@@ -1049,9 +1040,9 @@ editPaper=function(){
 window.addEventListener('wheel',e=>{if(!document.body.classList.contains('paper-edit-active'))return;e.stopImmediatePropagation();if(!e.target.closest('.paper-inline-choices,.paper-life'))e.preventDefault()},{capture:true,passive:false});
 const navigateBeforePaperEdit=navigationGesture;navigationGesture=function(...args){if(document.body.classList.contains('paper-edit-active'))return;return navigateBeforePaperEdit(...args)};
 
-const shareBeforePublicAccess=openSpaceShare;openSpaceShare=function(){shareBeforePublicAccess();const form=document.querySelector('#share-form');if(!form)return;const password=form.querySelector('[name=access][value=password]').closest('label'),expiry=form.querySelector('.share-expiry');for(const el of [password,expiry]){const badge=document.createElement('span');badge.className='membership-badge';badge.innerHTML=MEMBER_VISUAL_CONFIG.badge;badge.title='会员功能';el.append(badge)}
- const guard=e=>{if(isMember())return;const target=e.target.closest('.share-expiry')||e.target.closest('label')===password;if(!target)return;e.preventDefault();e.stopImmediatePropagation();memberGate('share')};form.addEventListener('click',guard,true);form.addEventListener('keydown',e=>{if(['Enter',' ','ArrowDown','ArrowUp'].includes(e.key))guard(e)},true);
- form.addEventListener('change',e=>{if(isMember())return;if(form.elements.access.value==='password'||form.elements.validFor.value!=='0'){e.stopImmediatePropagation();form.elements.access.value='public';form.elements.validFor.value='0';form.elements.password.value='';form.elements.password.required=false;document.querySelector('#share-password-fields').hidden=true;memberGate('share')}},true);
+const shareBeforePublicAccess=openSpaceShare;openSpaceShare=function(){shareBeforePublicAccess();const form=document.querySelector('#share-form');if(!form)return;const password=form.querySelector('[name=access][value=password]').closest('label'),expiry=form.querySelector('.share-expiry');password.dataset.entitlementKey='share-password';expiry.dataset.entitlementKey='share-expiry';window.ShiyuEntitlements?.decorate();
+ const guard=e=>{const key=e.target.closest('.share-expiry')?'share-expiry':e.target.closest('label')===password?'share-password':'';if(!key||window.ShiyuEntitlements?.allows(key))return;e.preventDefault();e.stopImmediatePropagation();window.ShiyuEntitlements?.require(key,undefined,'share')};form.addEventListener('click',guard,true);form.addEventListener('keydown',e=>{if(['Enter',' ','ArrowDown','ArrowUp'].includes(e.key))guard(e)},true);
+ form.addEventListener('change',e=>{const passwordDenied=form.elements.access.value==='password'&&!window.ShiyuEntitlements?.allows('share-password'),expiryDenied=form.elements.validFor.value!=='0'&&!window.ShiyuEntitlements?.allows('share-expiry');if(!passwordDenied&&!expiryDenied)return;e.stopImmediatePropagation();if(passwordDenied){form.elements.access.value='public';form.elements.password.value='';form.elements.password.required=false;document.querySelector('#share-password-fields').hidden=true}if(expiryDenied)form.elements.validFor.value='0';window.ShiyuEntitlements?.require(passwordDenied?'share-password':'share-expiry',undefined,'share')},true);
 };
 const markBeforePublicSharing=markMemberEntries;markMemberEntries=function(){markBeforePublicSharing();document.querySelectorAll('[data-share-open] .membership-badge').forEach(e=>e.remove())};markMemberEntries();
 
@@ -1216,14 +1207,14 @@ THEMES.paper.desc='把日常的小事，编成自己的头条。';
   const accountMessage=(d,text,field)=>{d.querySelectorAll('.account-field-error').forEach(error=>{error.textContent=''});const status=d.querySelector('.account-status');if(status)status.textContent=field?'':text;if(field){const error=d.querySelector('.account-field-error[data-error-for="'+field+'"]');if(error)error.textContent=text;}};
   const loginErrorField=text=>/验证码|密码|凭证|登录方式/.test(String(text||''))?'credential':'account';
   const syncServerAccount=(result)=>{
+    if(window.ShiyuAccountSession){window.ShiyuAccountSession.applyLogin(result);return;}
     signed=true;
     prefs.accountProfile={...(prefs.accountProfile||{}),id:result.user.id,name:result.user.name,phone:result.user.phone,email:result.user.email,avatar:prefs.accountProfile?.avatar||ACCOUNT_AVATARS[0]};
-    const memberUntil=result.user.memberExpiresAt;
-    prefs.membership=result.user.member?{expiresAt:memberUntil==='永久'?Number.MAX_SAFE_INTEGER:(memberUntil?new Date(memberUntil+'T23:59:59+08:00').getTime():Number.MAX_SAFE_INTEGER),label:memberUntil||'永久'}:null;
+    prefs.membership=result.user.member?{...result.user.membership,label:result.user.membership?.permanent?'永久':result.user.memberExpiresAt||''}:null;
     prefs.accountDataUserId=result.user.id;
     if(Array.isArray(result.accountData))data=cloneValue(result.accountData);
     persist();
-    window.dispatchEvent(new CustomEvent('shiyu-account-state'));
+    window.dispatchEvent(new CustomEvent('shiyu-account-state',{detail:result}));
   };
   async function submitAccount(button){
     const d=$('#login'), account=d.querySelector('[data-login-account]')?.value.trim()||'', credential=d.querySelector('[data-login-credential]')?.value||'', emailMode=d.querySelector('[data-account-tab=email][aria-selected=true]')!==null;
@@ -1244,8 +1235,8 @@ THEMES.paper.desc='把日常的小事，编成自己的头条。';
     if(button)button.dataset.submitting='1';
     button.disabled=true;accountMessage(d,'正在登录…');
     try{
-      const response=await fetch('/api/shiyu/auth/login',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({account,credential,mode:codeMode?'code':'password',name:prefs.accountProfile?.name||'任伟'})});
-      const result=await response.json();if(!response.ok)throw new Error(result.message||'登录失败');
+      const payload={account,credential,mode:codeMode?'code':'password',invitationCode:window.shiyuInvitationCode||sessionStorage.getItem('shiyu-invitation-code')||undefined};
+      const result=await window.ShiyuAccountSession.login(payload);
       const needsProfile=!profileBasicsComplete(prefs.accountProfile);
       const successText=result.accountInitialized?'登录成功，账号已准备好':'登录成功';
       syncServerAccount(result);d.close();render();
@@ -1379,7 +1370,7 @@ updateHeader();
  ];
  let overlay,panel,ring,index=0,frame=0,startTimer=0,restoreFocus,returnWasVisible=false,inertState=[];
  const done=()=>prefs.workspaceGuideDoneV1===true;
- function finish(remember=true){clearTimeout(startTimer);if(!overlay)return;if(remember){prefs.workspaceGuideDoneV1=true;persist()}if(!returnWasVisible)document.querySelector('.peek-return')?.classList.remove('revealed');for(const [el,value]of inertState)if(el.isConnected)el.inert=value;inertState=[];overlay.remove();overlay=null;document.body.classList.remove('workspace-guide-active');if(restoreFocus?.isConnected)restoreFocus.focus({preventScroll:true});coverReturnArmed=0;gestureTotal=0;wheelBurstHandled=false;lastWheelAt=0;}
+ function finish(remember=true){clearTimeout(startTimer);if(!overlay)return;if(remember){prefs.workspaceGuideDoneV1=true;persist()}if(!returnWasVisible)document.querySelector('.peek-return')?.classList.remove('revealed');for(const [el,value]of inertState)if(el.isConnected)el.inert=value;inertState=[];overlay.remove();overlay=null;document.body.classList.remove('workspace-guide-active');if(restoreFocus?.isConnected)restoreFocus.focus({preventScroll:true});coverReturnArmed=0;gestureTotal=0;wheelBurstHandled=false;lastWheelAt=0;if(remember)window.dispatchEvent(new Event('shiyu-workspace-guide-complete'));}
  function targets(){const list=steps[index].targets.map(s=>document.querySelector(s)).filter(el=>el&&el.getClientRects().length);return steps[index].combine?list:list.slice(0,1)}
  function position(){if(!overlay)return;if(view!=='space'||document.body.classList.contains('atlas-active')){finish(false);return}const els=targets(),vw=document.documentElement.clientWidth,vh=visualViewport?.height||innerHeight,pad=12;
   let boxes=els.map(el=>el.getBoundingClientRect());if(!boxes.length){ring.hidden=true;panel.style.left=pad+'px';panel.style.top=pad+'px';return}ring.hidden=false;
@@ -1395,7 +1386,7 @@ updateHeader();
  function maybeStart(){if(overlay||done()||view!=='space'||document.querySelector('dialog[open]')||!document.querySelector('.workspace-tools>.group-view-controls'))return;clearTimeout(startTimer);startTimer=setTimeout(start,1100)}
  window.addEventListener('keydown',e=>{if(!overlay)return;e.stopImmediatePropagation();if(e.key==='Escape'){e.preventDefault();finish()}else if(e.key==='Tab'){const buttons=[...panel.querySelectorAll('button:not(:disabled)')],first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}},true);
  window.addEventListener('wheel',e=>{if(overlay){e.stopImmediatePropagation();if(!panel.contains(e.target))e.preventDefault()}},{capture:true,passive:false});
- new MutationObserver(schedule).observe(document.querySelector('#main'),{childList:true,subtree:true});window.addEventListener('resize',schedule);window.addEventListener('scroll',schedule,true);visualViewport?.addEventListener('resize',schedule);maybeStart();
+ new MutationObserver(schedule).observe(document.querySelector('#main'),{childList:true,subtree:true});window.addEventListener('resize',schedule);window.addEventListener('scroll',schedule,true);visualViewport?.addEventListener('resize',schedule);document.addEventListener('close',()=>setTimeout(maybeStart,0),true);maybeStart();
 })();
 
 // Final account-center hook: later legacy refinements may wrap the renderer;
@@ -1481,4 +1472,169 @@ updateHeader();
 (()=>{
  const previousCenter=openAccountCenter;
  openAccountCenter=function(){previousCenter();const d=$('#account-center'),summary=d?.querySelector('.profile-view-summary');if(!summary||!signed)return;const profile=accountProfile();summary.outerHTML='<div class="profile-view-summary"><button class="account-avatar profile-avatar-trigger" data-profile-avatar-open type="button" aria-label="修改头像">'+avatarMarkup(profile.avatar)+'</button><div><b>'+esc(profile.name||'我')+'</b></div></div>';d.querySelector('[data-profile-avatar-open]').onclick=()=>window.openShiyuProfileEditor?.('avatar')};
+})();
+
+// The server has already attached the mandatory gift to a newly registered account.
+// This screen waits until the existing workspace guide has finished before revealing it.
+(() => {
+  const giftSpaceId = 'gift-welcome-sites-v1';
+  let pending = false;
+  let shownThisSession = false;
+  let showTimer = 0;
+  let dialog = null;
+  let requiresGuide = true;
+  let replayToken = '';
+  let testLoginMode = 'actual';
+
+  function accountId() { return prefs.accountProfile?.id || ''; }
+  function giftSpace() { return data.find(item => item.id === giftSpaceId); }
+  function countItems(space) { return space.scenes.reduce((total, scene) => total + scene.groups.reduce((count, group) => count + group.items.length, 0), 0); }
+  function guideKey() { return testLoginMode === 'first' && replayToken ? `${accountId()}:${replayToken}` : accountId(); }
+
+  function applyState(result) {
+    const nextToken = result?.replayToken || result?.welcomeGiftReplayToken || '';
+    if (nextToken !== replayToken) shownThisSession = false;
+    pending = (result?.pending ?? result?.welcomeGiftPending) === true;
+    requiresGuide = (result?.requiresGuide ?? result?.welcomeGiftRequiresGuide) !== false;
+    replayToken = nextToken;
+    testLoginMode = result?.testLoginMode || 'actual';
+    if (testLoginMode === 'returning' && !prefs.workspaceGuideDoneV1) {
+      prefs.workspaceGuideDoneV1 = true;
+      persist();
+    }
+    prepareGuide();
+    maybeShow();
+  }
+
+  function prepareGuide() {
+    if (!pending || !requiresGuide || !accountId()) return;
+    if (prefs.welcomeGiftGuideDoneFor !== guideKey() && prefs.workspaceGuideDoneV1) {
+      prefs.workspaceGuideDoneV1 = false;
+      persist();
+      render();
+    }
+  }
+
+  function maybeShow() {
+    if (!pending || shownThisSession || !signed || view !== 'space' || !giftSpace()) return;
+    if (requiresGuide && (!prefs.workspaceGuideDoneV1 || prefs.welcomeGiftGuideDoneFor !== guideKey())) return;
+    if (document.body.classList.contains('workspace-guide-active') || document.querySelector('dialog[open]')) return;
+    if (showTimer) return;
+    showTimer = setTimeout(() => { showTimer = 0; show(); }, 460);
+  }
+
+  function colorInk() {
+    const color = resolveThemeColor();
+    const match = /^#([0-9a-f]{6})$/i.exec(color || '');
+    if (!match) return '#fff';
+    const number = parseInt(match[1], 16);
+    const r = (number >> 16) & 255, g = (number >> 8) & 255, b = number & 255;
+    return (r * 299 + g * 587 + b * 114) / 1000 > 158 ? '#182024' : '#fff';
+  }
+
+  function show() {
+    if (!pending || shownThisSession || view !== 'space' || !giftSpace() || document.querySelector('dialog[open]')) return;
+    shownThisSession = true;
+    const space = giftSpace();
+    const groups = space.scenes.reduce((total, scene) => total + scene.groups.length, 0);
+    const links = countItems(space);
+    dialog = document.createElement('dialog');
+    dialog.className = 'welcome-gift-dialog';
+    dialog.style.setProperty('--gift-ink', colorInk());
+    dialog.innerHTML = `<button class="welcome-gift-close" type="button" aria-label="关闭见面礼">×</button>
+      <div class="welcome-gift-kicker">A LITTLE GIFT FOR YOU</div>
+      <div class="welcome-gift-symbol" aria-hidden="true"><span>✦</span><span>◈</span><span>✧</span></div>
+      <h2>送你一份见面礼</h2><p>「${esc(space.name)}」已经为你准备好了。</p>
+      <div class="welcome-gift-preview" aria-label="见面礼内容"><b>${links}</b><span>个精挑细选的网址</span><small>${space.scenes.length} 个场景 · ${groups} 个分组</small></div>
+      <button class="welcome-gift-accept" type="button">收下</button><small class="welcome-gift-note">也可以稍后查看，见面礼会一直留在你的空间里。</small>`;
+    document.body.append(dialog);
+    let accepted = false, closingBounds;
+    const dismiss = () => { closingBounds = dialog.getBoundingClientRect(); dialog.close(); };
+    dialog.querySelector('.welcome-gift-accept').onclick = () => { accepted = true; dismiss(); };
+    dialog.querySelector('.welcome-gift-close').onclick = dismiss;
+    dialog.addEventListener('click', event => { if (event.target === dialog) dismiss(); });
+    dialog.addEventListener('cancel', () => { closingBounds = dialog.getBoundingClientRect(); });
+    dialog.addEventListener('close', () => {
+      const bounds = closingBounds || dialog.getBoundingClientRect();
+      dialog.remove();
+      dialog = null;
+      pending = false;
+      void fetch('/api/shiyu/auth/welcome-gift', { method: 'POST', credentials: 'same-origin', keepalive: true });
+      flyToSpace(bounds, accepted);
+    }, { once: true });
+    dialog.showModal();
+  }
+
+  function flyToSpace(from, accepted) {
+    const target = document.querySelector('.workspace .corner-space-switch') || document.querySelector('.workspace .heading-space-switch') || document.querySelector('.dock-trigger');
+    if (!target) { if (accepted) goSpace(giftSpaceId); return; }
+    const to = target.getBoundingClientRect();
+    const startX = from.left + from.width / 2, startY = from.top + from.height / 2;
+    const endX = to.left + to.width / 2, endY = to.top + to.height / 2;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduced) {
+      for (let index = 0; index < 5; index++) {
+        const mote = document.createElement('span');
+        mote.className = 'welcome-gift-mote';
+        mote.style.left = `${startX}px`; mote.style.top = `${startY}px`;
+        document.body.append(mote);
+        const spread = (index - 2) * 25;
+        const animation = mote.animate([
+          { transform: `translate(${spread}px, ${index % 2 ? 18 : -18}px) scale(.65)`, opacity: 0 },
+          { transform: `translate(${(endX - startX) * .45 + spread * 2}px, ${(endY - startY) * .42 - 54 - Math.abs(spread)}px) scale(1.15)`, opacity: 1, offset: .45 },
+          { transform: `translate(${endX - startX}px, ${endY - startY}px) scale(.1)`, opacity: 0 },
+        ], { duration: 900 + index * 45, delay: index * 35, easing: 'cubic-bezier(.42,0,.2,1)', fill: 'forwards' });
+        animation.finished.finally(() => mote.remove());
+      }
+    }
+    setTimeout(() => {
+      if (accepted) goSpace(giftSpaceId);
+      const visibleTarget = document.querySelector('.workspace .corner-space-switch') || document.querySelector('.workspace .heading-space-switch') || target;
+      visibleTarget.classList.add('welcome-gift-target');
+      const rect = visibleTarget.getBoundingClientRect();
+      const hint = document.createElement('div');
+      hint.className = 'welcome-gift-arrived';
+      hint.textContent = '已放入「精选网址」空间';
+      hint.style.setProperty('--gift-ink', colorInk());
+      hint.style.left = `${Math.min(innerWidth - 240, Math.max(16, rect.left))}px`;
+      hint.style.top = `${Math.min(innerHeight - 54, rect.bottom + 10)}px`;
+      document.body.append(hint);
+      setTimeout(() => { hint.remove(); visibleTarget.classList.remove('welcome-gift-target'); }, 2900);
+    }, reduced ? 0 : 1250);
+  }
+
+  window.addEventListener('shiyu-workspace-guide-complete', () => {
+    if (!pending || !accountId()) return;
+    prefs.welcomeGiftGuideDoneFor = guideKey();
+    persist();
+    maybeShow();
+  });
+  window.addEventListener('shiyu-account-state', event => {
+    applyState(event.detail);
+  });
+  document.addEventListener('close', () => setTimeout(maybeShow, 0), true);
+  new MutationObserver(maybeShow).observe(document.querySelector('#main'), { childList: true, subtree: true });
+  async function refreshGift() {
+    if (!signed || !accountId()) return;
+    const requestUserId = accountId();
+    try {
+      const response = await fetch('/api/shiyu/auth/welcome-gift', { credentials: 'same-origin', cache: 'no-store' });
+      if (!response.ok) return;
+      const result = await response.json();
+      if (!signed || accountId() !== requestUserId) return;
+      if (result.pending && !giftSpace()) {
+        const account = await fetch('/api/shiyu/auth/account', { credentials: 'same-origin', cache: 'no-store' });
+        if (account.ok) {
+          const accountResult = await account.json();
+          if (!signed || accountId() !== requestUserId || accountResult.userId !== requestUserId) return;
+          const gift = accountResult.data?.find(item => item.id === giftSpaceId);
+          if (gift && !giftSpace()) { data.push(clone(gift)); render(); }
+        }
+      }
+      applyState(result);
+    } catch { /* Keep the existing experience when the preview API is unavailable. */ }
+  }
+  window.addEventListener('focus', () => { void refreshGift(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) void refreshGift(); });
+  void refreshGift();
 })();

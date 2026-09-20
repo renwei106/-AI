@@ -27,12 +27,13 @@ function localRequest(req) {
 function createPaymentHandler(options = {}) {
   const config = options.config || loadConfig(), readiness = inspect(config);
   const store = options.store || new PaymentStore(config.database);
+  const memberships = options.memberships || require('./membership.cjs').createMembershipService();
   const providers = options.providers || {};
   if (!options.providers) {
     if (readiness.providers.wechat.ready) providers.wechat = new WechatProvider(config.wechat);
     if (readiness.providers.alipay.ready) providers.alipay = new AlipayProvider(config.alipay);
   }
-  const service = new PaymentService({ config, store, providers, getPlans: options.getPlans || (async () => {
+  const service = new PaymentService({ config, store, providers, memberships, getPlans: options.getPlans || (async () => {
     let response;
     try { response = await fetch(config.catalogUrl, { headers: { Accept: 'application/json' }, redirect: 'error', signal: AbortSignal.timeout(5000) }); }
     catch { throw new PaymentError('套餐服务暂不可用', 'CATALOG_UNAVAILABLE', 503); }
@@ -41,7 +42,7 @@ function createPaymentHandler(options = {}) {
     if (!Array.isArray(data.items)) throw new PaymentError('套餐配置无效', 'CATALOG_INVALID', 503);
     return data.items;
   }) });
-  const publicStatus = () => ({ enabled: config.enabled, mode: config.mode, providers: Object.fromEntries(['wechat', 'alipay'].map(p => [p, { enabled: config[p].enabled !== false, ready: config[p].enabled !== false && !!providers[p], kind: p === 'wechat' ? 'qr' : 'redirect' }])) });
+  const publicStatus = () => ({ enabled: config.enabled, mode: config.mode, recurringEnabled: false, providers: Object.fromEntries(['wechat', 'alipay'].map(p => [p, { enabled: config[p].enabled !== false, ready: config.enabled && config[p].enabled !== false && !!providers[p], kind: p === 'wechat' ? 'qr' : 'redirect' }])) });
   let revision = '';
   function reloadConfig() {
     if (options.config || options.providers) return;
@@ -99,8 +100,9 @@ function createPaymentHandler(options = {}) {
       const user = await authenticate(req);
       if (!user?.id) throw new PaymentError('请登录后再购买', 'UNAUTHENTICATED', 401);
       if (url.pathname === PREFIX + '/account' && req.method === 'GET') {
-        const originalExpiry = typeof user.memberExpiresAt === 'number' ? user.memberExpiresAt : Date.parse(user.memberExpiresAt || '') || 0;
-        json(res, 200, { userId: user.id, memberExpiresAt: Math.max(originalExpiry, store.membership(user.id)), mode: config.mode }); return true;
+        const current = memberships.readUsers().find(item => item.id === user.id);
+        const state = memberships.stateFor(current || null);
+        json(res, 200, { userId: user.id, ...state, memberExpiresAt: state.expiresAt, mode: config.mode }); return true;
       }
       if (url.pathname === PREFIX + '/orders' && req.method === 'GET') { json(res, 200, { items: store.list(user.id).map(publicOrder) }); return true; }
       if (url.pathname === PREFIX + '/orders' && req.method === 'POST') {
@@ -108,7 +110,9 @@ function createPaymentHandler(options = {}) {
         json(res, 201, { order: await service.create(user, JSON.parse(await readBody(req))) }); return true;
       }
       const order = url.pathname.match(/^\/api\/shiyu\/payments\/orders\/(SY[a-f0-9]{28})$/);
-      if (order && req.method === 'GET') { json(res, 200, { order: await service.query(user, order[1]) }); return true; }
+      if (order && req.method === 'GET') { json(res, 200, { order: publicOrder(service.owned(user, order[1])) }); return true; }
+      const query = url.pathname.match(/^\/api\/shiyu\/payments\/orders\/(SY[a-f0-9]{28})\/query$/);
+      if (query && req.method === 'POST') { json(res, 200, { order: await service.query(user, query[1]) }); return true; }
       throw new PaymentError('接口不存在', 'NOT_FOUND', 404);
     } catch (error) {
       const statusCode = error instanceof PaymentError ? error.status : error instanceof SyntaxError ? 400 : 500;
@@ -120,7 +124,8 @@ function createPaymentHandler(options = {}) {
     }
     return true;
   }
-  handler.close = () => store.close();
+  const recovery = setInterval(() => service.retryFulfillment(), 30000); recovery.unref();
+  handler.close = () => { clearInterval(recovery); store.close(); };
   handler.service = service;
   return handler;
 }

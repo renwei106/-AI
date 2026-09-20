@@ -3,3 +3,7 @@
 .payment-order-dialog .payment-cashier { display: inline-flex; text-decoration: none; align-items: center; justify-content: center; margin: 16px 0 0; }
 .payment-order-dialog .payment-order-number { overflow-wrap: anywhere; font-size: 12px; }
 .payment-order-dialog .payment-confirmed { color: var(--accent); }
+.member-invite-link-row { display: flex; gap: 12px; margin-top: 22px; align-items: center; }
+.member-invite-link-row input { min-width: 0; flex: 1; width: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); color: var(--ink); font: inherit; font-size: 12px; }
+.member-invite-link-row .member-primary { flex: none; margin: 0; }
+@media (max-width: 520px) { .member-invite-link-row { flex-direction: column; align-items: stretch; } }

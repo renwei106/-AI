@@ -5,6 +5,142 @@
   const accountId = () => prefs.accountProfile?.id || '';
   let syncTimer = 0;
   let syncEnabled = true;
+  let membershipRequest = 0;
+  let membershipExpiryTimer = 0;
+  const storageKey = 'yiyu-prototype-v1';
+  const localIdentity = () => signed ? accountId() : '';
+  const sharedIdentity = () => {
+    try { const state = JSON.parse(localStorage.getItem(storageKey) || 'null'); return state?.signed ? state.prefs?.accountProfile?.id || '' : ''; }
+    catch { return localIdentity(); }
+  };
+  let accountEpoch = 0, verifiedUserId = null, authBusy = false, authQueue = Promise.resolve(), logoutRequest = null;
+  let accountDataRefreshPending = true;
+  const rawPersist = persist;
+  const appliedLogins = new WeakSet();
+  function invalidateAccount() { accountEpoch++; membershipRequest++; verifiedUserId = null; accountDataRefreshPending = true; clearTimeout(syncTimer); clearTimeout(membershipExpiryTimer); document.documentElement.classList.remove('shiyu-account-ready'); }
+  function markAccountReady() { document.documentElement.classList.toggle('shiyu-account-ready', !authBusy && verifiedUserId !== null && verifiedUserId === localIdentity()); }
+  const profileKey = id => 'shiyu-account-profile:' + id;
+  const profileFields = ['name', 'avatar', 'realName', 'gender', 'birthday', 'profileCompleted'];
+  function savedProfile(id) {
+    try {
+      const value = JSON.parse(localStorage.getItem(profileKey(id)) || '{}');
+      return Object.fromEntries(profileFields.filter(key => typeof value?.[key] === (key === 'profileCompleted' ? 'boolean' : 'string')).map(key => [key, value[key]]));
+    } catch { return {}; }
+  }
+  function rememberProfile() {
+    const profile = prefs.accountProfile;
+    if (!profile?.id) return;
+    try {
+      const key = profileKey(profile.id);
+      // Migrate old local-only display fields to their original owner, never to the next login.
+      if (localStorage.getItem(key) !== null && (verifiedUserId !== profile.id || sharedIdentity() !== profile.id)) return;
+      localStorage.setItem(key, JSON.stringify(Object.fromEntries(profileFields.filter(field => profile[field] !== undefined).map(field => [field, profile[field]]))));
+    } catch { /* profile caching is optional when browser storage is unavailable */ }
+  }
+  function closeAccountDialogs() {
+    document.querySelectorAll('#account-center[open],#account-security[open],#profile-item-editor[open],#account-security-editor[open],#birthday-dialog[open]').forEach(dialog => dialog.close());
+  }
+  const requestTicket = () => ({ epoch: accountEpoch, identity: sharedIdentity() });
+  const currentTicket = ticket => !authBusy && ticket.epoch === accountEpoch && ticket.identity === sharedIdentity();
+  function originalPersist() {
+    // An old tab must never replace a newer login with its in-memory account.
+    if (authBusy || localIdentity() !== sharedIdentity()) { if (!authBusy) void refreshMembership(); return false; }
+    rememberProfile();
+    rawPersist();
+    return true;
+  }
+  function adoptUser(user, accountData) {
+    const previousId = accountId(), changed = !signed || previousId !== user.id;
+    if (changed) {
+      rememberProfile();
+      invalidateAccount();
+      data = clone(seed);
+      prefs.accountDataUserId = '';
+      prefs.membershipDemo = null;
+      prefs.demoMemberOrders = [];
+      prefs.accountProfile = savedProfile(user.id);
+      closeAccountDialogs();
+    }
+    signed = true;
+    verifiedUserId = user.id;
+    prefs.accountProfile = { ...prefs.accountProfile, id: user.id, name: prefs.accountProfile?.name || user.name, phone: user.phone || '', email: user.email || '', avatar: prefs.accountProfile?.avatar || ACCOUNT_AVATARS[0] };
+    if (Array.isArray(accountData)) { data = clone(accountData); prefs.accountDataUserId = user.id; accountDataRefreshPending = false; normalizeSelection(); }
+    syncMembershipFromUser(user);
+    syncCornerLoginState();
+    return changed;
+  }
+  function clearAccount() {
+    rememberProfile();
+    invalidateAccount(); signed = false; verifiedUserId = '';
+    prefs.accountProfile = {}; prefs.accountDataUserId = ''; prefs.membership = null; prefs.membershipDemo = null; prefs.demoMemberOrders = [];
+    data = clone(seed); normalizeSelection(); view = 'home'; pending = null;
+    publishMembership(null); syncCornerLoginState(); rawPersist();
+    closeAccountDialogs();
+    window.dispatchEvent(new CustomEvent('shiyu-account-state', { detail: { authenticated: false } }));
+    render();
+  }
+  function withAuthLock(action) {
+    const run = () => navigator.locks?.request ? navigator.locks.request('shiyu-account-session', action) : action();
+    const task = authQueue.then(run, run); authQueue = task.catch(() => {}); return task;
+  }
+  function applyLogin(result) {
+    if (appliedLogins.has(result)) return;
+    invalidateAccount();
+    const previousOwner = prefs.accountDataUserId;
+    adoptUser(result.user, result.accountData);
+    if (!Array.isArray(result.accountData) && previousOwner !== result.user.id) { data = clone(seed); prefs.accountDataUserId = result.user.id; normalizeSelection(); }
+    rawPersist(); appliedLogins.add(result);
+    window.dispatchEvent(new CustomEvent('shiyu-account-state', { detail: result }));
+  }
+  window.ShiyuAccountSession = {
+    applyLogin,
+    login(payload) {
+      return withAuthLock(async () => {
+        authBusy = true; invalidateAccount();
+        try {
+          const response = await fetch('/api/shiyu/auth/login', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          const result = await response.json(); if (!response.ok) throw Error(result.message || '登录失败');
+          applyLogin(result); return result;
+        } finally { authBusy = false; markAccountReady(); if (verifiedUserId === null) void refreshMembership(); }
+      });
+    },
+    logout() {
+      if (logoutRequest) return logoutRequest;
+      authBusy = true; invalidateAccount();
+      logoutRequest = withAuthLock(async () => {
+        authBusy = true;
+        try {
+          const response = await fetch('/api/shiyu/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+          if (!response.ok) throw Error('退出登录失败，请重试');
+          clearAccount();
+        } catch (error) { toast(error.message || '退出登录失败，请重试'); }
+        finally { authBusy = false; logoutRequest = null; markAccountReady(); void refreshMembership(); }
+      });
+      return logoutRequest;
+    },
+  };
+  function publishMembership(user, ready = true) {
+    const source = user?.membership || user || {};
+    const active = signed && source.member === true && (source.permanent === true || Number(source.expiresAt) > Date.now());
+    const free = (window.__shiyuMemberCatalog?.plans || []).find(plan => plan.id === 'free');
+    const snapshot = { ready, member: active, permanent: active && source.permanent === true,
+      expiresAt: source.expiresAt || null, planId: source.planId || 'free', planName: source.planName || '免费版', entitlements: Array.isArray(source.entitlements) ? source.entitlements : [] };
+    if (!active && source.member === true) { snapshot.planId = 'free'; snapshot.planName = free?.name || '免费版'; snapshot.entitlements = free?.entitlements || []; }
+    clearTimeout(membershipExpiryTimer);
+    if (active && !snapshot.permanent) membershipExpiryTimer = setTimeout(() => {
+      if (snapshot.expiresAt <= Date.now()) {
+        prefs.membership = null;
+        const currentFree = (window.__shiyuMemberCatalog?.plans || []).find(plan => plan.id === 'free');
+        publishMembership({ member: false, entitlements: currentFree?.entitlements || [] });
+        originalPersist();
+        if (typeof updateHeader === 'function') updateHeader();
+      }
+      void refreshMembership();
+    }, Math.min(snapshot.expiresAt - Date.now() + 25, 2147483647));
+    window.__shiyuUserEntitlements = snapshot;
+    window.dispatchEvent(new CustomEvent('shiyu-user-entitlements', { detail: snapshot }));
+  }
+  publishMembership(null, false);
 
   // The bottom "我的一隅" preview is only discoverable after login. Keep the
   // entry itself visible so an unsigned visitor can click it and open login.
@@ -13,9 +149,8 @@
   };
   syncCornerLoginState();
 
-  const originalPersist = persist;
   persist = function accountPersist() {
-    originalPersist();
+    if (!originalPersist()) return;
     if (!syncEnabled || !signed || !accountId() || prefs.accountDataUserId !== accountId()) return;
     clearTimeout(syncTimer);
     syncTimer = setTimeout(() => { void saveAccountData(); }, 350);
@@ -24,43 +159,60 @@
   function membershipFromUser(user) {
     if (!user || user.member !== true) return null;
     const label = String(user.memberExpiresAt || '').trim();
-    if (!label || label === '永久') return { expiresAt: Number.MAX_SAFE_INTEGER, label: '永久' };
-    const parsed = Date.parse(`${label}T23:59:59+08:00`);
-    return { expiresAt: Number.isFinite(parsed) && parsed > 0 ? parsed : Number.MAX_SAFE_INTEGER, label };
+    if (user.permanent === true || user.membership?.permanent === true || label === '永久') return { ...user.membership, member: true, permanent: true, expiresAt: null, label: '永久' };
+    const parsed = typeof user.expiresAt === 'number' ? user.expiresAt : Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(label) ? `${label}T23:59:59+08:00` : label);
+    return Number.isFinite(parsed) && parsed > Date.now() ? { ...user.membership, member: true, permanent: false, expiresAt: parsed, label } : null;
   }
 
   function syncMembershipFromUser(user) {
     if (!user) return false;
+    publishMembership(user);
     const next = membershipFromUser(user);
     if (JSON.stringify(prefs.membership || null) === JSON.stringify(next)) return false;
     prefs.membership = next;
     return true;
   }
 
-  async function refreshMembership() {
-    if (!signed || !accountId()) return;
+  async function refreshMembership(forceData = false) {
+    if (forceData) accountDataRefreshPending = true;
+    if (authBusy) return;
+    const requestId = ++membershipRequest;
+    const ticket = requestTicket();
     try {
       const response = await fetch('/api/shiyu/auth/session', { credentials: 'same-origin', cache: 'no-store' });
       if (!response.ok) return;
       const result = await response.json();
-      if (result.authenticated !== true || result.user?.id !== accountId()) return;
-      if (syncMembershipFromUser(result.user)) {
-        originalPersist();
-        syncCornerLoginState();
-        render();
+      if (requestId !== membershipRequest || !currentTicket(ticket)) return;
+      if (result.authenticated !== true || !result.user?.id) {
+        if (signed || sharedIdentity()) clearAccount();
+        else { verifiedUserId = ''; publishMembership({ member: false, entitlements: result.entitlements || [] }); }
+        return;
       }
-    } catch { /* the local membership snapshot remains the fallback */ }
+      const previousMembership = JSON.stringify(prefs.membership || null), previousProfile = JSON.stringify(prefs.accountProfile || {});
+      const changed = adoptUser(result.user);
+      rawPersist();
+      if (changed || accountDataRefreshPending || prefs.accountDataUserId !== result.user.id) {
+        await loadAccountData(result.user.id);
+      }
+      if (verifiedUserId === result.user.id && (changed || previousMembership !== JSON.stringify(prefs.membership || null) || previousProfile !== JSON.stringify(prefs.accountProfile || {}))) render();
+    } catch { if (requestId === membershipRequest && currentTicket(ticket)) { verifiedUserId = null; publishMembership(null, false); } }
+    finally { markAccountReady(); }
   }
+  window.refreshShiyuMembership = refreshMembership;
+  window.addEventListener('shiyu-member-catalog', () => { void refreshMembership(); });
 
   async function saveAccountData() {
-    if (!signed || !accountId() || prefs.accountDataUserId !== accountId()) return;
+    if (authBusy || !signed || !accountId() || verifiedUserId !== accountId() || sharedIdentity() !== accountId() || prefs.accountDataUserId !== accountId()) return;
+    const userId = accountId(), ticket = requestTicket();
     try {
-      await fetch('/api/shiyu/auth/account', {
+      const response = await fetch('/api/shiyu/auth/account', {
         method: 'PUT',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data }),
+        body: JSON.stringify({ userId, data }),
       });
+      if (!currentTicket(ticket) || accountId() !== userId) return;
+      if (!response.ok) { const result = await response.json(); toast(result.message || '空间保存失败'); await hydrateAccountData(); }
     } catch { /* local storage remains the fallback for offline preview */ }
   }
 
@@ -98,7 +250,11 @@
 
   // Login UI upgrades can complete through the shared account dialog. Keep
   // the corner preview in sync when that flow finishes outside this module.
-  window.addEventListener('shiyu-account-state', syncCornerLoginState);
+  window.addEventListener('shiyu-account-state', event => {
+    syncCornerLoginState();
+    if (event.detail?.user && event.detail.user.id === accountId()) { syncMembershipFromUser(event.detail.user); originalPersist(); }
+    else { if (!signed) { prefs.membership = null; publishMembership(null); } void refreshMembership(); }
+  });
 
   const originalChangeView = changeView;
   changeView = function accountChangeView(next, ...args) {
@@ -121,24 +277,29 @@
     return originalWorkspace(...args);
   };
 
-  async function hydrateAccountData(onMembershipReady) {
-    if (!signed || !accountId()) { onMembershipReady?.(); return; }
-    await refreshMembership();
-    onMembershipReady?.();
+  async function loadAccountData(userId) {
+    const ticket = requestTicket();
+    if (authBusy || !signed || verifiedUserId !== userId || accountId() !== userId) return;
     try {
       const response = await fetch('/api/shiyu/auth/account', { credentials: 'same-origin', cache: 'no-store' });
       if (!response.ok) return;
       const result = await response.json();
+      if (!currentTicket(ticket) || accountId() !== userId || verifiedUserId !== userId || result.userId !== userId) return;
+      accountDataRefreshPending = false;
       if (Array.isArray(result.data)) {
         syncEnabled = false;
         data = clone(result.data);
-        prefs.accountDataUserId = accountId();
+        prefs.accountDataUserId = userId;
         normalizeSelection();
         originalPersist();
         syncEnabled = true;
         render();
       }
     } catch { /* unauthenticated/static hosting keeps the local prototype available */ }
+  }
+  async function hydrateAccountData(onMembershipReady) {
+    await refreshMembership(true);
+    onMembershipReady?.();
   }
 
   async function login(button) {
@@ -152,34 +313,10 @@
     button.disabled = true;
     if (status) status.textContent = '正在登录…';
     try {
-      const response = await fetch('/api/shiyu/auth/login', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ account, credential, mode: accountLoginTab === 'password' ? 'password' : 'code', name: prefs.accountProfile?.name || '任伟' }),
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || '登录失败');
-      signed = true;
-      syncCornerLoginState();
-      prefs.accountProfile = { ...(prefs.accountProfile || {}), id: result.user.id, name: result.user.name, phone: result.user.phone, email: result.user.email, avatar: prefs.accountProfile?.avatar || ACCOUNT_AVATARS[0] };
-      syncMembershipFromUser(result.user);
-      prefs.accountDataUserId = result.user.id;
-      if (Array.isArray(result.accountData)) {
-        syncEnabled = false;
-        data = clone(result.accountData);
-        normalizeSelection();
-        originalPersist();
-        syncEnabled = true;
-      } else if (previousId === result.user.id && Array.isArray(data)) {
+      const result = await window.ShiyuAccountSession.login({ account, credential, mode: accountLoginTab === 'password' ? 'password' : 'code', invitationCode: window.shiyuInvitationCode || sessionStorage.getItem('shiyu-invitation-code') || undefined });
+      if (!Array.isArray(result.accountData) && previousId === result.user.id && Array.isArray(data)) {
         // A legacy account has no server copy yet; migrate the same browser's existing data once.
         await saveAccountData();
-      } else {
-        syncEnabled = false;
-        data = clone(seed);
-        normalizeSelection();
-        originalPersist();
-        syncEnabled = true;
       }
       dialog.close();
       render();
@@ -188,6 +325,7 @@
       if (status) status.textContent = error.message || '登录失败';
     } finally {
       button.disabled = false;
+      delete button.dataset.accountHandled;
     }
   }
 
@@ -203,13 +341,23 @@
     }
   }, true);
 
-  // The account menu handles sign-out in the existing account UI. Refresh the
-  // preview visibility after that handler changes the shared `signed` flag.
+  // Complete server sign-out before publishing the signed-out browser state.
   window.addEventListener('click', event => {
-    if (event.target.closest?.('[data-account-signout],[data-action="demo-login"]')) {
-      setTimeout(syncCornerLoginState, 0);
+    if (event.target.closest?.('[data-account-signout]')) {
+      event.preventDefault(); event.stopImmediatePropagation();
+      void window.ShiyuAccountSession.logout();
+    } else if (event.target.closest?.('[data-action="demo-login"]')) {
+      setTimeout(() => { syncCornerLoginState(); if (!signed) { prefs.membership = null; publishMembership(null, false); } void refreshMembership(); }, 0);
     }
   }, true);
+
+  window.addEventListener('storage', event => {
+    if (event.key !== storageKey && event.key !== null) return;
+    if (localIdentity() === sharedIdentity()) return;
+    invalidateAccount();
+    document.documentElement.classList.remove('shiyu-account-ready');
+    void hydrateAccountData().finally(markAccountReady);
+  });
 
   // Membership can be granted or revoked from the admin while the public page
   // is still open. Re-read the server-owned entitlement when the user returns
@@ -220,6 +368,5 @@
   // Keep the account slot reserved but invisible until the first membership
   // snapshot has been checked. This prevents a stale badge from flashing on
   // refresh before the server-owned entitlement is applied.
-  const markAccountReady = () => document.documentElement.classList.add('shiyu-account-ready');
   void hydrateAccountData(markAccountReady).finally(markAccountReady);
 })();
