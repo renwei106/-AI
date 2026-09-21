@@ -369,7 +369,7 @@
       const gap=20,cellW=Math.max(120,...direct.map(c=>c.w)),cellH=Math.max(52,...direct.map(c=>c.h)),vertical=state.layout==='organization';
       const heading=sharedHeading.getBoundingClientRect(),box=canvas.getBoundingClientRect(),rootX=clamp(heading.left-box.left+(compactLayout?42:58),55,w*.25),left=rootX+(compactLayout?110:180);
       const available=vertical?w-80:Math.max(cellW,w-left-40),cols=Math.max(1,Math.floor((available+gap)/(cellW+gap))),rows=Math.ceil(direct.length/cols);
-      direct.forEach((c,i)=>{const row=Math.floor(i/cols),col=i%cols,count=Math.min(cols,direct.length-row*cols);
+      direct.forEach((c,i)=>{const columnMajor=state.layout==='mindmap',row=columnMajor?i%rows:Math.floor(i/cols),col=columnMajor?Math.floor(i/rows):i%cols,count=columnMajor?Math.min(rows,direct.length-col*rows):Math.min(cols,direct.length-row*cols);
         c.bx=(vertical?(col-(count-1)/2)*(cellW+gap)-cellW/2:left-rootX+col*(cellW+gap))+c.anchorX;
         c.by=(vertical?140:-(rows*(cellH+gap)-gap)/2)+row*(cellH+gap)+c.anchorY;
       });
