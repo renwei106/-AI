@@ -720,6 +720,10 @@
     peek.innerHTML='<div class="brand-theme-menu corner-bottom-menu" aria-label="一隅模块">'+buttons+'</div>';
   }
   function onTodoPanelClick(e){
+    if(!e.target.closest('button,a,input,textarea,select,.corner-pull-cord,.todo-stage,.corner-close-entry')){
+      const stage=panel.querySelector('.todo-stage'),bottom=stage?.getBoundingClientRect().bottom||innerHeight;
+      if(e.clientY>bottom){closeCorner();return;}
+    }
     const view=e.target.closest('[data-todo-view]');if(view){todoLibrary().view=view.dataset.todoView;persist();renderTodoPanel();return;}
     const add=e.target.closest('[data-todo-add]');if(add){const title=prompt('给这件事留一个名字');if(title?.trim()){const l=todoLibrary(),d=todoWeekStart();l.tasks.push({id:uid(),title:title.trim(),date:todoDateKey(d),start:9*60,duration:60,color:'blue',status:'today'});persist();renderTodoPanel();}return;}
     const task=e.target.closest('[data-todo-task]');if(task&&!e.target.closest('[data-todo-resize]')){const item=todoLibrary().tasks.find(t=>t.id===task.dataset.todoTask);if(item){item.status=item.status==='done'?'today':'done';item.completed=item.status==='done';persist();renderTodoPanel();}return;}

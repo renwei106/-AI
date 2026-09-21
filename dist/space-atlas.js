@@ -2,6 +2,14 @@
 (() => {
   'use strict';
   const KEY = 'shiyu-space-atlas-v1';
+  const defaultSpaceViews={regular:{enabled:true,cards:true,list:true,poker:true},graph:{enabled:true,twoD:{enabled:true,mindmap:true},threeD:{enabled:true,micro:true,galaxy:true}}};
+  let remoteSpaceViews=defaultSpaceViews;
+  const spaceViews=()=>remoteSpaceViews;
+  const graphAllowed=()=>spaceViews().graph.enabled===true&&(spaceViews().graph.twoD?.enabled===true||spaceViews().graph.threeD?.enabled===true);
+  const dimensionAllowed=mode=>graphAllowed()&&spaceViews().graph[mode==='2d'?'twoD':'threeD']?.enabled===true;
+  const regularAllowed=id=>spaceViews().regular.enabled===true&&spaceViews().regular[id]!==false;
+  window.ShiyuSpaceViews={get:()=>spaceViews()};
+  function applyRegularViewConfig(){document.querySelectorAll('[data-group-style]').forEach(select=>{for(const option of select.options)option.hidden=!regularAllowed(option.value);if(select.selectedOptions[0]?.hidden){const next=[...select.options].find(option=>!option.hidden);if(next){select.value=next.value;select.dispatchEvent(new Event('change',{bubbles:true}))}}});}
   const classicOrbits = new URLSearchParams(location.search).get('atlas-orbits')==='classic';
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const svg = paths => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
@@ -64,6 +72,12 @@
     const p=saved[state.sid]||{};
     state.mode=p.mode==='3d'?'3d':'2d';state.motion=!reduceMotion.matches;state.layout=['radial','organization','mindmap'].includes(p.layout)?p.layout:'radial';
     state.scene3d=['spatial','solar','systems'].includes(p.scene3d)?p.scene3d:'spatial';
+    if(!dimensionAllowed(state.mode)){state.mode=dimensionAllowed('2d')?'2d':'3d'}
+    if(state.mode==='2d'&&!spaceViews().graph.twoD.mindmap)state.layout='mindmap';
+    if(state.mode==='3d'){
+      if(!spaceViews().graph.threeD.micro&&spaceViews().graph.threeD.galaxy)state.scene3d='solar';
+      else if(!spaceViews().graph.threeD.galaxy&&spaceViews().graph.threeD.micro)state.scene3d='spatial';
+    }
     if(window.ShiyuEntitlements?.snapshot().ready&&!window.ShiyuEntitlements.allows('atlas-'+state.mode)&&window.ShiyuEntitlements.allows('atlas-2d'))state.mode='2d';
   }
   function savePreferences() {
@@ -98,6 +112,7 @@
       switcher.querySelector('.space-detail-icon').innerHTML=typeof entityIcon==='function'?entityIcon(current.icon||'work'):icons.space;
       switcher.querySelector('span').textContent=current.name;switcher.setAttribute('aria-label','切换空间：'+current.name);
       button.querySelector('.space-mode-indicator').innerHTML=atlas?icons.graph:icons.grid;
+      button.hidden=!atlas&&!graphAllowed();
       button.setAttribute('aria-label','切换视图，当前'+(atlas?'图谱视图':'常规视图'));
       const host=atlas?query('.at-view-tools'):document.querySelector('.workspace-tools .group-view-controls');
       if(host)host.insertBefore(button,atlas?host.querySelector('.at-layout-picker'):host.firstChild);
@@ -149,12 +164,13 @@
     clearTimeout(menuTimer);menuTrigger=button;
     if(!modeMenu){modeMenu=document.createElement('div');modeMenu.id='space-mode-menu';document.body.append(modeMenu);modeMenu.onpointerenter=()=>clearTimeout(menuTimer);modeMenu.onpointerleave=()=>{menuTimer=setTimeout(hideModeMenu,240)};modeMenu.onkeydown=e=>{if(e.key==='Escape'){hideModeMenu();menuTrigger?.focus()}}}
     const active=!!dialog?.open;
-    modeMenu.innerHTML=`<p>空间展示方式</p><button data-space-mode="daily" aria-pressed="${!active}"><span class="mode-preview mode-preview-daily"><i></i><i></i><i></i><i></i></span><span><b>常规视图</b><small>按场景和分组整齐呈现，适合日常浏览、搜索与管理</small></span></button><button data-space-mode="atlas" aria-pressed="${active}"><span class="mode-preview mode-preview-atlas">${icons.graph}</span><span><b>图谱视图</b><small>用节点和连线展开层级，适合查看上下级与整体关系</small></span></button>`;
+    modeMenu.innerHTML=`<p>空间展示方式</p>${spaceViews().regular.enabled?'<button data-space-mode="daily" aria-pressed="'+(!active)+'"><span class="mode-preview mode-preview-daily"><i></i><i></i><i></i></span><span><b>常规视图</b><small>按场景和分组整齐呈现，适合日常浏览、搜索与管理</small></span></button>':''}${graphAllowed()?'<button data-space-mode="atlas" aria-pressed="'+active+'"><span class="mode-preview mode-preview-atlas">'+icons.graph+'</span><span><b>图谱视图</b><small>用节点和连线展开层级，适合查看上下级与整体关系</small></span></button>':''}`;
     const rect=button.getBoundingClientRect();modeMenu.hidden=false;modeMenu.style.left=clamp(rect.right-modeMenu.offsetWidth,12,innerWidth-modeMenu.offsetWidth-12)+'px';modeMenu.style.top=Math.max(12,rect.top-modeMenu.offsetHeight-9)+'px';button.setAttribute('aria-expanded','true');
     modeMenu.onclick=e=>{const choice=e.target.closest('[data-space-mode]');if(!choice)return;hideModeMenu();if(choice.dataset.spaceMode==='atlas'){if(!dialog?.open)open(spaceId,button)}else if(dialog?.open)closeAtlas('daily')};
   }
   document.addEventListener('click',e=>{if(!e.target.closest('#space-mode-menu,.space-mode-entry'))hideModeMenu()});
   function open(sid,trigger,preset,directEntry=false) {
+    if(!graphAllowed())return;
     returnFocus=trigger;state.sid=sid;state.focus='s:'+sid;preferences();resetCamera();
     if(preset)for(const field of ['mode','layout','scene3d'])if(preset[field]!==undefined)state[field]=preset[field];
     if(!window.ShiyuEntitlements?.allows('atlas-'+state.mode)){
@@ -246,7 +262,7 @@
   function layoutPicker(){
     const current=state.mode==='2d'?state.layout:state.scene3d;
     const descriptions={radial:'从中心向四周逐级展开',organization:'从上到下，清楚呈现层级',mindmap:'从左到右，沿着分支浏览',spatial:'在立体空间中，探索收藏的关系',solar:classicOrbits?'以当前节点为恒星，内容沿多层轨道运行':'空间展开银河旋臂，场景与分组呈现行星圆盘',systems:'场景沿主轨道运行，分组环绕各自场景'};
-    const groups={two:viewOptions('2d'),three:viewOptions('3d')};
+    const groups={two:viewOptions('2d').filter(id=>id==='mindmap'&&spaceViews().graph.twoD.mindmap),three:viewOptions('3d').filter(id=>id==='spatial'?spaceViews().graph.threeD.micro:id==='solar'&&spaceViews().graph.threeD.galaxy)};
     const panel=(mode,ids)=>'<div class="at-view-panel" id="at-view-panel-'+mode+'" role="tabpanel" aria-labelledby="at-view-tab-'+mode+'" data-at-view-panel="'+mode+'"'+(state.mode===mode?'':' hidden')+'>'+ids.map(id=>'<button data-at-view="'+id+'" aria-pressed="'+(id===current)+'">'+layoutIcon(id)+'<span><b>'+layoutName(id)+'</b><small>'+descriptions[id]+'</small></span></button>').join('')+'</div>';
     return '<div class="at-layout-picker at-view-picker"><div class="at-quiet" role="group" aria-label="切换图谱视图"><button class="at-view-dimension" data-at="toggle-dimension" aria-label="切换到'+(state.mode==='3d'?'2D':'3D')+'模式" aria-haspopup="dialog" aria-controls="at-view-dialog" aria-expanded="false">'+state.mode.toUpperCase()+'</button><button class="at-view-current" data-at="views" aria-label="切换下一个结构视图" aria-haspopup="dialog" aria-controls="at-view-dialog" aria-expanded="false">'+layoutIcon(current)+'<b>'+layoutName(current)+'</b>'+icons.down+'</button></div><div class="at-layout-menu" id="at-view-dialog" role="dialog" aria-label="图谱展示方式" hidden><div class="at-view-tabs" role="tablist" aria-label="选择二维或三维"><button id="at-view-tab-2d" role="tab" data-at-dimension="2d" aria-controls="at-view-panel-2d" aria-selected="'+(state.mode==='2d')+'">2D</button><button id="at-view-tab-3d" role="tab" data-at-dimension="3d" aria-controls="at-view-panel-3d" aria-selected="'+(state.mode==='3d')+'">3D</button></div>'+panel('2d',groups.two)+panel('3d',groups.three)+'</div></div>';
   }
@@ -960,5 +976,9 @@
   };
   window.addEventListener('shiyu-user-entitlements',()=>{if(dialog?.open&&!window.ShiyuEntitlements?.allows('atlas-'+state.mode)){if(window.ShiyuEntitlements?.allows('atlas-2d')){state.mode='2d';resetCamera();renderAtlas()}else dialog.close()}});
   const groupsBeforeModeEntry=renderGroups;renderGroups=function(...args){const result=groupsBeforeModeEntry(...args);mountEntry();return result};
+  async function loadSpaceViewConfig(){try{const response=await fetch('/api/shiyu/operations',{credentials:'include',cache:'no-store'});if(!response.ok)return;const value=await response.json();if(value?.spaceViews)remoteSpaceViews={...defaultSpaceViews,...value.spaceViews,regular:{...defaultSpaceViews.regular,...value.spaceViews.regular},graph:{...defaultSpaceViews.graph,...value.spaceViews.graph,twoD:{...defaultSpaceViews.graph.twoD,...value.spaceViews.graph?.twoD},threeD:{...defaultSpaceViews.graph.threeD,...value.spaceViews.graph?.threeD}}};if(!graphAllowed()&&dialog?.open)closeAtlas('daily');applyRegularViewConfig();mountEntry()}catch{}}
   mountEntry();
+  applyRegularViewConfig();
+  new MutationObserver(()=>applyRegularViewConfig()).observe(document.body,{childList:true,subtree:true});
+  void loadSpaceViewConfig();
 })();
