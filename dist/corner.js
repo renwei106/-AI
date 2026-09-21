@@ -147,6 +147,15 @@
         {id:uid(),title:'未完的句子',content:'让灵感停在半句，也是一种温柔的保存。',updatedAt:now-1000*60*60*48,icon:'…'}
       ];persist();
     }
+    if(moduleId==='todo'&&library.tasks===undefined){
+      const base=new Date();base.setHours(0,0,0,0);const iso=d=>d.toISOString().slice(0,10);
+      library.tasks=[
+        {id:uid(),title:'晨间整理',date:iso(base),start:8*60,duration:60,color:'sand',status:'today'},
+        {id:uid(),title:'推进重要事项',date:iso(base),start:9*60,duration:180,color:'blue',status:'today'},
+        {id:uid(),title:'留一段专注时间',date:iso(base),start:13*60,duration:180,color:'teal',status:'today'},
+        {id:uid(),title:'收束今日工作',date:iso(base),start:17*60,duration:60,color:'olive',status:'today'}
+      ];library.inbox=[{id:uid(),title:'还未决定日期的事项'}];persist();
+    }
     ensureInbox(library);return library;
   }
   function ensureInbox(library){
@@ -213,7 +222,17 @@
     cornerRevealAnimation=animation;
     animation.finished.then(()=>{if(panel.open&&cornerRevealAnimation===animation)panel.close();},()=>{});
   }
+  function requireCornerModuleAuth(moduleId){
+    if(moduleId!=='memo'&&moduleId!=='todo')return true;
+    if(signed)return true;
+    const label=cornerModuleConfig(moduleId)?.entryName||cornerModuleConfig(moduleId)?.name||'这个模块';
+    if(typeof openLogin==='function')openLogin('登录后即可进入'+label+'。');
+    else if(typeof show==='function')show('#login');
+    else document.querySelector('#login')?.showModal?.();
+    return false;
+  }
   function openCorner(trigger, groupId, event, moduleId='common') {
+    if(!requireCornerModuleAuth(moduleId))return;
     if(panel?.open){closeCorner();return;}
     prepareCardAudio();
     activeModule=cornerModuleConfig(moduleId)?.enabled!==false?moduleId:(enabledCornerModuleIds()[0]||'common');
@@ -223,11 +242,16 @@
       panel=dialog('my-corner',meta.panelName||meta.name);
       panel.addEventListener('close',()=>{cornerRevealAnimation?.cancel();cornerRevealAnimation=null;cornerClosing=false;panel.style.clipPath='';panel.style.removeProperty('--corner-backdrop-from');panel.classList.remove('corner-reveal-opening','corner-reveal-closing','memo-editor-mode');finishDrag(true);restoreEntry();flipped.clear();coverOpen.clear();memoEditingId=null;memoFocusId=null;memoWheelLock=0;cancelAnimationFrame(motionFrame);cancelAnimationFrame(fanMotion.frame);fanMotion.frame=0;panel.classList.remove('corner-animating');wheelConsumed=false;swipe=null;});
       panel.addEventListener('pointerdown',startDrag);
+      panel.addEventListener('pointerdown',onTodoResizeStart);
       panel.addEventListener('dragstart',e=>{if(e.target.closest('.corner-inbox [data-corner-ref]'))e.preventDefault();});
+      panel.addEventListener('dragstart',onTodoDragStart);
+      panel.addEventListener('dragover',onTodoDragOver);
+      panel.addEventListener('drop',onTodoDrop);
       panel.addEventListener('cancel',e=>{e.preventDefault();if(cornerClosing)return;if(flipped.size)flipCard([...flipped][0],false);else closeCorner();});
       panel.addEventListener('click',onPanelClick);
       panel.addEventListener('change',onPanelChange);
       panel.addEventListener('input',onPanelInput);
+      panel.addEventListener('submit',onTodoSubmit);
 
       panel.addEventListener('pointerover',e=>{const card=e.target.closest?.('[data-corner-card]:not(.corner-inbox)');if(card&&panel.contains(card))card.classList.add('is-pointer-hover');});
       panel.addEventListener('pointerout',e=>{const card=e.target.closest?.('[data-corner-card]:not(.corner-inbox)');if(card&&(!e.relatedTarget||!card.contains(e.relatedTarget)))card.classList.remove('is-pointer-hover');});
@@ -314,6 +338,7 @@
   function renderPanel() {
 
     if(activeModule==='memo'){renderMemoPanel();return;}
+    if(activeModule==='todo'){renderTodoPanel();return;}
 
     const listScroll=new Map([...panel.querySelectorAll('[data-corner-card]')].map(el=>[el.dataset.cornerCard,el.querySelector('.corner-links')?.scrollTop||0]));
     const {groups}=collection(),entries=sources(),meta=moduleMeta();panel.dataset.cornerModule=activeModule;
@@ -340,16 +365,16 @@
     let index=notes.findIndex(note=>note.dataset.memoCard===memoFocusId);if(index<0){index=0;memoFocusId=notes[0].dataset.memoCard;}
     const next=Math.max(0,Math.min(notes.length-1,index+(direction>0?1:-1)));memoFocusId=notes[next].dataset.memoCard;syncMemoFocus();memoScrollTo(memoFocusId);
   }
-  function memoNoteMarkup(note,index){const editing=memoEditingId===note.id,focused=memoFocusId===note.id;return '<article class="memo-note '+(editing?'is-editing ':'')+(focused?'is-focus':'')+'" data-memo-card="'+note.id+'" style="--memo-order:'+index+'"><div class="memo-note-paper"><div class="memo-note-rule" aria-hidden="true"></div><div class="memo-note-head"><span class="memo-note-icon" aria-hidden="true">'+esc(note.icon||'✦')+'</span><span class="memo-note-time">'+esc(memoTime(note.updatedAt))+'</span></div><h3>'+esc(note.title||'无题')+'</h3><p>'+esc(note.content||'还没有写下什么。')+'</p><footer><span>小记 · '+String(index+1).padStart(2,'0')+'</span><span>点击展开</span></footer></div></article>';}
-  function memoEditorMarkup(note){if(!note)return '';return '<section class="memo-editor" aria-label="编辑小记"><div class="memo-editor-top"><span class="memo-editor-kicker">正在写下</span><button type="button" data-memo-done aria-label="完成编辑" title="完成">'+glyph('<path d="m5 12 4 4L19 6"/>')+'</button></div><label class="memo-editor-title"><span>标题</span><input data-memo-title="'+note.id+'" maxlength="60" value="'+esc(note.title||'')+'" placeholder="给这一刻留一个名字"></label><label class="memo-editor-content"><span>内容</span><textarea data-memo-content="'+note.id+'" maxlength="2000" placeholder="让想法慢慢展开……">'+esc(note.content||'')+'</textarea></label><div class="memo-editor-meta"><span>'+esc(note.icon||'✦')+'</span><span>最后编辑于 '+esc(memoTime(note.updatedAt))+'</span></div></section>';}
+  function memoNoteMarkup(note,index){const editing=memoEditingId===note.id,focused=memoFocusId===note.id;return '<article class="memo-note '+(editing?'is-editing ':'')+(focused?'is-focus':'')+'" data-memo-card="'+note.id+'" style="--memo-order:'+index+';--memo-y:'+((note.__memoCount-index-1)*28)+'px;--memo-tilt:'+((index%2?-1:1)*1.2)+'deg"><div class="memo-note-paper"><div class="memo-note-rule" aria-hidden="true"></div><div class="memo-note-head"><span class="memo-note-icon" aria-hidden="true">'+esc(note.icon||'✦')+'</span><span class="memo-note-time">'+esc(memoTime(note.updatedAt))+'</span></div><h3>'+esc(note.title||'无题')+'</h3><p>'+esc(note.content||'还没有写下什么。')+'</p><footer><span>小记 · '+String(index+1).padStart(2,'0')+'</span><button type="button" class="memo-note-edit" data-memo-edit="'+note.id+'" aria-label="编辑 '+esc(note.title||'这则小记')+'">编辑</button></footer></div></article>';}
+  function memoEditorMarkup(note){if(!note)return '';return '<section class="memo-editor" role="dialog" aria-modal="true" aria-label="编辑小记"><div class="memo-editor-top"><span class="memo-editor-kicker">正在写下</span><button type="button" data-memo-done aria-label="完成编辑" title="完成">'+glyph('<path d="m5 12 4 4L19 6"/>')+'</button></div><label class="memo-editor-title"><span>标题</span><input data-memo-title="'+note.id+'" maxlength="60" value="'+esc(note.title||'')+'" placeholder="给这一刻留一个名字"></label><label class="memo-editor-content"><span>内容</span><textarea data-memo-content="'+note.id+'" maxlength="2000" placeholder="让想法慢慢展开……">'+esc(note.content||'')+'</textarea></label><div class="memo-editor-meta"><span>'+esc(note.icon||'✦')+'</span><span>最后编辑于 '+esc(memoTime(note.updatedAt))+'</span></div></section>';}
   function renderMemoPanel(){
-    const library=memoLibrary(),notes=Array.isArray(library.notes)?library.notes:[],meta=moduleMeta();panel.dataset.cornerModule='memo';
-    if(notes.length&&!notes.some(note=>note.id===memoFocusId))memoFocusId=notes[0].id;
+    const library=memoLibrary(),notes=(Array.isArray(library.notes)?library.notes:[]).map((note,index)=>({...note,__memoOriginalIndex:index})).sort((a,b)=>(Number(a.updatedAt)||0)-(Number(b.updatedAt)||0)||a.__memoOriginalIndex-b.__memoOriginalIndex).map(note=>({...note,__memoCount:library.notes.length})),meta=moduleMeta();panel.dataset.cornerModule='memo';
+    if(notes.length&&!notes.some(note=>note.id===memoFocusId))memoFocusId=notes[notes.length-1].id;
     const editor=memoEditingId?memoEditorMarkup(notes.find(note=>note.id===memoEditingId)):'';
     const panelName=meta.panelName||meta.name;
     const content='<div class="corner-stage memo-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2><button type="button" data-corner-next-theme title="点击切换主题" aria-label="'+esc(panelName)+'，点击切换下一个主题">'+esc(panelName)+'</button></h2><span class="corner-theme-art" aria-hidden="true"></span></div><p>'+esc(meta.subtitle)+'</p></div><div class="memo-board" aria-label="小记卡片，滚轮移动"><div class="memo-track">'+(notes.length?notes.map(memoNoteMarkup).join(''):'<div class="memo-empty"><span>✦</span><p>还没有留下小记</p><small>把此刻的灵感，收进一张纸里</small></div>')+'<button type="button" class="memo-add" data-memo-new aria-label="新建小记"><span>＋</span><strong>写下一笔</strong><small>让念头有处可去</small></button></div></div>'+editor+'</div>';
     let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';panel.append(body);}body.innerHTML=content;panel.classList.toggle('memo-editor-mode',Boolean(editor));syncCornerThemePresentation();
-    const title=panel.querySelector('[data-memo-title]');if(title&&editor)requestAnimationFrame(()=>{title.focus();memoScrollTo(memoFocusId,'auto')});
+    const title=panel.querySelector('[data-memo-title]');requestAnimationFrame(()=>{if(title&&editor)title.focus();if(memoFocusId)memoScrollTo(memoFocusId,editor?'auto':'smooth')});
   }
   function card(g,index,entries) {
     const skin=cornerThemeSkin();
@@ -392,6 +417,26 @@
     el.style.setProperty('--corner-vinyl-paper',dark?'#f5ead1':'#28332d');
     el.style.setProperty('--corner-space-ink',dark?'color-mix(in srgb,'+surface+' 68%,#081329)':'color-mix(in srgb,'+surface+' 78%,#ffffff)');
     el.style.setProperty('--corner-star',dark?'#e9f1ff':'#2b4059');
+  }
+  function todoLibrary(){return moduleCollection('todo');}
+  function todoDateKey(date){return date.toISOString().slice(0,10)}
+  function todoWeekStart(){const d=new Date();d.setHours(0,0,0,0);const day=d.getDay()||7;d.setDate(d.getDate()-day+1);return d}
+  function todoTime(min){const h=Math.floor(min/60),m=min%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}
+  function todoWeekMarkup(library){
+    const start=todoWeekStart(),days=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return d}),today=todoDateKey(new Date());
+    const labels=['一','二','三','四','五','六','日'];
+    const head=days.map((d,i)=>'<div class="todo-day-head '+(todoDateKey(d)===today?'is-today':'')+'"><span>周'+labels[i]+'</span><b>'+d.getDate()+'</b></div>').join('');
+    const rows=Array.from({length:24},(_,i)=>'<div class="todo-hour"><span>'+String(i).padStart(2,'0')+':00</span></div>').join('');
+    const grid=days.map(d=>'<div class="todo-day-column" data-todo-date="'+todoDateKey(d)+'"></div>').join('');
+    const events=(library.tasks||[]).filter(t=>days.some(d=>todoDateKey(d)===t.date)).map(t=>{const col=days.findIndex(d=>todoDateKey(d)===t.date);return '<article class="todo-event todo-'+(t.color||'blue')+'" draggable="true" data-todo-task="'+t.id+'" style="--todo-col:'+(col+1)+';--todo-start:'+Number(t.start||540)+';--todo-duration:'+Number(t.duration||60)+'"><button class="todo-event-resize" data-todo-resize="'+t.id+'" aria-label="调整时长"></button><strong>'+esc(t.title)+'</strong><small>'+todoTime(t.start||540)+' – '+todoTime((t.start||540)+(t.duration||60))+'</small></article>'}).join('');
+    return '<div class="todo-week"><div class="todo-calendar-head"><div class="todo-month-label">'+(start.getMonth()+1)+'月 · 本周</div>'+head+'</div><div class="todo-calendar-body"><div class="todo-time-axis">'+rows+'</div><div class="todo-grid">'+grid+'<div class="todo-grid-lines">'+rows+'</div>'+events+'</div></div></div>';
+  }
+  function renderTodoPanel(){
+    const library=todoLibrary(),meta=moduleMeta(),view=library.view||'week';panel.dataset.cornerModule='todo';
+    const inbox=(library.inbox||[]).map(item=>'<div class="todo-inbox-item" draggable="true" data-todo-inbox="'+item.id+'"><span>○</span>'+esc(item.title)+'</div>').join('');
+    const board=(library.tasks||[]).map(t=>'<article class="todo-board-item todo-'+(t.color||'blue')+'" draggable="true" data-todo-task="'+t.id+'"><span>○</span><strong>'+esc(t.title)+'</strong><small>'+esc(t.date||'未排期')+'</small></article>').join('');
+    const content='<div class="corner-stage todo-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2>'+esc(meta.panelName||meta.name)+'</h2></div><p>把要做的事，安放在合适的时刻</p></div><div class="todo-toolbar"><div class="todo-view-switch"><button type="button" data-todo-view="week" class="'+(view==='week'?'is-active':'')+'">周视图</button><button type="button" data-todo-view="board" class="'+(view==='board'?'is-active':'')+'">看板视图</button></div><button type="button" class="todo-add" data-todo-add>＋ 新增事项</button></div><div class="todo-layout"><aside class="todo-inbox"><div class="todo-inbox-title"><strong>收集箱</strong><span>'+((library.inbox||[]).length)+'</span></div><p>还没决定日期的事项，先放在这里。</p><div class="todo-inbox-list">'+(inbox||'<small class="todo-empty">收集箱很安静</small>')+'</div><form class="todo-inbox-form" data-todo-form><input name="title" placeholder="添加一件待安排的事" aria-label="添加待安排事项"><button>添加</button></form></aside><main class="todo-main">'+(view==='week'?todoWeekMarkup(library):'<div class="todo-board">'+['today','doing','done'].map((status,i)=>'<section class="todo-board-column" data-todo-status="'+status+'"><header><strong>'+['今天','进行中','已完成'][i]+'</strong><span>'+((library.tasks||[]).filter(t=>(t.status||'today')===status).length)+'</span></header>'+((library.tasks||[]).filter(t=>(t.status||'today')===status).map(t=>'<article class="todo-board-item todo-'+(t.color||'blue')+'" draggable="true" data-todo-task="'+t.id+'"><span>○</span><strong>'+esc(t.title)+'</strong><small>'+esc(t.date||'未排期')+'</small></article>').join('')||'<div class="todo-board-empty">把事项拖到这里</div>')+'</section>').join('')+'</div>')+'</main></div></div>';
+    let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';panel.append(body);}body.innerHTML=content;syncCornerThemePresentation();
   }
   function backCard(g){
     const choices=themeChoices();if(!followsTheme(g)&&g.icon&&!choices.some(x=>x.id===g.icon))choices.push({id:g.icon,name:'当前图标'});
@@ -438,6 +483,7 @@
   }
   function onPanelClick(e) {
     if(activeModule==='memo'){onMemoPanelClick(e);return;}
+    if(activeModule==='todo'){onTodoPanelClick(e);return;}
     if(performance.now()<swallowClickUntil){e.preventDefault();e.stopPropagation();return;}
     const b=e.target.closest('button'),el=e.target.closest('[data-corner-card]'),g=el&&collection().groups.find(g=>g.id===el.dataset.cornerCard);
     if(!e.target.closest('button,a,input,select,[data-corner-card],.corner-pull-cord')&&!drag?.active){const cards=[...panel.querySelectorAll('.corner-card:not(.is-away)')].map(card=>card.getBoundingClientRect()).filter(box=>box.right>0&&box.left<innerWidth),bottom=Math.max(...cards.map(box=>box.bottom));if(cards.length&&e.clientY>bottom){closeCorner();return;}}
@@ -478,7 +524,8 @@
     if(e.target.closest('[data-corner-next-theme]')){cycleCornerTheme();return;}
     const done=e.target.closest('[data-memo-done]');if(done){memoFocusId=memoEditingId;memoEditingId=null;renderPanel();return;}
     const add=e.target.closest('[data-memo-new]');if(add){const library=memoLibrary(),now=Date.now(),note={id:uid(),title:'未命名的灵感',content:'',updatedAt:now,icon:'✦'};library.notes.push(note);persist();memoEditingId=note.id;memoFocusId=note.id;renderPanel();return;}
-    const card=e.target.closest('[data-memo-card]');if(card){const note=memoLibrary().notes.find(item=>item.id===card.dataset.memoCard);if(note){memoFocusId=note.id;memoEditingId=note.id;renderPanel();}return;}
+    const edit=e.target.closest('[data-memo-edit]');if(edit){const note=memoLibrary().notes.find(item=>item.id===edit.dataset.memoEdit);if(note){memoFocusId=note.id;memoEditingId=note.id;renderPanel();}return;}
+    const card=e.target.closest('[data-memo-card]');if(card){const note=memoLibrary().notes.find(item=>item.id===card.dataset.memoCard);if(note){memoFocusId=note.id;syncMemoFocus();memoScrollTo(note.id);}return;}
     if(!e.target.closest('button,a,input,textarea,select,.corner-pull-cord,.memo-editor,.corner-close-entry,.memo-board')){
       const board=panel.querySelector('.memo-board'),bottom=board?.getBoundingClientRect().bottom||innerHeight;
       if(e.clientY>bottom+28)closeCorner();
@@ -672,6 +719,16 @@
     const buttons=enabledCornerModuleIds().map(id=>{const meta=cornerModuleConfig(id);return '<button type="button" data-corner-module="'+id+'" aria-label="打开'+esc(meta.entryName||meta.name)+'">'+moduleIcon(id)+'<b>'+esc(meta.entryName||meta.name)+'</b><span aria-hidden="true">→</span></button>';}).join('');
     peek.innerHTML='<div class="brand-theme-menu corner-bottom-menu" aria-label="一隅模块">'+buttons+'</div>';
   }
+  function onTodoPanelClick(e){
+    const view=e.target.closest('[data-todo-view]');if(view){todoLibrary().view=view.dataset.todoView;persist();renderTodoPanel();return;}
+    const add=e.target.closest('[data-todo-add]');if(add){const title=prompt('给这件事留一个名字');if(title?.trim()){const l=todoLibrary(),d=todoWeekStart();l.tasks.push({id:uid(),title:title.trim(),date:todoDateKey(d),start:9*60,duration:60,color:'blue',status:'today'});persist();renderTodoPanel();}return;}
+    const task=e.target.closest('[data-todo-task]');if(task&&!e.target.closest('[data-todo-resize]')){const item=todoLibrary().tasks.find(t=>t.id===task.dataset.todoTask);if(item){item.status=item.status==='done'?'today':'done';item.completed=item.status==='done';persist();renderTodoPanel();}return;}
+  }
+  function onTodoDragStart(e){if(activeModule!=='todo')return;const item=e.target.closest('[data-todo-task],[data-todo-inbox]');if(!item)return;e.dataTransfer.setData('text/plain',item.dataset.todoTask?'task:'+item.dataset.todoTask:'inbox:'+item.dataset.todoInbox);e.dataTransfer.effectAllowed='move';}
+  function onTodoResizeStart(e){if(activeModule!=='todo')return;const handle=e.target.closest('[data-todo-resize]');if(!handle)return;e.preventDefault();const task=todoLibrary().tasks.find(t=>t.id===handle.dataset.todoResize);if(!task)return;const startY=e.clientY,startDuration=Number(task.duration)||60;const move=ev=>{task.duration=Math.max(30,Math.round((startDuration+(ev.clientY-startY)*1440/(panel.querySelector('.todo-calendar-body')?.clientHeight||620))/15)*15);renderTodoPanel()};const up=()=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up);persist()};addEventListener('pointermove',move);addEventListener('pointerup',up,{once:true});}
+  function onTodoSubmit(e){if(activeModule!=='todo'||!e.target.matches('[data-todo-form]'))return;e.preventDefault();const input=e.target.elements.title,title=input.value.trim();if(!title)return;const l=todoLibrary();l.inbox??=[];l.inbox.push({id:uid(),title});input.value='';persist();renderTodoPanel();}
+  function onTodoDragOver(e){if(activeModule==='todo'&&e.target.closest('.todo-day-column,.todo-board-column')){e.preventDefault();e.dataTransfer.dropEffect='move';}}
+  function onTodoDrop(e){if(activeModule!=='todo')return;const zone=e.target.closest('.todo-day-column,.todo-board-column');if(!zone)return;e.preventDefault();const raw=e.dataTransfer.getData('text/plain'),l=todoLibrary();if(raw.startsWith('inbox:')){const id=raw.slice(6),item=(l.inbox||[]).find(x=>x.id===id);if(!item)return;const date=zone.dataset.todoDate||todoDateKey(todoWeekStart()),task={id:uid(),title:item.title,date,start:9*60,duration:60,color:'blue',status:zone.dataset.todoStatus||'today'};l.tasks.push(task);l.inbox=l.inbox.filter(x=>x.id!==id);}else if(raw.startsWith('task:')){const task=l.tasks.find(x=>x.id===raw.slice(5));if(!task)return;if(zone.dataset.todoDate)task.date=zone.dataset.todoDate;if(zone.dataset.todoStatus)task.status=zone.dataset.todoStatus;}persist();renderTodoPanel();}
   // Exact standalone file from the "悬浮菜单对话" task. An iframe isolates
   // its document-wide styles and wheel interaction from the existing home page.
   function syncOrbitPreviewTheme(preview){
