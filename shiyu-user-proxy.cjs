@@ -2,7 +2,7 @@ const http=require('node:http')
 
 module.exports=function shiyuUserProxy(req,res){
   const pathname=(req.url||'/').split('?')[0]
-  if(!pathname.startsWith('/api/shiyu/auth/')&&pathname!=='/api/shiyu/login-methods')return false
+  if(!pathname.startsWith('/api/shiyu/auth/')&&pathname!=='/api/shiyu/login-methods'&&pathname!=='/api/shiyu/operations')return false
   const upstream=http.request({host:'127.0.0.1',port:5175,path:req.url,method:req.method,headers:{cookie:req.headers.cookie||'','content-type':req.headers['content-type']||'application/json'}},response=>{
     if(response.headers['set-cookie'])res.setHeader('set-cookie',response.headers['set-cookie'])
     res.writeHead(response.statusCode||502,{'content-type':response.headers['content-type']||'application/json; charset=utf-8','cache-control':'no-store'})

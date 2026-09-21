@@ -9,3 +9,4 @@ payments/.pnpm-store/
 payments/.env*
 !payments/.env.example
 payments/keys/
+preview-4318.*.log

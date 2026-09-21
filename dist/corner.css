@@ -389,11 +389,11 @@ body.account-unsigned #dock .corner-unified.corner-peeking .corner-dock-preview{
 #dock .corner-peek-groups button[data-corner-module=todo] i{color:#6d8fb3}
 /* The copied standalone menu keeps its interaction; this frame only supplies
    a transparent, compact host beside the original home entry. */
-#corner-orbit-preview{display:none;position:fixed;right:24px;bottom:64px;z-index:36;width:min(360px,calc(100vw - 32px));height:min(410px,calc(100dvh - 160px));border:0;background:transparent;visibility:hidden}
+#corner-orbit-preview{display:none;position:fixed;right:24px;bottom:64px;z-index:36;width:min(320px,calc(100vw - 32px));height:min(370px,calc(100dvh - 160px));border:0;background:transparent;visibility:hidden}
 #corner-orbit-preview[data-theme-ready="true"]{visibility:visible}
 #corner-orbit-preview{opacity:1;transition:opacity .35s ease}
 #corner-orbit-preview.is-idle-hidden{opacity:0;pointer-events:none}
-body[data-view=home]:not(.world-active):not(.atlas-active) #corner-orbit-preview:not([hidden]){display:block}
+body:is([data-view=home],[data-view=space]):not(.world-active):not(.atlas-active) #corner-orbit-preview:not([hidden]){display:block}
 @media(max-width:760px){#corner-orbit-preview{right:16px;bottom:184px;width:calc(100vw - 32px);height:min(390px,calc(100dvh - 276px))}}
 #my-corner .corner-add-card>button>.corner-member-badge{position:static;font-size:inherit}
 #my-corner .corner-add-card>button>.corner-member-badge svg{width:22px;height:22px}
@@ -912,6 +912,31 @@ body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-fi
 #my-corner .corner-card:not(.corner-inbox) .corner-card-cover small{color:var(--corner-cover-muted,var(--muted))}
 #my-corner[data-corner-module=memo] .corner-card-logo{color:var(--module-accent)}
 
+/* All themed collection cards use the same editorial cover composition:
+   title and count on the left, the theme icon on the right. The lid retracts
+   only while the pointer is over the card, then expands again on leave. */
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-front{position:absolute}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover{position:absolute;inset:0;z-index:3;display:grid;grid-template-columns:minmax(0,1fr) 58px;grid-template-rows:auto auto auto;align-content:center;min-height:0;height:100%;box-sizing:border-box;border-radius:inherit;overflow:hidden;transition:height .72s cubic-bezier(.22,.75,.22,1),padding .72s cubic-bezier(.22,.75,.22,1),background .35s ease,box-shadow .35s ease;cursor:pointer}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover .corner-card-number{grid-column:1 / -1;grid-row:1}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover h3{grid-column:1;grid-row:2;align-self:end;margin-right:0}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover small{grid-column:1;grid-row:3}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover .corner-card-logo{position:static;grid-column:2;grid-row:2;align-self:center;justify-self:end}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-links,#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-flip-hint{position:relative;z-index:1;opacity:0;pointer-events:none;transition:opacity .3s ease}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):hover .corner-card-cover{height:84px;min-height:84px;padding:16px 25px 12px;align-content:center;box-shadow:0 10px 24px #0003}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):hover .corner-links{padding-top:96px;opacity:1;pointer-events:auto}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):hover .corner-flip-hint{opacity:1;pointer-events:auto}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):hover .corner-card-cover h3{font-size:22px;line-height:1.25}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):hover .corner-card-cover small{display:none}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):hover .corner-card-logo{width:38px;height:38px}
+
+/* Theme faces for the remaining collection skins. */
+#my-corner[data-corner-theme=reading] .corner-card-cover{background:linear-gradient(125deg,color-mix(in srgb,#756d9e 16%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)));border-left:4px solid color-mix(in srgb,#756d9e 42%,transparent)}
+#my-corner[data-corner-theme=flip] .corner-card-cover{background:repeating-linear-gradient(90deg,transparent 0 28px,color-mix(in srgb,var(--ink) 5%,transparent) 29px 30px),var(--corner-face,var(--surface));border-top:1px solid color-mix(in srgb,var(--ink) 18%,transparent)}
+#my-corner[data-corner-theme=rain] .corner-card-cover{background:linear-gradient(150deg,color-mix(in srgb,#477d70 18%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)));border-right:3px solid color-mix(in srgb,#477d70 30%,transparent)}
+#my-corner[data-corner-theme=poly] .corner-card-cover{background:conic-gradient(from 20deg at 84% 22%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 28%,color-mix(in srgb,var(--accent) 7%,transparent) 42%,transparent 68%),var(--corner-face,var(--surface))}
+#my-corner:is([data-corner-theme=cinema],[data-corner-theme=projection]) .corner-card-cover{background:linear-gradient(135deg,color-mix(in srgb,#45636a 16%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)));border-bottom:1px dashed color-mix(in srgb,var(--ink) 25%,transparent)}
+
+
 /* 小记 keeps the paper-stack interaction from the earlier module version. */
 #my-corner[data-corner-module=memo] .memo-stage{inset:clamp(102px,14vh,155px) 0 94px;display:block;perspective:none}
 #my-corner[data-corner-module=memo] .memo-board{position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-snap-type:x mandatory;padding:34px 0 28px}
@@ -946,3 +971,46 @@ body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-fi
   #my-corner[data-corner-module=memo] .memo-note h3{font-size:24px}
   #my-corner[data-corner-module=memo] .memo-note p{font-size:16px}
 }
+.corner-config-icon{display:block;width:1.5em;height:1.5em;aspect-ratio:1;object-fit:contain;flex:0 0 auto}
+.orbit .menu-item .corner-config-icon{width:30px;height:30px}
+
+/* Collection cover refinement: hover is an independent interaction state,
+   while the centered card keeps a stronger visual anchor. */
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover:is(:hover),
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox).is-pointer-hover .corner-card-cover{height:84px;min-height:84px;padding:14px 24px 11px;align-content:center;box-shadow:0 12px 28px #0003}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox).is-center{z-index:30;filter:saturate(1.08)}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox).is-center .corner-card-cover{border:1px solid color-mix(in srgb,var(--accent) 58%,var(--corner-cover-ink,var(--ink)));box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 14%,transparent),0 16px 34px #0003}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox).is-center .corner-card-number{color:var(--accent);font-weight:700}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover{grid-template-columns:minmax(0,1fr) 62px;grid-template-rows:auto 1fr auto;row-gap:8px;padding:28px 28px 24px;background-image:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent 46%),var(--corner-cover-face,var(--corner-face,var(--surface)));}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-number{font-size:10px;letter-spacing:.24em;text-transform:uppercase;opacity:.78;align-self:start}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover h3{font-size:clamp(22px,2vw,30px);font-weight:600;letter-spacing:.02em;line-height:1.18;align-self:center;max-width:15ch}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover small{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.74;align-self:end}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover .corner-card-logo{width:62px;height:62px;display:grid;place-items:center;border-radius:50%;background:color-mix(in srgb,var(--accent) 15%,transparent);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);box-shadow:inset 0 0 0 7px color-mix(in srgb,var(--surface) 18%,transparent),0 8px 18px #0002}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover .corner-card-logo svg{width:31px;height:31px;stroke-width:1.25}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox).is-pointer-hover .corner-card-cover h3,
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):hover .corner-card-cover h3{font-size:22px;line-height:1.25}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox).is-pointer-hover .corner-card-cover small,
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):hover .corner-card-cover small{display:none}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox).is-pointer-hover .corner-card-cover .corner-card-logo,
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):hover .corner-card-cover .corner-card-logo{width:42px;height:42px}
+
+/* Final cover interaction and focused-card emphasis overrides. */
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):is(:hover,.is-pointer-hover) .corner-card-cover{height:84px;min-height:84px;padding:14px 24px 11px;align-content:center;box-shadow:0 12px 28px #0003}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox).is-center{z-index:30;filter:saturate(1.08)}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox).is-center .corner-card-cover{border:1px solid color-mix(in srgb,var(--accent) 58%,var(--corner-cover-ink,var(--ink)));box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 14%,transparent),0 16px 34px #0003}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox).is-center .corner-card-number{color:var(--accent);font-weight:700}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover{grid-template-columns:minmax(0,1fr) 62px;grid-template-rows:auto 1fr auto;row-gap:8px;padding:28px 28px 24px;background-image:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent 46%),var(--corner-cover-face,var(--corner-face,var(--surface)))}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-number{font-size:10px;letter-spacing:.24em;text-transform:uppercase;opacity:.78;align-self:start}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover h3{font-size:clamp(22px,2vw,30px);font-weight:600;letter-spacing:.02em;line-height:1.18;align-self:center;max-width:15ch}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover small{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.74;align-self:end}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover .corner-card-logo{width:62px;height:62px;display:grid;place-items:center;border-radius:50%;background:color-mix(in srgb,var(--accent) 15%,transparent);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);box-shadow:inset 0 0 0 7px color-mix(in srgb,var(--surface) 18%,transparent),0 8px 18px #0002}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox) .corner-card-cover .corner-card-logo svg{width:31px;height:31px;stroke-width:1.25}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):is(:hover,.is-pointer-hover) .corner-card-cover h3{font-size:22px;line-height:1.25}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):is(:hover,.is-pointer-hover) .corner-card-cover small{display:none}
+#my-corner[data-corner-theme] .corner-card:not(.corner-inbox):is(:hover,.is-pointer-hover) .corner-card-cover .corner-card-logo{width:42px;height:42px}
+
+/* The orbit is now the only visible home entry; keep the old trigger as a hidden programmatic anchor. */
+#dock .corner-legacy-hidden{display:flex!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+.corner-legacy-hidden.corner-close-entry{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
+#corner-orbit-preview{left:50%;right:auto;bottom:-120px;transform:translateX(-50%)}
+@media(max-width:760px){#corner-orbit-preview{left:50%;right:auto;bottom:-64px;transform:translateX(-50%);width:calc(100vw - 32px);height:min(390px,calc(100dvh - 110px))}}

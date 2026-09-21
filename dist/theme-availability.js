@@ -1,5 +1,5 @@
 (function(){
- const retired=new Set(['reading','projection','wallfilm']),DAILY_MS=10*60*1000,PRESENCE_INTERVAL=5000;
+ const retired=new Set(['reading','projection','wallfilm','flip']),DAILY_MS=10*60*1000,PRESENCE_INTERVAL=5000;
  const COPY={active:'今天还可以体验 ',activeSuffix:'',expiredTitle:'今天的体验先到这里',expiredBody:'你已经体验过这个主题了，开通会员后可以继续使用。'};
  let order=Object.keys(THEMES).filter(id=>!retired.has(id)),enabled=new Set(order),free=new Set(['base']),entitled=new Set(),member=false,memberExpired=false,ready=false,installed=false,defaultTheme='base',selection=0,refreshing=null,expiryTimer=null,noticeTimer=null,presenceTimer=null;
  let previews={},deadlines={},notice=null,lockedVisual=false,lockedTheme='',activeTheme='',presenceQueue=Promise.resolve();

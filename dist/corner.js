@@ -7,6 +7,15 @@
     todo:{id:'todo',name:'我的待办',subtitle:'把要做的事，放在眼前',countLabel:'项待办',empty:'把要做的事，收进来',emptyHint:'待办模块正在准备，你可以先建立自己的分组',addHint:'为待办，再留一席',groups:['今天','进行中','已完成'],icon:'<path d="m5 12 4 4L19 6"/><rect x="3" y="3" width="18" height="18" rx="4"/>'},
     memo:{id:'memo',name:'我的小记',subtitle:'把一闪而过的灵感，轻轻留下',countLabel:'条记录',empty:'把一闪而过的想法留下来',emptyHint:'小记模块正在准备，你可以先建立自己的分组',addHint:'为灵感，再留一席',groups:['灵感','随手记','待整理'],icon:'<path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2Z"/><path d="M8 9h8M8 13h5"/>'}
   });
+  const CORNER_MODULE_SETTINGS=Object.freeze({
+    common:{entryName:'我的收藏',panelName:'我的收藏',enabled:true},
+    memo:{entryName:'我的小记',panelName:'我的小记',enabled:true},
+    todo:{entryName:'我的待办',panelName:'我的待办',enabled:true}
+  });
+  let remoteCornerModules=null;
+  const cornerModuleConfig=id=>({...CORNER_MODULES[id],...CORNER_MODULE_SETTINGS[id],...(remoteCornerModules?.[id]||{})});
+  const enabledCornerModuleIds=()=>{const ids=Object.keys(CORNER_MODULE_SETTINGS).filter(id=>cornerModuleConfig(id).enabled!==false);return ids.length?ids:['common'];};
+  window.ShiyuCornerModules={defaults:CORNER_MODULE_SETTINGS,config:cornerModuleConfig,enabled:enabledCornerModuleIds};
   const cardsIcon = glyph('<rect x="7" y="5" width="13" height="16" rx="3"/><path d="M4 17 2 5a2 2 0 0 1 2-2l10-1M11 10h5m-5 4h3"/>');
   const grip = glyph('<path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" stroke-width="3"/>');
   const drawings = [
@@ -22,8 +31,19 @@
   const flipped=new Set(),coverOpen=new Set(),flipTimers=new WeakMap();
   const fanMotion={position:null,target:0,frame:0,last:0,tau:100};
   const ADD_CARD="__corner_add__";
-  const moduleMeta=()=>CORNER_MODULES[activeModule]||CORNER_MODULES.common;
-  const moduleIcon=id=>glyph(CORNER_MODULES[id]?.icon||CORNER_MODULES.common.icon);
+  const moduleMeta=()=>cornerModuleConfig(activeModule)||cornerModuleConfig('common');
+  const moduleIcon=id=>{const icon=cornerModuleConfig(id)?.icon;if(icon&&/^(?:data:image\/(?:png|svg\+xml);base64,|https?:\/\/)/i.test(icon))return '<img class="corner-config-icon" src="'+String(icon).replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" alt="" aria-hidden="true">';return glyph(cornerModuleConfig(id)?.icon||CORNER_MODULES.common.icon);};
+  async function loadCornerConfig(){
+    try{
+      const response=await fetch('/api/shiyu/operations',{credentials:'include',cache:'no-store'});
+      if(!response.ok)return;
+      const data=await response.json();const modules=Array.isArray(data?.corner?.modules)?data.corner.modules:[];
+      if(!modules.length)return;
+      remoteCornerModules=Object.fromEntries(modules.map(module=>[module.id,{enabled:module.enabled!==false,entryName:String(module.entryName||'').trim(),panelName:String(module.panelName||'').trim(),icon:typeof module.icon==='string'?module.icon:''}]));
+      if(!enabledCornerModuleIds().includes(activeModule))activeModule=enabledCornerModuleIds()[0]||'common';
+      refreshDockPreview();refreshOrbitPreview();
+    }catch{}
+  }
   const cornerTheme=()=>({wallfilm:'projection',surge:'flow'}[dockTheme()]||dockTheme());
   // The collection keeps one interaction engine and swaps only this visual skin.
   // `depth` is deliberately explicit so each future theme can choose flat or layered cards.
@@ -70,12 +90,20 @@
   let cardAudio,cardNoise,lastSound=0,fastTimer;
   function prepareCardAudio(){try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;cardAudio??=new Audio();if(cardAudio.state==='suspended')cardAudio.resume().catch(()=>{});}catch{}}
   function playCardSound(){
-    prepareCardAudio();if(!cardAudio||cardAudio.state!=='running')return;
+    prepareCardAudio();if(!cardAudio||cardAudio.state==='closed')return;
+    const emit=(level=1)=>{
     const ctx=cardAudio,t=ctx.currentTime;
     // A dry ratchet click: a short tooth impact plus a very light paper-like tail.
-    const hit=ctx.createOscillator(),envelope=ctx.createGain();hit.type='triangle';hit.frequency.setValueAtTime(1450,t);hit.frequency.exponentialRampToValueAtTime(420,t+.025);envelope.gain.setValueAtTime(.001,t);envelope.gain.linearRampToValueAtTime(.055,t+.002);envelope.gain.exponentialRampToValueAtTime(.001,t+.045);hit.connect(envelope).connect(ctx.destination);hit.start(t);hit.stop(t+.05);hit.onended=()=>{hit.disconnect();envelope.disconnect();};
+    const hit=ctx.createOscillator(),envelope=ctx.createGain();hit.type='triangle';hit.frequency.setValueAtTime(1450,t);hit.frequency.exponentialRampToValueAtTime(420,t+.025);envelope.gain.setValueAtTime(.001,t);envelope.gain.linearRampToValueAtTime(.055*level,t+.002);envelope.gain.exponentialRampToValueAtTime(.001,t+.045);hit.connect(envelope).connect(ctx.destination);hit.start(t);hit.stop(t+.05);hit.onended=()=>{hit.disconnect();envelope.disconnect();};
     if(!cardNoise){cardNoise=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*.045),ctx.sampleRate);const samples=cardNoise.getChannelData(0);for(let i=0;i<samples.length;i++)samples[i]=Math.random()*2-1;}
-    const source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();source.buffer=cardNoise;filter.type='highpass';filter.frequency.value=1800;gain.gain.setValueAtTime(.018,t);gain.gain.exponentialRampToValueAtTime(.001,t+.035);source.connect(filter).connect(gain).connect(ctx.destination);source.start(t);source.stop(t+.045);source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();};
+    const source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();source.buffer=cardNoise;filter.type='highpass';filter.frequency.value=1800;gain.gain.setValueAtTime(.018*level,t);gain.gain.exponentialRampToValueAtTime(.001,t+.035);source.connect(filter).connect(gain).connect(ctx.destination);source.start(t);source.stop(t+.045);source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();};
+    };
+    if(cardAudio.state==='suspended'){
+      // Schedule the click while suspended, then resume. Web Audio keeps the
+      // nodes queued, so the first wheel gesture is audible too.
+      emit(.48);
+      cardAudio.resume().catch(()=>{});
+    }else emit();
   }
   const libraryIcons=[['Briefcase','工作'],['BookOpen','阅读'],['Globe','世界'],['Lightbulb','灵感'],['Code','开发'],['Palette','设计'],['Camera','摄影'],['Music','音乐'],['Film','电影'],['Heart','喜欢'],['Star','星标'],['Coffee','生活'],['Plane','旅行'],['Gamepad2','游戏'],['Rocket','探索'],['Compass','方向'],['Leaf','自然'],['Mountain','山川'],['Sun','日光'],['Moon','月色'],['Folder','文件'],['Laptop','工具'],['NotebookPen','笔记'],['GraduationCap','学习']].map(([id,name])=>({id:'lib-'+id,name})).filter(x=>ENTITY_ICONS[x.id]);
   const themeIconSets={"base":"House Coffee Heart Leaf Sun BookOpen Briefcase Star Compass Mountain Flower Camera Bike Globe Music Lightbulb Folder Pen Map TrainFront","music":"Disc Disc3 Music Headphones Mic Radio Guitar Piano Drum Speaker Volume2 Play Film BookOpen Coffee Heart Star Camera Tv Clapperboard","reading":"BookOpen Book Library BookMarked Bookmark NotebookPen ScrollText Pen Pencil GraduationCap Languages School Lamp Coffee Leaf Flower Globe Newspaper Lightbulb Archive","flow":"Waves Droplets Wind Shapes Circle Triangle Hexagon Pentagon Square Component Spline Layers Atom Magnet Snowflake CloudSnow Rainbow Star Leaf Fish","poly":"Triangle Hexagon Pentagon Square Circle Shapes Component Layers Gem Spline Ruler PenTool Palette Brush Pipette Mountain Building2 Rocket Flag Target","cosmos":"Globe Star Moon Sun Telescope Rocket Atom Compass Navigation Cloud Sunrise Sunset Mountain Waves Magnet FlaskConical Lightbulb Plane Map Circle","flip":"AlarmClock Calendar Notebook Clipboard Pen Book Sunrise Sunset Sun Moon Archive BookMarked NotebookPen Files Stamp Calculator Target Activity Coffee Briefcase","rain":"CloudRain Droplets Umbrella Cloud CloudLightning Wind Waves Rainbow CloudSnow Snowflake Leaf Flower Sprout TreePine Coffee BookOpen Lamp Moon Sun Fish","projection":"Presentation Monitor Video Film Camera Tv Play Lightbulb Sun Moon Star Palette Layers Shapes Spline Circle Triangle Music Speaker BookOpen","cinema":"Clapperboard Film Video Camera Tv Play Popcorn Disc Mic Speaker Music Headphones Star Heart BookOpen Award Wine Coffee Plane Globe","paper":"Newspaper FileText Files Pen Pencil NotebookPen BookOpen BookMarked ScrollText Stamp Archive Clipboard Calendar Printer Scan Languages Globe Coffee Camera Bookmark"};
@@ -169,7 +197,7 @@
     cornerRevealAnimation?.cancel();
     cornerRevealAnimation=null;
     const r=entryAnchor||origin?.getBoundingClientRect()||{left:innerWidth/2,top:innerHeight,width:0,height:0};
-    const shape=cornerRevealGeometry({x:r.left+r.width/2,y:r.top+r.height/2});
+    const shape=cornerRevealGeometry(panel._orbitRevealPoint||{x:r.left+r.width/2,y:r.top+r.height/2});
     const from=interrupted&&currentClip.startsWith('polygon(')?currentClip:shape.full;
     panel.style.clipPath=from;
     panel.classList.remove('corner-reveal-opening');
@@ -188,11 +216,11 @@
   function openCorner(trigger, groupId, event, moduleId='common') {
     if(panel?.open){closeCorner();return;}
     prepareCardAudio();
-    activeModule=CORNER_MODULES[moduleId]?moduleId:'common';
+    activeModule=cornerModuleConfig(moduleId)?.enabled!==false?moduleId:(enabledCornerModuleIds()[0]||'common');
     const meta=moduleMeta();
     origin=trigger||document.activeElement;
     if(!panel){
-      panel=dialog('my-corner',meta.name);
+      panel=dialog('my-corner',meta.panelName||meta.name);
       panel.addEventListener('close',()=>{cornerRevealAnimation?.cancel();cornerRevealAnimation=null;cornerClosing=false;panel.style.clipPath='';panel.style.removeProperty('--corner-backdrop-from');panel.classList.remove('corner-reveal-opening','corner-reveal-closing','memo-editor-mode');finishDrag(true);restoreEntry();flipped.clear();coverOpen.clear();memoEditingId=null;memoFocusId=null;memoWheelLock=0;cancelAnimationFrame(motionFrame);cancelAnimationFrame(fanMotion.frame);fanMotion.frame=0;panel.classList.remove('corner-animating');wheelConsumed=false;swipe=null;});
       panel.addEventListener('pointerdown',startDrag);
       panel.addEventListener('dragstart',e=>{if(e.target.closest('.corner-inbox [data-corner-ref]'))e.preventDefault();});
@@ -200,6 +228,9 @@
       panel.addEventListener('click',onPanelClick);
       panel.addEventListener('change',onPanelChange);
       panel.addEventListener('input',onPanelInput);
+
+      panel.addEventListener('pointerover',e=>{const card=e.target.closest?.('[data-corner-card]:not(.corner-inbox)');if(card&&panel.contains(card))card.classList.add('is-pointer-hover');});
+      panel.addEventListener('pointerout',e=>{const card=e.target.closest?.('[data-corner-card]:not(.corner-inbox)');if(card&&(!e.relatedTarget||!card.contains(e.relatedTarget)))card.classList.remove('is-pointer-hover');});
 
       panel.addEventListener('pointerleave',resetFloat);
       panel.addEventListener('keydown',e=>{
@@ -211,9 +242,10 @@
       panel.addEventListener('pointerup',e=>{if(!swipe||drag?.active)return;const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;swipe=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3){navigate(Math.sign(-dx));swallowClickUntil=performance.now()+400;}});
       panel.addEventListener('pointercancel',()=>{swipe=null;});
     }
-    entryAnchor=null;inboxExpanded=null;flipped.clear();coverOpen.clear();wheelLast=0;wheelConsumed=false;wheelSum=0;wheelLock=0;memoFocusId=null;memoWheelLock=0;panel.setAttribute('aria-label',meta.name);panel.dataset.cornerModule=activeModule;const groups=collection().groups;activeId=groups.find(g=>g.id===groupId)?.id||groups.find(g=>!isInbox(g))?.id||ADD_CARD;syncCornerThemePresentation();renderPanel();
+    entryAnchor=null;inboxExpanded=null;flipped.clear();coverOpen.clear();wheelLast=0;wheelConsumed=false;wheelSum=0;wheelLock=0;memoFocusId=null;memoWheelLock=0;panel.setAttribute('aria-label',meta.panelName||meta.name);panel.querySelector('.dialog-heading h2')?.replaceChildren(document.createTextNode(meta.panelName||meta.name));panel.dataset.cornerModule=activeModule;const groups=collection().groups;activeId=groups.find(g=>g.id===groupId)?.id||groups.find(g=>!isInbox(g))?.id||ADD_CARD;syncCornerThemePresentation();renderPanel();
     const r=origin?.getBoundingClientRect()||{left:innerWidth/2,top:innerHeight,width:0,height:0};
     const point=event?.detail&&Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?{x:event.clientX,y:event.clientY}:{x:r.left+r.width/2,y:r.top+r.height/2};
+    panel._orbitRevealPoint=event?.detail?.orbit?point:null;
     const shape=cornerRevealGeometry(point),animateReveal=!reduced()&&typeof panel.animate==='function';
     if(animateReveal){panel.style.clipPath=shape.closed;panel.classList.add('corner-reveal-opening');}
     panel.showModal();moveEntry();
@@ -285,7 +317,8 @@
 
     const listScroll=new Map([...panel.querySelectorAll('[data-corner-card]')].map(el=>[el.dataset.cornerCard,el.querySelector('.corner-links')?.scrollTop||0]));
     const {groups}=collection(),entries=sources(),meta=moduleMeta();panel.dataset.cornerModule=activeModule;
-    const content='<div class="corner-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2><button type="button" data-corner-next-theme title="点击切换主题" aria-label="'+esc(meta.name)+'，点击切换下一个主题">'+esc(meta.name)+'</button></h2><span class="corner-theme-art" aria-hidden="true"></span></div><p>'+esc(meta.subtitle)+'</p></div><button class="corner-deck-arrow previous" data-corner-page="-1" aria-label="上一组卡片">'+glyph('<path d="m15 5-7 7 7 7"/>')+'</button><div class="corner-deck" aria-label="'+esc(meta.name)+'分组卡牌" title="滚轮切换 · Shift + 滚轮快速切换">'+groups.map((g,i)=>card(g,i,entries)).join('')+newCardMarkup()+'</div><button class="corner-deck-arrow next" data-corner-page="1" aria-label="下一组卡片">'+glyph('<path d="m9 5 7 7-7 7"/>')+'</button></div>';
+    const panelName=meta.panelName||meta.name;
+    const content='<div class="corner-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2><button type="button" data-corner-next-theme title="点击切换主题" aria-label="'+esc(panelName)+'，点击切换下一个主题">'+esc(panelName)+'</button></h2><span class="corner-theme-art" aria-hidden="true"></span></div><p>'+esc(meta.subtitle)+'</p></div><button class="corner-deck-arrow previous" data-corner-page="-1" aria-label="上一组卡片">'+glyph('<path d="m15 5-7 7 7 7"/>')+'</button><div class="corner-deck" aria-label="'+esc(panelName)+'分组卡牌" title="滚轮切换 · Shift + 滚轮快速切换">'+groups.map((g,i)=>card(g,i,entries)).join('')+newCardMarkup()+'</div><button class="corner-deck-arrow next" data-corner-page="1" aria-label="下一组卡片">'+glyph('<path d="m9 5 7 7-7 7"/>')+'</button></div>';
     let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';panel.append(body);}body.innerHTML=content;
     syncCornerThemePresentation();
     layoutFan();
@@ -313,7 +346,8 @@
     const library=memoLibrary(),notes=Array.isArray(library.notes)?library.notes:[],meta=moduleMeta();panel.dataset.cornerModule='memo';
     if(notes.length&&!notes.some(note=>note.id===memoFocusId))memoFocusId=notes[0].id;
     const editor=memoEditingId?memoEditorMarkup(notes.find(note=>note.id===memoEditingId)):'';
-    const content='<div class="corner-stage memo-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2><button type="button" data-corner-next-theme title="点击切换主题" aria-label="'+esc(meta.name)+'，点击切换下一个主题">'+esc(meta.name)+'</button></h2><span class="corner-theme-art" aria-hidden="true"></span></div><p>'+esc(meta.subtitle)+'</p></div><div class="memo-board" aria-label="小记卡片，滚轮移动"><div class="memo-track">'+(notes.length?notes.map(memoNoteMarkup).join(''):'<div class="memo-empty"><span>✦</span><p>还没有留下小记</p><small>把此刻的灵感，收进一张纸里</small></div>')+'<button type="button" class="memo-add" data-memo-new aria-label="新建小记"><span>＋</span><strong>写下一笔</strong><small>让念头有处可去</small></button></div></div>'+editor+'</div>';
+    const panelName=meta.panelName||meta.name;
+    const content='<div class="corner-stage memo-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2><button type="button" data-corner-next-theme title="点击切换主题" aria-label="'+esc(panelName)+'，点击切换下一个主题">'+esc(panelName)+'</button></h2><span class="corner-theme-art" aria-hidden="true"></span></div><p>'+esc(meta.subtitle)+'</p></div><div class="memo-board" aria-label="小记卡片，滚轮移动"><div class="memo-track">'+(notes.length?notes.map(memoNoteMarkup).join(''):'<div class="memo-empty"><span>✦</span><p>还没有留下小记</p><small>把此刻的灵感，收进一张纸里</small></div>')+'<button type="button" class="memo-add" data-memo-new aria-label="新建小记"><span>＋</span><strong>写下一笔</strong><small>让念头有处可去</small></button></div></div>'+editor+'</div>';
     let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';panel.append(body);}body.innerHTML=content;panel.classList.toggle('memo-editor-mode',Boolean(editor));syncCornerThemePresentation();
     const title=panel.querySelector('[data-memo-title]');if(title&&editor)requestAnimationFrame(()=>{title.focus();memoScrollTo(memoFocusId,'auto')});
   }
@@ -369,7 +403,7 @@
   function syncFaces(el){const back=el.classList.contains('is-flipped');el.querySelector('.corner-card-front').inert=back;if(el.querySelector('.corner-card-back'))el.querySelector('.corner-card-back').inert=!back;el.querySelector('.corner-card-front').setAttribute('aria-hidden',String(back));el.querySelector('.corner-card-back')?.setAttribute('aria-hidden',String(!back));}
   function syncCoverState(){if(!panel)return;for(const el of panel.querySelectorAll('[data-corner-card]'))el.classList.toggle('is-cover-open',coverOpen.has(el.dataset.cornerCard));}
   function setCoverOpen(id,open=true){if(open){coverOpen.clear();coverOpen.add(id);}else coverOpen.delete(id);syncCoverState();}
-  function activateCard(id){if(activeId!==id){activeId=id;setCoverOpen(id,true);layoutFan(true);return;}if(fanMotion.frame)return;if(!coverOpen.has(id)){setCoverOpen(id,true);return;}flipCard(id,true);}
+  function activateCard(id){if(activeId!==id){activeId=id;layoutFan(true);return;}if(fanMotion.frame)return;flipCard(id,true);}
   function syncInbox(el){
     const open=el.classList.contains('is-inbox-open'),front=el.querySelector('.corner-card-front'),lid=el.querySelector('.corner-inbox-lid');
     front.inert=!open;front.setAttribute('aria-hidden',String(!open));lid.inert=open;lid.setAttribute('aria-hidden',String(open));
@@ -420,8 +454,7 @@
     }
     const cover=e.target.closest('.corner-card-cover');
     if(cover&&!isInbox(g)){
-      if(activeId!==g.id){activeId=g.id;setCoverOpen(g.id,true);layoutFan(true);return;}
-      setCoverOpen(g.id,!coverOpen.has(g.id));
+      if(activeId!==g.id){activeId=g.id;layoutFan(true);}
       return;
     }
     if(b?.dataset.cornerTab){const tab=b.dataset.cornerTab;for(const t of el.querySelectorAll('[data-corner-tab]'))t.setAttribute('aria-selected',String(t===b));el.querySelector('.corner-icon-choices').hidden=tab!=='icons';el.querySelector('.corner-color-options').hidden=tab!=='colors';return;}
@@ -481,7 +514,7 @@
     const settled=Math.abs(fanMotion.target-fanMotion.position)<.001;if(settled)fanMotion.position=fanMotion.target;paintFan(fanMotion.position);
     if(settled){fanMotion.frame=0;panel.classList.remove('corner-animating');}else fanMotion.frame=requestAnimationFrame(advanceFan);
   }
-  function navigate(direction,fast=false){if(flipped.size||drag?.active)return;const ids=[...collection().groups.map(g=>g.id),ADD_CARD],index=ids.indexOf(activeId),next=Math.max(0,Math.min(ids.length-1,index+direction));if(next===index||!ids[next])return;activeId=ids[next];setCoverOpen(activeId,true);layoutFan(true,fast);playCardSound();}
+  function navigate(direction,fast=false){if(flipped.size||drag?.active)return;const ids=[...collection().groups.map(g=>g.id),ADD_CARD],index=ids.indexOf(activeId),next=Math.max(0,Math.min(ids.length-1,index+direction));if(next===index||!ids[next])return;activeId=ids[next];layoutFan(true,fast);playCardSound();}
   function onWheel(e){
     if(e.ctrlKey||drag?.active)return;
     if(activeModule==='memo'){
@@ -634,10 +667,9 @@
   addEventListener('resize',()=>{closeSwitch();if(panel?.open){layoutFan();if(entrySlot?.isConnected){const r=entrySlot.getBoundingClientRect();origin.style.left=r.left+'px';origin.style.top=r.top+'px';entryAnchor={left:r.left,top:r.top,width:r.width,height:r.height};}}});
   function refreshDockPreview(){
     const peek=document.querySelector('.corner-dock-preview');if(!peek)return;
-    const moduleIds=['memo','common','todo'];
     // This is the same floating menu markup used by the theme switcher.
     // Only its three module records change; the layout and divider CSS stay shared.
-    const buttons=moduleIds.map(id=>{const meta=CORNER_MODULES[id];return '<button type="button" data-corner-module="'+id+'" aria-label="打开'+esc(meta.name)+'">'+moduleIcon(id)+'<b>'+esc(meta.name)+'</b><span aria-hidden="true">→</span></button>';}).join('');
+    const buttons=enabledCornerModuleIds().map(id=>{const meta=cornerModuleConfig(id);return '<button type="button" data-corner-module="'+id+'" aria-label="打开'+esc(meta.entryName||meta.name)+'">'+moduleIcon(id)+'<b>'+esc(meta.entryName||meta.name)+'</b><span aria-hidden="true">→</span></button>';}).join('');
     peek.innerHTML='<div class="brand-theme-menu corner-bottom-menu" aria-label="一隅模块">'+buttons+'</div>';
   }
   // Exact standalone file from the "悬浮菜单对话" task. An iframe isolates
@@ -651,19 +683,31 @@
     const orbitThemeIcon={base:'lib-Leaf',music:'lib-Disc3',reading:'lib-BookOpen',flow:'lib-Waves',poly:'lib-Triangle',cosmos:'lib-Atom',flip:'lib-Calendar',rain:'lib-Droplets',projection:'lib-Presentation',cinema:'lib-Clapperboard',paper:'lib-Newspaper'};
     const themeIconId=orbitThemeIcon[cornerTheme()]||orbitThemeIcon.base;
     const logo=documentInOrbit.querySelector('.logo-mark');
-    if(logo&&logo.dataset.shiyuThemeIcon!==themeIconId){
+    if(logo&&cornerTheme()==='paper'&&logo.dataset.shiyuThemeIcon!=='paper-daily'){
+      logo.setAttribute('viewBox','0 0 24 24');
+      logo.innerHTML='<g class="paper-logo"><path d="M2 4h20M2 6h20"/><text x="12" y="15" text-anchor="middle">日报</text><path d="M2 20h20"/></g>';
+      logo.dataset.shiyuThemeIcon='paper-daily';
+    }else if(logo&&cornerTheme()!=='paper'&&logo.dataset.shiyuThemeIcon!==themeIconId){
       const iconPaths=typeof ENTITY_ICONS==='object'&&ENTITY_ICONS[themeIconId]?ENTITY_ICONS[themeIconId][1]:'<circle cx="12" cy="12" r="8"/><path d="m8 13 3 3 5-7"/>';
       logo.setAttribute('viewBox','0 0 24 24');logo.innerHTML='<g class="theme-icon">'+iconPaths+'</g>';logo.dataset.shiyuThemeIcon=themeIconId;
     }
+    const dockObject=document.querySelector('#dock .dock-trigger .dock-object'),dockSvg=dockObject?.querySelector('svg');
+    if(logo&&dockObject&&cornerTheme()!=='paper'&&logo.dataset.shiyuThemeIcon!=='dock-'+cornerTheme()){
+      logo.setAttribute('viewBox',dockSvg?.getAttribute('viewBox')||'0 0 24 24');
+      logo.innerHTML=dockSvg?dockSvg.innerHTML:'<text x="12" y="16" text-anchor="middle">'+esc(dockObject.textContent?.trim()||'◎')+'</text>';
+      logo.dataset.shiyuThemeIcon='dock-'+cornerTheme();
+    }
     const coreTitle=documentInOrbit.querySelector('.core-title');if(coreTitle)coreTitle.textContent='我的一隅';
     const coreSubtitle=documentInOrbit.querySelector('.core-subtitle');if(coreSubtitle){coreSubtitle.textContent='';coreSubtitle.hidden=true;}
-    const orbit=documentInOrbit.querySelector('#orbit'),items=[...documentInOrbit.querySelectorAll('.menu-item')],activeItems=items.slice(0,3);
-    const sectorModuleIds=['common','memo','todo'];
-    const threeLabels=['我的收藏','我的小记','我的待办'];
+    const sectorModuleIds=enabledCornerModuleIds();
+    const orbit=documentInOrbit.querySelector('#orbit'),items=[...documentInOrbit.querySelectorAll('.menu-item')],activeItems=items.slice(0,sectorModuleIds.length),stage=documentInOrbit.querySelector('.stage');
+    stage?.classList.toggle('is-single-module',activeItems.length<2);
+    const sectorStep=360/activeItems.length;
+    const threeLabels=sectorModuleIds.map(id=>cornerModuleConfig(id).entryName||cornerModuleConfig(id).name);
     activeItems.forEach((item,index)=>{
       item.querySelector('span')?.replaceChildren(documentInOrbit.createTextNode(threeLabels[index]));
       item.setAttribute('aria-label',threeLabels[index]);
-      item.style.setProperty('--angle',`${index*120}deg`);
+      item.style.setProperty('--angle',`${index*sectorStep}deg`);
       const iconMarkup=moduleIcon(sectorModuleIds[index]);
       if(item.dataset.shiyuModuleIcon!==sectorModuleIds[index]){
         const holder=documentInOrbit.createElement('template');holder.innerHTML=iconMarkup;
@@ -672,7 +716,7 @@
         item.dataset.shiyuModuleIcon=sectorModuleIds[index];
       }
     });
-    items.slice(3).forEach(item=>{item.hidden=true;item.classList.remove('is-selected');});
+    items.slice(activeItems.length).forEach(item=>{item.hidden=true;item.classList.remove('is-selected');});
     if(orbit&&items.length&&!orbit.dataset.shiyuTextOrientation){
       const updateTextOrientation=()=>{
         // The item itself rotates around the center. Keep its label's local
@@ -684,62 +728,85 @@
       orbit.dataset.shiyuTextOrientation='orbit';updateTextOrientation();
     }
     if(orbit&&!orbit.dataset.shiyuThreeMenu){
-      const stage=documentInOrbit.querySelector('.stage'),mod=(value,length)=>((value%length)+length)%length;
+      const mod=(value,length)=>((value%length)+length)%length;
+      const marker=documentInOrbit.createElement('div');marker.className='orbit-selection-marker';marker.setAttribute('aria-hidden','true');stage.append(marker);
+      let opening=false;
       const openOrbitModule=(index,event)=>{
+        if(opening||panel?.open)return;
         const trigger=document.querySelector('#dock .corner-entry');if(!trigger)return;
         const frameRect=preview.getBoundingClientRect();
-        const point={detail:{orbit:true},clientX:frameRect.left+(event?.clientX||frameRect.width/2),clientY:frameRect.top+(event?.clientY||frameRect.height/2)};
-        openCorner(trigger,null,point,sectorModuleIds[mod(index,sectorModuleIds.length)]);
+        const point={detail:{orbit:true},clientX:frameRect.left+(event?.clientX??frameRect.width/2),clientY:frameRect.top+(event?.clientY??frameRect.height/2)};
+        const moduleId=sectorModuleIds[mod(index,sectorModuleIds.length)];
+        opening=true;
+        const feedback=event?.target?.closest?.('.core-hit')?documentInOrbit.querySelector('.core'):activeItems[mod(index,activeItems.length)];
+        const animation=!reduced()?feedback?.animate([{scale:'1',opacity:1},{scale:'.95',opacity:.75},{scale:'1',opacity:1}],{duration:180,easing:'ease-out'}):null;
+        (animation?animation.finished.catch(()=>{}):Promise.resolve()).then(()=>{opening=false;openCorner(trigger,null,point,moduleId);});
       };
+      const indexFromPointer=event=>{
+        const rect=stage.getBoundingClientRect(),x=event.clientX-rect.left-rect.width/2,y=event.clientY-rect.top-rect.height/2;
+        const matrix=new preview.contentWindow.DOMMatrix(preview.contentWindow.getComputedStyle(orbit).transform);
+        const rotation=Math.atan2(matrix.b,matrix.a)*180/Math.PI;
+        return mod(Math.floor((Math.atan2(x,-y)*180/Math.PI-rotation+sectorStep/2)/sectorStep),activeItems.length);
+      };
+      orbit.addEventListener('pointermove',event=>{const index=indexFromPointer(event);activeItems.forEach((item,i)=>item.classList.toggle('is-pointer-hover',i===index));});
+      orbit.addEventListener('pointerleave',()=>activeItems.forEach(item=>item.classList.remove('is-pointer-hover')));
       const setThreeRotation=(nextRotation,announce=false)=>{
         const previous=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
-        const rotation=Math.round(nextRotation/120)*120;
+        const rotation=Math.round(nextRotation/sectorStep)*sectorStep;
         orbit.style.setProperty('--rotation',`${rotation}deg`);
-        const selected=mod(Math.round(-rotation/120),activeItems.length);
+        const selected=mod(Math.round(-rotation/sectorStep),activeItems.length);
         activeItems.forEach((item,index)=>item.classList.toggle('is-selected',index===selected));
+        try{localStorage.setItem('shiyu-corner-selected-module',sectorModuleIds[selected]||'');}catch{}
         if(announce&&rotation!==previous)playCardSound();
+      };
+      const nearestRotationForIndex=(index,current)=>{
+        const base=-index*sectorStep,turns=Math.round((current-base)/360);
+        return base+turns*360;
       };
       stage?.addEventListener('wheel',event=>{
         if(!stage.classList.contains('is-hover'))return;
+        prepareCardAudio();
         event.preventDefault();event.stopImmediatePropagation();
         const rotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
-        setThreeRotation(rotation+(event.deltaY>0?-120:120),true);
+        setThreeRotation(rotation+(event.deltaY>0?sectorStep:-sectorStep),true);
       },{capture:true,passive:false});
       orbit.addEventListener('click',event=>{
         if(!stage?.classList.contains('is-hover'))return;
         if(event.target?.closest?.('.core-hit,.core'))return;
         event.preventDefault();event.stopImmediatePropagation();
-        const rect=orbit.getBoundingClientRect(),x=event.clientX-(rect.left+rect.width/2),y=event.clientY-(rect.top+rect.height/2);
-        let worldAngle=Math.atan2(x,-y)*180/Math.PI;if(worldAngle<0)worldAngle+=360;
-        const rotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
-        const localAngle=mod(worldAngle-rotation,360),index=Math.floor((localAngle+60)/120)%activeItems.length;
-        setThreeRotation(-index*120,true);
+        const index=indexFromPointer(event);
+        const currentRotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
+        // Keep the current revolution. Clicking after several wheel turns now
+        // takes the shortest local step instead of rewinding to turn zero.
+        setThreeRotation(nearestRotationForIndex(index,currentRotation),true);
         openOrbitModule(index,event);
       },{capture:true});
-      setThreeRotation(0);orbit.dataset.shiyuThreeMenu='true';
+      let initialIndex=0;try{const saved=localStorage.getItem('shiyu-corner-selected-module');const found=sectorModuleIds.indexOf(saved);if(found>=0)initialIndex=found;}catch{}
+      setThreeRotation(-initialIndex*sectorStep);orbit.dataset.shiyuThreeMenu='true';
       orbit._shiyuOpenOrbitModule=openOrbitModule;
     }
     const coreHit=documentInOrbit.querySelector('.core-hit');
     if(coreHit&&!coreHit.dataset.shiyuDragBound){
       let pressTimer=0,dragging=false,suppressClick=false,startX=0,startY=0,startLeft=0,startTop=0;
-      const endDrag=()=>{clearTimeout(pressTimer);if(dragging){dragging=false;suppressClick=true;setTimeout(()=>{suppressClick=false},0)}};
+      const endDrag=()=>{clearTimeout(pressTimer);coreHit.classList.remove('is-dragging');if(dragging){dragging=false;suppressClick=true;setTimeout(()=>{suppressClick=false},0)}};
       coreHit.addEventListener('pointerdown',event=>{
         if(event.button!==0)return;
+        prepareCardAudio();
         const rect=preview.getBoundingClientRect();
         startX=event.screenX;startY=event.screenY;startLeft=rect.left;startTop=rect.top;
-        pressTimer=window.setTimeout(()=>{dragging=true;coreHit.setPointerCapture?.(event.pointerId);preview.dataset.orbitDragged='true';},280);
+        pressTimer=window.setTimeout(()=>{dragging=true;coreHit.classList.add('is-dragging');preview.style.transform='none';preview.style.left=`${startLeft}px`;preview.style.top=`${startTop}px`;coreHit.setPointerCapture?.(event.pointerId);preview.dataset.orbitDragged='true';},280);
       });
       coreHit.addEventListener('pointermove',event=>{
         if(!dragging)return;event.preventDefault();
         // screen coordinates stay stable when the iframe itself moves.
-        preview.style.left=`${startLeft+event.screenX-startX}px`;preview.style.top=`${startTop+event.screenY-startY}px`;preview.style.right='auto';preview.style.bottom='auto';
+        preview.style.left=`${startLeft+event.screenX-startX}px`;preview.style.top=`${startTop+event.screenY-startY}px`;preview.style.right='auto';preview.style.bottom='auto';preview.style.transform='none';
       });
       coreHit.addEventListener('pointerup',endDrag);coreHit.addEventListener('pointercancel',endDrag);
       coreHit.addEventListener('click',event=>{
         if(suppressClick||dragging)return;
         event.preventDefault();event.stopImmediatePropagation();
         const rotation=Number.parseFloat(orbit?.style.getPropertyValue('--rotation'))||0;
-        const selected=((Math.round(-rotation/120)%sectorModuleIds.length)+sectorModuleIds.length)%sectorModuleIds.length;
+        const selected=((Math.round(-rotation/sectorStep)%sectorModuleIds.length)+sectorModuleIds.length)%sectorModuleIds.length;
         orbit?._shiyuOpenOrbitModule?.(selected,event);
       });
       documentInOrbit.addEventListener('click',event=>{if(suppressClick){event.preventDefault();event.stopImmediatePropagation();}},true);
@@ -770,6 +837,8 @@
       .stage::before{display:none!important}
       .stage::after{display:none!important}
       .orbit-track,.orbit-track::before,.orbit-track::after{display:none!important}
+      .stage:not(.is-hover) .orbit{opacity:0!important;pointer-events:none!important;transition:opacity .28s ease!important}
+      .stage.is-hover .orbit{opacity:1!important;pointer-events:auto!important;transition:opacity .28s ease!important}
       /* Keep the six interactive sectors, but clip their outer tips to one
          shared circular envelope. This changes the silhouette only; the
          source wheel/click handlers and their hit flow remain untouched. */
@@ -778,20 +847,45 @@
       .orbit::after{border-color:color-mix(in srgb,var(--orbit-accent) 36%,transparent)!important}
       /* Only the visible center disc is slightly smaller; keep the original
          invisible core hit area so the hover interaction does not move. */
-      .core{inset:31%!important}
-      .menu-item{color:var(--orbit-ink)!important;background:conic-gradient(from -60deg,color-mix(in srgb,var(--orbit-accent) 22%,var(--orbit-surface)) 0 120deg,transparent 120deg 360deg)!important;-webkit-mask:radial-gradient(circle at center,transparent 0 31%,#000 31.5% 100%),conic-gradient(from -60deg,#000 0 120deg,transparent 120deg 360deg)!important;mask:radial-gradient(circle at center,transparent 0 31%,#000 31.5% 100%),conic-gradient(from -60deg,#000 0 120deg,transparent 120deg 360deg)!important;-webkit-mask-composite:source-in!important;mask-composite:intersect!important;filter:drop-shadow(0 10px 18px #0001)!important}
+      .core{inset:35%!important}
+      .core-hit{inset:35%!important;border-radius:50%!important}
+      .menu-item{color:var(--orbit-ink)!important;background:conic-gradient(from ${-sectorStep/2+2}deg,color-mix(in srgb,var(--orbit-accent) 22%,var(--orbit-surface)) 0 ${sectorStep-4}deg,transparent ${sectorStep-4}deg 360deg)!important;-webkit-mask:radial-gradient(circle at center,transparent 0 31%,#000 31.5% 100%),conic-gradient(from ${-sectorStep/2+2}deg,#000 0 ${sectorStep-4}deg,transparent ${sectorStep-4}deg 360deg)!important;mask:radial-gradient(circle at center,transparent 0 31%,#000 31.5% 100%),conic-gradient(from ${-sectorStep/2+2}deg,#000 0 ${sectorStep-4}deg,transparent ${sectorStep-4}deg 360deg)!important;-webkit-mask-composite:source-in!important;mask-composite:intersect!important;filter:drop-shadow(0 10px 18px #0001)!important}
       .menu-item[hidden]{display:none!important}
-      .menu-item:hover,.menu-item.is-selected{color:var(--orbit-ink)!important;background:conic-gradient(from -60deg,color-mix(in srgb,var(--orbit-accent) 36%,var(--orbit-surface)) 0 120deg,transparent 120deg 360deg)!important;filter:drop-shadow(0 0 9px color-mix(in srgb,var(--orbit-accent) 32%,transparent)) drop-shadow(0 12px 20px #0002)!important}
-      .core{background:color-mix(in srgb,var(--orbit-surface) 96%,transparent)!important;border-color:color-mix(in srgb,var(--orbit-accent) 46%,transparent)!important;box-shadow:0 0 0 10px color-mix(in srgb,var(--orbit-accent) 6%,transparent),0 0 44px color-mix(in srgb,var(--orbit-accent) 18%,transparent),inset 0 0 38px color-mix(in srgb,var(--orbit-accent) 10%,transparent)!important;transition:opacity .62s ease,border-color .3s ease,box-shadow .3s ease}
-      .stage:not(.is-hover) .core{opacity:.52!important}
+      .orbit-selection-marker{position:absolute;left:50%;top:8%;width:22px;height:5px;border-radius:8px;transform:translateX(-50%);background:color-mix(in srgb,var(--orbit-accent) 65%,var(--orbit-ink));box-shadow:0 0 10px color-mix(in srgb,var(--orbit-accent) 65%,transparent);z-index:5;pointer-events:none;opacity:0;transition:opacity .25s}
+      .orbit-selection-marker{display:none!important}
+      .stage.is-hover .orbit-selection-marker{opacity:1;transition-delay:1s}
+      .stage .menu-item.is-pointer-hover{background:conic-gradient(from ${-sectorStep/2+2}deg,color-mix(in srgb,var(--orbit-accent) 52%,var(--orbit-surface)) 0 ${sectorStep-4}deg,transparent ${sectorStep-4}deg 360deg)!important;filter:brightness(1.15)!important}
+      .stage .menu-item span{text-shadow:0 1px 3px color-mix(in srgb,#000 38%,transparent);font-weight:650!important;-webkit-font-smoothing:antialiased}
+      .stage .menu-item.is-pointer-hover span,.stage .menu-item:hover span,.stage .menu-item.is-selected span{font-weight:700!important;text-shadow:0 1px 4px color-mix(in srgb,#000 48%,transparent)}
+      .menu-item.is-pointer-hover svg{width:27px;height:27px}
+      .menu-item svg{transition:width .18s ease,height .18s ease}
+
+      .menu-item:hover,.menu-item.is-selected{color:var(--orbit-ink)!important;background:conic-gradient(from ${-sectorStep/2+2}deg,color-mix(in srgb,var(--orbit-accent) 36%,var(--orbit-surface)) 0 ${sectorStep-4}deg,transparent ${sectorStep-4}deg 360deg)!important;filter:drop-shadow(0 0 9px color-mix(in srgb,var(--orbit-accent) 32%,transparent)) drop-shadow(0 12px 20px #0002)!important}
+      .menu-item.is-selected{background:conic-gradient(from ${-sectorStep/2+2}deg,color-mix(in srgb,var(--orbit-accent) 54%,var(--orbit-surface)) 0 ${sectorStep-4}deg,transparent ${sectorStep-4}deg 360deg)!important;filter:brightness(1.18) drop-shadow(0 0 12px color-mix(in srgb,var(--orbit-accent) 48%,transparent))!important}
+      .core{background:color-mix(in srgb,var(--orbit-surface) 68%,transparent)!important;backdrop-filter:blur(12px) saturate(1.12)!important;-webkit-backdrop-filter:blur(12px) saturate(1.12)!important;border-color:color-mix(in srgb,var(--orbit-accent) 46%,transparent)!important;box-shadow:0 0 0 10px color-mix(in srgb,var(--orbit-accent) 6%,transparent),0 0 44px color-mix(in srgb,var(--orbit-accent) 18%,transparent),inset 0 0 38px color-mix(in srgb,var(--orbit-accent) 10%,transparent)!important;transition:opacity .62s ease,border-color .3s ease,box-shadow .3s ease}
+      .stage:not(.is-hover) .core{opacity:1!important}
+      .stage:not(.is-hover) .core{background:color-mix(in srgb,var(--orbit-surface) 28%,transparent)!important;border-color:color-mix(in srgb,var(--orbit-ink) 20%,transparent)!important;box-shadow:0 8px 25px color-mix(in srgb,#111326 12%,transparent)!important;backdrop-filter:blur(12px) saturate(1.08)!important;-webkit-backdrop-filter:blur(12px) saturate(1.08)!important}
       .stage.is-hover .core{opacity:1!important}
-      .core-hit{cursor:grab!important}
+      .stage.is-single-module .orbit,.stage.is-single-module .orbit-track{display:none!important}
+      .core-hit{cursor:pointer!important}
+      .core-hit.is-dragging{cursor:grabbing!important}
       .core::before{border-color:color-mix(in srgb,var(--orbit-accent) 32%,transparent)!important}
       .core::after{border-color:color-mix(in srgb,var(--orbit-accent) 28%,transparent)!important}
       .logo-mark circle,.logo-mark path{stroke:var(--orbit-ink)!important}
       .logo-mark :is(circle,path,rect,line,polyline,polygon,ellipse){fill:none!important;stroke:var(--orbit-ink)!important}
       .logo-mark .accent{stroke:color-mix(in srgb,var(--orbit-accent) 60%,var(--orbit-ink))!important}
-      .core-title{color:var(--orbit-ink)!important;font-size:clamp(12px,2vw,17px)!important;letter-spacing:.1em!important;text-indent:.1em!important}
+      .logo-mark .paper-logo text{fill:var(--orbit-ink)!important;stroke:none!important;font-family:serif;font-size:16px;font-weight:600;letter-spacing:1px}
+      .logo-mark text{fill:var(--orbit-ink)!important;stroke:none!important;font-size:18px;font-weight:600;font-family:var(--orbit-font)!important}
+      .stage.is-hover .logo-mark :is(circle,path,rect,line,polyline,polygon,ellipse){stroke:var(--orbit-accent)!important;transition:stroke .25s ease}
+      .core-title{color:var(--orbit-ink)!important;font-size:clamp(12px,2vw,17px)!important;letter-spacing:.1em!important;text-indent:.1em!important;font-weight:400!important;transform:translateY(-4px)!important;transition:font-weight .2s ease,transform .2s ease}
+      .stage.is-hover .core-title{font-weight:650!important}
+      .core-content{gap:5px!important;max-width:82%!important}
+      .logo-mark{width:42px!important;height:42px!important;overflow:visible!important}
+      .core-title{font-size:clamp(10px,1.45vw,13px)!important;letter-spacing:.07em!important;text-indent:.07em!important;transform:translateY(-4px)!important}
+      .menu-item svg{top:14%!important;transition:top .18s ease,width .18s ease,height .18s ease}
+      .menu-item svg{stroke-width:1.8!important;shape-rendering:geometricPrecision}
+      .menu-item span{top:24%!important;font-size:clamp(11px,2vw,14px)!important;font-weight:500!important;letter-spacing:.08em!important;text-rendering:optimizeLegibility;font-synthesis:none;-webkit-font-smoothing:auto;text-shadow:none;opacity:1!important}
+      .menu-item span{font-size:clamp(14px,2.6vw,18px)!important;font-weight:700!important;letter-spacing:.04em!important;line-height:1.2!important;color:var(--orbit-ink)!important;text-rendering:geometricPrecision; font-synthesis:none;-webkit-font-smoothing:antialiased;text-shadow:0 1px 2px color-mix(in srgb,#000 34%,transparent);transform:translate(-50%,-50%) rotate(var(--content-rotation,0deg)) translateZ(0);}
       .core-subtitle,.status-line{display:none!important}
       .water-fill{background:linear-gradient(180deg,color-mix(in srgb,var(--orbit-accent) 40%,var(--orbit-surface)),color-mix(in srgb,var(--orbit-accent) 26%,var(--orbit-surface)) 48%,color-mix(in srgb,var(--orbit-accent) 18%,var(--orbit-surface)))!important}
     `;
@@ -814,11 +908,13 @@
     }
   }
   function alignOrbitPreview(preview){
-    if(!preview||preview.dataset.orbitDragged==='true'||document.body.dataset.view!=='home')return;
-    const entry=document.querySelector('#dock .corner-entry');
-    if(!entry)return;
-    const entryRect=entry.getBoundingClientRect(),stage=preview.contentDocument?.querySelector('.stage'),stageRect=stage?.getBoundingClientRect(),stageHeight=stageRect?.height||entryRect.height,stageOffset=stageRect?.top||0;
-    preview.style.top=`${Math.round(entryRect.top+entryRect.height/2-stageOffset-stageHeight/2)}px`;
+    if(!preview||preview.dataset.orbitDragged==='true'||!['home','space'].includes(document.body.dataset.view))return;
+    const previewHeight=preview.getBoundingClientRect().height;
+    preview.style.left='50%';preview.style.right='auto';preview.style.transform='translateX(-50%)';
+    // The iframe contains the orbit stage with internal lower padding. Offset
+    // the host downward so the visible center circle sits near the bottom safe
+    // area rather than appearing in the middle of the page.
+    preview.style.top=`${Math.round(innerHeight-previewHeight+120)}px`;
     preview.style.bottom='auto';
   }
   function wakeOrbitPreview(preview){
@@ -826,7 +922,7 @@
     preview.classList.remove('is-idle-hidden');
     clearTimeout(preview._shiyuIdleTimer);
     preview._shiyuIdleTimer=window.setTimeout(()=>{
-      if(document.body.dataset.view==='home')preview.classList.add('is-idle-hidden');
+      if(document.body.dataset.view==='home'&&!preview._shiyuOrbitInside)preview.classList.add('is-idle-hidden');
     },10000);
   }
   function refreshOrbitPreview(){
@@ -834,10 +930,12 @@
     if(!preview){
       preview=document.createElement('iframe');preview.id='corner-orbit-preview';
       preview.dataset.themeReady='false';
-      preview.title='悬浮菜单原版组件预览';preview.src='liquid-orbit-menu.html';
+      preview.title='悬浮菜单原版组件预览';preview.src='liquid-orbit-menu.html?center-core=v31';
       preview.addEventListener('load',()=>{
         syncOrbitPreviewTheme(preview);
-        preview.contentWindow?.addEventListener('pointermove',()=>wakeOrbitPreview(preview),{passive:true});
+        preview.contentWindow?.addEventListener('pointerenter',()=>{preview._shiyuOrbitInside=true;wakeOrbitPreview(preview)},{passive:true});
+        preview.contentWindow?.addEventListener('pointermove',()=>{preview._shiyuOrbitInside=true;wakeOrbitPreview(preview)},{passive:true});
+        preview.contentWindow?.addEventListener('pointerleave',()=>{preview._shiyuOrbitInside=false;wakeOrbitPreview(preview)},{passive:true});
       });
       document.body.append(preview);
     }
@@ -853,10 +951,34 @@
       document.documentElement.dataset.shiyuOrbitThemeWatch='true';
     }
     if(!document.documentElement.dataset.shiyuOrbitIdleWatch){
-      window.addEventListener('pointermove',()=>wakeOrbitPreview(document.querySelector('#corner-orbit-preview')),{passive:true});
+      window.addEventListener('pointermove',event=>{
+        const current=document.querySelector('#corner-orbit-preview');if(!current)return;
+        const rect=current.getBoundingClientRect();
+        current._shiyuOrbitInside=event.clientX>=rect.left&&event.clientX<=rect.right&&event.clientY>=rect.top&&event.clientY<=rect.bottom;
+        wakeOrbitPreview(current);
+      },{passive:true});
       document.documentElement.dataset.shiyuOrbitIdleWatch='true';
     }
-    preview.hidden=document.body.dataset.view!=='home';
+    if(!document.documentElement.dataset.shiyuOrbitViewWatch){
+      const viewWatch=new MutationObserver(()=>refreshOrbitPreview());
+      viewWatch.observe(document.body,{attributes:true,attributeFilter:['data-view']});
+      document.documentElement.dataset.shiyuOrbitViewWatch='true';
+    }
+    if(!document.documentElement.dataset.shiyuOrbitWheelRelay){
+      window.addEventListener('message',event=>{
+        const current=document.querySelector('#corner-orbit-preview');
+        if(!current||event.source!==current.contentWindow||event.data?.type!=='shiyu-orbit-wheel')return;
+        const delta=Number(event.data.deltaY)||0;if(!delta)return;
+        const atBoundary=document.body.dataset.view==='home'
+          ?window.scrollY+innerHeight>=document.documentElement.scrollHeight-8
+          :document.body.dataset.view==='space'&&window.scrollY<=2;
+        if(atBoundary){
+          document.documentElement.dispatchEvent(new WheelEvent('wheel',{bubbles:true,cancelable:true,deltaY:delta,deltaMode:Number(event.data.deltaMode)||0}));
+        }else window.scrollBy({top:delta,left:0,behavior:'auto'});
+      });
+      document.documentElement.dataset.shiyuOrbitWheelRelay='true';
+    }
+    preview.hidden=!['home','space'].includes(document.body.dataset.view);
     wakeOrbitPreview(preview);
   }
   addEventListener('resize',refreshDockPreview);
@@ -878,7 +1000,7 @@
     // Keep original space options in place for a reversible entry change.
     const legacy=dockEl.querySelector('.dock-options');if(legacy){legacy.hidden=true;legacy.setAttribute('aria-hidden','true');legacy.inert=true;}
     const entry=dockEl.querySelector('.dock-trigger');if(!entry)return;
-    entry.removeAttribute('data-action');entry.classList.add('corner-entry','corner-themed-entry');entry.title='点击打开我的一隅';entry.setAttribute('aria-label','打开我的一隅');entry.setAttribute('aria-haspopup','dialog');entry.querySelector('.dock-label').textContent='我的一隅';
+    entry.removeAttribute('data-action');entry.classList.add('corner-entry','corner-themed-entry','corner-legacy-hidden');entry.title='';entry.setAttribute('aria-label','');entry.setAttribute('aria-hidden','true');entry.setAttribute('aria-haspopup','dialog');entry.tabIndex=-1;entry.querySelector('.dock-label').textContent='';
     const peek=document.createElement('div');peek.className='corner-dock-preview';dockEl.prepend(peek);dockEl.classList.add('corner-unified');refreshDockPreview();refreshOrbitPreview();
     let closePeekTimer=0;
     const hidePeek=()=>{clearTimeout(closePeekTimer);dockEl.classList.remove('corner-peeking','open');entry.setAttribute('aria-expanded','false');};
@@ -918,6 +1040,7 @@
   };
   const renderBeforeSwitchCleanup=render;render=function(){closeSwitch();return renderBeforeSwitchCleanup();};
   dock();
+  void loadCornerConfig();
 })();
 
 /* Actions for the existing website cards. Keep collection data and editors shared. */
