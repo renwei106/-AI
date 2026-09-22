@@ -8,8 +8,5 @@
 .shiyu-language-menu .shiyu-language-option[aria-checked=true]{color:var(--accent)}
 .shiyu-language-option:focus-visible,.shiyu-language-trigger:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .shiyu-language-check{font-size:14px;line-height:1}
-html:lang(en) body,html:lang(ja) body{font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif}
-html:not(:lang(zh-CN)) :is(dialog,.ops-body,.ops-notice-list){overflow-wrap:anywhere}
-html:not(:lang(zh-CN)) body[data-view=space] :is(.workspace-tools [data-link-settings],#space-atlas .at-view-picker>.at-quiet){width:212px}
-html:not(:lang(zh-CN)) .workspace-tools [data-link-settings]>span{font-size:11px}
-html:not(:lang(zh-CN)) #space-atlas .at-view-current>b{white-space:nowrap;font-size:10px}
+/* Text may wrap within the shared layout; language never selects a layout. */
+:is(dialog,.ops-body,.ops-notice-list){overflow-wrap:anywhere}

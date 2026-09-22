@@ -1,5 +1,5 @@
 const fs=require('node:fs'),path=require('node:path');
-const {scan,hash,compile,validateTranslation}=require('./catalog.cjs');
+const {scan,hash,compile,validateTranslation,renderCurrent}=require('./catalog.cjs');
 const {GROUPS}=require('./groups.cjs');
 const {createProvider}=require('./provider.cjs');
 const LANGUAGES=[{code:'zh-CN',name:'简体中文'},{code:'en',name:'English'},{code:'ja',name:'日本語'}];
@@ -14,6 +14,18 @@ function resolveLocale(settings,manual,country){const enabled=settings.languages
 function createService({root,store,ts,fetcher=fetch}){
  const initial=()=>({version:1,settings:{languages:LANGUAGES.map(l=>({...l,enabled:l.code==='zh-CN',countries:l.code==='zh-CN'?['CN']:l.code==='ja'?['JP']:[]})),fallback:'zh-CN'},entries:{},inventory:{entries:{},files:{}},notices:{},releases:{}});
  const read=()=>fs.existsSync(store)?JSON.parse(fs.readFileSync(store,'utf8')):initial();
+ const assetCache=new Map();
+ function asset(locale,file,data=read()){
+  if(!data.settings.languages.some(l=>l.code===locale&&l.enabled))return;
+  if(typeof file!=='string'||!(/^[\w-]+\.(js|html)$/.test(file)||/^extension\/(integration|store)\.js$/.test(file)))return;
+  const target=path.join(root,file);
+  if(!fs.existsSync(target)||!fs.statSync(target).isFile())return;
+  const source=fs.readFileSync(target,'utf8'),dictionary=data.releases[locale]?.dictionary||{};
+  const key=locale+':'+file,version=hash(source)+':'+hash(JSON.stringify(dictionary)),cached=assetCache.get(key);
+  if(cached?.version===version)return cached.content;
+  const content=locale==='zh-CN'?source:renderCurrent(source,file,ts,dictionary);
+  assetCache.set(key,{version,content});return content;
+ }
  const write=data=>{fs.mkdirSync(path.dirname(store),{recursive:true});fs.writeFileSync(store+'.tmp',JSON.stringify(data));fs.renameSync(store+'.tmp',store)};
  let translating=false;
  const translationProvider=createProvider(store,fetcher);
@@ -60,6 +72,6 @@ function createService({root,store,ts,fetcher=fetch}){
   }
   throw new Error('不支持的多语言操作');
  }
- return {action,read,resolveLocale:(manual,country)=>resolveLocale(read().settings,manual,country)};
+ return {action,read,asset,resolveLocale:(manual,country)=>resolveLocale(read().settings,manual,country)};
 }
 module.exports={createService,validateSettings,resolveLocale};

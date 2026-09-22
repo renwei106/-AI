@@ -17,15 +17,19 @@ async function localized(req,res,file,root){
  if(file!=='index.html'&&url.searchParams.get('locale')!==locale){res.writeHead(409);res.end('Language configuration changed; reload this page.');return true}
  if(locale!=='zh-CN'){
   try{const asset=new URL('/api/shiyu/i18n/asset',process.env.SHIYU_ADMIN_ORIGIN||'http://127.0.0.1:5175');asset.searchParams.set('locale',locale);asset.searchParams.set('file',file);const r=await fetch(asset,{signal:AbortSignal.timeout(5000)});if(!r.ok)throw new Error();content=await r.text()}catch{
-   // Never mix languages inside a page if its published bundle is unavailable.
-   if(file!=='index.html'){res.writeHead(503,{'Content-Type':'text/javascript; charset=utf-8'});res.end('throw new Error("Language bundle temporarily unavailable")');return true}locale='zh-CN';
+   // Translation availability must not disable the current application.
+   // Missing text falls back to current source, never a stale application bundle.
   }
  }
  content??=fs.readFileSync(path.join(root,file),'utf8');
  if(file==='index.html'){
   const client={locale,settings:state.settings,country:region};
   content=content.replace(/<html lang="[^"]*"/,'<html lang="'+locale+'"');
-  if(locale!=='zh-CN')content=content.replace(/(<script\b[^>]*\bsrc=")([^"?]+\.js)(")/g,(all,start,src,end)=>src.startsWith('i18n-')||src.startsWith('assets/')?all:start+src+'?locale='+locale+end);
+  if(locale!=='zh-CN')content=content.replace(/(<script\b[^>]*\bsrc=")([^"#]+\.js(?:\?[^"#]*)?)(")/g,(all,start,src,end)=>{
+   if(/^(?:https?:)?\/\//.test(src)||/^\/?(?:i18n-|assets\/)/.test(src))return all;
+   const target=new URL(src,'http://localhost');target.searchParams.set('locale',locale);
+   return start+(src.startsWith('/')?target.pathname:target.pathname.slice(1))+target.search+end;
+  });
   content=content.replace('</head>','<script>window.SHIYU_LOCALE_STATE='+JSON.stringify(client).replace(/</g,'\\u003c')+'</script><link rel="stylesheet" href="/i18n-client.css"><script src="/i18n-client.js" defer></script></head>');
  }
  res.writeHead(200,{'Content-Type':file.endsWith('.html')?'text/html; charset=utf-8':'text/javascript; charset=utf-8','Cache-Control':'no-store','Vary':'Cookie','Content-Language':locale});res.end(content);return true;

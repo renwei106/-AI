@@ -112,7 +112,7 @@
         try {
           const response = await fetch('/api/shiyu/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: '{}' });
           if (!response.ok) throw Error('退出登录失败，请重试');
-          clearAccount(); toast('已退出登录，愿你下次回来时，喜欢依然在。');
+          clearAccount(); toast('愿你下次回来时，喜欢依然在。');
         } catch (error) { toast(error.message || '退出登录失败，请重试'); }
         finally { authBusy = false; logoutRequest = null; markAccountReady(); void refreshMembership(); }
       });
@@ -320,7 +320,7 @@
       }
       dialog.close();
       render();
-      toast('登录成功');
+      toast('已与你相识，欢迎来到拾隅。');
     } catch (error) {
       if (status) status.textContent = error.message || '登录失败';
     } finally {

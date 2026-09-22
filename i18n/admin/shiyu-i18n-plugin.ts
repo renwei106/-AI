@@ -22,7 +22,7 @@ export function shiyuI18nPlugin(): Plugin {
    if (route === 'asset') {
     const data = service.read(), locale = url.searchParams.get('locale'), file = url.searchParams.get('file')
     if (!data.settings.languages.some((l: { code: string; enabled: boolean }) => l.code === locale && l.enabled)) return send(404, { message: '该语言尚未启用' })
-    const content = data.releases[locale || '']?.files[file || '']
+    const content = service.asset(locale, file, data)
     if (typeof content !== 'string') return send(404, { message: '语言资源尚未发布' })
     res.setHeader('Content-Type', file?.endsWith('.html') ? 'text/html; charset=utf-8' : 'text/javascript; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); res.end(content); return
    }

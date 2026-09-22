@@ -1022,13 +1022,14 @@
   }
   function alignOrbitPreview(preview){
     if(!preview||preview.dataset.orbitDragged==='true'||!['home','space'].includes(document.body.dataset.view))return;
-    const previewHeight=preview.getBoundingClientRect().height;
     preview.style.left='50%';preview.style.right='auto';preview.style.transform='translateX(-50%)';
     // The iframe contains the orbit stage with internal lower padding. Offset
     // the host downward so the visible center circle sits near the bottom safe
     // area rather than appearing in the middle of the page.
-    preview.style.top=`${Math.round(innerHeight-previewHeight+120)}px`;
-    preview.style.bottom='auto';
+    // A world-page reload initializes this iframe while display:none. Anchor to
+    // the viewport instead of measuring a zero-height frame and placing it below it.
+    preview.style.top='auto';
+    preview.style.bottom='-120px';
   }
   function wakeOrbitPreview(preview){
     if(!preview)return;

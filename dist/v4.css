@@ -771,9 +771,11 @@ body[data-dark=true] #agreement-required-dialog>.member-primary{background:var(-
 #search-form .search-engine-tabs-nav>button:hover:not([aria-selected=true]),#search-form .search-engine-options>button:hover:not([aria-selected=true]){background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--ink)}
 
 /* The birthday picker keeps a fixed selection window in the middle. */
-#birthday-dialog .birth-column{position:relative}
-#birthday-dialog .birth-column::before{content:"";position:absolute;z-index:0;left:6px;right:6px;top:50%;height:36px;transform:translateY(-50%);border-radius:7px;background:var(--accent);pointer-events:none}
-#birthday-dialog .birth-column button{position:relative;z-index:1;background:transparent;color:var(--ink)}
+#birthday-dialog .birth-wheel{position:relative;height:min(240px,45svh);border-radius:10px;background:var(--soft);overflow:hidden;isolation:isolate}
+#birthday-dialog .birth-column{position:relative;z-index:1;box-sizing:border-box;height:100%;padding:calc((min(240px,45svh) - 36px)/2) 6px;background:transparent;scroll-snap-type:y mandatory}
+#birthday-dialog .birth-column::before{content:none}
+#birthday-dialog .birth-selection{position:absolute;z-index:0;left:6px;right:6px;top:50%;height:36px;transform:translateY(-50%);border-radius:7px;background:var(--accent);pointer-events:none}
+#birthday-dialog .birth-column button{position:relative;background:transparent;color:var(--ink);scroll-snap-align:center;flex-shrink:0}
 #birthday-dialog .birth-column button[aria-selected=true],#birthday-dialog .birth-column button.birth-center{background:transparent;color:var(--selection-contrast,#fff);font-weight:600}
 
 /* Membership marker stays compact and anchored to the avatar corner. */
@@ -864,3 +866,8 @@ html:not([data-header-ready]) body>header .header-right{visibility:hidden}
 .wechat-skip{display:block;margin:12px auto 0;color:var(--muted);font-size:11px;text-decoration:underline;text-underline-offset:3px}.wechat-skip:hover,.wechat-skip:focus-visible{color:var(--ink)}
 
 #login .account-login-content > .account-status{display:block;width:100%;box-sizing:border-box;margin:6px 0 0;font-size:10px;line-height:1.6}
+#login .account-login-content:has([data-code-send]) > .account-status{margin-left:72px;width:calc(100% - 72px);text-align:left}
+
+/* Toasts remain in the top layer without changing their existing placement. */
+#toast[popover]{margin:0;border:0;right:auto;max-width:calc(100vw - 32px);overflow-wrap:anywhere}
+#toast::backdrop{background:transparent;pointer-events:none}
