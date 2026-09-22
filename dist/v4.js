@@ -5,7 +5,7 @@ let settingsTab='themes',focusStarted=false,rainDateSeen='',orbitDrag=null,orbit
 const oldApply=apply;
 apply=function(){oldApply();const p=effective(),dark=document.body.dataset.dark==='true',tint=resolveThemeColor();document.body.style.setProperty('--bg',`color-mix(in srgb, ${tint} ${dark?'13%':'9%'}, ${dark?'#14171b':'#fbfbf8'})`);document.body.style.setProperty('--surface',`color-mix(in srgb, ${tint} ${dark?'18%':'5%'}, ${dark?'#20242a':'#ffffff'})`);document.body.style.setProperty('--soft',`color-mix(in srgb, ${tint} ${dark?'24%':'15%'}, ${dark?'#272c32':'#f1f2ed'})`);document.body.style.setProperty('--line',`color-mix(in srgb, ${tint} ${dark?'28%':'23%'}, ${dark?'#353941':'#e6e8e3'})`);updateHeader()};
 function updateHeader(){const r=$('.header-right');r.innerHTML=`<button class="icon-button" data-v4="daynight" aria-label="${document.body.dataset.dark==='true'?'切换日间模式':'切换夜间模式'}">${icon(document.body.dataset.dark==='true'?'sun':'moon')}</button><button class="icon-button" data-action="settings" aria-label="个性化设置">${icon('settings')}</button>`}
-render=function(){apply();view==='home'?home():workspace();dock();enhanceControls()};
+render=function(){apply();view==='home'?home():workspace();if(view!=='home'||window.ShiyuCorner)dock();enhanceControls()};
 function weekIssue(date=new Date()){const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));const weekday=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-weekday);const year=d.getUTCFullYear();return `${year} 年 · 第 ${String(Math.ceil((((d-new Date(Date.UTC(year,0,1)))/86400000)+1)/7)).padStart(2,'0')} 期`}
 const POSTERS=[{id:'sea',title:'海风来信',en:'LETTERS FROM THE SEA',desc:'有些答案，藏在潮汐之间。',image:'poster-sea.png'},{id:'night',title:'未眠之城',en:'WHEN THE CITY SLEEPS',desc:'在所有灯熄灭之前，与你相遇。',image:'poster-night.png'},{id:'road',title:'一路向远',en:'THE LONG WAY HOME',desc:'走得更远，是为了回到自己。',image:'poster-road.png'}];
 function cinemaComposition(){const p=POSTERS.find(x=>x.id===prefs.poster)||POSTERS[0];return `<div class="cinema-composition film-${p.id}"><div class="film-poster"><img class="poster-photo" src="${p.image}" alt="${p.title}电影海报背景"><div class="poster-top"><span>SHIYU PICTURES PRESENTS</span><span>一部由 ${esc(userName())} 创作的日常</span></div><div class="poster-title"><span class="eyebrow">${p.en}</span><h1>${p.title}</h1><p>${p.desc}</p></div><div class="poster-bottom"><span>WRITTEN & DIRECTED BY<br><small>${esc(userName())}</small></span><div>此刻上映 <b data-live-time>${timeText()}</b></div><span class="film-rating">A FILM ABOUT<br>YOUR EVERYDAY</span></div></div><div class="poster-choices" aria-label="电影海报方案">${POSTERS.map((x,i)=>`<button data-poster="${x.id}" class="${p.id===x.id?'selected':''}" aria-pressed="${p.id===x.id}">0${i+1} ${x.title}</button>`).join('')}</div></div>`}
@@ -831,7 +831,7 @@ const syncBeforeFullHorizonHit=syncPlanetView;syncPlanetView=function(){syncBefo
 if(view==='home'&&effective().theme==='cosmos')syncPlanetView();
 
 const dockBeforeSatelliteSymbol=dock;dock=function(){dockBeforeSatelliteSymbol();if(dockTheme()!=='cosmos')return;const object=$('.dock-trigger .cosmos-object');if(object)object.innerHTML='<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="9" fill="currentColor" opacity=".7"/><ellipse cx="24" cy="24" rx="21" ry="12" transform="rotate(-28 24 24)" stroke="currentColor" stroke-width="1.3" opacity=".55"/><g class="dock-satellite"><circle cx="41" cy="16" r="3" fill="currentColor"/></g></svg>'};
-if(effective().theme==='cosmos')dock();
+if(effective().theme==='cosmos'&&(view!=='home'||window.ShiyuCorner))dock();
 // One-time, user-requested preview data; preserve all existing spaces.
 if(!prefs.twelveSpacePreviewAdded){
  const names=['阅读空间','音乐空间','电影空间','旅行空间','学习空间','设计空间','探索空间','日常空间','收藏空间','远方空间','时光空间','星光空间'];
@@ -1638,3 +1638,6 @@ updateHeader();
   document.addEventListener('visibilitychange', () => { if (!document.hidden) void refreshGift(); });
   void refreshGift();
 })();
+
+// Static previews have no injected language client.
+if(!window.SHIYU_LOCALE_STATE)document.documentElement.dataset.headerReady="true";

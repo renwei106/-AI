@@ -457,6 +457,7 @@
       let fillStartedAt = 0;
       let fillDuration = 1000;
       let menuTimer = 0;
+      let expandTimer = 0;
       let rotation = 0;
       let active = false;
       let selected = 0;
@@ -475,10 +476,12 @@
           fill = fillTarget;
           waterFill.style.transform = `scaleY(${fill})`;
           fillFrame = 0;
+          stage.classList.toggle('is-filled', fillTarget === 1 && active);
         }
       }
 
       function animateFill(target) {
+        if (target === 0) stage.classList.remove('is-filled');
         fillFrom = fill;
         fillTarget = target;
         fillStartedAt = performance.now();
@@ -515,7 +518,8 @@
         active = true;
         stage.classList.remove('is-leaving');
         stage.classList.add('is-hover');
-        animateFill(1);
+        if(new URLSearchParams(location.search).get('interaction')==='hover-preview')expandTimer=setTimeout(()=>{if(active)animateFill(1)},500);
+        else animateFill(1);
         clearTimeout(menuTimer);
         menuTimer = window.setTimeout(() => {
           if (active) setStatus(`当前模块 · ${items[selected].getAttribute('aria-label')}`);
@@ -525,6 +529,7 @@
       function deactivate() {
         if (!active) return;
         active = false;
+        clearTimeout(expandTimer);
         clearTimeout(menuTimer);
         stage.classList.remove('is-hover');
         stage.classList.add('is-leaving');

@@ -853,3 +853,6 @@ body.world-active .space-home-tab-icon{top:auto;bottom:7px}
 .space-home-tab:focus-visible .space-home-tab-shape{stroke:var(--accent);stroke-width:2px}
 @media(max-width:760px){.space-home-tab{width:104px;height:42px}.space-home-tab-icon{top:5px}body.world-active .space-home-tab-icon{top:auto;bottom:5px}}
 @media(prefers-reduced-motion:reduce){.space-home-tab,.space-home-tab-shape,.space-home-tab-icon{transition:none}}
+
+/* Reveal the header as one unit after its language control is mounted. */
+html:not([data-header-ready]) body>header .header-right{visibility:hidden}

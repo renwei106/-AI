@@ -8,7 +8,7 @@ window.SHIYU_WORLD_CONFIG={
     resources:{enabled:true,label:'资源库',icon:'compass'},
     learning:{enabled:true,label:'学习路线',icon:'book'},
     materials:{enabled:true,label:'素材工具',icon:'shapes'},
-    creators:{enabled:true,label:'创作者',icon:'people',status:'preview'},
+    creators:{enabled:false,label:'平台精选',icon:'people',status:'preview'},
     collaboration:{enabled:true,label:'一起共建',icon:'branch',status:'preview'}
   },
   features:{subscriptions:{enabled:true,status:'preview'},publishing:{enabled:true,status:'preview'}},

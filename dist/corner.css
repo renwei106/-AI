@@ -389,12 +389,12 @@ body.account-unsigned #dock .corner-unified.corner-peeking .corner-dock-preview{
 #dock .corner-peek-groups button[data-corner-module=todo] i{color:#6d8fb3}
 /* The copied standalone menu keeps its interaction; this frame only supplies
    a transparent, compact host beside the original home entry. */
-#corner-orbit-preview{display:none;position:fixed;right:24px;bottom:64px;z-index:36;width:min(320px,calc(100vw - 32px));height:min(370px,calc(100dvh - 160px));border:0;background:transparent;visibility:hidden}
-#corner-orbit-preview[data-theme-ready="true"]{visibility:visible}
-#corner-orbit-preview{opacity:1;transition:opacity .35s ease}
-#corner-orbit-preview.is-idle-hidden{opacity:0;pointer-events:none}
-body:is([data-view=home],[data-view=space]):not(.world-active):not(.atlas-active) #corner-orbit-preview:not([hidden]){display:block}
-@media(max-width:760px){#corner-orbit-preview{right:16px;bottom:184px;width:calc(100vw - 32px);height:min(390px,calc(100dvh - 276px))}}
+:is(#corner-orbit-preview,#corner-orbit-demo){display:none;position:fixed;right:24px;bottom:64px;z-index:36;width:min(320px,calc(100vw - 32px));height:min(370px,calc(100dvh - 160px));border:0;background:transparent;visibility:hidden}
+:is(#corner-orbit-preview,#corner-orbit-demo)[data-theme-ready="true"]{visibility:visible}
+:is(#corner-orbit-preview,#corner-orbit-demo){opacity:1;transition:opacity .35s ease}
+:is(#corner-orbit-preview,#corner-orbit-demo).is-idle-hidden{opacity:0;pointer-events:none}
+body:is([data-view=home],[data-view=space]):not(.world-active):not(.atlas-active) :is(#corner-orbit-preview,#corner-orbit-demo):not([hidden]){display:block}
+@media(max-width:760px){:is(#corner-orbit-preview,#corner-orbit-demo){right:16px;bottom:184px;width:calc(100vw - 32px);height:min(390px,calc(100dvh - 276px))}}
 #my-corner .corner-add-card>button>.corner-member-badge{position:static;font-size:inherit}
 #my-corner .corner-add-card>button>.corner-member-badge svg{width:22px;height:22px}
 
@@ -1039,5 +1039,9 @@ body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-fi
 /* The orbit is now the only visible home entry; keep the old trigger as a hidden programmatic anchor. */
 #dock .corner-legacy-hidden{display:flex!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
 .corner-legacy-hidden.corner-close-entry{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
-#corner-orbit-preview{left:50%;right:auto;bottom:-120px;transform:translateX(-50%)}
-@media(max-width:760px){#corner-orbit-preview{left:50%;right:auto;bottom:-64px;transform:translateX(-50%);width:calc(100vw - 32px);height:min(390px,calc(100dvh - 110px))}}
+:is(#corner-orbit-preview,#corner-orbit-demo){left:50%;right:auto;bottom:-120px;transform:translateX(-50%)}
+@media(max-width:760px){:is(#corner-orbit-preview,#corner-orbit-demo){left:50%;right:auto;bottom:-64px;transform:translateX(-50%);width:calc(100vw - 32px);height:min(390px,calc(100dvh - 110px))}}
+
+/* The gradient magnetic entry is the single home entrance. */
+body[data-view=home] #corner-orbit-preview{display:none!important}
+#corner-orbit-demo{left:50%!important}

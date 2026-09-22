@@ -83,7 +83,7 @@ function createFeedbackHandler(options = {}) {
     const id = signedIn ? text(identity.id, 100, '用户 ID', true) : null;
     const context = body.context || {};
     return {
-      submissionId: body.submissionId.toLowerCase(), type: body.type, typeName: TYPES[body.type],
+      submissionId: body.submissionId.toLowerCase(), applicationId: text(body.applicationId, 64, '应用标识') || 'shiyu', type: body.type, typeName: TYPES[body.type],
       categoryId,
       description, contact, images,
       // The existing preview login has no authenticated session. Never trust client

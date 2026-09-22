@@ -319,7 +319,7 @@
     if (!field('description').value.trim()) { showError(`请填写${type.label}，再寄给我们吧。`, field('description')); return; }
     const contact = type.attachments ? field('contact').value.trim() : '';
     if (contact && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) && !(/^\+?[\d ()-]{6,30}$/.test(contact) && (contact.match(/\d/g) || []).length >= 6)) { showError('请填写有效的联系电话或邮箱。', field('contact')); return; }
-    if (!attempt) attempt = JSON.stringify({ submissionId: crypto.randomUUID(), type: field('type').value,
+    if (!attempt) attempt = JSON.stringify({ submissionId: crypto.randomUUID(), applicationId: 'shiyu', type: field('type').value,
       categoryId: type.category ? field('categoryId').value : null, description: field('description').value.trim(), contact, images: type.attachments ? images : [],
       identity: identitySnapshot(), context: { page: location.pathname, theme: effective().theme,
         mode: document.body.dataset.dark === 'true' ? 'dark' : 'light', viewport: `${innerWidth} × ${innerHeight}` } });

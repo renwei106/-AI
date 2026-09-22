@@ -18,7 +18,7 @@
    wrap.append(trigger,menu);const settings=host.querySelector('[data-action="settings"]');host.insertBefore(wrap,settings||null);
   }
  }
- let queued=false;const observer=new MutationObserver(()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;mount()})});observer.observe(document.body,{childList:true,subtree:true});mount();
+ let queued=false;const observer=new MutationObserver(()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;mount()})});observer.observe(document.body,{childList:true,subtree:true});mount();document.documentElement.dataset.headerReady="true";
  // Revalidate after returning from the admin. A disabled manual choice must not survive.
  addEventListener('focus',async()=>{try{const r=await fetch('/api/shiyu/i18n/public',{cache:'no-store'});if(!r.ok)return;const next=await r.json();if(JSON.stringify(next.settings)!==JSON.stringify(state.settings)&&!document.querySelector('dialog[open] form'))location.reload()}catch{}});
  window.ShiyuLanguage=Object.freeze({locale:state.locale,manual:manual||null});

@@ -948,11 +948,57 @@
       .menu-item span{top:24%!important;font-size:clamp(11px,2vw,14px)!important;font-weight:500!important;letter-spacing:.08em!important;text-rendering:optimizeLegibility;font-synthesis:none;-webkit-font-smoothing:auto;text-shadow:none;opacity:1!important}
       .menu-item span{font-size:clamp(14px,2.6vw,18px)!important;font-weight:700!important;letter-spacing:.04em!important;line-height:1.2!important;color:var(--orbit-ink)!important;text-rendering:geometricPrecision; font-synthesis:none;-webkit-font-smoothing:antialiased;text-shadow:0 1px 2px color-mix(in srgb,#000 34%,transparent);transform:translate(-50%,-50%) rotate(var(--content-rotation,0deg)) translateZ(0);}
       .core-subtitle,.status-line{display:none!important}
+      .stage.is-hover.is-filled .core{background:var(--orbit-accent)!important}
+      .stage.is-hover.is-filled .water-fill{background:var(--orbit-accent)!important}
+      .stage.is-hover.is-filled .core-title{color:#fff!important}
+      .stage.is-hover.is-filled .logo-mark :is(circle,path,rect,line,polyline,polygon,ellipse){stroke:#fff!important}
+      .stage.is-hover.is-filled .logo-mark text{fill:#fff!important;stroke:none!important}
       .water-fill{background:linear-gradient(180deg,color-mix(in srgb,var(--orbit-accent) 40%,var(--orbit-surface)),color-mix(in srgb,var(--orbit-accent) 26%,var(--orbit-surface)) 48%,color-mix(in srgb,var(--orbit-accent) 18%,var(--orbit-surface)))!important}
     `;
     let style=preview.contentDocument.getElementById('shiyu-orbit-adapter');
     if(!style){style=preview.contentDocument.createElement('style');style.id='shiyu-orbit-adapter';preview.contentDocument.head.append(style)}
     if(style.textContent!==css)style.textContent=css;
+    if(preview.id==='corner-orbit-demo'&&!documentInOrbit.querySelector('#orbit-demo-motion')){
+      const demoStyle=documentInOrbit.createElement('style');demoStyle.id='orbit-demo-motion';
+      demoStyle.textContent=`
+        :root{--demo-gradient:linear-gradient(135deg,color-mix(in srgb,var(--orbit-accent) 64%,white) 0%,var(--orbit-accent) 48%,color-mix(in srgb,var(--orbit-accent) 65%,#111827) 100%)}
+        .stage:not(.is-hover) .core,.stage.is-hover .core,.stage.is-hover.is-filled .core{background:var(--demo-gradient)!important;border-color:color-mix(in srgb,var(--orbit-accent) 55%,white)!important}
+        .stage .core-title,.stage.is-hover .core-title{color:#fff!important}
+        .stage:not(.is-hover) .core{background:linear-gradient(135deg,color-mix(in srgb,var(--orbit-accent) 4%,var(--orbit-surface)),color-mix(in srgb,var(--orbit-accent) 10%,var(--orbit-surface)))!important;border-color:color-mix(in srgb,var(--orbit-accent) 12%,transparent)!important}
+        .stage:not(.is-hover) .core-title{color:var(--orbit-accent)!important}
+        .stage:not(.is-hover) .core,.stage:not(.is-hover) .core-hit{border-radius:999px!important}
+        .stage:not(.is-hover) .core::before,.stage:not(.is-hover) .core::after,.stage:not(.is-hover) .orbit-track{display:none!important}
+        .stage .logo-mark :is(circle,path,rect,line,polyline,polygon,ellipse){stroke:#fff!important}
+        .stage .logo-mark text{fill:#fff!important;stroke:none!important}
+        .stage.is-hover .water-fill,.stage.is-hover.is-filled .water-fill{background:linear-gradient(160deg,color-mix(in srgb,var(--orbit-accent) 78%,white),color-mix(in srgb,var(--orbit-accent) 72%,#111827))!important}
+        .stage .core,.stage .core-hit{inset:44% 29%!important;translate:var(--magnet-x,0px) var(--magnet-y,0px);rotate:var(--magnet-angle,0deg);transition:inset .5s cubic-bezier(.34,1.56,.64,1),background .25s ease!important}
+        .stage.is-hover .core,.stage.is-hover .core-hit{inset:35%!important}
+        .stage:not(.is-filled) .logo-mark{display:none!important}
+        .stage:not(.is-filled) .core-content{transform:none!important}
+        .stage .core-title{white-space:nowrap!important;flex-shrink:0}
+        .stage:not(.is-filled) .core-title{transform:none!important}
+        .stage .menu-shell{opacity:0!important;transform:scale(.55)!important;pointer-events:none!important;transition:opacity .25s ease,transform .6s cubic-bezier(.34,1.56,.64,1)!important;transition-delay:0s!important}
+        .stage.is-hover.is-filled .menu-shell{opacity:1!important;transform:scale(1)!important;pointer-events:auto!important}
+      `;
+      documentInOrbit.head.append(demoStyle);
+      stage.addEventListener('wheel',event=>{event.stopImmediatePropagation();},{capture:true,passive:true});
+      // One animation loop updates magnetic properties only; shape and fill stay independent.
+      let magnetFrame=0,lastMagnetTime=0,returning=false;
+      const magnet={x:0,y:0,angle:0,vx:0,vy:0,va:0,tx:0,ty:0,ta:0};
+      const paintMagnet=()=>{stage.style.setProperty('--magnet-x',magnet.x+'px');stage.style.setProperty('--magnet-y',magnet.y+'px');stage.style.setProperty('--magnet-angle',magnet.angle+'deg')};
+      const stepMagnet=now=>{
+        const dt=Math.min((now-lastMagnetTime)/1000||1/60,1/30);lastMagnetTime=now;
+        const stiffness=returning?180:420,damping=returning?15:30;
+        for(const [pos,velocity,target] of [['x','vx','tx'],['y','vy','ty'],['angle','va','ta']]){magnet[velocity]+=(stiffness*(magnet[target]-magnet[pos])-damping*magnet[velocity])*dt;magnet[pos]+=magnet[velocity]*dt}
+        paintMagnet();
+        if(Math.abs(magnet.tx-magnet.x)+Math.abs(magnet.ty-magnet.y)+Math.abs(magnet.ta-magnet.angle)+Math.abs(magnet.vx)+Math.abs(magnet.vy)+Math.abs(magnet.va)>.08)magnetFrame=preview.contentWindow.requestAnimationFrame(stepMagnet);
+        else{magnet.x=magnet.tx;magnet.y=magnet.ty;magnet.angle=magnet.ta;magnet.vx=magnet.vy=magnet.va=0;paintMagnet();magnetFrame=0}
+      };
+      const aimMagnet=(x,y,angle,release=false)=>{returning=release;magnet.tx=x;magnet.ty=y;magnet.ta=angle;if(reduced()){magnet.x=x;magnet.y=y;magnet.angle=angle;paintMagnet();return}if(!magnetFrame){lastMagnetTime=performance.now();magnetFrame=preview.contentWindow.requestAnimationFrame(stepMagnet)}};
+      stage.addEventListener('pointermove',event=>{if(stage.classList.contains('is-hover'))return;const rect=stage.getBoundingClientRect(),x=event.clientX-rect.left-rect.width/2,y=event.clientY-rect.top-rect.height/2;aimMagnet(Math.max(-42,Math.min(42,x*.34)),Math.max(-28,Math.min(28,y*.28)),Math.max(-7,Math.min(7,x*.055)))});
+      coreHit.addEventListener('pointerenter',()=>aimMagnet(0,0,0));
+      stage.addEventListener('pointerleave',()=>aimMagnet(0,0,0,true));
+    }
     if(preview.dataset.themeReady!=='true'&&!preview._orbitRevealPending){
       preview._orbitRevealPending=true;
       const core=documentInOrbit.querySelector('.core');
@@ -1006,6 +1052,7 @@
       const themeWatch=new MutationObserver(()=>{
         const current=document.querySelector('#corner-orbit-preview');
         if(current)syncOrbitPreviewTheme(current);
+        const demo=document.querySelector('#corner-orbit-demo');if(demo)syncOrbitPreviewTheme(demo);
       });
       themeWatch.observe(document.documentElement,{attributes:true,attributeFilter:['style']});
       themeWatch.observe(document.body,{attributes:true,attributeFilter:['data-theme','data-dark']});
@@ -1041,6 +1088,14 @@
     }
     preview.hidden=!['home','space'].includes(document.body.dataset.view);
     wakeOrbitPreview(preview);
+    let demo=document.querySelector('#corner-orbit-demo');
+    if(!demo){
+      demo=document.createElement('iframe');demo.id='corner-orbit-demo';demo.title='我的一隅 · 自动展开预览';demo.dataset.themeReady='false';
+      // Register before the module wheel listener: this version opens on hover only.
+      demo.addEventListener('load',()=>{demo.contentDocument.querySelector('.stage')?.addEventListener('wheel',event=>event.stopImmediatePropagation(),{capture:true,passive:true});syncOrbitPreviewTheme(demo)});
+      demo.src='liquid-orbit-menu.html?interaction=hover-preview';document.body.append(demo);
+    }
+    demo.hidden=document.body.dataset.view!=='home';syncOrbitPreviewTheme(demo);alignOrbitPreview(demo);
   }
   addEventListener('resize',refreshDockPreview);
   addEventListener('resize',refreshOrbitPreview);
@@ -1057,7 +1112,7 @@
   addEventListener('shiyu-theme-preview-state',syncCornerAvailability);
   const previousDock=dock;
   dock=function(){
-    previousDock();const dockEl=document.querySelector('#dock .dock');if(!dockEl)return;
+    if(view==='home'){const host=document.querySelector('#dock');host.dataset.dockTheme=dockTheme();host.innerHTML='<div class="dock"><button class="dock-trigger"><span class="dock-label"></span></button></div>';}else previousDock();const dockEl=document.querySelector('#dock .dock');if(!dockEl)return;
     // Keep original space options in place for a reversible entry change.
     const legacy=dockEl.querySelector('.dock-options');if(legacy){legacy.hidden=true;legacy.setAttribute('aria-hidden','true');legacy.inert=true;}
     const entry=dockEl.querySelector('.dock-trigger');if(!entry)return;
