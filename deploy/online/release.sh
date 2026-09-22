@@ -64,7 +64,13 @@ curl -fsS http://127.0.0.1:4318/api/shiyu/operations -o "/tmp/shiyu-operations-$
 grep -q 'corner' "/tmp/shiyu-operations-$release_id.json"
 curl -fsS -H 'Cookie: shiyu-language=en' http://127.0.0.1:4318/ -o "/tmp/shiyu-home-$release_id.html"
 grep -q 'earth-theme.js' "/tmp/shiyu-home-$release_id.html"
-curl -fsS 'http://127.0.0.1:5175/api/shiyu/i18n/asset?locale=en&file=v4.js' -o "/tmp/shiyu-en-$release_id.js"
-grep -q 'wechat-inline-login' "/tmp/shiyu-en-$release_id.js"
+curl -fsS http://127.0.0.1:5175/api/shiyu/i18n/public -o "/tmp/shiyu-languages-$release_id.json"
+locales=$(/opt/node-v22/bin/node -e 'const fs=require("fs");const state=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));console.log(state.settings.languages.filter(l=>l.enabled&&l.code!=="zh-CN").map(l=>l.code).join(" "))' "/tmp/shiyu-languages-$release_id.json")
+for locale in $locales; do
+  [[ "$locale" =~ ^[a-zA-Z-]+$ ]]
+  curl -fsS "http://127.0.0.1:5175/api/shiyu/i18n/asset?locale=$locale&file=v4.js" -o "/tmp/shiyu-$locale-$release_id.js"
+  grep -q 'wechat-inline-login' "/tmp/shiyu-$locale-$release_id.js"
+done
+echo "ENABLED_EXTRA_LOCALES=$locales"
 trap - ERR
 printf 'ONLINE_RELEASE=%s\nFRONT_COMMIT=%s\nADMIN_COMMIT=%s\nPREVIOUS_FRONT=%s\nPREVIOUS_ADMIN=%s\n' "$release_id" "$front_commit" "$admin_commit" "$old_front" "$old_admin"
