@@ -28,6 +28,10 @@ class PaymentStore {
   }
   get(id) { return this.db.prepare('SELECT * FROM orders WHERE id=?').get(id); }
   find(userId, requestId) { return this.db.prepare('SELECT * FROM orders WHERE user_id=? AND request_id=?').get(userId, requestId); }
+  active(userId, provider, planId, now = Date.now()) {
+    return this.db.prepare("SELECT * FROM orders WHERE user_id=? AND provider=? AND plan_id=? AND status IN ('created','pending','unknown') AND expires_at>? ORDER BY created_at DESC LIMIT 1")
+      .get(userId, provider, planId, now);
+  }
   list(userId) { return this.db.prepare('SELECT * FROM orders WHERE user_id=? ORDER BY created_at DESC LIMIT 100').all(userId); }
   create({ userId, requestId, provider, plan, amount, baseExpiry = 0 }) {
     const id = 'SY' + crypto.randomBytes(14).toString('hex'), now = Date.now();

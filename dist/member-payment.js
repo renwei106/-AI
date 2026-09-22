@@ -29,6 +29,8 @@
   if(methods){ methods.hidden=!available.length; methods.querySelectorAll('[data-method-choice],[data-footer-pay]').forEach(item=>{if(!available.includes(item.dataset.methodChoice||item.dataset.footerPay))item.remove();}); }
   const plan = MEMBER_CONFIG.plans[selectedMemberPlan], recurring = plan?.auto || plan?.autoRenew;
   button.disabled = freeMemberSelected || recurring || !status?.providers?.[memberPayment]?.ready || submitting;
+  button.setAttribute('aria-busy', submitting ? 'true' : 'false');
+  d.querySelectorAll('[data-member-plan],[data-payment]').forEach(control => { control.disabled = submitting; });
   button.textContent = freeMemberSelected ? '免费使用' : recurring ? '连续订阅暂未开放' : !status?.providers?.[memberPayment]?.ready ? '支付暂未开放' : submitting ? '正在创建订单…' : '立即支付';
   button.onclick = purchase;
   if (note) {
@@ -80,8 +82,9 @@
  // The older page has multiple render wrappers. Capture checkout clicks to prevent any saved demo handler from running.
  document.addEventListener('click', event => {
   const button = event.target.closest('#member-center .member-checkout>.member-primary');
-  if (!button || button.disabled) return;
-  event.preventDefault(); event.stopImmediatePropagation(); purchase();
+  if (!button) return;
+  event.preventDefault(); event.stopImmediatePropagation();
+  if (!button.disabled) purchase();
  }, true);
  function stopPolling() { clearTimeout(timer); timer = null; }
  function showOrder(order) {

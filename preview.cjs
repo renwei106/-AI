@@ -17,6 +17,7 @@ async function handlePayment(req,res){
   }
 }
 const routes={
+  '/site-filing.js':'site-filing.js','/site-filing.css':'site-filing.css',
   '/i18n-client.js':'i18n-client.js','/i18n-client.css':'i18n-client.css',
   '/member-payment.js':'member-payment.js','/member-payment.css':'member-payment.css',
   '/world.css':'world.css','/world-config.js':'world-config.js','/world.js':'world.js',

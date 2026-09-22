@@ -838,6 +838,7 @@ body[data-dark=true] #agreement-required-dialog>.member-primary{background:var(-
 body[data-view=space] .space-home-tab{display:block}
 body.world-active .space-home-tab{display:block;top:auto;bottom:0;z-index:130;pointer-events:auto}
 body.world-active .space-home-tab-shape{transform:rotate(180deg)}
+body.world-active .space-home-tab-arrow svg{transform:rotate(180deg)}
 body.world-active .space-home-tab-icon{top:auto;bottom:7px}
 #space-atlas>.space-home-tab{display:block;z-index:90;pointer-events:auto}
 #space-atlas>.space-home-tab .space-home-tab-shape{width:100%;height:100%}
@@ -871,3 +872,13 @@ html:not([data-header-ready]) body>header .header-right{visibility:hidden}
 /* Toasts remain in the top layer without changing their existing placement. */
 #toast[popover]{margin:0;border:0;right:auto;max-width:calc(100vw - 32px);overflow-wrap:anywhere}
 #toast::backdrop{background:transparent;pointer-events:none}
+
+/* Space is a second visual plane. Derive only its page backdrop from the
+   existing theme-tinted background; keep cards, controls and text unchanged. */
+body[data-dark=false]{--space-page-bg:color-mix(in srgb,var(--bg) 93%,#000)}
+body[data-dark=true]{--space-page-bg:color-mix(in srgb,var(--bg) 91%,#fff)}
+body[data-view=space][data-dark]:not(.world-active){background-color:var(--space-page-bg)}
+body[data-view=space][data-dark] #space-atlas{background-color:var(--space-page-bg)}
+body[data-view=space][data-dark] .group-tab-bar{background-color:var(--space-page-bg)}
+body[data-view=space][data-theme=globe][data-dark]{background-image:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--accent) 16%,var(--space-page-bg)),var(--space-page-bg) 58%)}
+body[data-view=space][data-theme=globe][data-dark=false]{background-image:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--accent) 10%,var(--space-page-bg)),var(--space-page-bg) 62%)}

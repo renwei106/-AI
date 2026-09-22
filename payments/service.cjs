@@ -7,18 +7,22 @@ function publicOrder(o) {
     memberExpiresAt: o.member_expires_at, fulfillment: o.fulfillment_state, checkout: o.checkout && o.status !== 'paid' && o.expires_at > Date.now() ? JSON.parse(o.checkout) : null };
 }
 class PaymentService {
-  constructor({ config, store, providers, getPlans, memberships }) { Object.assign(this, { config, store, providers, getPlans, memberships }); this.creating = new Map(); this.querying = new Map(); }
+  constructor({ config, store, providers, getPlans, memberships }) { Object.assign(this, { config, store, providers, getPlans, memberships }); this.creating = new Map(); this.creatingIntent = new Map(); this.querying = new Map(); }
   provider(name) { if (!this.providers[name]) reject('该支付方式尚未配置完成，请稍后重试', 'NOT_CONFIGURED', 503); return this.providers[name]; }
   async create(user, input) {
     if (!input || input.accepted !== true) reject('请先阅读并同意会员服务协议', 'AGREEMENT_REQUIRED');
     if (!['alipay', 'wechat'].includes(input.provider)) reject('请选择支付方式', 'INVALID_PROVIDER');
     if (!/^[A-Za-z0-9_-]{16,80}$/.test(input.requestId || '') || typeof input.planId !== 'string') reject('下单参数无效', 'INVALID_INPUT');
     if (this.config[input.provider]?.enabled === false) reject('该支付方式已关闭，请选择其他方式', 'PROVIDER_DISABLED', 409);
-    const key = user.id + ':' + input.requestId;
+    const key = user.id + ':' + input.requestId, intent = user.id + ':' + input.provider + ':' + input.planId;
     if (this.creating.has(key)) { await this.creating.get(key); return this.existing(user, input); }
+    if (this.creatingIntent.has(intent)) {
+      await this.creatingIntent.get(intent);
+      return this.existing(user, input) || publicOrder(this.store.active(user.id, input.provider, input.planId));
+    }
     const promise = this.createOnce(user, input);
-    this.creating.set(key, promise);
-    try { return await promise; } finally { this.creating.delete(key); }
+    this.creating.set(key, promise); this.creatingIntent.set(intent, promise);
+    try { return await promise; } finally { this.creating.delete(key); if (this.creatingIntent.get(intent) === promise) this.creatingIntent.delete(intent); }
   }
   existing(user, input) {
     const old = this.store.find(user.id, input.requestId);
@@ -28,6 +32,8 @@ class PaymentService {
   async createOnce(user, input) {
     const existing = this.existing(user, input);
     if (existing) return existing;
+    const active = this.store.active(user.id, input.provider, input.planId);
+    if (active) return publicOrder(active);
     const provider = this.provider(input.provider);
     if (!this.store.rate('create:' + user.id, 10, 60_000) || !this.store.rate('daily:' + user.id, 100, 86_400_000)) reject('操作过于频繁，请稍后再试', 'RATE_LIMITED', 429);
     const plans = await this.getPlans();

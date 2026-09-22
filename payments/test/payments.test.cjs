@@ -64,10 +64,12 @@ test('server catalog determines price and duration; client identity and amount a
   assert.equal(order.amount, 1000); assert.equal(order.days, 30); assert.equal(f.store.get(order.id).user_id, user.id);
   await assert.rejects(() => f.service.query({ id: 'attacker' }, order.id), e => e.status === 404);
 });
-test('retries and concurrent clicks create a single provider order; changed request intent is rejected', async t => {
+test('retries, rapid clicks and separate tabs reuse a single active provider order; changed request intent is rejected', async t => {
   const f = fixture(); t.after(() => f.store.close()); const body = input();
   const result = await Promise.all(Array.from({ length: 6 }, () => f.service.create(user, body)));
   assert.equal(new Set(result.map(o => o.id)).size, 1); assert.equal(f.calls(), 1);
+  const separateTabs = await Promise.all(Array.from({ length: 6 }, () => f.service.create(user, input())));
+  assert.equal(new Set(separateTabs.map(o => o.id)).size, 1); assert.equal(separateTabs[0].id, result[0].id); assert.equal(f.calls(), 1);
   await assert.rejects(() => f.service.create(user, { ...body, provider: 'alipay' }), e => e.code === 'REQUEST_CONFLICT');
 });
 
@@ -105,8 +107,9 @@ test('repeated notifications grant once, renewals extend existing paid time, pai
 });
 test('a transaction cannot be reused on a second order; rollback keeps its ledger untouched', async t => {
   const f = fixture(); t.after(() => f.store.close());
-  const first = await f.service.create(user, input()), second = await f.service.create(user, input());
+  const first = await f.service.create(user, input());
   f.service.apply('wechat', paidResult(first, { transactionId: 'unique-txn' }));
+  const second = await f.service.create(user, input());
   assert.throws(() => f.service.apply('wechat', paidResult(second, { transactionId: 'unique-txn' })));
   assert.equal(f.store.get(second.id).status, 'pending'); assert.equal(f.store.membership(user.id), now + 30 * 86_400_000);
 });

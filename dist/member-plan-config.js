@@ -79,7 +79,7 @@
    else if (Number.isFinite(Number(current.expiresAt))) message = '会员有效期至 ' + new Date(Number(current.expiresAt)).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Shanghai' });
   }
   let label = heading.querySelector('.member-current-status'); if (!message) { label?.remove(); return; }
-  if (!label) { label = document.createElement('small'); label.className = 'member-current-status'; label.setAttribute('role', 'status'); heading.insertBefore(label, heading.querySelector('button')); }
+  if (!label) { label = document.createElement('small'); label.className = 'member-current-status'; label.setAttribute('role', 'status'); heading.insertBefore(label, heading.querySelector(':scope > button,:scope > [data-shiyu-language]')); }
   label.textContent = message;
  }
  function paint() {
