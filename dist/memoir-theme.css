@@ -43,6 +43,9 @@ body[data-theme=cinema][data-view=home]:has(.home-memoir) :is(.dock-label,.proto
 .memoir-controls{gap:10px;align-items:center}
 .memoir-controls [data-memoir-music]{width:36px;height:36px;justify-content:center;border-radius:50%;background:color-mix(in srgb,var(--ink) 6%,transparent)}
 .memoir-controls [data-memoir-music][aria-pressed=true]{background:color-mix(in srgb,var(--accent) 19%,transparent);opacity:1}
+.memoir-controls [data-memoir-music] svg{transform-origin:50% 50%;}
+.memoir-controls [data-memoir-music][aria-pressed=true] svg{animation:memoir-music-spin 2.4s linear infinite;}
+@keyframes memoir-music-spin{to{transform:rotate(360deg)}}
 .memoir-controls [data-memoir-track]{padding:6px 9px;font-size:12px;letter-spacing:.06em}
 .memoir-editor-preview{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:18px;padding:18px 0 22px;min-height:135px}
 .memoir-editor-preview img{width:100%;aspect-ratio:1;object-fit:cover;object-position:center;box-sizing:border-box;border:7px solid #f5f2ea;box-shadow:0 3px 12px #0002}

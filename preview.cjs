@@ -24,7 +24,7 @@ const routes={
   '/member-entitlements.js':'member-entitlements.js','/member-invitations.js':'member-invitations.js',
   '/feedback.css':'feedback.css','/feedback.js':'feedback.js',
   '/memoir-theme.css':'memoir-theme.css','/memoir-theme.js':'memoir-theme.js',
-  '/corner.css':'corner.css','/corner.js':'corner.js',
+ '/corner.css':'corner.css','/corner.js':'corner.js','/earth-theme.css':'earth-theme.css','/earth-theme.js':'earth-theme.js','/earth-source.js':'earth-source.js',
   '/liquid-orbit-menu.html':'liquid-orbit-menu.html',
   '/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.js':'app.js','/v4.js':'v4.js','/v4.css':'v4.css','/account-access.js':'account-access.js',
   '/space-atlas.js':'space-atlas.js','/space-atlas.css':'space-atlas.css','/assets/reading/valley-closed.webp':'assets/reading/valley-closed.webp','/assets/reading/valley-open.webp':'assets/reading/valley-open.webp',
@@ -43,12 +43,19 @@ http.createServer(async(req,res)=>{
   if(await shareHandler(req,res))return
   const pathname=req.url.split('?')[0]
   const fontAsset=/^\/assets\/fonts\/shiyu-(?:youfeng|qingya-song|wenrun-kai)\/[A-Za-z0-9._-]+\.woff2$/i.test(pathname)?pathname.slice(1):''
-  const file=routes[pathname]||fontAsset||(/^\/assets\/site-icons\/[a-z0-9._-]+\.(?:svg|ico|png|webp)$/i.test(pathname)?pathname.slice(1):'')
+  let file=routes[pathname]||fontAsset||(/^\/assets\/site-icons\/[a-z0-9._-]+\.(?:svg|ico|png|webp)$/i.test(pathname)?pathname.slice(1):'')
+  if(pathname==='/official/')file='official/index.html'
+  else if(pathname==='/official/v2/'||pathname==='/official/v2')file='official/v2/index.html'
+  else if(/^\/official\/(?!.*\.\.)[A-Za-z0-9._/-]+$/.test(pathname))file=pathname.slice(1)
   if(!file){res.writeHead(404);res.end('Not found');return}
   if(await localized(req,res,file,root))return
+  const fullPath=path.join(root,file)
+  if(!fullPath.startsWith(root+path.sep)||!fs.existsSync(fullPath)||!fs.statSync(fullPath).isFile()){res.writeHead(404);res.end('Not found');return}
   // The desktop preview serves files directly from dist while the app stays
   // open for long sessions. Never let a previous UI bundle survive a refresh.
   res.setHeader('Cache-Control','no-store, max-age=0')
   res.setHeader('Content-Type',file.endsWith('.svg')?'image/svg+xml':file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webp')?'image/webp':file.endsWith('.woff2')?'font/woff2':file.endsWith('.css')?'text/css; charset=utf-8':file.endsWith('.js')?'text/javascript; charset=utf-8':'text/html; charset=utf-8')
-  fs.createReadStream(path.join(root,file)).pipe(res)
+  const stream=fs.createReadStream(fullPath)
+  stream.on('error',()=>{if(!res.headersSent)res.writeHead(404);res.end('Not found')})
+  stream.pipe(res)
 }).listen(port,host,()=>console.log(`Preview: http://${host}:${port}`))

@@ -1,5 +1,6 @@
 .local-shares/
 .local-feedback/
+.local/
 .local/payments/
 .local/translation-venv/
 .local/translation-data/

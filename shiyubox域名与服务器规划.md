@@ -1,6 +1,6 @@
 # shiyubox.com 域名与服务器规划
 
-更新时间：2026-09-14  
+更新时间：2026-09-22  
 主域名：`shiyubox.com`  
 当前服务器公网 IP：`39.106.4.85`  
 服务器系统：Ubuntu 24.04  
@@ -10,10 +10,11 @@
 
 `shiyubox.com` 建议作为拾隅体系的统一主入口。主站负责品牌首页、产品入口、登录入口和下载/介绍，具体应用和后台放到子域名。
 
-建议结构是：
+当前确认的结构是：
 
-- 主域名：给用户看的统一入口。
-- 应用子域名：给各个前台产品。
+- 主域名：拾隅首页和主题页。
+- 官网子域名：品牌官网和产品介绍。
+- 空间、世界子域名：对应前台模块。
 - 后台子域名：给 PC 管理后台和业务管理后台。
 - API 子域名：后续统一接口、登录、会员、支付、分享等服务。
 - 静态资源子域名：后续放图片、图标、上传封面、分享快照等。
@@ -24,14 +25,14 @@
 
 | 域名 | 用途 | 当前建议指向 |
 | --- | --- | --- |
-| `shiyubox.com` | 拾隅总入口 / 品牌首页 | `39.106.4.85` |
-| `www.shiyubox.com` | 主站别名 | `39.106.4.85`，后续 301 到主域名 |
-| `app.shiyubox.com` | 拾隅用户端主应用 | `39.106.4.85` |
+| `shiyubox.com` | 拾隅首页 / 用户主题页 | `39.106.4.85` |
+| `www.shiyubox.com` | 拾隅官网 | `39.106.4.85` |
+| `space.shiyubox.com` | 拾隅空间前台 | `39.106.4.85` |
+| `world.shiyubox.com` | 拾隅世界前台 | `39.106.4.85` |
 | `admin.shiyubox.com` | PC 聚合管理后台 | `39.106.4.85` |
+| `space-admin.shiyubox.com` | 拾隅后台 / 空间业务后台 | `39.106.4.85` |
 | `time-admin.shiyubox.com` | 轻时间管理后台 | `39.106.4.85` |
-| `space-admin.shiyubox.com` | 轻间 / 轻应用管理后台 | `39.106.4.85` |
 | `api.shiyubox.com` | 统一 API 网关 | `39.106.4.85` |
-| `account.shiyubox.com` | 登录、账号、会员身份中心 | `39.106.4.85` |
 | `share.shiyubox.com` | 分享链接、公开访问页 | `39.106.4.85` |
 | `assets.shiyubox.com` | 静态资源、图片、上传文件 | `39.106.4.85` |
 
@@ -45,25 +46,25 @@
 | `dev.shiyubox.com` | 开发/测试环境 |
 | `staging.shiyubox.com` | 预发布环境 |
 
-如果希望更简洁，第一阶段只建 5 个也可以：
+当前第一阶段实际使用以下 7 个入口：
 
 ```text
 shiyubox.com
-app.shiyubox.com
+www.shiyubox.com
+space.shiyubox.com
+world.shiyubox.com
 admin.shiyubox.com
-api.shiyubox.com
-share.shiyubox.com
+space-admin.shiyubox.com
+time-admin.shiyubox.com
 ```
 
-业务后台可以先挂在 `admin.shiyubox.com` 下面的路径里：
+三个后台已经按独立子域名接入，不再依赖后台路径区分：
 
 ```text
-admin.shiyubox.com/platform
-admin.shiyubox.com/time
-admin.shiyubox.com/space
+admin.shiyubox.com
+space-admin.shiyubox.com
+time-admin.shiyubox.com
 ```
-
-等服务拆开部署后，再拆成 `time-admin`、`space-admin`。
 
 ## 3. DNS 记录建议
 
@@ -73,19 +74,11 @@ admin.shiyubox.com/space
 | --- | --- | --- | --- |
 | `@` | A | `39.106.4.85` | 主域名 |
 | `www` | A | `39.106.4.85` | www 入口 |
-| `app` | A | `39.106.4.85` | 用户端应用 |
+| `space` | A | `39.106.4.85` | 空间前台 |
+| `world` | A | `39.106.4.85` | 世界前台 |
 | `admin` | A | `39.106.4.85` | PC 聚合后台 |
-| `api` | A | `39.106.4.85` | API |
-| `account` | A | `39.106.4.85` | 账号中心 |
-| `share` | A | `39.106.4.85` | 分享页 |
-| `assets` | A | `39.106.4.85` | 静态资源 |
-
-如果第一阶段要把两个业务后台独立出来，再加：
-
-| 主机记录 | 记录类型 | 记录值 | 说明 |
-| --- | --- | --- | --- |
+| `space-admin` | A | `39.106.4.85` | 拾隅空间后台 |
 | `time-admin` | A | `39.106.4.85` | 轻时间后台 |
-| `space-admin` | A | `39.106.4.85` | 轻间后台 |
 
 TTL 可以先用默认值。等服务稳定后再根据需要调整。
 
@@ -103,10 +96,13 @@ TTL 可以先用默认值。等服务稳定后再根据需要调整。
 建议不要把 5175、5176、5177 这些开发端口直接暴露到公网。正式访问应由 Nginx 代理：
 
 ```text
+shiyubox.com -> 127.0.0.1:4318（拾隅首页 / 主题页）
+www.shiyubox.com -> 127.0.0.1:4318/official/v2/（拾隅官网）
+space.shiyubox.com -> 127.0.0.1:4318（空间前台）
+world.shiyubox.com -> 127.0.0.1:4318（世界前台）
 admin.shiyubox.com -> 127.0.0.1:5175 或构建后的静态后台
 time-admin.shiyubox.com -> 127.0.0.1:5176
 space-admin.shiyubox.com -> 127.0.0.1:5177
-app.shiyubox.com -> 拾隅前台
 api.shiyubox.com -> 后端 API
 ```
 
@@ -145,10 +141,9 @@ api.shiyubox.com -> 后端 API
 1. 在阿里云 DNS 创建第一批 A 记录。
 2. 登录服务器，安装 Nginx、Node.js、Git、PM2。
 3. 拉取前台和后台仓库。
-4. 先部署 `app.shiyubox.com`，确认拾隅前台能访问。
-5. 再部署 `admin.shiyubox.com`，确认 PC 聚合后台能登录。
-6. 申请 HTTPS 证书，强制跳转 HTTPS。
-7. 再逐步接入 `api`、`share`、`account`。
+4. 当前 `shiyubox.com`、`www.shiyubox.com`、`space.shiyubox.com`、`world.shiyubox.com`、`admin.shiyubox.com`、`space-admin.shiyubox.com`、`time-admin.shiyubox.com` 已完成 HTTP 接入。
+5. 申请 HTTPS 证书，配置 443 监听并强制跳转 HTTPS。
+6. 再逐步接入 `api`、`share`、`account` 等尚未启用的服务域名。
 
 ## 7. 命名建议
 
@@ -164,4 +159,3 @@ api.shiyubox.com -> 后端 API
 - 拾隅时间：轻时间。
 - 拾隅应用盒：轻应用集合。
 - 拾隅后台：PC 管理后台。
-

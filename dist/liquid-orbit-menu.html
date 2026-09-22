@@ -538,8 +538,23 @@
         window.setTimeout(() => stage.classList.remove('is-leaving'), 900);
       }
 
-      coreHit.addEventListener('pointerenter', () => {
+      coreHit.addEventListener('pointerenter', (event) => {
+        const hoverPreview = new URLSearchParams(location.search).get('interaction') === 'hover-preview';
+        if (hoverPreview) {
+          if (document.documentElement.dataset.shiyuOrbitReady !== 'true' || !coreHit.matches(':hover')) return;
+          activate();
+          stage.dispatchEvent(new CustomEvent('orbit-hover-activated'));
+          return;
+        }
         activate();
+      });
+      core.addEventListener('pointermove', (event) => {
+        if (new URLSearchParams(location.search).get('interaction') !== 'hover-preview') return;
+        if (document.documentElement.dataset.shiyuOrbitReady !== 'true') return;
+        if (active) return;
+        if (event.target !== core || !core.matches(':hover')) return;
+        activate();
+        stage.dispatchEvent(new CustomEvent('orbit-hover-activated'));
       });
       stage.addEventListener('pointerleave', deactivate);
 

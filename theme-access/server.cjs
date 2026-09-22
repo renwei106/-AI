@@ -22,6 +22,13 @@ function policy(themes,plans,entitlements){
   return {items,fallback:items.find(theme=>theme.enabled&&theme.allowed)?.id||items.find(theme=>theme.enabled&&!theme.memberOnly)?.id||'base'};
 }
 async function upstream(path,req){const r=await fetch(new URL(path,process.env.SHIYU_ADMIN_ORIGIN||'http://127.0.0.1:5175'),{headers:{cookie:req.headers.cookie||'',accept:'application/json'},signal:AbortSignal.timeout(4000)});if(!r.ok)throw Error('主题权限暂时无法校验');return r.json()}
+function allowedOrigins(req){
+  const origins=new Set(['https://shiyubox.com','https://www.shiyubox.com','http://127.0.0.1:4318','http://localhost:4318']);
+  const forwardedHost=String(req.headers['x-forwarded-host']||'').split(',')[0].trim();
+  const forwardedProto=String(req.headers['x-forwarded-proto']||'').split(',')[0].trim()||'https';
+  for(const host of [req.headers.host,forwardedHost])if(host)origins.add(`${forwardedProto}://${host}`);
+  return origins;
+}
 async function handler(req,res){
   const pathname=(req.url||'').split('?')[0];
   if(!['/api/shiyu/theme-access','/api/shiyu/theme-access/preview','/api/shiyu/theme-access/presence'].includes(pathname))return false;
@@ -35,7 +42,7 @@ async function handler(req,res){
     const result=policy(themes.items,plans.items,member?entitlementData:undefined);
     const token=store.visitor(req,res);let preview=null,presence=null,payload={};
     if(req.method==='POST'){
-      if(![`http://${req.headers.host}`,`https://${req.headers.host}`].includes(req.headers.origin)){send(403,{message:'请求来源无效'});return true}
+      if(req.headers.origin&&!allowedOrigins(req).has(req.headers.origin)){send(403,{message:'请求来源无效'});return true}
       let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>1024)throw Error('请求内容过大')}payload=JSON.parse(raw||'{}');
       const theme=String(payload.theme||'');
       if(isPresence){

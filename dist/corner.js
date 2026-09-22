@@ -41,7 +41,7 @@
       if(!modules.length)return;
       remoteCornerModules=Object.fromEntries(modules.map(module=>[module.id,{enabled:module.enabled!==false,entryName:String(module.entryName||'').trim(),panelName:String(module.panelName||'').trim(),icon:typeof module.icon==='string'?module.icon:''}]));
       if(!enabledCornerModuleIds().includes(activeModule))activeModule=enabledCornerModuleIds()[0]||'common';
-      refreshDockPreview();refreshOrbitPreview();
+      refreshOrbitPreview();
     }catch{}
   }
   const cornerTheme=()=>({wallfilm:'projection',surge:'flow'}[dockTheme()]||dockTheme());
@@ -223,7 +223,6 @@
     animation.finished.then(()=>{if(panel.open&&cornerRevealAnimation===animation)panel.close();},()=>{});
   }
   function requireCornerModuleAuth(moduleId){
-    if(moduleId!=='memo'&&moduleId!=='todo')return true;
     if(signed)return true;
     const label=cornerModuleConfig(moduleId)?.entryName||cornerModuleConfig(moduleId)?.name||'这个模块';
     if(typeof openLogin==='function')openLogin('登录后即可进入'+label+'。');
@@ -322,18 +321,19 @@
   function moveEntry(){
     if(!origin?.isConnected)return;
     const measured=origin.getBoundingClientRect(),r=entryAnchor||measured,style=getComputedStyle(origin);entryAnchor={left:r.left,top:r.top,width:r.width,height:r.height};
-    entrySnapshot={html:origin.innerHTML,title:origin.title,label:origin.getAttribute('aria-label'),style:origin.getAttribute('style')};
+    entrySnapshot={html:origin.innerHTML,title:origin.title,label:origin.getAttribute('aria-label'),style:origin.getAttribute('style'),onclick:origin.onclick};
     entrySlot=document.createElement('span');entrySlot.className='corner-entry-slot';entrySlot.style.cssText='display:block;width:'+r.width+'px;height:'+r.height+'px';origin.before(entrySlot);
     origin.classList.add('corner-close-entry');origin.style.cssText='position:fixed;left:'+r.left+'px;top:'+r.top+'px;width:'+r.width+'px;height:'+r.height+'px;color:'+style.color;
     origin.innerHTML='<span class="corner-close-symbol">'+glyph('<path d="m6 6 12 12M18 6 6 18"/>')+'</span><span class="dock-label">关闭</span>';
     origin.setAttribute('aria-label','关闭我的一隅');origin.title='关闭我的一隅';panel.append(origin);
+    origin.onclick=e=>{e.preventDefault();e.stopPropagation();closeCorner();};
   }
   function restoreEntry(){
     if(!entrySnapshot)return;
-    origin.innerHTML=entrySnapshot.html;origin.title=entrySnapshot.title;origin.setAttribute('aria-label',entrySnapshot.label);origin.classList.remove('corner-close-entry');
+    origin.innerHTML=entrySnapshot.html;origin.title=entrySnapshot.title;origin.setAttribute('aria-label',entrySnapshot.label);origin.onclick=entrySnapshot.onclick;origin.classList.remove('corner-close-entry');
     if(entrySnapshot.style===null)origin.removeAttribute('style');else origin.setAttribute('style',entrySnapshot.style);
     if(entrySlot?.isConnected){entrySlot.replaceWith(origin);origin.focus({preventScroll:true});}else{origin.remove();document.querySelector('.corner-entry')?.focus({preventScroll:true});}
-    entrySlot=null;entrySnapshot=null;refreshDockPreview();
+    entrySlot=null;entrySnapshot=null;
   }
   function renderPanel() {
 
@@ -561,7 +561,7 @@
     const settled=Math.abs(fanMotion.target-fanMotion.position)<.001;if(settled)fanMotion.position=fanMotion.target;paintFan(fanMotion.position);
     if(settled){fanMotion.frame=0;panel.classList.remove('corner-animating');}else fanMotion.frame=requestAnimationFrame(advanceFan);
   }
-  function navigate(direction,fast=false){if(flipped.size||drag?.active)return;const ids=[...collection().groups.map(g=>g.id),ADD_CARD],index=ids.indexOf(activeId),next=Math.max(0,Math.min(ids.length-1,index+direction));if(next===index||!ids[next])return;activeId=ids[next];layoutFan(true,fast);playCardSound();}
+  function navigate(direction,fast=false){if(flipped.size||drag?.active)return;const ids=[...collection().groups.map(g=>g.id),ADD_CARD],index=ids.indexOf(activeId),next=((index+direction)%ids.length+ids.length)%ids.length;if(next===index||!ids[next])return;activeId=ids[next];layoutFan(true,fast);playCardSound();}
   function onWheel(e){
     if(e.ctrlKey||drag?.active)return;
     if(activeModule==='memo'){
@@ -712,13 +712,6 @@
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&switchMenu&&!switchMenu.hidden){closeSwitch();switchOrigin?.focus();}});
   addEventListener('resize',()=>{closeSwitch();if(panel?.open){layoutFan();if(entrySlot?.isConnected){const r=entrySlot.getBoundingClientRect();origin.style.left=r.left+'px';origin.style.top=r.top+'px';entryAnchor={left:r.left,top:r.top,width:r.width,height:r.height};}}});
-  function refreshDockPreview(){
-    const peek=document.querySelector('.corner-dock-preview');if(!peek)return;
-    // This is the same floating menu markup used by the theme switcher.
-    // Only its three module records change; the layout and divider CSS stay shared.
-    const buttons=enabledCornerModuleIds().map(id=>{const meta=cornerModuleConfig(id);return '<button type="button" data-corner-module="'+id+'" aria-label="打开'+esc(meta.entryName||meta.name)+'">'+moduleIcon(id)+'<b>'+esc(meta.entryName||meta.name)+'</b><span aria-hidden="true">→</span></button>';}).join('');
-    peek.innerHTML='<div class="brand-theme-menu corner-bottom-menu" aria-label="一隅模块">'+buttons+'</div>';
-  }
   function onTodoPanelClick(e){
     if(!e.target.closest('button,a,input,textarea,select,.corner-pull-cord,.todo-stage,.corner-close-entry')){
       const stage=panel.querySelector('.todo-stage'),bottom=stage?.getBoundingClientRect().bottom||innerHeight;
@@ -961,31 +954,35 @@
     if(preview.id==='corner-orbit-demo'&&!documentInOrbit.querySelector('#orbit-demo-motion')){
       const demoStyle=documentInOrbit.createElement('style');demoStyle.id='orbit-demo-motion';
       demoStyle.textContent=`
-        :root{--demo-gradient:linear-gradient(135deg,color-mix(in srgb,var(--orbit-accent) 64%,white) 0%,var(--orbit-accent) 48%,color-mix(in srgb,var(--orbit-accent) 65%,#111827) 100%)}
-        .stage:not(.is-hover) .core,.stage.is-hover .core,.stage.is-hover.is-filled .core{background:var(--demo-gradient)!important;border-color:color-mix(in srgb,var(--orbit-accent) 55%,white)!important}
-        .stage .core-title,.stage.is-hover .core-title{color:#fff!important}
-        .stage:not(.is-hover) .core{background:linear-gradient(135deg,color-mix(in srgb,var(--orbit-accent) 4%,var(--orbit-surface)),color-mix(in srgb,var(--orbit-accent) 10%,var(--orbit-surface)))!important;border-color:color-mix(in srgb,var(--orbit-accent) 12%,transparent)!important}
-        .stage:not(.is-hover) .core-title{color:var(--orbit-accent)!important}
+        :root{--demo-gradient:linear-gradient(114.41deg,#0ae448 20.74%,#abff84 65.5%)}
+        .stage .core,.stage.is-hover .core,.stage.is-hover.is-filled .core{background:color-mix(in srgb,var(--orbit-surface) 34%,transparent)!important;border-color:color-mix(in srgb,var(--orbit-ink) 16%,transparent)!important;backdrop-filter:blur(18px) saturate(115%)!important;-webkit-backdrop-filter:blur(18px) saturate(115%)!important;box-shadow:0 10px 30px color-mix(in srgb,var(--orbit-ink) 10%,transparent),inset 0 1px 0 color-mix(in srgb,white 42%,transparent)!important}
+        .stage .core-title,.stage.is-hover .core-title{color:var(--orbit-ink)!important}
+        .stage:not(.is-hover) .core{background:color-mix(in srgb,var(--orbit-surface) 34%,transparent)!important;border-color:color-mix(in srgb,var(--orbit-ink) 14%,transparent)!important}
+        .stage:not(.is-hover) .core-title{color:var(--orbit-ink)!important}
+        .stage.is-hover .core-title{color:#fff!important}
+        .stage.is-hover:not(.is-filled) .core-title{color:var(--orbit-ink)!important}
         .stage:not(.is-hover) .core,.stage:not(.is-hover) .core-hit{border-radius:999px!important}
+        .stage:not(.is-hover) .core-hit{pointer-events:none!important}
         .stage:not(.is-hover) .core::before,.stage:not(.is-hover) .core::after,.stage:not(.is-hover) .orbit-track{display:none!important}
         .stage .logo-mark :is(circle,path,rect,line,polyline,polygon,ellipse){stroke:#fff!important}
         .stage .logo-mark text{fill:#fff!important;stroke:none!important}
         .stage.is-hover .water-fill,.stage.is-hover.is-filled .water-fill{background:linear-gradient(160deg,color-mix(in srgb,var(--orbit-accent) 78%,white),color-mix(in srgb,var(--orbit-accent) 72%,#111827))!important}
-        .stage .core,.stage .core-hit{inset:44% 29%!important;translate:var(--magnet-x,0px) var(--magnet-y,0px);rotate:var(--magnet-angle,0deg);transition:inset .5s cubic-bezier(.34,1.56,.64,1),background .25s ease!important}
+        .stage .core,.stage .core-hit{inset:43% 24%!important;translate:var(--magnet-x,0px) var(--magnet-y,0px);rotate:var(--magnet-angle,0deg);transition:inset .5s cubic-bezier(.34,1.56,.64,1),background .25s ease!important}
         .stage.is-hover .core,.stage.is-hover .core-hit{inset:35%!important}
         .stage:not(.is-filled) .logo-mark{display:none!important}
         .stage:not(.is-filled) .core-content{transform:none!important}
         .stage .core-title{white-space:nowrap!important;flex-shrink:0}
         .stage:not(.is-filled) .core-title{transform:none!important}
+        .stage:not(.is-hover):not(.is-filled) .core-title{transform:translate(var(--label-x,0px),var(--label-y,0px))!important}
         .stage .menu-shell{opacity:0!important;transform:scale(.55)!important;pointer-events:none!important;transition:opacity .25s ease,transform .6s cubic-bezier(.34,1.56,.64,1)!important;transition-delay:0s!important}
         .stage.is-hover.is-filled .menu-shell{opacity:1!important;transform:scale(1)!important;pointer-events:auto!important}
       `;
       documentInOrbit.head.append(demoStyle);
       stage.addEventListener('wheel',event=>{event.stopImmediatePropagation();},{capture:true,passive:true});
       // One animation loop updates magnetic properties only; shape and fill stay independent.
-      let magnetFrame=0,lastMagnetTime=0,returning=false;
+      let magnetFrame=0,lastMagnetTime=0,returning=false,wiggleFrame=0;
       const magnet={x:0,y:0,angle:0,vx:0,vy:0,va:0,tx:0,ty:0,ta:0};
-      const paintMagnet=()=>{stage.style.setProperty('--magnet-x',magnet.x+'px');stage.style.setProperty('--magnet-y',magnet.y+'px');stage.style.setProperty('--magnet-angle',magnet.angle+'deg')};
+      const paintMagnet=()=>{stage.style.setProperty('--magnet-x',magnet.x+'px');stage.style.setProperty('--magnet-y',magnet.y+'px');stage.style.setProperty('--magnet-angle',(magnet.angle+Math.sin(performance.now()/1500*Math.PI*2)*.6)+'deg')};
       const stepMagnet=now=>{
         const dt=Math.min((now-lastMagnetTime)/1000||1/60,1/30);lastMagnetTime=now;
         const stiffness=returning?180:420,damping=returning?15:30;
@@ -995,9 +992,17 @@
         else{magnet.x=magnet.tx;magnet.y=magnet.ty;magnet.angle=magnet.ta;magnet.vx=magnet.vy=magnet.va=0;paintMagnet();magnetFrame=0}
       };
       const aimMagnet=(x,y,angle,release=false)=>{returning=release;magnet.tx=x;magnet.ty=y;magnet.ta=angle;if(reduced()){magnet.x=x;magnet.y=y;magnet.angle=angle;paintMagnet();return}if(!magnetFrame){lastMagnetTime=performance.now();magnetFrame=preview.contentWindow.requestAnimationFrame(stepMagnet)}};
-      stage.addEventListener('pointermove',event=>{if(stage.classList.contains('is-hover'))return;const rect=stage.getBoundingClientRect(),x=event.clientX-rect.left-rect.width/2,y=event.clientY-rect.top-rect.height/2;aimMagnet(Math.max(-42,Math.min(42,x*.34)),Math.max(-28,Math.min(28,y*.28)),Math.max(-7,Math.min(7,x*.055)))});
-      coreHit.addEventListener('pointerenter',()=>aimMagnet(0,0,0));
-      stage.addEventListener('pointerleave',()=>aimMagnet(0,0,0,true));
+      const tickWiggle=()=>{paintMagnet();wiggleFrame=preview.contentWindow.requestAnimationFrame(tickWiggle)};
+      if(!reduced())wiggleFrame=preview.contentWindow.requestAnimationFrame(tickWiggle);
+      stage.addEventListener('orbit-hover-activated',()=>aimMagnet(0,0,0));
+      /* 暂停外围监听区域：先仅保留胶囊本体的悬停展开，便于验证误触发来源。 */
+      /*
+      stage.addEventListener('pointermove',event=>{if(stage.classList.contains('is-hover'))return;const rect=stage.getBoundingClientRect(),x=event.clientX-rect.left-rect.width/2,y=event.clientY-rect.top-rect.height/2;aimMagnet(Math.max(-42,Math.min(42,x*.34)),Math.max(-28,Math.min(28,y*.28)),Math.max(-1.5,Math.min(1.5,x*.012)));stage.style.setProperty('--label-x',Math.max(-30,Math.min(30,x*.24))+'px');stage.style.setProperty('--label-y',Math.max(-20,Math.min(20,y*.2))+'px')});
+      */
+      coreHit.addEventListener('pointerenter',()=>{stage.style.setProperty('--label-x','0px');stage.style.setProperty('--label-y','0px')});
+      /*
+      stage.addEventListener('pointerleave',event=>{const rect=stage.getBoundingClientRect();if(Number.isFinite(event.clientX)&&event.clientX>=rect.left&&event.clientX<=rect.right&&event.clientY>=rect.top&&event.clientY<=rect.bottom)return;stage.style.setProperty('--label-x','0px');stage.style.setProperty('--label-y','0px');aimMagnet(0,0,0,true)});
+      */
     }
     if(preview.dataset.themeReady!=='true'&&!preview._orbitRevealPending){
       preview._orbitRevealPending=true;
@@ -1007,6 +1012,7 @@
       const fonts=documentInOrbit.fonts.load(`${titleStyle.fontSize} ${titleStyle.fontFamily}`,'我的一隅');
       fonts.catch(()=>{}).then(()=>{
         if(preview.contentDocument!==documentInOrbit)return;
+        documentInOrbit.documentElement.dataset.shiyuOrbitReady='true';
         alignOrbitPreview(preview);
         preview.contentWindow.getComputedStyle(core).opacity;
         preview.dataset.themeReady='true';
@@ -1095,19 +1101,19 @@
       demo.addEventListener('load',()=>{demo.contentDocument.querySelector('.stage')?.addEventListener('wheel',event=>event.stopImmediatePropagation(),{capture:true,passive:true});syncOrbitPreviewTheme(demo)});
       demo.src='liquid-orbit-menu.html?interaction=hover-preview';document.body.append(demo);
     }
-    demo.hidden=document.body.dataset.view!=='home';syncOrbitPreviewTheme(demo);alignOrbitPreview(demo);
+    demo.hidden=!['home','space'].includes(document.body.dataset.view);syncOrbitPreviewTheme(demo);alignOrbitPreview(demo);
   }
-  addEventListener('resize',refreshDockPreview);
+
   addEventListener('resize',refreshOrbitPreview);
   let lastCardLimit=cardLimit();
-  addEventListener('shiyu-user-entitlements',()=>{const next=cardLimit();if(next===lastCardLimit)return;lastCardLimit=next;refreshDockPreview();if(panel?.open)renderPanel()});
+  addEventListener('shiyu-user-entitlements',()=>{const next=cardLimit();if(next===lastCardLimit)return;lastCardLimit=next;if(panel?.open)renderPanel()});
   function syncCornerAvailability(){
-    const entry=document.querySelector('#dock .corner-entry'),peek=document.querySelector('#dock .corner-dock-preview'),dockEl=document.querySelector('#dock .dock');
+    const entry=document.querySelector('#dock .corner-entry'),dockEl=document.querySelector('#dock .dock');
     if(!entry)return;
     const locked=document.body.classList.contains('theme-preview-corner-disabled');
     entry.disabled=locked;entry.setAttribute('aria-disabled',String(locked));entry.classList.toggle('is-disabled',locked);entry.tabIndex=locked?-1:0;
-    if(peek)peek.hidden=locked;
-    if(locked){dockEl?.classList.remove('corner-peeking','open');entry.setAttribute('aria-expanded','false');}
+
+    if(locked){dockEl?.classList.remove('open');entry.setAttribute('aria-expanded','false');}
   }
   addEventListener('shiyu-theme-preview-state',syncCornerAvailability);
   const previousDock=dock;
@@ -1117,20 +1123,9 @@
     const legacy=dockEl.querySelector('.dock-options');if(legacy){legacy.hidden=true;legacy.setAttribute('aria-hidden','true');legacy.inert=true;}
     const entry=dockEl.querySelector('.dock-trigger');if(!entry)return;
     entry.removeAttribute('data-action');entry.classList.add('corner-entry','corner-themed-entry','corner-legacy-hidden');entry.title='';entry.setAttribute('aria-label','');entry.setAttribute('aria-hidden','true');entry.setAttribute('aria-haspopup','dialog');entry.tabIndex=-1;entry.querySelector('.dock-label').textContent='';
-    const peek=document.createElement('div');peek.className='corner-dock-preview';dockEl.prepend(peek);dockEl.classList.add('corner-unified');refreshDockPreview();refreshOrbitPreview();
-    let closePeekTimer=0;
-    const hidePeek=()=>{clearTimeout(closePeekTimer);dockEl.classList.remove('corner-peeking','open');entry.setAttribute('aria-expanded','false');};
-    // Wait briefly before collapsing the preview. The preview is positioned
-    // above the entry, so collapsing it immediately while the pointer is
-    // leaving can move the entry under the pointer and retrigger its hover
-    // animation, which looks like a flicker or a second train arrival.
-    const closePeek=()=>{clearTimeout(closePeekTimer);closePeekTimer=setTimeout(()=>{if(!dockEl.matches(':hover'))hidePeek();},160);};
-    dockEl.addEventListener('pointerenter',()=>{clearTimeout(closePeekTimer);if(panel?.open||entry.disabled)return;refreshDockPreview();dockEl.classList.add('corner-peeking');entry.setAttribute('aria-expanded','true');});
-    dockEl.addEventListener('pointerleave',closePeek);
-    dockEl.addEventListener('focusin',()=>{if(!panel?.open&&!entry.disabled){dockEl.classList.add('corner-peeking');entry.setAttribute('aria-expanded','true');}});
-    dockEl.addEventListener('focusout',e=>{if(!dockEl.contains(e.relatedTarget)&&!dockEl.matches(':hover'))closePeek();});
-    entry.onclick=e=>{if(entry.disabled)return;e.stopPropagation();hidePeek();openCorner(entry,null,e,'common');};
-    peek.onclick=e=>{if(entry.disabled)return;const b=e.target.closest('[data-corner-module]');if(b){hidePeek();openCorner(entry,null,e,b.dataset.cornerModule);}};
+    dockEl.classList.add('corner-unified');refreshOrbitPreview();
+    const requireCornerLogin=()=>{if(signed)return true;show('#login');return false;};
+    entry.onclick=e=>{if(entry.disabled)return;e.stopPropagation();if(!requireCornerLogin())return;openCorner(entry,null,e,'common');};
     syncCornerAvailability();
   };
   // A website action adds only that website; card-level collection tools stay separate.
@@ -1143,7 +1138,7 @@
       if(target.refs.some(r=>r.gid===x.gid&&r.url===x.url)){toast('已在「'+target.name+'」中');return}
       let existing;for(const g of groups){const ref=g.refs.find(r=>r.gid===x.gid&&r.url===x.url);if(ref){existing??=ref;g.refs=g.refs.filter(r=>r!==ref)}}
       target.refs.push(existing||{id:uid(),sid:x.sid,cid:x.cid,gid:x.gid,url:x.url});persist();
-      if(panel?.open)refreshLinks(groups.map(g=>g.id));refreshDockPreview();toast('已添加到「'+target.name+'」');
+      if(panel?.open)refreshLinks(groups.map(g=>g.id));toast('已添加到「'+target.name+'」');
     }
   });
   const previousEdit=editBookmark;

@@ -73,7 +73,7 @@
     rememberProfile();
     invalidateAccount(); signed = false; verifiedUserId = '';
     prefs.accountProfile = {}; prefs.accountDataUserId = ''; prefs.membership = null; prefs.membershipDemo = null; prefs.demoMemberOrders = [];
-    data = clone(seed); normalizeSelection(); view = 'home'; pending = null;
+    data = clone(seed); normalizeSelection(); view = location.hostname === 'space.shiyubox.com' ? 'space' : 'home'; pending = null;
     publishMembership(null); syncCornerLoginState(); rawPersist();
     closeAccountDialogs();
     window.dispatchEvent(new CustomEvent('shiyu-account-state', { detail: { authenticated: false } }));
@@ -112,7 +112,7 @@
         try {
           const response = await fetch('/api/shiyu/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: '{}' });
           if (!response.ok) throw Error('退出登录失败，请重试');
-          clearAccount();
+          clearAccount(); toast('已退出登录，愿你下次回来时，喜欢依然在。');
         } catch (error) { toast(error.message || '退出登录失败，请重试'); }
         finally { authBusy = false; logoutRequest = null; markAccountReady(); void refreshMembership(); }
       });
@@ -233,7 +233,7 @@
 
   function isSpaceEntry(target) {
     return target.closest?.('[data-action="space"],[data-v2="enter"],[data-space],[data-heading-space],.space-option,.dock-label')
-      || target.closest?.('.corner-entry,.corner-dock-preview');
+      || target.closest?.('.corner-entry:not(.corner-close-entry)');
   }
 
   // Capture before the existing navigation handlers so an unsigned visitor cannot enter a space.
@@ -268,12 +268,12 @@
   };
   const originalNavigationGesture = navigationGesture;
   navigationGesture = function accountNavigationGesture(delta, ...args) {
-    if (view === 'home' && delta > 0 && !signed) { openLogin(); return; }
+    if (view === 'home' && delta > 0 && !signed) { const now = Date.now(); if (downArmedAt && now - downArmedAt < 2400) { downArmedAt = 0; openLogin('再向下滚动一次即可进入你的空间。登录后即可继续进入。'); return; } downArmedAt = now; toast('再向下滚动一次，进入你的空间。','bottom'); return; }
     return originalNavigationGesture(delta, ...args);
   };
   const originalWorkspace = workspace;
   workspace = function accountWorkspace(...args) {
-    if (!signed) { view = 'home'; openLogin(); render(); return; }
+    if (!signed && location.hostname !== 'space.shiyubox.com') { view = 'home'; openLogin(); render(); return; }
     return originalWorkspace(...args);
   };
 
@@ -346,8 +346,6 @@
     if (event.target.closest?.('[data-account-signout]')) {
       event.preventDefault(); event.stopImmediatePropagation();
       void window.ShiyuAccountSession.logout();
-    } else if (event.target.closest?.('[data-action="demo-login"]')) {
-      setTimeout(() => { syncCornerLoginState(); if (!signed) { prefs.membership = null; publishMembership(null, false); } void refreshMembership(); }, 0);
     }
   }, true);
 

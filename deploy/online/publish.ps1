@@ -42,6 +42,8 @@ if [ -d "$old/node_modules" ]; then ln -s "$old/node_modules" $release/node_modu
 if [ -d "$old/.local" ]; then cp -a "$old/.local" $release/.local; fi
 mkdir -p $base/releases
 ln -sfn /opt/shiyu/current $base/releases/导航站
+mkdir -p /opt/shiyu/releases
+ln -sfn /opt/shiyu-admin/current /opt/shiyu/releases/聚合管理后台
 systemctl stop shiyu-admin.service
 if [ -L $base/current ]; then rm $base/current; else mv $base/current $base/previous-$releaseId; fi
 ln -s $release $base/current

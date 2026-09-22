@@ -52,7 +52,7 @@
   }
   function change(step){if(performance.now()<transitionUntil)return;const photos=album().photos;index=(index+step+photos.length)%photos.length;paint(true);}
   function stopMusic(){if(musicOwned&&playing)toggleMusic();musicOwned=false;}
-  function syncMusic(){const button=document.querySelector('[data-memoir-music]');if(button){button.setAttribute('aria-pressed',String(playing));button.setAttribute('aria-label',playing?'停止音乐':'播放音乐');button.title=playing?'停止音乐':'播放音乐';button.innerHTML=svg('<path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/>');}const name=document.querySelector('[data-memoir-track]');if(name){name.textContent=TRACKS[trackIndex].name;name.title='点击切换下一首音乐';}}
+  function syncMusic(){const button=document.querySelector('[data-memoir-music]');if(button){button.setAttribute('aria-pressed',String(playing));button.setAttribute('aria-label',playing?'停止音乐':'播放音乐');button.title=playing?'停止音乐':'播放音乐';button.innerHTML=svg('<path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/>'+(playing?'':'<path d="m4 4 16 16"/>'));}const name=document.querySelector('[data-memoir-track]');if(name){name.textContent=TRACKS[trackIndex].name;name.title='点击切换下一首音乐';}}
   async function toggleSound(){musicOwned=true;await toggleMusic();syncMusic();}
   const previousMusicSync=syncMusicUI;syncMusicUI=function(){previousMusicSync();syncMusic();};
   function mount(){

@@ -362,31 +362,6 @@ body[data-dark=true] #my-corner .corner-card-logo{color:color-mix(in srgb,var(--
 #dock .corner-unified .dock-options[hidden]{display:none!important}
 #dock .corner-unified .corner-entry{padding:10px 14px 9px;border:1px solid color-mix(in srgb,var(--ink) 10%,transparent);border-radius:20px;background:color-mix(in srgb,var(--surface) 28%,transparent);box-shadow:0 8px 30px #0000000d;-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15);transition:background .2s,border-color .2s,box-shadow .2s}
 #dock .corner-unified .corner-entry:is(:hover,:focus-visible){background:color-mix(in srgb,var(--surface) 38%,transparent);border-color:color-mix(in srgb,var(--ink) 16%,transparent);box-shadow:0 10px 34px #00000016}
-#dock .corner-dock-preview{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);padding:0;box-sizing:border-box;border-radius:0;background:transparent;color:var(--ink);box-shadow:none;visibility:hidden;pointer-events:none;z-index:5}
-body.account-unsigned #dock .corner-dock-preview{visibility:hidden!important;pointer-events:none!important}
-#dock .corner-unified.corner-peeking .corner-dock-preview{visibility:visible;pointer-events:auto}
-body.account-unsigned #dock .corner-unified.corner-peeking .corner-dock-preview{visibility:visible!important;pointer-events:auto!important}
-#dock .corner-dock-preview .corner-bottom-menu{display:block;position:static;top:auto;left:auto;width:174px;box-sizing:border-box;color:var(--ink)}
-#dock .corner-dock-preview .corner-bottom-menu>button[data-corner-module=memo]>svg{color:#ad8365}
-#dock .corner-dock-preview .corner-bottom-menu>button[data-corner-module=common]>svg{color:var(--accent)}
-#dock .corner-dock-preview .corner-bottom-menu>button[data-corner-module=todo]>svg{color:#6d8fb3}
-#dock .corner-dock-preview>p{font-size:12px;margin:0 0 16px;text-align:left;color:var(--muted)}
-#dock .corner-peek-rail{display:flex;align-items:center;gap:6px;min-width:0;max-width:min(760px,calc(100vw - 72px))}
-#dock .corner-peek-groups{display:flex;gap:12px;min-width:0;max-width:min(680px,calc(100vw - 72px));overflow:auto;scrollbar-width:none}
-#dock .corner-peek-groups::-webkit-scrollbar{display:none}
-#dock .corner-peek-groups button{display:flex;flex-direction:column;align-items:center;gap:10px;width:max-content;min-width:82px;max-width:220px;flex:none;padding:10px 12px;border-radius:10px;color:var(--ink)}
-#dock .corner-peek-arrow{display:grid;place-items:center;flex:0 0 24px;width:24px;height:32px;padding:4px;border-radius:7px;color:var(--ink)}
-#dock .corner-peek-arrow svg{width:16px;height:16px}
-#dock .corner-peek-arrow:disabled{opacity:.3;cursor:default}
-#dock .corner-peek-arrow:not(:disabled):hover{background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
-#dock .corner-peek-arrow[hidden]{display:none}
-#dock .corner-peek-groups button:hover{background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
-#dock .corner-peek-groups i{display:grid;place-items:center;width:38px;height:38px;color:var(--accent)}
-#dock .corner-peek-groups svg{width:32px;height:32px}
-#dock .corner-peek-groups span{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#dock .corner-peek-groups button[data-corner-module=memo] i{color:#ad8365}
-#dock .corner-peek-groups button[data-corner-module=common] i{color:var(--accent)}
-#dock .corner-peek-groups button[data-corner-module=todo] i{color:#6d8fb3}
 /* The copied standalone menu keeps its interaction; this frame only supplies
    a transparent, compact host beside the original home entry. */
 :is(#corner-orbit-preview,#corner-orbit-demo){display:none;position:fixed;right:24px;bottom:64px;z-index:36;width:min(320px,calc(100vw - 32px));height:min(370px,calc(100dvh - 160px));border:0;background:transparent;visibility:hidden}
@@ -428,8 +403,6 @@ body:is([data-view=home],[data-view=space]):not(.world-active):not(.atlas-active
 #dock[data-dock-theme=flow] .corner-unified,#dock[data-dock-theme=poly] .corner-unified{--corner-icon-motion:corner-icon-shape}
 #dock[data-dock-theme=flip] .corner-unified{--corner-icon-motion:corner-icon-tick}
 #dock[data-dock-theme=reading] .corner-unified,#dock[data-dock-theme=paper] .corner-unified{--corner-icon-motion:corner-icon-page}
-#dock .corner-unified.corner-peeking .corner-peek-groups i svg{animation:var(--corner-icon-motion) 3.4s ease-in-out infinite;animation-delay:calc(var(--peek-index,0)*-.23s);transform-origin:center;transform-box:fill-box}
-#dock .corner-unified.corner-peeking .corner-themed-entry>:not(.dock-label):not(.train-track){animation:var(--corner-icon-motion) 3.4s ease-in-out infinite;transform-origin:center}
 @keyframes corner-icon-travel{0%,100%{transform:translateX(-3px) rotate(-2deg)}50%{transform:translateX(3px) translateY(-2px) rotate(2deg)}}
 @keyframes corner-icon-beat{0%,100%{transform:rotate(-7deg) scale(.97)}50%{transform:rotate(7deg) scale(1.04)}}
 @keyframes corner-icon-orbit{0%,100%{transform:translate(-2px,1px) rotate(-8deg)}50%{transform:translate(2px,-3px) rotate(8deg)}}
@@ -437,7 +410,6 @@ body:is([data-view=home],[data-view=space]):not(.world-active):not(.atlas-active
 @keyframes corner-icon-tick{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
 @keyframes corner-icon-page{0%,100%{transform:skewY(-3deg) translateY(0)}50%{transform:skewY(3deg) translateY(-3px)}}
 @keyframes corner-icon-float{0%,100%{transform:translateY(1px) rotate(-2deg)}50%{transform:translateY(-3px) rotate(2deg)}}
-@media(prefers-reduced-motion:reduce){#dock .corner-unified.corner-peeking .corner-peek-groups i svg,#dock .corner-unified.corner-peeking .corner-themed-entry>:not(.dock-label):not(.train-track){animation:none}}
 
 #my-corner .corner-card:not(.is-center):not(.is-away){opacity:.55}
 #my-corner.corner-editing .corner-card:not(.is-center):not(.is-away){opacity:.38}
@@ -887,9 +859,6 @@ body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-fi
 }
 
 /* The three homepage entries share the existing card engine. */
-#dock .corner-peek-groups button[data-corner-module=memo] i{color:#ad8365}
-#dock .corner-peek-groups button[data-corner-module=common] i{color:var(--accent)}
-#dock .corner-peek-groups button[data-corner-module=todo] i{color:#6d8fb3}
 #my-corner[data-corner-module=todo]{--module-accent:#6d8fb3}
 #my-corner[data-corner-module=memo]{--module-accent:#ad8365}
 #my-corner[data-corner-module=todo] .corner-card-front{background:linear-gradient(145deg,color-mix(in srgb,var(--module-accent) 14%,var(--corner-face,var(--surface))),var(--corner-face,var(--surface)) 58%);border-radius:15px 15px 26px 15px}
@@ -1043,5 +1012,5 @@ body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-fi
 @media(max-width:760px){:is(#corner-orbit-preview,#corner-orbit-demo){left:50%;right:auto;bottom:-64px;transform:translateX(-50%);width:calc(100vw - 32px);height:min(390px,calc(100dvh - 110px))}}
 
 /* The gradient magnetic entry is the single home entrance. */
-body[data-view=home] #corner-orbit-preview{display:none!important}
+body:is([data-view=home],[data-view=space]) #corner-orbit-preview{display:none!important}
 #corner-orbit-demo{left:50%!important}
