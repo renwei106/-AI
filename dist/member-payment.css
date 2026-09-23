@@ -1,8 +1,11 @@
+#payment-order.payment-order-dialog { width: min(540px, calc(100vw - 32px)); padding: 28px 34px; }
 .payment-order-dialog .payment-order-body { text-align: center; }
 .payment-order-dialog .payment-qr { display: block; margin: 18px auto; width: 264px; max-width: 100%; height: auto; border-radius: 8px; }
 .payment-order-dialog .payment-cashier { display: inline-flex; text-decoration: none; align-items: center; justify-content: center; margin: 16px 0 0; }
 .payment-order-dialog .payment-order-number { overflow-wrap: anywhere; font-size: 12px; }
 .payment-order-dialog .payment-confirmed { color: var(--accent); }
+.checkout-quantity { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.checkout-quantity select { padding: 7px 28px 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); color: var(--ink); font: inherit; }
 .member-invite-link-row { display: flex; gap: 12px; margin-top: 22px; align-items: center; }
 .member-invite-link-row input { min-width: 0; flex: 1; width: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); color: var(--ink); font: inherit; font-size: 12px; }
 .member-invite-link-row .member-primary { flex: none; margin: 0; }

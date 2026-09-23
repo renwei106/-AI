@@ -12,7 +12,7 @@ class PaymentStore {
       CREATE TABLE IF NOT EXISTS orders (
         id TEXT PRIMARY KEY, user_id TEXT NOT NULL, request_id TEXT NOT NULL,
         provider TEXT NOT NULL, plan_id TEXT NOT NULL, plan_name TEXT NOT NULL,
-        amount INTEGER NOT NULL CHECK(amount>0), days INTEGER NOT NULL CHECK(days>0),
+        quantity INTEGER NOT NULL DEFAULT 1 CHECK(quantity>0), amount INTEGER NOT NULL CHECK(amount>0), days INTEGER NOT NULL CHECK(days>0),
         status TEXT NOT NULL, created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL,
         paid_at INTEGER, transaction_id TEXT, checkout TEXT, last_checked_at INTEGER NOT NULL DEFAULT 0,
         base_expiry INTEGER NOT NULL DEFAULT 0, member_expires_at INTEGER,
@@ -23,20 +23,21 @@ class PaymentStore {
       CREATE TABLE IF NOT EXISTS rates (key TEXT PRIMARY KEY, started_at INTEGER NOT NULL, count INTEGER NOT NULL);
     `);
     const columns = new Set(this.db.prepare('PRAGMA table_info(orders)').all().map(row => row.name));
+    if (!columns.has('quantity')) this.db.exec('ALTER TABLE orders ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1');
     if (!columns.has('plan_snapshot')) this.db.exec('ALTER TABLE orders ADD COLUMN plan_snapshot TEXT');
     if (!columns.has('fulfillment_state')) this.db.exec("ALTER TABLE orders ADD COLUMN fulfillment_state TEXT NOT NULL DEFAULT 'legacy'");
   }
   get(id) { return this.db.prepare('SELECT * FROM orders WHERE id=?').get(id); }
   find(userId, requestId) { return this.db.prepare('SELECT * FROM orders WHERE user_id=? AND request_id=?').get(userId, requestId); }
-  active(userId, provider, planId, now = Date.now()) {
-    return this.db.prepare("SELECT * FROM orders WHERE user_id=? AND provider=? AND plan_id=? AND status IN ('created','pending','unknown') AND expires_at>? ORDER BY created_at DESC LIMIT 1")
-      .get(userId, provider, planId, now);
+  active(userId, provider, planId, quantity, now = Date.now()) {
+    return this.db.prepare("SELECT * FROM orders WHERE user_id=? AND provider=? AND plan_id=? AND quantity=? AND status IN ('created','pending','unknown') AND expires_at>? ORDER BY created_at DESC LIMIT 1")
+      .get(userId, provider, planId, quantity, now);
   }
   list(userId) { return this.db.prepare('SELECT * FROM orders WHERE user_id=? ORDER BY created_at DESC LIMIT 100').all(userId); }
-  create({ userId, requestId, provider, plan, amount, baseExpiry = 0 }) {
+  create({ userId, requestId, provider, plan, quantity = 1, amount, days = plan.days, baseExpiry = 0 }) {
     const id = 'SY' + crypto.randomBytes(14).toString('hex'), now = Date.now();
-    this.db.prepare(`INSERT INTO orders (id,user_id,request_id,provider,plan_id,plan_name,amount,days,status,created_at,expires_at,base_expiry,plan_snapshot,fulfillment_state) VALUES (?,?,?,?,?,?,?,?,'created',?,?,?,?,'pending')`)
-      .run(id, userId, requestId, provider, plan.id, plan.name, amount, plan.days, now, now + 30 * 60_000, baseExpiry, JSON.stringify(plan));
+    this.db.prepare(`INSERT INTO orders (id,user_id,request_id,provider,plan_id,plan_name,quantity,amount,days,status,created_at,expires_at,base_expiry,plan_snapshot,fulfillment_state) VALUES (?,?,?,?,?,?,?,?,?,'created',?,?,?,?,'pending')`)
+      .run(id, userId, requestId, provider, plan.id, plan.name, quantity, amount, days, now, now + 30 * 60_000, baseExpiry, JSON.stringify(plan));
     return this.get(id);
   }
   checkout(id, data) { this.db.prepare("UPDATE orders SET checkout=?,status='pending' WHERE id=? AND status IN ('created','unknown')").run(JSON.stringify(data), id); return this.get(id); }

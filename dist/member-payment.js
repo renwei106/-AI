@@ -4,6 +4,7 @@
  const API = '/api/shiyu/payments';
  let status = null, account = null, currentOrder = null, timer = null, submitting = false;
  let pendingRequest = null;
+ let quantities = Object.create(null);
  const originalCenter = openMemberCenter, originalOrders = openMemberOrders;
  const originalAgreement = simulatePayment;
  const text = value => esc(String(value ?? ''));
@@ -28,6 +29,7 @@
   const methods=d.querySelector('.checkout-methods');
   if(methods){ methods.hidden=!available.length; methods.querySelectorAll('[data-method-choice],[data-footer-pay]').forEach(item=>{if(!available.includes(item.dataset.methodChoice||item.dataset.footerPay))item.remove();}); }
   const plan = MEMBER_CONFIG.plans[selectedMemberPlan], recurring = plan?.auto || plan?.autoRenew;
+  renderQuantity(d, plan, recurring);
   button.disabled = freeMemberSelected || recurring || !status?.providers?.[memberPayment]?.ready || submitting;
   button.setAttribute('aria-busy', submitting ? 'true' : 'false');
   d.querySelectorAll('[data-member-plan],[data-payment]').forEach(control => { control.disabled = submitting; });
@@ -44,6 +46,26 @@
    const memberStatus = d.querySelector('.member-status>span');
    if (memberStatus) memberStatus.textContent = account.member ? account.permanent ? '永久会员' : '会员有效至 ' + new Date(account.expiresAt).toLocaleDateString() : '免费账户';
   }
+ }
+ function quantityFor(plan) { return Math.max(1, Number(quantities[plan?.id]) || 1); }
+ function renderQuantity(dialog, plan, recurring) {
+  const checkout = dialog.querySelector('.member-checkout');
+  if (!checkout) return;
+  checkout.querySelector('.checkout-quantity')?.remove();
+  if (!plan?.id || freeMemberSelected || recurring || !Number.isInteger(plan.days) || plan.days < 1) return;
+  const max = Math.min(12, Math.floor(3660 / plan.days));
+  const quantity = Math.min(quantityFor(plan), max);
+  quantities[plan.id] = quantity;
+  const unit = plan.days >= 360 ? '年' : plan.days >= 80 ? '个季度' : '个月';
+  const options = Array.from({ length: max }, (_, index) => index + 1).map(value => `<option value="${value}"${value === quantity ? ' selected' : ''}>${value} ${unit}</option>`).join('');
+  const control = document.createElement('label');
+  control.className = 'checkout-quantity';
+  control.innerHTML = `购买数量 <select data-member-quantity aria-label="购买数量">${options}</select>`;
+  const methods = checkout.querySelector('.checkout-methods');
+  checkout.insertBefore(control, methods || checkout.querySelector('.checkout-legal') || checkout.firstChild);
+  const price = checkout.querySelector('.checkout-choice .checkout-price');
+  if (price) price.textContent = '¥' + (Number(plan.price) * quantity).toFixed(2).replace(/\.00$/, '');
+  control.querySelector('select').onchange = event => { quantities[plan.id] = Number(event.currentTarget.value); pendingRequest = null; decorate(); };
  }
  openMemberCenter = function () { originalCenter(); decorate(); void refreshStatus(); };
  async function refreshAccount() {
@@ -67,10 +89,10 @@
    return;
   }
   submitting = true; decorate();
-  const selection = plan.id + ':' + memberPayment;
+  const quantity = quantityFor(plan), selection = plan.id + ':' + memberPayment + ':' + quantity;
   if (!pendingRequest || pendingRequest.selection !== selection) pendingRequest = { selection, requestId: crypto.randomUUID().replaceAll('-', '') };
   try {
-   const data = await request('/orders', { method: 'POST', body: JSON.stringify({ planId: plan.id, provider: memberPayment, requestId: pendingRequest.requestId, accepted: true }) });
+   const data = await request('/orders', { method: 'POST', body: JSON.stringify({ planId: plan.id, quantity, provider: memberPayment, requestId: pendingRequest.requestId, accepted: true }) });
    showOrder(data.order);
   } catch (error) {
    if (error.orderId) {
@@ -101,7 +123,8 @@
   const d = document.querySelector('#payment-order'), order = currentOrder;
   if (!d || !order) return;
   const body = d.querySelector('.payment-order-body'), expired = order.expiresAt <= Date.now();
-  let content = `<div class="member-order-summary"><h3>${text(order.planName)}</h3><strong>¥${money(order.amount)}</strong><p>${order.days} 天 · ${order.provider === 'wechat' ? '微信支付' : '支付宝'}</p></div>`;
+  const quantityText = Number(order.quantity || 1) > 1 ? ` × ${text(order.quantity)}` : '';
+  let content = `<div class="member-order-summary"><h3>${text(order.planName)}${quantityText}</h3><strong>¥${money(order.amount)}</strong><p>${order.days} 天 · ${order.provider === 'wechat' ? '微信支付' : '支付宝'}</p></div>`;
   if (order.status === 'paid') {
    content += `<h3 class="payment-confirmed">支付成功</h3><p class="member-sub">${order.fulfillment === 'pending' ? '会员权益正在同步，请稍后刷新查看' : order.memberExpiresAt ? '会员有效期至 ' + text(new Date(order.memberExpiresAt).toLocaleString()) : '永久会员权益保持有效'}</p>`;
    pendingRequest = null;

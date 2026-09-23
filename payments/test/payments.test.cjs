@@ -64,6 +64,15 @@ test('server catalog determines price and duration; client identity and amount a
   assert.equal(order.amount, 1000); assert.equal(order.days, 30); assert.equal(f.store.get(order.id).user_id, user.id);
   await assert.rejects(() => f.service.query({ id: 'attacker' }, order.id), e => e.status === 404);
 });
+test('quantity is server-validated and multiplies the authoritative price and membership time', async t => {
+  const f = fixture(); t.after(() => f.store.close());
+  const order = await f.service.create(user, input({ quantity: 3, amount: 1, days: 1 }));
+  assert.equal(order.quantity, 3); assert.equal(order.amount, 3000); assert.equal(order.days, 90);
+  f.service.apply('wechat', paidResult(order));
+  assert.equal(f.store.membership(user.id), now + 90 * 86_400_000);
+  await assert.rejects(() => f.service.create(user, input({ quantity: 123 })), error => error.code === 'QUANTITY_EXCEEDED');
+  await assert.rejects(() => f.service.create(user, input({ quantity: 1.5 })), error => error.code === 'INVALID_INPUT');
+});
 test('retries, rapid clicks and separate tabs reuse a single active provider order; changed request intent is rejected', async t => {
   const f = fixture(); t.after(() => f.store.close()); const body = input();
   const result = await Promise.all(Array.from({ length: 6 }, () => f.service.create(user, body)));
