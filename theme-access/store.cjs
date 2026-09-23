@@ -11,43 +11,33 @@ function visitor(req,res){const data=read();let token=cookie(req,'shiyu_theme_vi
 const DAILY_MS=10*60*1000;
 const PRESENCE_LEASE_MS=30*1000;
 function dayKey(now){return new Date(now+8*3600000).toISOString().slice(0,10)}
-function emptyPreview(day){return {day,startedAt:0,expiresAt:0,remainingMs:DAILY_MS,consumedMs:0,active:false,started:false,expired:false}}
-function normalizePreview(value,day){
-  if(!value||value.day!==day)return emptyPreview(day);
-  const consumed=Math.min(DAILY_MS,Math.max(0,Number(value.consumedMs)||0));
-  const activeSince=Number(value.activeSince)||0;
-  return {day,startedAt:Number(value.startedAt)||0,expiresAt:Number(value.expiresAt)||0,remainingMs:Math.max(0,DAILY_MS-consumed),consumedMs:consumed,activeSince};
+function trialConfig(value){const mode=value?.mode==='total'?'total':'daily',amount=Math.max(1,Number(value?.value)||10);return {mode,durationMs:amount*(mode==='total'?86400000:60000)}}
+function emptyPreview(day,limit=DAILY_MS,mode='daily'){return {mode,day,firstStartedAt:0,startedAt:0,expiresAt:0,remainingMs:limit,consumedMs:0,active:false,started:false,expired:false}}
+function preview(token,theme,now=Date.now(),trial){
+  const config=trialConfig(trial),record=read().visitors[token],value=record?.previews?.[theme];
+  const firstStartedAt=Number(value?.firstStartedAt)||Number(value?.startedAt)||0;
+  if(config.mode==='total'){const startedAt=firstStartedAt,expiresAt=startedAt?startedAt+config.durationMs:0,remainingMs=startedAt?Math.max(0,expiresAt-now):config.durationMs;return {mode:'total',day:'',firstStartedAt,startedAt,expiresAt,remainingMs,consumedMs:startedAt?Math.min(config.durationMs,now-startedAt):0,active:false,activeSince:0,started:startedAt>0,expired:startedAt>0&&remainingMs<=0}}
+  const day=dayKey(now);
+  if(!value||value.day!==day)return {...emptyPreview(day,config.durationMs),firstStartedAt};
+  const startedAt=Number(value.startedAt)||0,expiresAt=startedAt?startedAt+config.durationMs:0,remainingMs=startedAt?Math.max(0,expiresAt-now):config.durationMs;
+  return {mode:'daily',day,firstStartedAt:firstStartedAt||startedAt,startedAt,expiresAt,remainingMs,consumedMs:startedAt?Math.min(config.durationMs,now-startedAt):0,active:false,activeSince:0,started:startedAt>0,expired:startedAt>0&&remainingMs<=0};
 }
-function settle(value,now){
-  const consumed=Math.min(DAILY_MS,Math.max(0,Number(value.consumedMs)||0));
-  const activeSince=Number(value.activeSince)||0;
-  // A missing heartbeat must not consume an unlimited amount after a tab crash.
-  const elapsed=activeSince>0?Math.min(PRESENCE_LEASE_MS,Math.max(0,now-activeSince)):0;
-  const nextConsumed=Math.min(DAILY_MS,consumed+elapsed),remainingMs=Math.max(0,DAILY_MS-nextConsumed);
-  return {...value,consumedMs:nextConsumed,remainingMs,activeSince:0,expiresAt:0,active:false,started:value.startedAt>0,expired:value.startedAt>0&&remainingMs<=0};
-}
-function preview(token,theme,now=Date.now()){
-  const day=dayKey(now),record=read().visitors[token],value=record?.previews?.[theme];
-  const normalized=normalizePreview(value,day),settled=normalized.activeSince?settle(normalized,now):normalized;
-  const remainingMs=Math.max(0,DAILY_MS-(Number(settled.consumedMs)||0)),leaseActive=normalized.activeSince>0&&now-normalized.activeSince<=PRESENCE_LEASE_MS&&remainingMs>0;
-  return {...settled,remainingMs,started:settled.startedAt>0,expired:settled.startedAt>0&&remainingMs<=0,active:leaseActive,activeSince:leaseActive?normalized.activeSince:0,expiresAt:leaseActive?now+remainingMs:0};
-}
-function previews(token,now=Date.now()){
+function previews(token,now=Date.now(),trial){
   const source=read().visitors[token]?.previews||{},day=dayKey(now),result={};
-  for(const id of Object.keys(source)){const state=preview(token,id,now);if(state.started||state.expired)result[id]=state;}
+  for(const id of Object.keys(source)){const state=preview(token,id,now,trial);if(state.started||state.expired)result[id]=state;}
   return result;
 }
-function updatePresence(token,theme,active,now=Date.now()){
+function updatePresence(token,theme,active,now=Date.now(),trial){
   if(!theme)throw Error('缺少主题');
   const data=read(),record=data.visitors[token];if(!record)throw Error('预览会话已失效');
-  record.previews??={};const day=dayKey(now),current=normalizePreview(record.previews[theme],day),settled=current.activeSince?settle(current,now):current;
-  const remainingMs=Math.max(0,DAILY_MS-(Number(settled.consumedMs)||0));
-  const next={...settled,day,startedAt:Number(settled.startedAt)||now,consumedMs:Number(settled.consumedMs)||0,remainingMs,started:true,expired:remainingMs<=0,active:false,activeSince:0,expiresAt:0};
-  if(active&&remainingMs>0){next.active=true;next.activeSince=now;next.expiresAt=now+remainingMs;}
-  record.previews[theme]=next;write(data);return next;
+  const config=trialConfig(trial);record.previews??={};
+  const existing=record.previews[theme],firstStartedAt=Number(existing?.firstStartedAt)||Number(existing?.startedAt)||now;
+  if(config.mode==='total'){record.previews[theme]={mode:'total',firstStartedAt,startedAt:firstStartedAt};write(data);return preview(token,theme,now,trial)}
+  const day=dayKey(now),startedAt=existing?.day===day&&Number(existing.startedAt)>0?Number(existing.startedAt):now;
+  record.previews[theme]={mode:'daily',day,firstStartedAt,startedAt};write(data);return preview(token,theme,now,trial);
 }
-function startPreview(token,theme,now=Date.now()){
-  const state=preview(token,theme,now);return state.expired?0:state.remainingMs;
+function startPreview(token,theme,now=Date.now(),trial){
+  const state=preview(token,theme,now,trial);return state.expired?0:state.remainingMs;
 }
 function pausePreview(token,theme,now=Date.now()){return updatePresence(token,theme,false,now)}
 // Kept as a compatibility helper for callers that only need the current theme state.

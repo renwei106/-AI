@@ -5,12 +5,17 @@ const themes=[{id:'base',enabled:true},{id:'music',enabled:true},{id:'cosmos',en
 const rights=value=>[{key:'themes',kind:'selection',enabled:true,value}];
 const plans=[{id:'free',entitlements:rights(['base'])}];
 test('membership theme badges use free catalog, access uses actual user plan',()=>{
- const result=policy(themes,plans,rights(['base','music','rain']));
+ const result=policy(themes,plans,rights(['base','music','rain']),true);
  assert.equal(result.items.find(item=>item.id==='music').memberOnly,true);
  assert.equal(result.items.find(item=>item.id==='music').allowed,true);
- assert.equal(result.items.find(item=>item.id==='cosmos').allowed,false);
+ assert.equal(result.items.find(item=>item.id==='cosmos').allowed,true);
  assert.equal(result.items.find(item=>item.id==='rain').allowed,false);
  assert.equal(policy(themes,plans).items.find(item=>item.id==='music').allowed,false);
+});
+test('active members automatically inherit newly enabled themes',()=>{
+ const result=policy([...themes,{id:'future-theme',enabled:true}],plans,rights(['base','music']),true);
+ assert.equal(result.items.find(item=>item.id==='future-theme').memberOnly,true);
+ assert.equal(result.items.find(item=>item.id==='future-theme').allowed,true);
 });
 test('historic theme flags remain readable and retired resources stay hidden',()=>{
  const result=policy([...themes,{id:'reading',enabled:true}],[{id:'free',entitlements:[{key:'theme-base',enabled:true}]}]);

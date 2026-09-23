@@ -14,11 +14,11 @@ function membershipState(identity,now=Date.now()){
   const end=expiryTime(snapshot?.expiresAt??user?.memberExpiresAt);
   return {member:active&&user?.member===true&&(permanent||end>now),memberExpired:active&&!permanent&&Number.isFinite(end)&&end<=now};
 }
-function policy(themes,plans,entitlements){
+function policy(themes,plans,entitlements,member=false){
   const free=plans.find(plan=>plan.id==='free');
   const granted=id=>themeGranted(free?.entitlements,id);
   const actual=Array.isArray(entitlements)?entitlements:free?.entitlements;
-  const items=themes.filter(theme=>!retired.has(theme.id)).map(theme=>({id:theme.id,enabled:theme.enabled===true,memberOnly:!granted(theme.id),allowed:theme.enabled===true&&themeGranted(actual,theme.id)}));
+  const items=themes.filter(theme=>!retired.has(theme.id)).map(theme=>({id:theme.id,enabled:theme.enabled===true,memberOnly:!granted(theme.id),allowed:theme.enabled===true&&(member||themeGranted(actual,theme.id))}));
   return {items,fallback:items.find(theme=>theme.enabled&&theme.allowed)?.id||items.find(theme=>theme.enabled&&!theme.memberOnly)?.id||'base'};
 }
 async function upstream(path,req){const r=await fetch(new URL(path,process.env.SHIYU_ADMIN_ORIGIN||'http://127.0.0.1:5175'),{headers:{cookie:req.headers.cookie||'',accept:'application/json'},signal:AbortSignal.timeout(4000)});if(!r.ok)throw Error('主题权限暂时无法校验');return r.json()}
@@ -39,7 +39,7 @@ async function handler(req,res){
     const [themes,plans,identity]=await Promise.all([upstream('/api/shiyu/themes',req),upstream('/api/shiyu/plans',req),upstream('/api/shiyu/auth/session',req)]);
     const now=Date.now(),{member,memberExpired}=membershipState(identity,now);
     const entitlementData=identity.entitlements||identity.user?.entitlements||identity.user?.membership?.entitlements;
-    const result=policy(themes.items,plans.items,member?entitlementData:undefined);
+    const result=policy(themes.items,plans.items,member?entitlementData:undefined,member),trial=themes.trial||{mode:'daily',value:10};
     const token=store.visitor(req,res);let preview=null,presence=null,payload={};
     if(req.method==='POST'){
       if(req.headers.origin&&!allowedOrigins(req).has(req.headers.origin)){send(403,{message:'请求来源无效'});return true}
@@ -47,13 +47,13 @@ async function handler(req,res){
       const theme=String(payload.theme||'');
       if(isPresence){
         const item=result.items.find(t=>t.id===theme&&t.enabled);if(!item){send(400,{message:'主题不可用'});return true}
-        if(item.allowed)presence=store.preview(token,theme,now);else presence=store.updatePresence(token,theme,payload.active===true,now);
-        send(200,{...result,member,memberExpired,serverTime:now,presence,presenceTheme:theme,previews:store.previews(token)});return true;
+        if(item.allowed)presence=store.preview(token,theme,now,trial);else presence=store.updatePresence(token,theme,payload.active===true,now,trial);
+        send(200,{...result,trial,member,memberExpired,serverTime:now,presence,presenceTheme:theme,previews:store.previews(token,now,trial)});return true;
       }
       const item=result.items.find(t=>t.id===theme&&t.enabled);if(!item){send(400,{message:'主题不可用'});return true}
-      if(!item.allowed){const state=store.preview(token,theme,now);if(state.expired){send(403,{message:member?'当前会员方案未包含这个主题，可以查看其他会员权益。':'今天的体验先到这里，开通会员后可以继续使用。',...result,member,memberExpired,serverTime:now,previews:store.previews(token)});return true}preview={theme,state};}
+      if(!item.allowed){const state=store.preview(token,theme,now,trial);if(state.expired){send(403,{message:member?'当前会员方案未包含这个主题，可以查看其他会员权益。':'当前会员主题体验已结束。',...result,trial,member,memberExpired,serverTime:now,previews:store.previews(token,now,trial)});return true}preview={theme,state};}
     }
-    send(200,{...result,member,memberExpired,serverTime:now,previews:store.previews(token),preview});
+    send(200,{...result,trial,member,memberExpired,serverTime:now,previews:store.previews(token,now,trial),preview});
   }catch{send(503,{message:'主题权限暂时无法校验，请稍后重试'})}
   return true;
 }

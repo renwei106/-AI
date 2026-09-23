@@ -662,12 +662,13 @@ html[data-home-cover=returning]::view-transition-new(root){z-index:2;animation:h
 @media(prefers-reduced-motion:reduce){
   html[data-home-cover]::view-transition-old(root),html[data-home-cover]::view-transition-new(root){animation:none}
 }
- .theme-preview-notice{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:90;display:grid;gap:4px;width:min(390px,calc(100vw - 32px));padding:14px 18px;border:1px solid color-mix(in srgb,var(--accent) 36%,var(--line));border-radius:16px;background:color-mix(in srgb,var(--surface) 92%,var(--accent));color:var(--ink);font:12px var(--font);line-height:1.55;text-align:left;box-shadow:0 12px 34px #00000018;backdrop-filter:blur(14px);cursor:pointer;transition:transform .2s,box-shadow .2s}
+ .theme-preview-notice{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:90;display:flex;align-items:center;gap:10px;width:auto;max-width:calc(100vw - 32px);padding:10px 13px;border:1px solid color-mix(in srgb,var(--accent) 36%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--surface) 92%,var(--accent));color:var(--ink);font:11px var(--font);line-height:1.35;text-align:left;box-shadow:0 12px 34px #00000018;backdrop-filter:blur(14px);cursor:pointer;transition:transform .2s,box-shadow .2s}
 .theme-preview-notice:hover,.theme-preview-notice:focus-visible{transform:translateX(-50%) translateY(-2px);box-shadow:0 15px 38px #00000024;outline:none}
 .theme-preview-notice[hidden]{display:none!important}
 .theme-preview-notice-title{font-size:14px;font-weight:600;letter-spacing:.02em}
 .theme-preview-notice-copy{color:var(--muted)}
 .theme-preview-notice-action{margin-top:4px;color:var(--accent);font-size:11px}
+.theme-preview-notice-badge{display:grid;place-items:center;width:22px;height:22px;flex:none;color:var(--accent)}.theme-preview-notice-badge svg{width:18px;height:18px}.theme-preview-notice-meta,.theme-preview-notice-counter{display:grid;gap:2px;white-space:nowrap}.theme-preview-notice-meta{text-align:left}.theme-preview-notice-counter{margin-left:8px;text-align:right}.theme-preview-notice small{color:var(--muted);font-size:9px}.theme-preview-notice-time{color:var(--accent);font:600 14px/1.2 ui-monospace,Consolas,monospace;white-space:nowrap}.theme-preview-notice.is-expired{border-color:color-mix(in srgb,#d8564f 58%,var(--line));background:color-mix(in srgb,var(--surface) 88%,#d8564f)}.theme-preview-notice.is-expired .theme-preview-notice-time{color:#d8564f}
 body.theme-preview-notice-active .scroll-invitation{display:none!important}
 body.theme-preview-corner-disabled #dock .corner-entry{opacity:.38;cursor:not-allowed;filter:saturate(.35)}
 body.theme-preview-corner-disabled #dock .corner-entry:disabled{pointer-events:none}
@@ -882,3 +883,38 @@ body[data-view=space][data-dark] #space-atlas{background-color:var(--space-page-
 body[data-view=space][data-dark] .group-tab-bar{background-color:var(--space-page-bg)}
 body[data-view=space][data-theme=globe][data-dark]{background-image:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--accent) 16%,var(--space-page-bg)),var(--space-page-bg) 58%)}
 body[data-view=space][data-theme=globe][data-dark=false]{background-image:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--accent) 10%,var(--space-page-bg)),var(--space-page-bg) 62%)}
+
+/* Keep browser credential previews legible in the themed login form. */
+#login .account-login-content input:-webkit-autofill,
+#login .account-login-content input:-webkit-autofill:hover,
+#login .account-login-content input:-webkit-autofill:focus,
+#login .account-login-content input:-webkit-autofill:active{
+  background-color:var(--soft)!important;
+  color:var(--ink)!important;
+  caret-color:var(--ink);
+  box-shadow:0 0 0 1000px var(--soft) inset!important;
+  -webkit-box-shadow:0 0 0 1000px var(--soft) inset!important;
+  -webkit-text-fill-color:var(--ink)!important;
+  transition:background-color 9999s ease-out 0s
+}
+#login .account-login-content input:autofill{
+  background-color:var(--soft)!important;
+  color:var(--ink)!important;
+  caret-color:var(--ink);
+  box-shadow:0 0 0 1000px var(--soft) inset!important;
+  -webkit-text-fill-color:var(--ink)!important
+}
+
+/* One shared home search entry across every theme. */
+body[data-view=home] > .utility-search{
+  position:fixed!important;
+  right:4.5%!important;
+  bottom:25px!important;
+  left:auto!important;
+  z-index:20;
+  margin:0!important
+}
+@media(max-width:760px){
+  body[data-view=home] > .utility-search{right:5%!important;bottom:24px!important}
+}
+body:not([data-view=home]) > .utility-search{display:none}
