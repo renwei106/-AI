@@ -5,6 +5,16 @@ const ids=['wechat','alipay'];
 const fields={wechat:['appId','mchId','serialNo','publicKeyId','apiV3Key','privateKey','publicKey','platformCertificate'],alipay:['appId','sellerId','privateKey','publicKey','appCertContent','alipayPublicCertContent','alipayRootCertContent']};
 const files={privateKey:'privateKeyPath',publicKey:'publicKeyPath',platformCertificate:'platformCertificatePath',appCertContent:'appCertPath',alipayPublicCertContent:'alipayPublicCertPath',alipayRootCertContent:'alipayRootCertPath'};
 const secret=k=>k==='apiV3Key'||Object.hasOwn(files,k);
+function normalizePrivateKey(value){
+ if(/-----BEGIN (?:RSA )?PRIVATE KEY-----/.test(value))return value;
+ const encoded=value.replace(/\s/g,'');
+ if(!/^[A-Za-z0-9+/]+={0,2}$/.test(encoded))return value;
+ const der=Buffer.from(encoded,'base64');
+ for(const type of ['pkcs8','pkcs1']){
+  try{return crypto.createPrivateKey({key:der,format:'der',type}).export({type:'pkcs8',format:'pem'}).toString();}catch{}
+ }
+ return value;
+}
 function view(filename){const c=loadConfig(filename),state=inspect(c);return {items:ids.map(id=>({id,enabled:c[id].enabled!==false,ready:state.providers[id].ready,updatedAt:c[id].updatedAt||null,values:Object.fromEntries(fields[id].filter(k=>!secret(k)).map(k=>[k,c[id][k]||''])),configured:Object.fromEntries(fields[id].filter(secret).map(k=>[k,!!c[id][k]]))})),publicBaseUrl:c.publicBaseUrl};}
 function save(id,input,filename){
  if(!ids.includes(id)||!input||typeof input!=='object')throw Error('支付方式无效');
@@ -14,7 +24,8 @@ function save(id,input,filename){
  const values=input.values||{};if(typeof values!=='object'||Array.isArray(values))throw Error('配置格式无效');
  const next={...(raw[id]||{})},pending=[];
  for(const [k,v] of Object.entries(values)){
-  if(!fields[id].includes(k)||typeof v!=='string'||v.length>16000)throw Error('配置字段无效');const text=v.trim();if(secret(k)&&!text)continue;
+  if(!fields[id].includes(k)||typeof v!=='string'||v.length>16000)throw Error('配置字段无效');let text=v.trim();if(secret(k)&&!text)continue;
+  if(k==='privateKey')text=normalizePrivateKey(text);
   if(text){
    const patterns={appId:id==='wechat'?/^wx[a-zA-Z0-9]{16}$/:/^\d{16}$/,mchId:/^\d{8,12}$/,sellerId:/^2088\d{12}$/,serialNo:/^[A-Fa-f0-9]{16,64}$/,publicKeyId:/^PUB_KEY_ID_\d+$/};
    if(patterns[k]&&!patterns[k].test(text))throw Error(k+' 格式不正确');
