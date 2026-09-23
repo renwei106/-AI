@@ -3,7 +3,7 @@
  'use strict';
  const API = '/api/shiyu/payments';
  let status = null, account = null, currentOrder = null, timer = null, submitting = false;
- let pendingRequest = null;
+ let pendingRequest = null, resultView = false, cashierUrl = '', cashierError = '', cashierLoading = false, cashierAttempt = 0;
  let quantities = Object.create(null);
  const originalCenter = openMemberCenter, originalOrders = openMemberOrders;
  const originalAgreement = simulatePayment;
@@ -30,9 +30,10 @@
   if(methods){ methods.hidden=!available.length; methods.querySelectorAll('[data-method-choice],[data-footer-pay]').forEach(item=>{if(!available.includes(item.dataset.methodChoice||item.dataset.footerPay))item.remove();}); }
   const plan = MEMBER_CONFIG.plans[selectedMemberPlan], recurring = plan?.auto || plan?.autoRenew;
   renderQuantity(d, plan, recurring);
+  renderMemberAccountSummary(d);
   button.disabled = freeMemberSelected || recurring || !status?.providers?.[memberPayment]?.ready || submitting;
   button.setAttribute('aria-busy', submitting ? 'true' : 'false');
-  d.querySelectorAll('[data-member-plan],[data-payment]').forEach(control => { control.disabled = submitting; });
+  d.querySelectorAll('[data-member-plan],[data-payment],[data-member-quantity],[data-member-quantity-value]').forEach(control => { control.disabled = submitting; });
   button.textContent = freeMemberSelected ? '免费使用' : recurring ? '连续订阅暂未开放' : !status?.providers?.[memberPayment]?.ready ? '支付暂未开放' : submitting ? '正在创建订单…' : '立即支付';
   button.onclick = purchase;
   if (note) {
@@ -53,20 +54,44 @@
   if (!checkout) return;
   checkout.querySelector('.checkout-quantity')?.remove();
   if (!plan?.id || freeMemberSelected || recurring || !Number.isInteger(plan.days) || plan.days < 1) return;
-  const max = Math.min(12, Math.floor(3660 / plan.days));
+  const max = 3;
   const quantity = Math.min(quantityFor(plan), max);
   quantities[plan.id] = quantity;
   const unit = plan.days >= 360 ? '年' : plan.days >= 80 ? '个季度' : '个月';
-  const options = Array.from({ length: max }, (_, index) => index + 1).map(value => `<option value="${value}"${value === quantity ? ' selected' : ''}>${value} ${unit}</option>`).join('');
+  const options = Array.from({ length: max }, (_, index) => index + 1).map(value => `<button type="button" data-member-quantity-value="${value}"${value === quantity ? ' aria-pressed="true"' : ''}>${value} ${unit}</button>`).join('');
   const control = document.createElement('label');
   control.className = 'checkout-quantity';
-  control.innerHTML = `购买数量 <select data-member-quantity aria-label="购买数量">${options}</select>`;
-  const methods = checkout.querySelector('.checkout-methods');
-  checkout.insertBefore(control, methods || checkout.querySelector('.checkout-legal') || checkout.firstChild);
+  control.innerHTML = `<span class="checkout-quantity-label">购买数量</span><span class="quantity-picker"><button type="button" class="quantity-picker-trigger" data-member-quantity aria-haspopup="listbox" aria-expanded="false">${quantity} ${unit}<span aria-hidden="true">⌃</span></button><span class="quantity-picker-menu" role="listbox" hidden>${options}</span></span>`;
+  const choice = checkout.querySelector('.checkout-choice');
+  checkout.insertBefore(control, choice || checkout.firstChild);
   const price = checkout.querySelector('.checkout-choice .checkout-price');
+  if (price && !choice.querySelector('.checkout-total-prefix')) {
+    const prefix = document.createElement('span');
+    prefix.className = 'checkout-total-prefix';
+    prefix.textContent = '订单总额';
+    price.before(prefix);
+  }
   if (price) price.textContent = '¥' + (Number(plan.price) * quantity).toFixed(2).replace(/\.00$/, '');
-  control.querySelector('select').onchange = event => { quantities[plan.id] = Number(event.currentTarget.value); pendingRequest = null; decorate(); };
+  const trigger = control.querySelector('[data-member-quantity]'), menu = control.querySelector('.quantity-picker-menu');
+  trigger.onclick = () => { menu.hidden = !menu.hidden; trigger.setAttribute('aria-expanded', String(!menu.hidden)); };
+  control.querySelectorAll('[data-member-quantity-value]').forEach(option => option.onclick = () => { quantities[plan.id] = Number(option.dataset.memberQuantityValue); pendingRequest = null; decorate(); });
  }
+ function renderMemberAccountSummary(dialog) {
+  const heading = dialog.querySelector('.member-heading');
+  if (!heading) return;
+  dialog.querySelector(':scope > .member-account-summary')?.remove();
+  const profile = typeof accountProfile === 'function' ? accountProfile() : {};
+  const entitlements = window.__shiyuUserEntitlements || account || {};
+  const expiry = entitlements.permanent ? '永久有效' : Number(entitlements.expiresAt) > Date.now()
+   ? '有效期至 ' + new Date(Number(entitlements.expiresAt)).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+   : '当前为免费版';
+  const identity = profile.email || profile.phone || profile.id || '当前登录账户';
+  const avatar = typeof avatarMarkup === 'function' ? avatarMarkup(profile.avatar) : '';
+  const summary = document.createElement('div');
+  summary.className = 'member-account-summary';
+  summary.innerHTML = `<span class="member-account-summary-avatar">${avatar}</span><span class="member-account-summary-copy"><b>${text(profile.name || '当前用户')}</b><small>${text(identity)} · ${text(expiry)}</small></span>`;
+  heading.insertAdjacentElement('afterend', summary);
+}
  openMemberCenter = function () { originalCenter(); decorate(); void refreshStatus(); };
  async function refreshAccount() {
   await window.refreshShiyuMembership?.();
@@ -109,8 +134,8 @@
   if (!button.disabled) purchase();
  }, true);
  function stopPolling() { clearTimeout(timer); timer = null; }
- function showOrder(order) {
-  stopPolling(); currentOrder = order;
+ function showOrder(order, showResult = false) {
+  stopPolling(); currentOrder = order; resultView = showResult; cashierUrl = ''; cashierError = ''; cashierLoading = false; cashierAttempt++;
   const d = memberDialog('payment-order', order.provider === 'wechat' ? '微信扫码支付' : '支付宝支付');
   d.classList.add('payment-order-dialog');
   d.addEventListener('close', stopPolling, { once: true });
@@ -128,18 +153,26 @@
   if (order.status === 'paid') {
    content += `<h3 class="payment-confirmed">支付成功</h3><p class="member-sub">${order.fulfillment === 'pending' ? '会员权益正在同步，请稍后刷新查看' : order.memberExpiresAt ? '会员有效期至 ' + text(new Date(order.memberExpiresAt).toLocaleString()) : '永久会员权益保持有效'}</p>`;
    pendingRequest = null;
-  } else if (order.status === 'closed') content += '<p class="member-sub">订单已关闭，请返回会员中心重新下单。</p>';
-  else if (expired) content += '<p class="member-sub">支付时间已结束。若你已完成付款，请查询支付结果。</p>';
+  } else if (order.status === 'closed') content += '<p class="member-sub">支付已取消，请返回会员中心重新选择。</p>';
+  else if (resultView) content += '<p class="member-sub">正在确认支付结果，请稍候。</p>';
+  else if (expired) content += '<p class="member-sub">二维码已过期，请返回会员中心重新发起支付。</p>';
   else if (order.checkout?.kind === 'qr') content += `<img class="payment-qr" width="264" height="264" src="${text(order.checkout.image)}" alt="微信支付二维码"><p class="member-sub">使用微信扫一扫完成付款</p>`;
-  else if (order.checkout?.kind === 'redirect') content += `<a class="member-primary payment-cashier" href="${text(order.checkout.url)}" target="_blank" rel="noopener noreferrer">前往支付宝付款</a><p class="member-sub">付款后返回此页查看结果</p>`;
-  else content += '<p class="member-sub">订单已记录，正在确认支付渠道状态。</p>';
+  else if (order.checkout?.kind === 'embedded-qr') content += cashierUrl ? `<iframe class="payment-qr payment-alipay-frame" width="264" height="300" src="${text(cashierUrl)}" title="支付宝支付二维码"></iframe><p class="member-sub">使用支付宝扫一扫完成付款，支付结果将自动更新</p><button type="button" class="payment-retry" data-payment-retry>二维码未显示？重新加载</button>` : `<div class="payment-qr-placeholder" role="status">${text(cashierError || '正在加载支付宝二维码…')}</div>${cashierError ? '<button type="button" class="payment-retry" data-payment-retry>重新加载二维码</button>' : ''}`;
+  else content += '<p class="member-sub">正在准备支付二维码，请稍候。</p>';
   if (error) content += `<p class="member-policy" role="status">${text(error)}</p>`;
-  content += `<p class="member-policy payment-order-number">订单号：${text(order.id)}</p>`;
-  if (!['paid', 'closed'].includes(order.status)) content += '<button class="member-primary" data-payment-query>查询支付结果</button>';
-  else content += '<button class="member-primary" data-payment-done>返回会员中心</button>';
+  if (!['paid', 'closed'].includes(order.status)) content += '<button class="member-primary payment-query" data-payment-query>查询付款结果</button>';
+  if (['paid', 'closed'].includes(order.status) || expired) content += '<button class="member-primary" data-payment-done>返回会员中心</button>';
   body.innerHTML = content;
   body.querySelector('[data-payment-query]')?.addEventListener('click', () => poll(true));
+  body.querySelector('[data-payment-retry]')?.addEventListener('click', () => { cashierUrl = ''; cashierError = ''; paintOrder(); });
+  if (order.checkout?.kind === 'embedded-qr' && !cashierUrl && !cashierError && !cashierLoading && !expired && !resultView && order.status !== 'paid') void loadCashier(order.id);
   body.querySelector('[data-payment-done]')?.addEventListener('click', () => { d.close(); pendingRequest = null; openMemberCenter(); });
+ }
+ async function loadCashier(id) {
+  cashierLoading = true; const attempt = ++cashierAttempt;
+  try { const data = await request('/orders/' + id + '/cashier'); if (attempt !== cashierAttempt || currentOrder?.id !== id) return; cashierUrl = data.url; }
+  catch (error) { if (attempt !== cashierAttempt || currentOrder?.id !== id) return; cashierError = error.message; }
+  finally { if (attempt === cashierAttempt && currentOrder?.id === id) { cashierLoading = false; paintOrder(); } }
  }
  function pollSoon() {
   if (currentOrder && !['paid', 'closed'].includes(currentOrder.status) && document.querySelector('#payment-order')?.open) timer = setTimeout(() => poll(false), 4500);
@@ -151,9 +184,9 @@
   try {
    const data = await request('/orders/' + id + '/query', { method: 'POST' });
    if (currentOrder?.id !== id) return;
-   const changed = data.order.status !== currentOrder.status || (!currentOrder.checkout && data.order.checkout);
+   const changed = data.order.status !== currentOrder.status || data.order.checkout?.kind !== currentOrder.checkout?.kind || data.order.expiresAt <= Date.now();
    currentOrder = data.order;
-   if (changed || manual) paintOrder();
+   if (changed || manual) paintOrder(manual && !['paid','closed'].includes(currentOrder.status) ? '暂未确认付款成功；若已付款，请稍候再次查询，请勿重复付款。' : '');
    if (currentOrder.status === 'paid') await refreshAccount();
   } catch (error) { if (manual && currentOrder?.id === id) paintOrder(error.message); }
   pollSoon();
@@ -178,11 +211,17 @@
   decorate(); await refreshAccount();
   const id = new URLSearchParams(location.search).get('paymentOrder');
   if (id && /^SY[a-f0-9]{28}$/.test(id)) {
-   try { const data = await request('/orders/' + id); showOrder(data.order); } catch (error) { toast(error.message); }
+   if (window.parent !== window) { window.parent.postMessage({ type: 'shiyu-payment-return', orderId: id }, location.origin); return; }
+   try { const data = await request('/orders/' + id); showOrder(data.order, true); } catch (error) { toast(error.message); }
   }
  }
- async function refreshStatus(){const before=JSON.stringify(status);try{status=await request('/status');}catch{status={enabled:false,providers:{}};}if(before!==JSON.stringify(status)&&document.querySelector('#member-center')?.open){originalCenter();decorate();}}
+ async function refreshStatus(){const before=JSON.stringify(status);try{status=await request('/status');}catch{return;}if(before!==JSON.stringify(status)&&document.querySelector('#member-center')?.open){if(!document.querySelector('#payment-order')?.open)originalCenter();decorate();}}
  window.addEventListener('focus',()=>{refreshStatus();refreshAccount();});
  setInterval(()=>{if(!document.hidden)refreshStatus();},5000);
+ window.addEventListener('message', event => {
+  const frame = document.querySelector('#payment-order .payment-alipay-frame');
+  if (event.origin !== location.origin || event.source !== frame?.contentWindow || event.data?.type !== 'shiyu-payment-return' || event.data.orderId !== currentOrder?.id) return;
+  resultView = true; paintOrder(); poll(true);
+ });
  initialize();
 })();

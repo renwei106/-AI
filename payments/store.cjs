@@ -27,20 +27,21 @@ class PaymentStore {
     if (!columns.has('plan_snapshot')) this.db.exec('ALTER TABLE orders ADD COLUMN plan_snapshot TEXT');
     if (!columns.has('fulfillment_state')) this.db.exec("ALTER TABLE orders ADD COLUMN fulfillment_state TEXT NOT NULL DEFAULT 'legacy'");
   }
+  expirePending(now = Date.now()) { this.db.prepare("UPDATE orders SET status='expired' WHERE status IN ('created','pending','unknown') AND expires_at<=?").run(now); }
   get(id) { return this.db.prepare('SELECT * FROM orders WHERE id=?').get(id); }
   find(userId, requestId) { return this.db.prepare('SELECT * FROM orders WHERE user_id=? AND request_id=?').get(userId, requestId); }
   active(userId, provider, planId, quantity, now = Date.now()) {
     return this.db.prepare("SELECT * FROM orders WHERE user_id=? AND provider=? AND plan_id=? AND quantity=? AND status IN ('created','pending','unknown') AND expires_at>? ORDER BY created_at DESC LIMIT 1")
       .get(userId, provider, planId, quantity, now);
   }
-  list(userId) { return this.db.prepare('SELECT * FROM orders WHERE user_id=? ORDER BY created_at DESC LIMIT 100').all(userId); }
+  list(userId) { return this.db.prepare("SELECT * FROM orders WHERE user_id=? AND status='paid' ORDER BY paid_at DESC LIMIT 100").all(userId); }
   create({ userId, requestId, provider, plan, quantity = 1, amount, days = plan.days, baseExpiry = 0 }) {
     const id = 'SY' + crypto.randomBytes(14).toString('hex'), now = Date.now();
     this.db.prepare(`INSERT INTO orders (id,user_id,request_id,provider,plan_id,plan_name,quantity,amount,days,status,created_at,expires_at,base_expiry,plan_snapshot,fulfillment_state) VALUES (?,?,?,?,?,?,?,?,?,'created',?,?,?,?,'pending')`)
       .run(id, userId, requestId, provider, plan.id, plan.name, quantity, amount, days, now, now + 30 * 60_000, baseExpiry, JSON.stringify(plan));
     return this.get(id);
   }
-  checkout(id, data) { this.db.prepare("UPDATE orders SET checkout=?,status='pending' WHERE id=? AND status IN ('created','unknown')").run(JSON.stringify(data), id); return this.get(id); }
+  checkout(id, data) { this.db.prepare("UPDATE orders SET checkout=?,status='pending' WHERE id=? AND status IN ('created','unknown','pending')").run(JSON.stringify(data), id); return this.get(id); }
   unknown(id) { this.db.prepare("UPDATE orders SET status='unknown' WHERE id=? AND status='created'").run(id); }
   checked(id) { this.db.prepare('UPDATE orders SET last_checked_at=? WHERE id=?').run(Date.now(), id); }
   closed(id) { this.db.prepare("UPDATE orders SET status='closed' WHERE id=? AND status!='paid'").run(id); return this.get(id); }

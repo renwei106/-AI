@@ -45,14 +45,15 @@
   table.innerHTML = `<thead><tr><th>功能权益</th>${plans.map(plan => `<th>${esc(plan.name)}</th>`).join('')}</tr></thead><tbody>${rows.map(([group, name, summary]) => {
    const key = resourceKeys[name], expanded = expandedBenefits.has(key);
    const toggle = key ? `<button type="button" class="member-benefit-toggle" data-benefit-toggle="${key}" aria-expanded="${expanded}" aria-label="${expanded ? '收起' : '展开'}${name === '常用卡片' ? '常用卡片配色' : name}明细">${expanded ? '收起' : '展开'}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></button>` : '';
-   const summaryRow = `<tr${key ? ` data-benefit-key="${key}"` : ''}><th scope="row"><span class="benefit-category">${esc(group)}</span><span class="member-benefit-title">${esc(name)}${toggle}</span></th>${plans.map(plan => `<td class="${plan.id === selectedId ? 'selected-entitlement' : ''}">${esc(summary(plan))}</td>`).join('')}</tr>`;
-   if (!key || !expanded) return summaryRow;
+   const groupRow = group ? `<tr class="member-benefit-group"><th scope="rowgroup">${esc(group)}</th>${plans.map(() => '<td aria-hidden="true"></td>').join('')}</tr>` : '';
+   const summaryRow = `<tr${key ? ` data-benefit-key="${key}"` : ''}><th scope="row"><span class="member-benefit-indent" aria-hidden="true"></span><span class="member-benefit-title">${esc(name)}${toggle}</span></th>${plans.map(plan => `<td class="${plan.id === selectedId ? 'selected-entitlement' : ''}">${esc(summary(plan))}</td>`).join('')}</tr>`;
+   if (!key || !expanded) return groupRow + summaryRow;
    const options = resourceOptions(key);
    const details = options.map(option => `<tr class="member-resource-detail" data-benefit-detail="${key}" data-resource-id="${attr(option.id)}"><th scope="row"><span class="member-resource-label"><span class="member-resource-preview" data-resource-preview aria-hidden="true"></span><span>${esc(option.name)}</span></span></th>${plans.map(plan => {
     const included = includesResource(plan, key, option.id), label = included ? '包含' : '不包含';
     return `<td data-included="${included}" class="${plan.id === selectedId ? 'selected-entitlement' : ''}"><span class="member-resource-check" role="img" aria-label="${label}" title="${label}">${included ? '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8 3 3 7-7"/></svg>' : ''}</span></td>`;
    }).join('')}</tr>`).join('');
-   return summaryRow + (details || `<tr class="member-resource-detail"><th scope="row">暂无可用项目</th>${plans.map(() => '<td>—</td>').join('')}</tr>`);
+   return groupRow + summaryRow + (details || `<tr class="member-resource-detail"><th scope="row">暂无可用项目</th>${plans.map(() => '<td>—</td>').join('')}</tr>`);
   }).join('')}</tbody>`;
   table.querySelectorAll('tr').forEach(row => row.style.gridTemplateColumns = columns);
   table.querySelectorAll('[data-benefit-detail]').forEach(row => {
@@ -73,6 +74,12 @@
  });
  function syncMemberHeader() {
   const heading = document.querySelector('#member-center[open] .member-heading'); if (!heading) return;
+  const breadcrumb = heading.querySelector(':scope > span');
+  if (breadcrumb && !breadcrumb.querySelector('.member-home-link')) {
+   const link = document.createElement('a'); link.className = 'member-home-link'; link.href = '/'; link.textContent = '拾隅 / 会员中心';
+   link.onclick = event => { if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return; event.preventDefault(); document.querySelector('#member-center').close(); const url = new URL(location.href); url.searchParams.delete('page'); url.searchParams.delete('paymentOrder'); history.replaceState(history.state, '', url); view = 'home'; render(); window.scrollTo({ top: 0, behavior: 'instant' }); };
+   breadcrumb.replaceChildren(link);
+  }
   const current = window.__shiyuUserEntitlements; let message = '';
   if (current?.ready && current.member) {
    if (current.permanent) message = '永久会员 · 永久有效';
@@ -87,7 +94,7 @@
   const rail = d.querySelector('.member-plans'), table = d.querySelector('.member-comparison table'), checkout = d.querySelector('.member-checkout'); if (!rail || !table) return;
   if (!plans.length) { rail.textContent = loading ? '正在读取会员套餐…' : window.__shiyuMemberCatalog?.ready ? '暂无上架套餐' : '套餐暂时无法加载，请稍后重试。'; table.replaceChildren(); if (checkout) checkout.hidden = true; return; }
   const paid = plans.filter(plan => plan.id !== 'free'); if (checkout) checkout.hidden = !paid.length;
-  selectedId = paid.some(plan => plan.id === selectedId) ? selectedId : paid[0]?.id || null;
+  selectedId = paid.some(plan => plan.id === selectedId) ? selectedId : paid.find(plan => plan.isDefault)?.id || paid[0]?.id || null;
   rail.querySelectorAll('button').forEach(button => button.remove());
   if (!rail.querySelector('.plan-label')) rail.innerHTML = '<div class="plan-label"><strong>可选套餐</strong><small>选择与你相伴的时光</small></div>';
   const columns = `var(--member-label-width, 280px) repeat(${plans.length},minmax(180px,1fr))`;
@@ -105,7 +112,7 @@
   const statusNote = d.querySelector('.member-status>span:last-child'); if (statusNote) statusNote.textContent = '具体权益与有效期以所选套餐为准';
   const subtitle = d.querySelector(':scope > .member-sub'); if (subtitle) subtitle.textContent = '更多主题与收藏空间，选择适合你的相伴方式。';
  }
- openMemberCenter = function () { original(); paint(); };
+ openMemberCenter = function () { if (!document.querySelector('#member-center')?.open) selectedId = plans.find(plan => plan.id !== 'free' && plan.isDefault)?.id || plans.find(plan => plan.id !== 'free')?.id || null; original(); paint(); };
  const originalHeader = updateHeader; updateHeader = function (...args) { const result = originalHeader.apply(this, args); syncMemberHeader(); return result; };
  async function refresh() {
   if (refreshing) return refreshing;
@@ -114,7 +121,7 @@
     const response = await fetch('/api/shiyu/plans', { cache: 'no-store' }); if (!response.ok) throw Error();
     const data = await response.json(), next = (data.items || []).filter(plan => plan.enabled !== false); loading = false;
     if (JSON.stringify(plans) === JSON.stringify(next) && window.__shiyuMemberCatalog?.ready) return;
-    plans = next; const paid = plans.filter(plan => plan.id !== 'free'); selectedId = paid.some(plan => plan.id === selectedId) ? selectedId : paid[0]?.id || null;
+    plans = next; const paid = plans.filter(plan => plan.id !== 'free'); selectedId = paid.some(plan => plan.id === selectedId) ? selectedId : paid.find(plan => plan.isDefault)?.id || paid[0]?.id || null;
     if (paid.length) { MEMBER_CONFIG.plans = paid.map(plan => ({ ...plan, auto: plan.autoRenew, saving: plan.cycle })); selectedMemberPlan = Math.max(0, paid.findIndex(plan => plan.id === selectedId)); freeMemberSelected = false; }
     publish(); if (document.querySelector('#member-center')?.open) { if (paid.length) openMemberCenter(); else paint(); }
    } catch { loading = false; if (!plans.length) publish(false); paint(); } finally { refreshing = null; }
@@ -122,4 +129,29 @@
  }
  window.addEventListener('shiyu-member-resources', paint); window.addEventListener('shiyu-user-entitlements', syncMemberHeader); window.addEventListener('focus', refresh);
  paint(); void refresh(); setInterval(() => { if (!document.hidden) void refresh(); }, 15000);
+})();
+
+/* Membership has an administrator-owned palette, independent of personal themes. */
+(() => {
+ const style = document.createElement('style'); style.id='member-admin-palette'; document.head.append(style);
+ const rgb = hex => [1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
+ const mix = (a,b,t) => a.map((v,i)=>Math.round(v*(1-t)+b[i]*t));
+ const css = a => `rgb(${a.join(',')})`;
+ const luminance = a => a.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4}).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0);
+ function palette(color,dark){
+  let accent=rgb(color); const white=[255,255,255],black=[0,0,0];
+  if(dark) { while(luminance(accent)<.38) accent=mix(accent,white,.12); }
+  else { while(luminance(accent)>.18) accent=mix(accent,black,.12); }
+  let selected=rgb(color); while(luminance(selected)>.18) selected=mix(selected,black,.12);
+  const surface=mix(rgb(color),dark?[23,26,29]:[255,255,255],dark?.88:.97);
+  return `--accent-hover:${css(selected)};--member-selected:${css(selected)};--accent:${css(accent)};--member-accent:${css(accent)};--bg:${css(surface)};--surface:${css(surface)};--ink:${dark?'#f3f4f1':'#252b27'};--muted:${dark?'#b8c0ba':'#606960'};--selection-contrast:${dark?'#111811':'#fff'};--soft:${css(mix(surface,accent,.09))};--line:${css(mix(surface,accent,.22))};--accent-soft:${css(mix(surface,accent,.12))};--accent-soft-strong:${css(mix(surface,accent,.2))};`;
+ }
+ function apply(color){
+  if(!/^#[0-9a-f]{6}$/i.test(color))return;
+  style.textContent=`body .membership-dialog{${palette(color,false).replaceAll(";"," !important;")}}body[data-dark="true"] .membership-dialog{${palette(color,true).replaceAll(";"," !important;")}}body #member-center.member-polished .member-plans>button[data-published-plan][aria-pressed=true]{background:var(--member-selected);color:#fff}`;
+ }
+ apply('#46634e');
+ let pending=false;
+ async function refresh(){if(pending)return;pending=true;try{const r=await fetch('/api/shiyu/operations',{cache:'no-store'});if(r.ok)apply((await r.json()).membershipColor)}catch{}finally{pending=false}}
+ void refresh();window.addEventListener('focus',refresh);setInterval(()=>{if(!document.hidden)void refresh()},15000);
 })();

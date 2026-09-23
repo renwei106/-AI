@@ -42,7 +42,7 @@ function createPaymentHandler(options = {}) {
     if (!Array.isArray(data.items)) throw new PaymentError('套餐配置无效', 'CATALOG_INVALID', 503);
     return data.items;
   }) });
-  const publicStatus = () => ({ enabled: config.enabled, mode: config.mode, recurringEnabled: false, providers: Object.fromEntries(['wechat', 'alipay'].map(p => [p, { enabled: config[p].enabled !== false, ready: config.enabled && config[p].enabled !== false && !!providers[p], kind: p === 'wechat' ? 'qr' : 'redirect' }])) });
+  const publicStatus = () => ({ enabled: config.enabled, mode: config.mode, recurringEnabled: false, providers: Object.fromEntries(['wechat', 'alipay'].map(p => [p, { enabled: config[p].enabled !== false, ready: config.enabled && config[p].enabled !== false && !!providers[p], kind: p === 'wechat' ? 'qr' : 'embedded-qr' }])) });
   let revision = '';
   function reloadConfig() {
     if (options.config || options.providers) return;
@@ -110,6 +110,13 @@ function createPaymentHandler(options = {}) {
         json(res, 201, { order: await service.create(user, JSON.parse(await readBody(req))) }); return true;
       }
       const order = url.pathname.match(/^\/api\/shiyu\/payments\/orders\/(SY[a-f0-9]{28})$/);
+      const cashier = url.pathname.match(/^\/api\/shiyu\/payments\/orders\/(SY[a-f0-9]{28})\/cashier$/);
+      if (cashier && req.method === 'GET') {
+        const owned = service.owned(user, cashier[1]);
+        if (owned.provider !== 'alipay' || !owned.checkout || owned.expires_at <= Date.now() || ['paid','closed','expired'].includes(owned.status)) throw new PaymentError('本次支付已结束，请返回会员中心', 'CHECKOUT_EXPIRED', 409);
+        const checkout = await service.upgradeCheckout(publicOrder(owned));
+        json(res, 200, { url: await service.provider('alipay').cashier(checkout.checkout.url) }); return true;
+      }
       if (order && req.method === 'GET') { json(res, 200, { order: publicOrder(service.owned(user, order[1])) }); return true; }
       const query = url.pathname.match(/^\/api\/shiyu\/payments\/orders\/(SY[a-f0-9]{28})\/query$/);
       if (query && req.method === 'POST') { json(res, 200, { order: await service.query(user, query[1]) }); return true; }
@@ -124,7 +131,8 @@ function createPaymentHandler(options = {}) {
     }
     return true;
   }
-  const recovery = setInterval(() => service.retryFulfillment(), 30000); recovery.unref();
+  store.expirePending();
+  const recovery = setInterval(() => { store.expirePending(); service.retryFulfillment(); }, 30000); recovery.unref();
   handler.close = () => { clearInterval(recovery); store.close(); };
   handler.service = service;
   return handler;

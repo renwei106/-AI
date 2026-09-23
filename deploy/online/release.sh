@@ -62,6 +62,11 @@ done
 systemctl is-active --quiet shiyu-admin.service shiyu-preview.service
 curl -fsS http://127.0.0.1:4318/api/shiyu/operations -o "/tmp/shiyu-operations-$release_id.json"
 grep -q 'corner' "/tmp/shiyu-operations-$release_id.json"
+grep -q 'membershipColor' "/tmp/shiyu-operations-$release_id.json"
+curl -fsS http://127.0.0.1:4318/api/shiyu/plans -o "/tmp/shiyu-plans-$release_id.json"
+grep -q 'isDefault' "/tmp/shiyu-plans-$release_id.json"
+curl -fsS http://127.0.0.1:4318/api/shiyu/agreements -o "/tmp/shiyu-agreements-$release_id.json"
+grep -q 'membership' "/tmp/shiyu-agreements-$release_id.json"
 curl -fsS -H 'Cookie: shiyu-language=en' http://127.0.0.1:4318/ -o "/tmp/shiyu-home-$release_id.html"
 grep -q 'earth-theme.js' "/tmp/shiyu-home-$release_id.html"
 curl -fsS http://127.0.0.1:5175/api/shiyu/i18n/public -o "/tmp/shiyu-languages-$release_id.json"

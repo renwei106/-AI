@@ -90,6 +90,21 @@ class WechatProvider {
 }
 
 class AlipayProvider {
+  async cashier(url, { fetchImpl = fetch } = {}) {
+    for (let step = 0; step < 5; step++) {
+      const target = new URL(url);
+      if (target.protocol !== 'https:' || !['openapi.alipay.com', 'unitradeprod.alipay.com', 'excashier.alipay.com', 'cashier.alipay.com'].includes(target.hostname)) fail('支付宝收银台地址无效', 'INVALID_RESPONSE', 502);
+      if (['excashier.alipay.com', 'cashier.alipay.com'].includes(target.hostname)) return target.href;
+      let response;
+      try { response = await fetchImpl(target, { redirect: 'manual', signal: AbortSignal.timeout(10000) }); }
+      catch { throw new PaymentError('支付宝二维码暂时无法加载，请重试', 'PROVIDER_UNAVAILABLE'); }
+      const location = response.headers.get('location');
+      await response.body?.cancel();
+      if (![301,302,303,307,308].includes(response.status) || !location) fail('支付宝未返回二维码收银台，请重试', 'INVALID_RESPONSE', 502);
+      url = new URL(location, target).href;
+    }
+    fail('支付宝收银台跳转异常，请重试', 'INVALID_RESPONSE', 502);
+  }
   constructor(config, { sdk } = {}) {
     this.config = config;
     if (sdk) { this.sdk = sdk; return; }
@@ -101,11 +116,11 @@ class AlipayProvider {
     const url = this.sdk.pageExec('alipay.trade.page.pay', 'GET', {
       notifyUrl: base + '/api/shiyu/payments/notify/alipay', returnUrl: base + '/?page=membership&paymentOrder=' + order.id,
       bizContent: { outTradeNo: order.id, totalAmount: (order.amount / 100).toFixed(2), subject: '拾隅 · ' + order.plan_name,
-        productCode: 'FAST_INSTANT_TRADE_PAY', timeoutExpress: '30m' },
+        productCode: 'FAST_INSTANT_TRADE_PAY', timeoutExpress: '30m', qrPayMode: '4', qrcodeWidth: '264' },
     });
     const parsed = new URL(url);
     if (parsed.protocol !== 'https:' || parsed.hostname !== 'openapi.alipay.com') fail('支付宝收银台地址无效', 'INVALID_RESPONSE', 502);
-    return { kind: 'redirect', url };
+    return { kind: 'embedded-qr', url };
   }
   async query(order) {
     let data;

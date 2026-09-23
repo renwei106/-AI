@@ -32,9 +32,9 @@ class PaymentService {
   }
   async createOnce(user, input) {
     const existing = this.existing(user, input);
-    if (existing) return existing;
+    if (existing) return this.upgradeCheckout(existing);
     const active = this.store.active(user.id, input.provider, input.planId, input.quantity);
-    if (active) return publicOrder(active);
+    if (active) return this.upgradeCheckout(publicOrder(active));
     const provider = this.provider(input.provider);
     if (!this.store.rate('create:' + user.id, 10, 60_000) || !this.store.rate('daily:' + user.id, 100, 86_400_000)) reject('操作过于频繁，请稍后再试', 'RATE_LIMITED', 429);
     const plans = await this.getPlans();
@@ -52,6 +52,12 @@ class PaymentService {
     try { return publicOrder(this.store.checkout(order.id, await provider.create(order, this.config.publicBaseUrl))); }
     catch (error) { this.store.unknown(order.id); error.orderId = order.id; throw error; }
   }
+  async upgradeCheckout(order) {
+    if (order.provider !== 'alipay' || order.checkout?.kind !== 'redirect' || order.status === 'paid' || order.status === 'closed') return order;
+    const stored = this.store.get(order.id);
+    const checkout = await this.provider('alipay').create(stored, this.config.publicBaseUrl);
+    return publicOrder(this.store.checkout(order.id, checkout));
+  }
   owned(user, id) {
     const order = this.store.get(id);
     if (!order || order.user_id !== user.id) reject('订单不存在', 'ORDER_NOT_FOUND', 404);
@@ -59,6 +65,10 @@ class PaymentService {
   }
   async query(user, id) {
     let order = this.owned(user, id);
+    if (order.provider === 'alipay' && order.checkout && JSON.parse(order.checkout).kind === 'redirect' && !['paid','closed'].includes(order.status) && order.expires_at > Date.now()) {
+      await this.upgradeCheckout(publicOrder(order));
+      order = this.owned(user, id);
+    }
     if (order.status === 'paid') return publicOrder(this.fulfill(order));
     if (order.status === 'closed' || Date.now() - order.last_checked_at < 4000) return publicOrder(order);
     if (this.querying.has(id)) return this.querying.get(id);

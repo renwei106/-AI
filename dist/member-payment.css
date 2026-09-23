@@ -1,12 +1,101 @@
 #payment-order.payment-order-dialog { width: min(540px, calc(100vw - 32px)); padding: 28px 34px; }
+.membership-dialog:not(#member-center) > .member-heading { height: 0 !important; min-height: 0; padding: 0 !important; margin: 0; }
+.membership-dialog:not(#member-center) > .member-heading > span { display: none; }
+.membership-dialog:not(#member-center) > .member-heading > [data-member-close] { position: absolute; top: 24px; right: 24px; }
+.membership-dialog:not(#member-center) > h2 { margin: 0 44px 18px 0; }
+#member-center .member-home-link { color: inherit; font: inherit; letter-spacing: inherit; text-decoration: none; cursor: pointer; }
+#member-center .member-home-link:hover { text-decoration: underline; text-underline-offset: 4px; }
 .payment-order-dialog .payment-order-body { text-align: center; }
 .payment-order-dialog .payment-qr { display: block; margin: 18px auto; width: 264px; max-width: 100%; height: auto; border-radius: 8px; }
+.payment-order-dialog .payment-alipay-frame { height: 300px; border: 0; background: #fff; }
+.payment-order-dialog .member-order-summary { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 16px; padding: 12px 16px; margin: 14px 0; text-align: left; }
+.payment-order-dialog .member-order-summary h3 { margin: 0; font-size: 14px; }
+.payment-order-dialog .member-order-summary strong { grid-column: 2; grid-row: 1 / 3; font-size: 24px; }
+.payment-order-dialog .member-order-summary p { margin: 0; font-size: 12px; }
+.payment-order-dialog .payment-qr-placeholder { display: grid; place-items: center; min-height: 264px; margin: 18px auto; max-width: 264px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.payment-order-dialog .payment-retry { display: block; margin: 8px auto; color: var(--accent); font-size: 12px; }
+.payment-order-dialog .payment-query { margin-top: 14px; }
 .payment-order-dialog .payment-cashier { display: inline-flex; text-decoration: none; align-items: center; justify-content: center; margin: 16px 0 0; }
 .payment-order-dialog .payment-order-number { overflow-wrap: anywhere; font-size: 12px; }
 .payment-order-dialog .payment-confirmed { color: var(--accent); }
-.checkout-quantity { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); white-space: nowrap; }
-.checkout-quantity select { padding: 7px 28px 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); color: var(--ink); font: inherit; }
+#member-center .checkout-legal { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+#member-center.member-polished { --member-label-width: 230px; }
+#member-center.member-polished .member-plans > button[data-published-plan] { position: relative; }
+#member-center.member-polished .member-plans > button[data-published-plan][aria-pressed=true] { background: color-mix(in srgb, var(--accent) 85%, #000); color: #fff; border: 0; box-shadow: none; }
+#member-center.member-polished .member-plans > button[data-published-plan][aria-pressed=true] :is(small, h3, strong, em, del, span) { color: #fff !important; }
+#member-center.member-polished .member-plans > button[data-published-plan][aria-pressed=true]::after { content: '✓'; position: absolute; top: 10px; right: 10px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--selection-contrast, #fff); font: 700 14px/1 Arial, sans-serif; }
+#member-center .checkout-quantity { display: inline-flex; align-items: flex-end; gap: 7px; height: 42px; font-size: 11px; color: var(--muted); white-space: nowrap; }
+#member-center .checkout-quantity-label { padding-bottom: 1px; }
+#member-center.member-polished .checkout-choice .checkout-total-prefix { font-size: 11px; font-weight: 400; color: var(--muted); align-self: flex-end; line-height: 20px; }
+#member-center .quantity-picker { position: relative; display: inline-flex; align-items: center; height: 100%; }
+#member-center .quantity-picker-trigger { display: inline-flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 82px; height: 42px; padding: 0 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--soft); color: var(--ink); font: inherit; }
+#member-center .quantity-picker-menu { position: absolute; z-index: 8; right: 0; bottom: calc(100% + 8px); display: grid; min-width: 100%; padding: 5px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); box-shadow: 0 8px 24px #0002; }
+#member-center .quantity-picker-menu[hidden] { display: none; }
+#member-center .quantity-picker-menu button { min-height: 34px; padding: 0 9px; border-radius: 5px; color: var(--ink); font: inherit; font-size: 11px; text-align: left; white-space: nowrap; }
+#member-center .quantity-picker-menu button[aria-pressed=true] { background: var(--soft); }
+#member-center.member-aligned .member-heading { margin-bottom: 12px; }
+#member-center > .member-account-summary { display: flex; align-items: center; gap: 9px; width: fit-content; min-width: 0; margin: 0 0 22px; padding: 7px 14px 7px 7px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+#member-center .member-account-summary-avatar { display: grid; place-items: center; flex: 0 0 30px; width: 30px; height: 30px; overflow: hidden; border-radius: 50%; background: var(--soft); }
+#member-center .member-account-summary-avatar img, #member-center .member-account-summary-avatar svg { width: 100%; height: 100%; object-fit: cover; }
+#member-center .member-account-summary-copy { display: grid; gap: 3px; min-width: 0; line-height: 1.1; }
+#member-center .member-account-summary-copy b, #member-center .member-account-summary-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#member-center .member-account-summary-copy b { font-size: 12px; font-weight: 500; }
+#member-center .member-account-summary-copy small { max-width: 260px; color: var(--muted); font-size: 10px; }
+#member-center .payment-alipay-mark { display: inline-grid; place-items: center; width: 20px; height: 20px; flex: 0 0 20px; border-radius: 5px; background: #1677ff; color: #fff; font-family: Arial, sans-serif; font-size: 15px; font-weight: 700; line-height: 1; }
+#member-center .payment-choice-menu button > svg { width: 20px !important; height: 20px !important; flex: 0 0 20px; }
+#member-center .payment-choice-menu .payment-alipay-mark { width: 20px; height: 20px; flex-basis: 20px; }
+#member-center.member-polished .benefit-category { width: auto; flex: 0 0 auto; }
+#member-center.member-polished .benefit-category:empty { width: 24px; flex-basis: 24px; }
+#member-center.member-polished .member-benefit-group th { grid-column: 1 / -1; min-height: 36px; padding: 14px 8px 4px; color: var(--ink); font-size: 12px; font-weight: 500; }
+#member-center.member-polished .member-benefit-group td { display: none !important; }
+#member-center.member-polished .member-benefit-indent { width: 24px; flex: 0 0 24px; }
+#member-invite-dialog .invite-share-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 18px; align-items: end; margin: 22px 0 26px; padding: 17px 18px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+#member-invite-dialog .invite-share-card small { color: var(--muted); font-size: 10px; letter-spacing: .08em; }
+#member-invite-dialog .invite-share-card p { margin: 6px 0 0; color: var(--ink); font-size: 13px; line-height: 1.65; }
+#member-invite-dialog .invite-share-card input { grid-column: 1 / -1; width: 100%; min-width: 0; box-sizing: border-box; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--muted); font-size: 11px; }
+#member-invite-dialog .invite-share-actions { display: flex; grid-column: 2; grid-row: 1; gap: 8px; }
+#member-invite-dialog .invite-share-actions button { padding: 9px 12px; border-radius: 7px; font-size: 11px; white-space: nowrap; }
+#member-invite-dialog .invite-share-actions button:not(.member-primary) { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+@media (min-width: 900px) {
+#member-center.member-polished.membership-page { padding-bottom: 100px; }
+#member-center.member-polished .member-checkout { grid-template-columns: minmax(210px, 1fr) auto auto auto auto; gap: 16px; align-items: center; align-content: center; }
+#member-center.member-polished.membership-page .member-checkout { position: fixed; z-index: 50; inset: auto 0 0; width: 100%; min-width: 0; min-height: 84px; box-sizing: border-box; margin: 0; padding: 20px max(30px, calc((100vw - 1420px)/2)) !important; background: var(--surface); isolation: isolate; }
+#member-center.member-polished .member-checkout > * { align-self: center; margin-top: 0; margin-bottom: 0; }
+#member-center.member-polished .checkout-quantity { align-items: center; padding: 0; line-height: 20px; }
+#member-center.member-polished .checkout-quantity-label { align-self: flex-end; padding: 0; }
+#member-center.member-polished .quantity-picker-trigger,
+#member-center.member-polished .checkout-methods > button,
+#member-center.member-polished .member-checkout > .member-primary { box-sizing: border-box; height: 42px; min-height: 42px; display: inline-flex; align-items: center; justify-content: center; margin: 0; }
+#member-center.member-polished .checkout-legal { grid-column: 1; grid-row: 1; }
+ #member-center.member-polished .checkout-quantity { grid-column: 2; grid-row: 1; }
+ #member-center.member-polished .checkout-choice { grid-column: 3; grid-row: 1; align-items: baseline; flex-wrap: nowrap; }
+ #member-center.member-polished .checkout-choice b { display: none; }
+ #member-center.member-polished .checkout-methods { grid-column: 4; grid-row: 1; }
+ #member-center.member-polished .member-checkout > .member-primary { grid-column: 5; grid-row: 1; }
+}
+@media (max-width: 680px) { #member-center .member-account-summary-copy small { max-width: 130px; } }
 .member-invite-link-row { display: flex; gap: 12px; margin-top: 22px; align-items: center; }
 .member-invite-link-row input { min-width: 0; flex: 1; width: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); color: var(--ink); font: inherit; font-size: 12px; }
 .member-invite-link-row .member-primary { flex: none; margin: 0; }
 @media (max-width: 520px) { .member-invite-link-row { flex-direction: column; align-items: stretch; } }
+/* Administrator-owned membership palette, including legacy night-mode rules. */
+body #member-center.member-polished .member-title-invite { background:var(--accent)!important; color:var(--selection-contrast)!important; }
+body #member-center.member-polished .member-title-invite:hover { background:var(--member-selected)!important; color:#fff!important; }
+body #member-center.member-polished .member-title-invite:hover :is(b,small,span,svg) { color:#fff!important; }
+body #member-center.member-polished .selected-entitlement { background:var(--accent-soft)!important; color:var(--ink)!important; }
+body #member-center.member-polished .member-plans>button:not([aria-pressed=true]) :is(h3,b,strong,em) { color:var(--ink)!important; }
+body #member-center.member-polished :is(.quantity-picker-trigger,.quantity-picker-menu button,.checkout-methods button) { color:var(--ink); }
+body #member-center.member-polished :is(.quantity-picker-trigger,.quantity-picker-menu button,.checkout-methods button) { color:var(--ink)!important; }
+/* Keep payment brands readable and leave a dedicated slot for the selected mark. */
+#member-center.member-polished .payment-choice-menu { left:auto; right:0; width:156px; min-width:156px; box-sizing:border-box; }
+#member-center.member-polished .payment-choice-menu button { display:grid; grid-template-columns:22px minmax(0,1fr) 16px; align-items:center; gap:10px; padding:10px; min-height:42px; box-sizing:border-box; text-align:left; }
+#member-center.member-polished .payment-choice-menu .payment-choice-check { text-align:center; }
+#member-center.member-polished .checkout-methods svg.payment-brand-alipay { color:#1677ff!important; fill:currentColor; }
+#member-center.member-polished .checkout-methods svg.payment-brand-wechat { color:#07c160!important; fill:currentColor; }
+.agreement-rich-body,.login-agreement-text { line-height:1.8; overflow-wrap:anywhere; }
+.agreement-rich-body :is(ul,ol),.login-agreement-text :is(ul,ol) { padding-left:1.8em; list-style-position:outside; }
+.agreement-rich-body ul,.login-agreement-text ul { list-style-type:disc; }
+.agreement-rich-body ol,.login-agreement-text ol { list-style-type:decimal; }
+.agreement-rich-body blockquote,.login-agreement-text blockquote { margin:1em 0; padding-left:1em; border-left:3px solid var(--accent); }
+.agreement-rich-body a,.login-agreement-text a { color:var(--accent); text-decoration:underline; }
+.agreement-rich-body :is(h2,h3,h4),.login-agreement-text :is(h2,h3,h4) { margin:1em 0 .5em; font-family:inherit; }

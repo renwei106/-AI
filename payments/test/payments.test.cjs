@@ -47,9 +47,35 @@ function fixture(overrides = {}) {
 }
 function paidResult(order, overrides = {}) { return { orderId: order.id, transactionId: 'transaction-' + order.id, appId: wechat.appId, merchantId: wechat.mchId, amount: order.amount, currency: 'CNY', status: 'paid', paidAt: now, ...overrides }; }
 
+test('unpaid attempts remain recoverable but only verified paid purchases enter order history', async t => {
+  const f=fixture();t.after(()=>f.store.close());
+  const order=await f.service.create(user,input());
+  assert.deepEqual(f.store.list(user.id),[]);
+  assert.equal(f.service.owned(user,order.id).status,'pending');
+  await f.service.query(user,order.id);
+  assert.deepEqual(f.store.list(user.id),[]);
+  f.service.apply('wechat',paidResult(order));
+  f.service.apply('wechat',paidResult(order));
+  assert.equal(f.store.list(user.id).length,1);
+  assert.equal(f.store.list(user.id)[0].status,'paid');
+});
+
 test('money accepts exact cents and rejects floating-point/negative/exponential values', () => {
   assert.equal(moneyToCents('10.01'), 1001); assert.equal(moneyToCents(10), 1000);
   for (const value of ['1.001', '-10', '1e2', NaN, Infinity, '0.30000000000000004']) assert.throws(() => moneyToCents(value));
+});
+
+test('unpaid attempts expire internally and a delayed verified payment can still fulfill once', async t => {
+  const f=fixture();t.after(()=>f.store.close());
+  const order=await f.service.create(user,input());
+  f.store.expirePending(order.expiresAt+1);
+  assert.equal(f.store.get(order.id).status,'expired');
+  assert.deepEqual(f.store.list(user.id),[]);
+  f.service.apply('wechat',paidResult(order));
+  f.service.apply('wechat',paidResult(order));
+  f.store.expirePending(order.expiresAt+1);
+  assert.equal(f.store.get(order.id).status,'paid');
+  assert.equal(f.store.list(user.id).length,1);
 });
 test('configuration requires secrets, bound AppID and HTTPS callback; production requires trusted identity', () => {
   assert.equal(inspect(config).providers.wechat.ready, true);
@@ -157,11 +183,22 @@ test('Wechat must reject unsigned successful HTTP responses', async () => {
   const provider = new WechatProvider(wechat, { fetchImpl: async () => new Response(JSON.stringify({ code_url: 'weixin://wxpay/fake' })) });
   await assert.rejects(() => provider.create({ id: 'SY' + 'b'.repeat(28), plan_name: '月度会员', amount: 1000, expires_at: now + 1800_000 }, config.publicBaseUrl));
 });
+test('Alipay cashier resolves official redirects and rejects external destinations and network failure', async () => {
+  const provider=new AlipayProvider(alipay);
+  const url='https://openapi.alipay.com/gateway.do';
+  assert.equal(await provider.cashier(url,{fetchImpl:async()=>new Response(null,{status:302,headers:{location:'https://excashier.alipay.com/test'}})}),'https://excashier.alipay.com/test');
+  await assert.rejects(()=>provider.cashier(url,{fetchImpl:async()=>new Response(null,{status:302,headers:{location:'https://example.com/test'}})}));
+  await assert.rejects(()=>provider.cashier(url,{fetchImpl:async()=>{throw Error('offline')}}),e=>e.code==='PROVIDER_UNAVAILABLE');
+});
+
 test('Alipay official SDK creates a signed desktop cashier URL and validates a real RSA2 notification', async () => {
   const provider = new AlipayProvider(alipay), id = 'SY' + 'c'.repeat(28);
   const checkout = await provider.create({ id, plan_name: '月度会员', amount: 1000 }, config.publicBaseUrl);
   const url = new URL(checkout.url), values = Object.fromEntries(url.searchParams);
   assert.equal(values.method, 'alipay.trade.page.pay'); assert.equal(values.app_id, alipay.appId);
+  assert.equal(checkout.kind, 'embedded-qr');
+  assert.equal(JSON.parse(values.biz_content).qr_pay_mode, '4');
+  assert.equal(JSON.parse(values.biz_content).qrcode_width, '264');
   assert.equal(JSON.parse(values.biz_content).total_amount, '10.00'); assert.equal(JSON.parse(values.biz_content).product_code, 'FAST_INSTANT_TRADE_PAY');
   const sign = values.sign; delete values.sign;
   const canonical = Object.keys(values).sort().map(k => `${k}=${values[k]}`).join('&');
