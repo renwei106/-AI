@@ -91,6 +91,10 @@ document.querySelector('#browser-download').onclick = () => {
   if (!selectedBrowser) return;
   if (selectedBrowser.id === 'firefox' && !firefoxRelease.ready) return;
   const link = document.createElement('a'); link.href = selectedBrowser.id === 'firefox' ? firefoxRelease.download : selectedBrowser.download; link.download = ''; link.click();
+  const toast = document.querySelector('#download-toast');
+  toast.textContent = `${selectedBrowser.short} 版插件已开始下载，请按下方步骤完成安装。`;
+  toast.classList.add('show'); clearTimeout(window.downloadToastTimer);
+  window.downloadToastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
   document.querySelector('#download-status').textContent = `${selectedBrowser.name} 版插件已开始下载。下载完成后请先解压，再按下方步骤安装。`;
   if (selectedBrowser.id === 'firefox') document.querySelector('#download-status').textContent = 'Firefox 版插件已开始下载，无需解压，按下方步骤安装即可。';
   document.querySelector('#install').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
