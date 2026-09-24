@@ -1005,22 +1005,24 @@ const applyBeforeCordTarget=apply;apply=function(){applyBeforeCordTarget();syncC
 function colorPaletteIndex(){const current=resolveThemeColor().toLowerCase();return Math.max(0,PALETTES.findIndex(([v])=>v.toLowerCase()===current))}
 function nextPalette(){const i=colorPaletteIndex();return PALETTES[(i+1)%PALETTES.length]}
 function syncColorCordTarget(){const b=document.querySelector('.color-pull-cord');if(!b)return;const [next,name]=nextPalette(),current=resolveThemeColor()||next;b.style.setProperty('--cord-color',current);b.style.setProperty('--next-color',next);b.title='点击或下拉，切换为'+name+'；双击打开配色设置';b.setAttribute('aria-label',b.title)}
+const showBeforeSettingsAuth=show;
+show=function(selector){if(selector==='#settings'&&!signed){if(typeof openLogin==='function')openLogin('登录后才能进入个性化设置。');else showBeforeSettingsAuth('#login');return}return showBeforeSettingsAuth(selector)};
 function openGlobalColorSettings(){scope='global';settingsTab='colors';renderSettings();show('#settings')}
 function mountColorCord(){
  let button=document.querySelector('.color-pull-cord');
  if(!['home','space'].includes(view)||new URLSearchParams(location.search).has('page')){button?.remove();return}
  if(button){syncColorCordTarget();return}
  button=document.createElement('button');button.className='color-pull-cord';button.type='button';button.innerHTML='<span class="color-cord-line"></span><span class="color-cord-handle"><i></i></span>';document.body.append(button);
- let origin=null,pull=0,busy=false,suppress=false;
- function requireColorAuth(){if(signed)return true;if(typeof openLogin==='function')openLogin('登录后才能切换颜色或打开个性化设置。');else if(typeof show==='function')show('#login');return false}
+ let origin=null,pull=0,busy=false,suppress=false,clickTimer=0;
+ function requireColorAuth(){if(signed)return true;if(typeof openLogin==='function')openLogin('登录后才能进入个性化设置。');else showBeforeSettingsAuth('#login');return false}
  function release(change){if(busy)return;busy=true;const distance=pull||20;button.animate([{transform:'translateY('+distance+'px)'},{transform:'translateY(-4px)',offset:.45},{transform:'translateY(2px)',offset:.72},{transform:'translateY(0)'}],{duration:520,easing:'ease-out'});button.style.transform='';button.style.setProperty('--pull','0px');pull=0;
-  if(change&&requireColorAuth()){const [color,name]=nextPalette();prefs.color=color;prefs.explicitColor=color;persist();apply();syncColorCordTarget();toast('已切换为'+name)}setTimeout(()=>busy=false,520)}
+  if(change){const [color,name]=nextPalette();prefs.color=color;prefs.explicitColor=color;persist();apply();syncColorCordTarget();toast('已切换为'+name)}setTimeout(()=>busy=false,520)}
  button.onpointerdown=e=>{if(busy||e.button!==0)return;origin=e.clientY;pull=0;button.setPointerCapture(e.pointerId)};
  button.onpointermove=e=>{if(origin===null)return;pull=Math.min(70,Math.max(0,(e.clientY-origin)*.65));button.style.transform='translateY('+pull+'px)';button.style.setProperty('--pull',pull+'px')};
  button.onpointerup=e=>{if(origin===null)return;const moved=e.clientY-origin;origin=null;suppress=true;release(moved>=24||Math.abs(moved)<6);setTimeout(()=>suppress=false,0)};
  button.onpointercancel=()=>{origin=null;release(false)};
- button.onclick=()=>{if(!suppress&&!busy)release(true)};
- button.ondblclick=e=>{e.preventDefault();if(requireColorAuth())openGlobalColorSettings()};
+ button.onclick=()=>{if(suppress||busy)return;clearTimeout(clickTimer);clickTimer=setTimeout(()=>release(true),220)};
+ button.ondblclick=e=>{e.preventDefault();clearTimeout(clickTimer);if(requireColorAuth())openGlobalColorSettings()};
  syncColorCordTarget();
 }
 const renderBeforeColorCord=render;render=function(){renderBeforeColorCord();mountColorCord()};
@@ -1281,7 +1283,10 @@ THEMES.paper.desc='把日常的小事，编成自己的头条。';
     decorateAccountLogin();
     d.querySelectorAll('.account-login-content>label').forEach((label,index)=>{const error=document.createElement('small');error.className='account-field-error';error.dataset.errorFor=index===0?'account':'credential';error.setAttribute('role','alert');label.after(error)});
     clearLoginPrefill(d);
-    d.querySelectorAll('[data-login-account],[data-login-credential]').forEach(input=>input.addEventListener('focus',()=>input.removeAttribute('readonly'),{once:true}));
+    d.querySelectorAll('[data-login-account],[data-login-credential]').forEach(input=>{
+      input.addEventListener('focus',()=>input.removeAttribute('readonly'),{once:true});
+      input.addEventListener('input',()=>{const field=input.hasAttribute('data-login-account')?'account':'credential',error=d.querySelector('.account-field-error[data-error-for="'+field+'"]');if(error)error.textContent=''});
+    });
     const status=d.querySelector('.account-status');if(status)status.textContent='';
     d.querySelector('[data-login-submit-v2]')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();void submitAccount(e.currentTarget)});
     const accountInput=d.querySelector('[data-login-account]'),codeSend=d.querySelector('[data-code-send]');
@@ -1298,7 +1303,7 @@ THEMES.paper.desc='把日常的小事，编成自己的头条。';
         accountMessage(d,'验证码已发送，'+Math.round(Number(result.expiresIn||600)/60)+'分钟内有效。');
       }catch(error){
         codeSend.disabled=false;const message=String(error?.message||'');
-        const unavailable=/JSON|Unexpected|Failed to execute|request\.validate/i.test(message);
+        const unavailable=/JSON|Unexpected|Failed to execute|Failed to fetch|Load failed|NetworkError|Network request failed|request\.validate/i.test(message);
         const errorText=unavailable?(emailMode?'邮件服务暂时不可用，请稍后再试':'短信服务暂时不可用，请稍后再试'):message||(emailMode?'邮件发送失败':'短信发送失败');
         accountMessage(d,errorText,'account');
       }
@@ -1385,7 +1390,7 @@ updateHeader();
 (()=>{
  const steps=[
   {title:'从空间开始整理',body:'左上角是当前空间。你可以切换空间，把工作、学习和生活分开管理。',targets:['.sidebar .space-heading-controls','.sidebar .space-select']},
-  {title:'用场景和分组分类',body:'左侧选择场景，上方切换分组。空间里可以有多个场景，每个场景再用分组整理网址。',targets:['.group-tab-bar']},
+  {title:'用场景和分组分类',body:'左侧选择场景，上方切换分组。空间里可以有多个场景，每个场景再用分组整理网址。',targets:['.sidebar .scene-scroll','.group-tab-bar'],combine:true},
   {title:'切换视图与样式',body:'右下角的小按钮可以切换常规视图与图谱视图，包括 3D 结构；旁边的椭圆按钮用来选择当前视图的样式。',targets:['.workspace-tools>.group-view-controls']},
   {title:'收藏网址，稍后再整理',body:'点击「收藏网址」手动添加。通过浏览器插件收下的网址会进入「稍后整理」，回来后再归类；插件可以从头像菜单中的「浏览器插件」入口了解和获取。',targets:['.space-top-actions [data-space-inbox]','.space-top-actions [data-action="add"]'],combine:true},
   {title:'连续上滑两次，回到首页',body:'没有网址，或网址列表已经滑到顶部时，鼠标连续向上滑动两次，就可以返回主首页。第一次会出现返回提示。',targets:['.peek-return']}

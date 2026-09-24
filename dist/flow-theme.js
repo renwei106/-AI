@@ -117,7 +117,7 @@
     snow:{title:'让灵感\n缓缓落下',intro:'落下，积聚，等一场清扫'},
     tide:{title:'让灵感\n随潮涌动',intro:'每一次经过，都会掀起新的流向'}
   };
-  function normalizeMode(value){return value==='tide'?'water':value==='surge'?'snow':value==='flow'?'chaos':MODE_KEYS.includes(value)?value:'form';}
+  function normalizeMode(value){return value==='tide'?'water':value==='surge'?'snow':value==='flow'?'chaos':MODE_KEYS.includes(value)?value:'water';}
   function modeCopy(mode){const custom=prefs.sharedHomeCopy?.mode==='custom'||prefs.homeCopy?.flow?.mode==='custom';return custom?currentCopy('flow'):MODE_COPY[mode]||MODE_COPY.chaos;}
   const CHROME_IDLE_AFTER=10000;
   let chromeIdleTimer=0;

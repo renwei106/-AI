@@ -82,10 +82,11 @@
   }
   window.addEventListener('shiyu-extension-change', refresh);
   window.addEventListener('storage', event => { if (event.key === store.EVENT_KEY) refresh(); });
-  window.shiyuExtensionBridge = Object.freeze({ dispatch(request) {
+  window.shiyuExtensionBridge = Object.freeze({ async dispatch(request) {
     try {
       if (request?.type === 'state') {
         const value = store.snapshot();
+        try { const response = await fetch('/api/shiyu/operations', { cache: 'no-store' }); if (response.ok) value.officialFont = (await response.json()).officialFont; } catch {}
         if (value.signed) { const theme = effective(); value.theme = { color: theme.color || '#48614c', mode: theme.mode || 'system' }; }
         return { ok: true, value };
       }
