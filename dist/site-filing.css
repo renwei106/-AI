@@ -8,7 +8,7 @@ body[data-view=space]:not(.atlas-active) .workspace:has(.site-filing){z-index:au
 .site-filing> a{pointer-events:auto}
 html.site-filing-idle .site-filing{opacity:0}
 body[data-view=home] #main{position:relative}
-body[data-view=home] #main>.site-filing{position:absolute;bottom:0;left:4.5%;width:min(480px,40%);padding-left:0;padding-right:0;justify-content:flex-start;align-items:baseline;text-align:left}
+body[data-view=home] #main>.site-filing{position:absolute;bottom:16px;left:4.5%;width:min(480px,40%);padding:0;justify-content:flex-start;align-items:center;text-align:left}
 body.world-active .site-filing,html[data-entry-page=membership] .site-filing{display:none}
 /* Keep the footer in the existing space content scroller, after cards and pagination. */
 body[data-view=space]:not(.atlas-active) #groups>.group:not([hidden]):has(>.site-filing){display:flex;flex-direction:column;padding-bottom:0}
@@ -16,5 +16,11 @@ body[data-view=space] #groups>.group>.site-filing{margin-top:auto;padding-top:10
 body[data-view=space] #groups>.group:has(>.site-filing)>:not(.site-filing){flex-shrink:0}
 #space-atlas>.site-filing{position:absolute;bottom:0;left:0;z-index:5}
 @media(prefers-reduced-motion:reduce){.site-filing{transition:none}}
-@media(max-width:760px){body[data-view=home] #main>.site-filing{position:relative;left:auto;width:100%;padding:12px 20px;justify-content:center;text-align:center}}
+@media(min-width:761px){
+  body[data-view=home] #main>.site-filing,
+  body[data-view=home]>.utility-search,
+  body[data-view=home] .scroll-invitation{bottom:16px!important;min-height:22px;align-items:center}
+  body[data-view=home] .scroll-invitation{position:fixed!important}
+}
+@media(max-width:760px){body[data-view=home] #main>.site-filing{position:relative;bottom:auto;left:auto;width:100%;padding:12px 20px;justify-content:center;text-align:center}}
 @media(max-width:760px){body[data-view=space]:not(.atlas-active) #groups>.group:not([hidden]):has(>.site-filing){min-height:max(0px,calc(100svh - var(--filing-group-start,0px)))}}

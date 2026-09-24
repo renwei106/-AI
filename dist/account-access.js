@@ -223,11 +223,11 @@
     if (!selectedSpace.scenes.some(sceneItem => sceneItem.id === sceneId)) sceneId = selectedSpace.scenes[0]?.id || null;
   }
 
-  function openLogin(message = '登录后即可进入你的空间。') {
+  function openLogin() {
     if (signed) return false;
     show('#login');
     const status = $('#login .account-status');
-    if (status && message) status.textContent = message;
+    if (status) status.textContent = '';
     return true;
   }
 

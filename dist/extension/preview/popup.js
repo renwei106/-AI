@@ -155,7 +155,7 @@ for (const [id, page] of [['login', 'login']]) $( '#' + id).onclick = () => {
   call('open', { page }).catch(error => status(error.message, 'error'));
 };
 async function start() {
-  if (preview) { document.body.classList.add('preview'); current = { title: '拾隅 · 拾万相，安一隅', url: 'https://shiyubox.com/', description: '遇见喜欢的，随手收进拾隅。', icon: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="7" fill="#48614c"/><g transform="translate(4 4)" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M3 14h7a4 4 0 0 0 4-4V3M14 14l7 7"/></g></svg>') }; }
+  if (preview) { document.body.classList.add('preview'); current = { title: '拾隅 · 让喜欢，自有归处', url: 'https://shiyubox.com/', description: '遇见喜欢的，随手收进拾隅。', icon: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="7" fill="#48614c"/><g transform="translate(4 4)" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M3 14h7a4 4 0 0 0 4-4V3M14 14l7 7"/></g></svg>') }; }
   else {
     const [tab] = await extensionApi.tabs.query({ active: true, currentWindow: true });
     if (tab?.url && /^https?:\/\//i.test(tab.url)) current = { url: tab.url, title: (tab.title || new URL(tab.url).hostname).slice(0, 100), icon: tab.favIconUrl || '' };

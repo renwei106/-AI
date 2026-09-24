@@ -1570,7 +1570,7 @@ updateHeader();
       <div class="welcome-gift-kicker">A LITTLE GIFT FOR YOU</div>
       <div class="welcome-gift-symbol" aria-hidden="true"><span>✦</span><span>◈</span><span>✧</span></div>
       <h2>送你一份见面礼</h2><p>「${esc(space.name)}」已经为你准备好了。</p>
-      <div class="welcome-gift-preview" aria-label="见面礼内容"><b>${links}</b><span>个精挑细选的网址</span><small>${space.scenes.length} 个场景 · ${groups} 个分组</small></div>
+      <div class="welcome-gift-preview" aria-label="见面礼内容"><b><strong>${links}</strong><em>个</em></b><span>精挑细选的网址</span><small>${space.scenes.length} 个场景 · ${groups} 个分组</small></div>
       <button class="welcome-gift-accept" type="button">收下</button><small class="welcome-gift-note">也可以稍后查看，见面礼会一直留在你的空间里。</small>`;
     document.body.append(dialog);
     let accepted = false, closingBounds;

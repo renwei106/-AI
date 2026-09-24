@@ -21,7 +21,7 @@ body[data-theme=globe][data-dark=false]{background:radial-gradient(circle at 50%
 body[data-theme=globe] .home-globe{background:transparent}
 body[data-theme=globe] .home-globe:before{display:none}
 body[data-theme=globe]>header{background:transparent}
-body[data-theme=globe]>header,body[data-theme=globe] #dock,body[data-theme=globe] .scroll-invitation{position:relative;z-index:20}
+body[data-theme=globe]>header,body[data-theme=globe] #dock,body[data-theme=globe] .scroll-invitation{z-index:20}
 body[data-theme=globe] #dock{position:fixed}
 @media(max-width:760px){.home-globe{min-height:calc(100svh - 76px);height:calc(100svh - 76px)}}
 @media(prefers-reduced-motion:reduce){.globe-loading{transition:none}}
