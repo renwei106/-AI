@@ -1,0 +1,60 @@
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const base=process.env.MEMO_TEST_ORIGIN||'http://127.0.0.1:4330',dir='.local/paper-reference/qa';fs.mkdirSync(dir,{recursive:true});
+const notes=p=>p.evaluate(()=>structuredClone(prefs.cornerModules['archive-qa'].memo.notes));
+async function open(p){await p.waitForFunction(()=>window.ShiyuCornerModules);await p.evaluate(()=>{signed=true});await p.frameLocator('#corner-orbit-preview').locator('#orbit').evaluate(el=>el._shiyuOpenOrbitModule(1));await p.waitForSelector('canvas[data-paper-count]');await p.waitForFunction(()=>!document.querySelector('#my-corner').classList.contains('corner-reveal-opening'));}
+async function setup(p){
+ await p.route('**/api/shiyu/auth/**',r=>r.fulfill({status:r.request().url().includes('/wechat/')?200:503,json:{}}));await p.route('**/api/shiyu/operations',r=>r.fulfill({json:{corner:{modules:['common','memo','todo'].map(id=>({id,enabled:true}))}}}));
+ await p.goto(base,{waitUntil:'domcontentloaded'});await p.evaluate(()=>{signed=true;prefs.accountProfile={id:'archive-qa'};prefs.mode='light';prefs.theme='base';prefs.brandGuideDismissed=true;localStorage.setItem('yiyu-prototype-v1',JSON.stringify({data,prefs,overrides,styles,signed}));persist();render()});await open(p);
+}
+async function archive(p,id){await p.locator(`[data-memo-archive="${id}"]`).evaluate(el=>el.click());await p.waitForFunction(()=>!document.querySelector('.memo-paper-app.is-busy'));}
+async function closePreview(p){if(await p.locator('[data-memo-unarchive]').count())await p.locator('.memo-editor-backdrop').click({position:{x:8,y:8}});else await p.locator('[data-memo-close]').click();await p.waitForFunction(()=>!document.querySelector('.memo-paper-editor'));}
+async function shelf(p){await p.locator('.memo-archive-dock').click();await p.waitForSelector('.memo-archive-shelf:not([hidden])');await p.waitForTimeout(650);}
+async function checkDock(p){
+ const bounds=await p.evaluate(()=>{const box=s=>document.querySelector(s).getBoundingClientRect();const dock=box('.memo-archive-dock'),heading=box('.memo-paper-heading'),footer=box('.memo-paper-footer');return{left:dock.left,headingLeft:heading.left,bottom:dock.bottom,footerBottom:footer.bottom,top:dock.top,height:innerHeight}});
+ assert(Math.abs(bounds.left-bounds.headingLeft)<1,'archive dock aligns with the heading');assert(Math.abs(bounds.bottom-bounds.footerBottom)<1,'archive dock aligns with the footer');assert(bounds.top>bounds.height/2,'archive dock is bottom left');
+ const contained=await p.locator('.memo-archive-dock').evaluate(el=>{const frame=el.getBoundingClientRect();return [...el.querySelectorAll('.memo-archive-mini>span')].every(card=>{const r=card.getBoundingClientRect();return r.left>=frame.left+5&&r.right<=frame.right-5&&r.top>=frame.top+5&&r.bottom<=frame.bottom-5})});assert(contained,'all thumbnail layers stay inside the background with padding');
+}
+(async()=>{const browser=await chromium.launch({channel:'msedge',headless:true});try{
+ const errors=[],p=await browser.newPage({viewport:{width:1440,height:960}});p.on('pageerror',e=>errors.push(e.message));await setup(p);const initial=await notes(p),id=initial[0].id;
+ const dock=p.locator('.memo-archive-dock'),mini=p.locator('.memo-archive-mini>span');
+ await checkDock(p);assert.equal(await dock.locator('[data-memo-count]').count(),0);assert(!(await dock.innerText()).includes('归档'));assert.equal(await mini.count(),3);
+ const compact=await mini.evaluateAll(els=>els.map(el=>getComputedStyle(el).transform));await dock.hover();await p.waitForTimeout(500);await checkDock(p);const spread=await mini.evaluateAll(els=>els.map(el=>getComputedStyle(el).transform));assert.notDeepEqual(compact,spread);await p.screenshot({path:dir+'/archive-dock-expanded.png'});await p.mouse.move(720,900);await p.waitForTimeout(500);await checkDock(p);assert.deepEqual(await mini.evaluateAll(els=>els.map(el=>getComputedStyle(el).transform)),compact);
+ const tabs=await p.locator('.memo-view-tabs button').allTextContents();assert.deepEqual(tabs.map(t=>t.replace(/[\d\s]/g,'')),['我的小记','已归档','垃圾桶']);
+ await p.locator(`[data-memo-color-trigger="${id}"]`).evaluate(el=>el.click());await p.locator('.memo-color-popover [data-memo-color=red]').click();
+ await p.waitForTimeout(250);const coverColor=await p.locator('.memo-cover.is-active .memo-cover-inner').evaluate(el=>getComputedStyle(el).backgroundColor);
+ await p.locator('.memo-cover.is-active').hover();await p.screenshot({path:dir+'/archive-hover.png'});
+ const archiveBox=await p.locator('.is-active [data-memo-archive]').boundingBox(),discardBox=await p.locator('.is-active [data-memo-discard]').boundingBox();assert(archiveBox.x<discardBox.x);assert(Math.abs(archiveBox.y-discardBox.y)<2);
+ const original=await p.locator('.memo-cover.is-active').boundingBox();await p.locator('.is-active [data-memo-archive]').click();await p.waitForSelector('.memo-archive-flight');
+ await p.locator('.memo-archive-flight').evaluate(el=>{el.getAnimations().forEach(a=>{a.pause();a.currentTime=0})});const start=await p.locator('.memo-archive-flight').boundingBox();assert(Math.hypot(start.x-original.x,start.y-original.y)<2,'archive starts at the actual cover');
+ await p.locator('.memo-archive-flight').evaluate(el=>el.getAnimations().forEach(a=>{a.currentTime=310}));await p.screenshot({path:dir+'/archive-midflight.png'});const middle=await p.locator('.memo-archive-flight').boundingBox();assert(middle.width<start.width);
+ await p.locator('.memo-archive-flight').evaluate(el=>el.getAnimations().forEach(a=>a.play()));await p.waitForFunction(()=>!document.querySelector('.memo-paper-app.is-busy'));
+ let saved=(await notes(p)).find(n=>n.id===id);assert(saved.archivedAt&&!saved.deletedAt);assert.equal(saved.content,initial[0].content);assert.equal(await p.locator('[data-memo-position]').innerText(),'共 3 则');assert.equal(await p.locator('[data-memo-count=archive]').innerText(),'1');assert.equal(await p.locator('canvas[data-paper-count]').getAttribute('data-paper-count'),'0');
+ await p.locator(`[data-memo-color-trigger="${initial[1].id}"]`).evaluate(el=>el.click());await p.locator('.memo-color-popover [data-memo-color=blue]').click();
+ await archive(p,initial[1].id);await shelf(p);await p.screenshot({path:dir+'/archive-shelf-light.png'});assert.equal(await p.locator('#memo-archive-shelf .memo-archive-card').count(),2);
+ assert(await dock.isHidden());assert.equal(await p.locator('.memo-archive-shelf header,.memo-archive-card-foot').count(),0);assert.equal(await p.locator(`[data-memo-archive-open="${id}"]`).evaluate(el=>getComputedStyle(el).backgroundColor),coverColor);
+ await p.locator(`[data-memo-archive-open="${id}"]`).click();await p.waitForSelector('[data-memo-unarchive]');assert.equal(await p.locator('.memo-paper-editor input,.memo-paper-editor textarea').count(),0);assert.equal(await p.locator('.memo-paper-preview-title').innerText(),initial[0].title);
+ const before=await notes(p);await p.keyboard.type('cannot edit');assert.deepEqual(await notes(p),before);await p.waitForTimeout(550);await p.screenshot({path:dir+'/archive-preview.png'});assert.equal(await p.locator('.memo-paper-editor-top button').count(),0);await closePreview(p);assert.equal(await p.evaluate(()=>document.activeElement.dataset.memoArchiveOpen),id);
+ await p.locator(`[data-memo-archive-open="${id}"]`).click();
+ const handoff=await p.evaluate(()=>{
+  const elements=()=>[document.querySelector('.memo-paper-editor'),document.querySelector('.memo-editor-backdrop')];
+  elements().forEach(el=>el.getAnimations().forEach(a=>{a.pause();a.currentTime=100}));
+  const snapshot=()=>{const [sheet,shade]=elements(),r=sheet.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height,opacity:+getComputedStyle(shade).opacity}};
+  const before=snapshot();document.querySelector('[data-memo-unarchive]').click();
+  elements().forEach(el=>el.getAnimations().forEach(a=>{a.pause();a.currentTime=0}));const after=snapshot();
+  elements().forEach(el=>el.getAnimations().forEach(a=>a.play()));return{before,after};
+ });
+ for(const key of ['x','y','w','h'])assert(Math.abs(handoff.before[key]-handoff.after[key])<2,'mid-animation restore preserves '+key);assert(Math.abs(handoff.before.opacity-handoff.after.opacity)<.01,'backdrop does not flash on restore');
+ await p.waitForSelector('[data-memo-title]');assert(!(await notes(p)).find(n=>n.id===id).archivedAt);assert.equal(await p.locator('.memo-paper-app').getAttribute('data-memo-view'),'notes');assert.equal(await p.evaluate(()=>document.activeElement.tagName),'SECTION');
+ await p.locator('[data-memo-title]').fill('归档后继续写');await closePreview(p);await archive(p,id);assert.equal((await notes(p)).find(n=>n.id===id).title,'归档后继续写');
+ // Emptying the trash must leave archived records untouched.
+ await p.locator(`[data-memo-discard="${initial[2].id}"]`).evaluate(el=>el.click());await p.waitForFunction(()=>!document.querySelector('.memo-paper-app.is-busy'));
+ await p.locator('.memo-view-tabs [data-memo-view=archive]').click();await p.waitForTimeout(700);assert.equal(await p.locator('canvas[data-paper-count]').getAttribute('data-paper-count'),'1');
+ await p.locator(`[data-memo-archive-open="${id}"]`).click();await p.waitForTimeout(550);
+ const frames=await p.evaluate(async()=>{const host=document.querySelector('.memo-paper-canvas'),samples=[];const sample=()=>{const s=getComputedStyle(host);samples.push({opacity:+s.opacity,visibility:s.visibility})};sample();document.querySelector('.memo-editor-backdrop').click();const start=performance.now();while(performance.now()-start<900){await new Promise(requestAnimationFrame);sample()}return samples});assert(frames.length>5);assert(frames.every(s=>s.visibility==='hidden'&&s.opacity===0),'paper stays hidden before, during and after archive preview closes');
+ await p.locator('[data-memo-view=trash]').click();await p.locator('[data-memo-pour]').click();await p.locator('[data-memo-confirm-pour]').click();await p.waitForFunction(()=>!document.querySelector('.memo-paper-app.is-busy'));assert.equal((await notes(p)).filter(n=>n.archivedAt).length,2);
+ await p.locator('.corner-close-entry').click();await p.waitForFunction(()=>!document.querySelector('#my-corner').open);await p.reload({waitUntil:'domcontentloaded'});await open(p);assert.equal(await p.locator('[data-memo-count=archive]').innerText(),'2');await shelf(p);
+ await p.evaluate(()=>{prefs.mode='dark';render()});await p.waitForTimeout(450);await p.screenshot({path:dir+'/archive-shelf-dark.png'});await p.keyboard.press('Escape');assert.equal(await p.locator('.memo-paper-app').getAttribute('data-memo-view'),'notes');await p.close();
+ const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});mobile.on('pageerror',e=>errors.push(e.message));await setup(mobile);await checkDock(mobile);await mobile.screenshot({path:dir+'/archive-dock-mobile.png'});const first=(await notes(mobile))[0];await mobile.locator('.is-active [data-memo-archive]').tap();await mobile.waitForFunction(()=>!document.querySelector('.memo-paper-app.is-busy'));await shelf(mobile);await mobile.screenshot({path:dir+'/archive-mobile.png'});await mobile.locator(`[data-memo-archive-open="${first.id}"]`).tap();assert.equal(await mobile.locator('.memo-paper-editor input').count(),0);const rect=await mobile.locator('.memo-paper-editor').boundingBox();assert(rect.x>=0&&rect.x+rect.width<=390&&rect.y>=0&&rect.y+rect.height<=844);await mobile.locator('[data-memo-unarchive]').tap();await mobile.locator('[data-memo-content]').fill('触屏恢复编辑');await closePreview(mobile);assert.equal((await notes(mobile))[0].content,'触屏恢复编辑');await mobile.close();
+ assert.deepEqual(errors,[]);console.log('PASS archive hover / flight continuity / shelf / readonly / restore-edit-rearchive / counts / trash separation / persistence / dark / mobile');
+}finally{await browser.close()}})().catch(e=>{console.error(e);process.exitCode=1});

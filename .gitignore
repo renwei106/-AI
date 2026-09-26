@@ -11,3 +11,4 @@ payments/.env*
 !payments/.env.example
 payments/keys/
 preview-4318.*.log
+memo-paper/node_modules/

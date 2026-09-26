@@ -25,6 +25,7 @@ const routes={
   '/member-entitlements.js':'member-entitlements.js','/member-invitations.js':'member-invitations.js',
   '/feedback.css':'feedback.css','/feedback.js':'feedback.js',
   '/memoir-theme.css':'memoir-theme.css','/memoir-theme.js':'memoir-theme.js',
+  '/memo-paper.css':'memo-paper.css','/memo-paper.js':'memo-paper.js',
  '/corner.css':'corner.css','/corner.js':'corner.js','/earth-theme.css':'earth-theme.css','/earth-theme.js':'earth-theme.js','/earth-source.js':'earth-source.js',
   '/liquid-orbit-menu.html':'liquid-orbit-menu.html',
   '/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.js':'app.js','/v4.js':'v4.js','/v4.css':'v4.css','/account-access.js':'account-access.js',
@@ -34,6 +35,43 @@ const routes={
   '/assets/poly/delaunator.min.js':'assets/poly/delaunator.min.js','/poster-sea.png':'poster-sea.png','/poster-night.png':'poster-night.png','/poster-road.png':'poster-road.png'
 }
 http.createServer(async(req,res)=>{
+  // Explicit, one-time local reset requested for the current preview browser.
+  if(process.env.SHIYU_PREVIEW_REVIEW==='1'&&host==='127.0.0.1'&&req.url.startsWith('/__local-memo-reset/')){
+    const requestFile=path.join(__dirname,'.local/memo-reset/request.json')
+    const request=fs.existsSync(requestFile)?JSON.parse(fs.readFileSync(requestFile,'utf8')):null
+    res.setHeader('Cache-Control','no-store')
+    if(request&&req.method==='GET'&&req.url===request.route+'/status'){
+      res.setHeader('Content-Type','application/json');res.end(JSON.stringify({done:request.done}));return
+    }
+    if(request&&req.method==='POST'&&req.url===request.route+'/complete'&&req.headers.origin===`http://${host}:${port}`){
+      request.done=true;fs.writeFileSync(requestFile,JSON.stringify(request));res.end('OK');return
+    }
+    if(request&&req.method==='GET'&&req.url===request.route){
+      res.setHeader('Content-Type','text/html; charset=utf-8');res.end(request.done?'本次初始化已完成，不会再次覆盖数据。':fs.readFileSync(path.join(__dirname,'.local/memo-reset/page.html')));return
+    }
+    res.writeHead(404);res.end('Not found');return
+  }
+  // Shared local review configuration; never persist module overrides.
+  if((process.env.SHIYU_PREVIEW_REVIEW==='1'||process.env.SHIYU_PREVIEW_MEMO==='1')&&host==='127.0.0.1'&&req.method==='GET'&&req.url.split('?')[0]==='/api/shiyu/operations'){
+    try{
+      const response=await fetch('http://127.0.0.1:5175/api/shiyu/operations',{headers:{cookie:req.headers.cookie||'',accept:'application/json'},signal:AbortSignal.timeout(5000)})
+      if(!response.ok)throw new Error('Operations unavailable')
+      const config=await response.json()
+      config.corner??={};config.corner.modules??=[]
+      const modules=config.corner.modules
+      const entries=process.env.SHIYU_PREVIEW_REVIEW==='1'?[['common','常用'],['memo','小记'],['todo','待办']]:[['memo','小记']]
+      for(const [id,name] of entries){
+        const module=modules.find(module=>module.id===id)
+        if(module)module.enabled=true
+        else modules.push({id,enabled:true,entryName:name,panelName:'我的'+name,icon:''})
+      }
+      res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'})
+      res.end(JSON.stringify(config));return
+    }catch{
+      res.writeHead(503,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'})
+      res.end(JSON.stringify({message:'本地预览配置暂不可用，请确认本地服务已启动'}));return
+    }
+  }
   if(await require('./theme-access/server.cjs').handler(req,res))return
   if(await handlePayment(req,res))return
   if(await feedbackHandler(req,res))return
@@ -45,6 +83,7 @@ http.createServer(async(req,res)=>{
   const pathname=req.url.split('?')[0]
   const fontAsset=/^\/assets\/fonts\/shiyu-(?:youfeng|qingya-song|wenrun-kai)\/[A-Za-z0-9._-]+\.woff2$/i.test(pathname)?pathname.slice(1):''
   let file=routes[pathname]||fontAsset||(/^\/assets\/site-icons\/[a-z0-9._-]+\.(?:svg|ico|png|webp)$/i.test(pathname)?pathname.slice(1):'')
+  if(/^\/assets\/memo-paper\/(?:engine\.js|carousel\.js|LICENSE|THIRD_PARTY_NOTICES\.txt|vat\/geo\/vertex_animation_textures1_mesh\.fbx|vat\/tex\/vertex_animation_textures1_pos\.exr)$/.test(pathname))file=pathname.slice(1)
   if(pathname==='/official/')file='official/index.html'
   else if(pathname==='/official/v2/'||pathname==='/official/v2')file='official/v2/index.html'
   else if(/^\/official\/(?!.*\.\.)[A-Za-z0-9._/-]+$/.test(pathname))file=pathname.slice(1)
@@ -55,6 +94,7 @@ http.createServer(async(req,res)=>{
   // The desktop preview serves files directly from dist while the app stays
   // open for long sessions. Never let a previous UI bundle survive a refresh.
   res.setHeader('Cache-Control','no-store, max-age=0')
+  if(/\.(?:fbx|exr)$/.test(file)){res.setHeader('Content-Type','application/octet-stream');fs.createReadStream(fullPath).pipe(res);return}
   res.setHeader('Content-Type',file.endsWith('.svg')?'image/svg+xml':file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webp')?'image/webp':file.endsWith('.woff2')?'font/woff2':file.endsWith('.css')?'text/css; charset=utf-8':file.endsWith('.js')?'text/javascript; charset=utf-8':'text/html; charset=utf-8')
   const stream=fs.createReadStream(fullPath)
   stream.on('error',()=>{if(!res.headersSent)res.writeHead(404);res.end('Not found')})

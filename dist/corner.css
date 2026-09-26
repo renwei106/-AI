@@ -103,6 +103,13 @@ body[data-dark=true] .corner-dialog .corner-toolbar button,body[data-dark=true] 
 
 /* The collection is a transparent stage over the current page, not a panel. */
 #my-corner{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;padding:0;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:hidden;color:var(--ink)}
+#my-corner .corner-fullscreen-shell{position:absolute;inset:0;width:100%;height:100dvh;overflow:visible}
+#my-corner .corner-fullscreen-shell>.dialog-done{display:none}
+#my-corner .corner-fullscreen-shell:fullscreen{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;background:transparent}
+#my-corner .corner-fullscreen-shell:fullscreen::backdrop{background:color-mix(in srgb,var(--bg) 32%,transparent);backdrop-filter:blur(18px) saturate(.75)}
+#my-corner .corner-fullscreen-cord .mode-cord-line{bottom:22px;height:calc(62px + var(--pull,0px))}
+#my-corner .corner-fullscreen-cord .mode-cord-handle,#my-corner .corner-fullscreen-cord:hover .mode-cord-handle{bottom:0;width:20px;height:20px;border:1px solid color-mix(in srgb,var(--accent) 70%,var(--ink));border-radius:50%;background:color-mix(in srgb,var(--accent) 16%,var(--surface));color:var(--accent);outline:0;box-shadow:0 2px 8px color-mix(in srgb,var(--accent) 18%,transparent)}
+#my-corner .corner-fullscreen-cord .mode-cord-handle svg{display:block;width:12px;height:12px;color:inherit;stroke:currentColor}
 #my-corner::backdrop{background:color-mix(in srgb,var(--bg) 32%,transparent);backdrop-filter:blur(18px) saturate(.75)}
 #my-corner.corner-reveal-opening::backdrop{animation:corner-backdrop-enter 620ms ease-out both}
 #my-corner.corner-reveal-closing::backdrop{animation:corner-backdrop-leave 520ms ease-in both}
@@ -288,6 +295,15 @@ body[data-dark=true] #my-corner .corner-card-logo{color:color-mix(in srgb,var(--
    chooses either a flat object or a shallow layered object. */
 #my-corner .corner-heading-title{display:flex;align-items:center;gap:16px;pointer-events:none}
 #my-corner .corner-heading-title h2{margin:0}
+#my-corner [data-module-title]{pointer-events:auto}
+#my-corner .corner-module-title-icon{display:inline-flex;width:12px;height:12px;margin-left:7px;vertical-align:baseline;opacity:.55}
+#my-corner .corner-module-title-icon svg{width:12px;height:12px}
+#my-corner .corner-module-menu{position:fixed;z-index:90;width:232px;max-height:50vh;overflow:auto;padding:6px;background:var(--surface);color:var(--ink);border-radius:12px;box-shadow:0 8px 26px #00000016}
+#my-corner .corner-module-menu[hidden]{display:none}
+#my-corner .corner-module-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;background:transparent;border:0;border-radius:8px;text-align:left;font:14px var(--font);color:inherit}
+#my-corner .corner-module-menu button:is(:hover,:focus-visible),#my-corner .corner-module-menu button[aria-current=true]{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+#my-corner .corner-module-menu :is(svg,img){width:18px;height:18px;flex:none}
+#my-corner .corner-module-menu small{margin-left:auto}
 #my-corner .corner-theme-art{display:grid;place-items:center;width:72px;height:42px;color:var(--accent);opacity:.64;transform:translateY(2px);pointer-events:none}
 #my-corner .corner-theme-art svg{width:68px;height:48px;overflow:visible}
 #my-corner[data-corner-depth=flat] .corner-theme-art{opacity:.46}
@@ -942,9 +958,9 @@ body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-fi
 #my-corner[data-corner-module=memo] .memo-editor input,#my-corner[data-corner-module=memo] .memo-editor textarea{box-sizing:border-box;width:100%;margin-top:9px;border:0;border-bottom:1px solid color-mix(in srgb,var(--ink) 18%,transparent);border-radius:0;background:transparent;color:var(--ink);font:30px/1.35 Georgia,"Songti SC","Noto Serif SC",serif;outline:0}
 #my-corner[data-corner-module=memo] .memo-editor textarea{min-height:180px;resize:none;font-size:18px;line-height:1.8}
 #my-corner[data-corner-module=memo] .memo-editor-meta{display:flex;justify-content:space-between;margin-top:auto;color:var(--muted);font:11px var(--font);letter-spacing:.06em}
-#my-corner[data-corner-module=todo] .todo-stage{inset:clamp(68px,9vh,110px) 0 70px;display:block;overflow:auto;padding:0 clamp(24px,4vw,72px);box-sizing:border-box}
-#my-corner[data-corner-module=todo] .todo-toolbar{display:flex;align-items:center;justify-content:space-between;margin:20px 0 18px}
-#my-corner[data-corner-module=todo] .todo-view-switch{display:flex;gap:4px;padding:4px;border-radius:10px;background:color-mix(in srgb,var(--ink) 7%,transparent)}
+#my-corner[data-corner-module=todo] .todo-stage{inset:clamp(195px,23vh,228px) 0 70px;display:block;overflow:auto;padding:0 clamp(24px,4vw,72px);box-sizing:border-box}
+#my-corner[data-corner-module=todo] .todo-toolbar{display:flex;align-items:center;justify-content:flex-end;margin:0 0 18px}
+#my-corner[data-corner-module=todo] .todo-view-switch{position:absolute;z-index:35;top:clamp(138px,17vh,178px);left:6vw;display:flex;gap:32px;padding:0;border-radius:0;background:none}
 #my-corner[data-corner-module=todo] .todo-view-switch button,#my-corner[data-corner-module=todo] .todo-add{border:0;border-radius:7px;background:transparent;color:var(--muted);padding:8px 13px;font:12px var(--font);cursor:pointer}
 #my-corner[data-corner-module=todo] .todo-view-switch button.is-active{background:var(--surface);color:var(--accent);box-shadow:0 2px 9px #0002}
 #my-corner[data-corner-module=todo] .todo-add{background:var(--accent);color:var(--on-accent,#fff)}
@@ -1014,3 +1030,30 @@ body[data-dark=true] #my-corner::backdrop{background:rgba(0,0,0,.64);backdrop-fi
 /* The gradient magnetic entry is the single home entrance. */
 body:is([data-view=home],[data-view=space]) #corner-orbit-preview{display:none!important}
 #corner-orbit-demo{left:50%!important}
+
+@media(max-height:680px){#my-corner[data-corner-module=todo] .todo-stage{inset:155px 0 60px}}
+@media(max-width:700px){#my-corner[data-corner-module=todo] .todo-stage{inset:188px 0 70px}#my-corner[data-corner-module=todo] .todo-view-switch{top:143px;left:24px;gap:26px}}
+@media(max-height:680px) and (max-width:700px){#my-corner[data-corner-module=todo] .todo-stage{inset:155px 0 60px}}
+
+/* Keep child-module headings on the same viewport anchor as the memo heading. */
+#my-corner .corner-stage-heading{
+  position:absolute;
+  z-index:35;
+  top:clamp(32px,5vh,65px);
+  right:6vw;
+  left:6vw;
+  pointer-events:none;
+}
+#my-corner .corner-stage-heading h2{
+  margin:0;
+  font:500 clamp(25px,3vw,36px)/1.3 var(--font);
+  letter-spacing:.08em;
+}
+#my-corner .corner-stage-heading h2 button{font:inherit;letter-spacing:inherit}
+#my-corner .corner-stage-heading p{
+  margin:12px 0 0;
+  color:var(--muted);
+  font-size:13px;
+  letter-spacing:.06em;
+}
+#my-corner .corner-stage-heading [data-corner-next-theme]{pointer-events:auto}

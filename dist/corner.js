@@ -3,6 +3,7 @@
   const uid = () => crypto.randomUUID();
   const glyph = paths => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
   const CORNER_MODULES=Object.freeze({
+    toolbox:{id:'toolbox',name:'百宝箱',icon:'<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v3h4v-3"/>'},
     common:{id:'common',name:'我的收藏',subtitle:'把每天会用到的网址，留在手边',countLabel:'个网址',empty:'把常去的地方，收进来',emptyHint:'在原网址的编辑窗口中<br>选择「收进我的一隅」',addHint:'为常用的网址，再留一席',groups:['常用','灵感','阅读'],icon:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M8 8h8M8 12h5M8 16h8"/>'},
     todo:{id:'todo',name:'我的待办',subtitle:'把要做的事，放在眼前',countLabel:'项待办',empty:'把要做的事，收进来',emptyHint:'待办模块正在准备，你可以先建立自己的分组',addHint:'为待办，再留一席',groups:['今天','进行中','已完成'],icon:'<path d="m5 12 4 4L19 6"/><rect x="3" y="3" width="18" height="18" rx="4"/>'},
     memo:{id:'memo',name:'我的小记',subtitle:'把一闪而过的灵感，轻轻留下',countLabel:'条记录',empty:'把一闪而过的想法留下来',emptyHint:'小记模块正在准备，你可以先建立自己的分组',addHint:'为灵感，再留一席',groups:['灵感','随手记','待整理'],icon:'<path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2Z"/><path d="M8 9h8M8 13h5"/>'}
@@ -10,7 +11,8 @@
   const CORNER_MODULE_SETTINGS=Object.freeze({
     common:{entryName:'我的收藏',panelName:'我的收藏',enabled:true},
     memo:{entryName:'我的小记',panelName:'我的小记',enabled:true},
-    todo:{entryName:'我的待办',panelName:'我的待办',enabled:true}
+    todo:{entryName:'我的待办',panelName:'我的待办',enabled:true},
+    toolbox:{entryName:'百宝箱',panelName:'百宝箱',enabled:true}
   });
   let remoteCornerModules=null;
   const cornerModuleConfig=id=>({...CORNER_MODULES[id],...CORNER_MODULE_SETTINGS[id],...(remoteCornerModules?.[id]||{})});
@@ -24,15 +26,16 @@
     '<path d="M3 18V8l9-4 9 4v10l-9 3-9-3ZM12 4v17M3 8l9 4 9-4"/>',
     '<path d="M3 17c5-12 13-12 18 0M5 19c4-9 10-9 14 0M8 21c2-6 6-6 8 0"/>'
   ];
-  let panel, picker, origin, switchMenu, switchOrigin, entrySlot, entrySnapshot, entryAnchor, motionFrame=0;
-  let activeModule='common',memoEditingId=null,memoFocusId=null,memoWheelLock=0;
+  let panel, fullscreenShell, picker, origin, switchMenu, switchOrigin, entrySlot, entrySnapshot, entryAnchor, motionFrame=0;
+  let activeModule='common';
+  let memoPaperView=null,memoRenderToken=0,memoViewState={view:'notes',page:0};
   let cornerRevealAnimation=null, cornerClosing=false;
   let drag = null, swallowClickUntil = 0, inboxExpanded=null;
   const flipped=new Set(),coverOpen=new Set(),flipTimers=new WeakMap();
   const fanMotion={position:null,target:0,frame:0,last:0,tau:100};
   const ADD_CARD="__corner_add__";
   const moduleMeta=()=>cornerModuleConfig(activeModule)||cornerModuleConfig('common');
-  const moduleIcon=id=>{const icon=cornerModuleConfig(id)?.icon;if(icon&&/^(?:data:image\/(?:png|svg\+xml);base64,|https?:\/\/)/i.test(icon))return '<img class="corner-config-icon" src="'+String(icon).replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" alt="" aria-hidden="true">';return glyph(cornerModuleConfig(id)?.icon||CORNER_MODULES.common.icon);};
+  const moduleIcon=id=>{const icon=cornerModuleConfig(id)?.icon;if(icon&&/^(?:data:image\/(?:png|svg\+xml);base64,|https?:\/\/)/i.test(icon))return '<img class="corner-config-icon" src="'+String(icon).replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" alt="" aria-hidden="true">';return glyph(cornerModuleConfig(id)?.icon||(id==='toolbox'?CORNER_MODULES.toolbox.icon:CORNER_MODULES.common.icon));};
   async function loadCornerConfig(){
     try{
       const response=await fetch('/api/shiyu/operations',{credentials:'include',cache:'no-store'});
@@ -141,10 +144,15 @@
     }
     if(moduleId==='memo'&&library.notes===undefined){
       const now=Date.now();library.notes=[
-        {id:uid(),title:'一念',content:'把尚未成形的念头，先轻轻放在这里。',updatedAt:now-1000*60*18,icon:'✦'},
-        {id:uid(),title:'留白',content:'有些答案不必急着抵达，留一点空白给明天。',updatedAt:now-1000*60*60*5,icon:'◌'},
-        {id:uid(),title:'拾光',content:'记下此刻看见的微小光亮，日后仍会认出它。',updatedAt:now-1000*60*60*24,icon:'⌁'},
-        {id:uid(),title:'未完的句子',content:'让灵感停在半句，也是一种温柔的保存。',updatedAt:now-1000*60*60*48,icon:'…'}
+        {id:uid(),title:"记录灵感",content:"突然想到的产品点子、工作改进或创作方向，可以先记在这里，之后再补充。\n\n例如：给每周例会增加“本周遇到的问题”，提前收集，集中讨论解决办法。",updatedAt:now-1000*60*18,icon:'✦'},
+        {id:uid(),title:"随手记",content:"临时要用的地址、清单、会议要点，都可以随手记下，方便查看、复制和粘贴。\n\n例如：周六下午 2 点取修好的电脑，出门前带上维修单和电源适配器。",updatedAt:now-1000*60*60*5,icon:'◌'},
+        {id:uid(),title:"收藏词句",content:"读书、看文章时遇到喜欢的词句，可以连同出处和自己的理解一起保存，写作或分享时方便查找。\n\n例如：“千里之行，始于足下。”——《老子》\n我的理解：把大目标拆成今天能完成的一小步。",updatedAt:now-1000*60*60*24,icon:'⌁'},
+        {id:uid(),title:"起草文案",content:"要发的消息、邮件或社交平台内容，可以先在这里打草稿，调整好再复制出去。\n\n例如：大家好，周五的项目讨论改到下午 3 点，请提前整理需要确认的问题。收到后回复一下，谢谢。",updatedAt:now-1000*60*60*36,icon:'…'},
+        {id:uid(),title:"学习笔记",content:"把学到的方法、容易忘记的知识点，用自己的话简要记下，方便之后复习和使用。\n\n例如：读完一篇文章，先写下核心观点，再补一个实际例子，最后记下自己还没弄懂的问题。",updatedAt:now-1000*60*60*48,icon:'✦'},
+        {id:uid(),title:"废纸团",content:"不再使用的草稿、临时记录或暂时放弃的想法，可以先丢成废纸团。\n\n点击小记上的“丢弃”，内容会进入垃圾桶。点击纸团可以展开查看；需要继续使用时，点击“捡回来”，回到“我的小记”后就能编辑。\n\n确认不再需要的内容，可以通过“倾倒垃圾桶”清理。确认倾倒后无法恢复。",updatedAt:now-1000*60*60*2,deletedAt:now-1000*60*8,icon:'⌁'},
+        {id:uid(),title:"过期的临时记录",content:"上周的取件提醒已经用完，先移到废纸团中。\n\n这类临时信息不需要一直留在小记里；清理前仍可以展开核对，避免误删有用的内容。",updatedAt:now-1000*60*60*6,deletedAt:now-1000*60*20,icon:'…'},
+        {id:uid(),title:"未采用的文案",content:"活动标题备选：周末一起走走。\n\n这版文案暂时没有采用，先放进废纸团。以后需要参考或重新修改时，可以再捡回来。",updatedAt:now-1000*60*60*12,deletedAt:now-1000*60*35,icon:'◌'},
+        {id:uid(),title:"归档文档",content:"日常记录中，值得长期保留的内容可以归档，例如整理好的灵感、项目复盘、学习总结和常用文案。\n\n归档后，内容会从日常小记中收起，集中保存在“已归档”里，方便以后查阅和复用。这样，小记里可以专注保留正在使用、还需要修改的内容。\n\n归档内容会保留，需要补充时也可以恢复编辑。",updatedAt:now-1000*60*60*24*3,archivedAt:now-1000*60*60,icon:'✦'}
       ];persist();
     }
     if(moduleId==='todo'&&library.tasks===undefined){
@@ -198,6 +206,7 @@
   }
   function closeCorner() {
     if(!panel?.open||cornerClosing)return;
+    if(document.fullscreenElement===fullscreenShell&&document.exitFullscreen){document.exitFullscreen().then(()=>{if(panel?.open)closeCorner();},()=>{if(panel?.open)closeCorner();});return;}
     if(reduced()||typeof panel.animate!=='function'){panel.close();return;}
     cornerClosing=true;
     const interrupted=Boolean(cornerRevealAnimation);
@@ -230,23 +239,27 @@
     else document.querySelector('#login')?.showModal?.();
     return false;
   }
+  function appendCornerNode(node){(fullscreenShell?.isConnected?fullscreenShell:panel).append(node);}
+  function prependCornerNode(node){(fullscreenShell?.isConnected?fullscreenShell:panel).prepend(node);}
   function openCorner(trigger, groupId, event, moduleId='common') {
+    if(moduleId==='toolbox'&&cornerModuleConfig(moduleId).enabled!==false){toast('敬请期待');return;}
     if(!requireCornerModuleAuth(moduleId))return;
     if(panel?.open){closeCorner();return;}
     prepareCardAudio();
     activeModule=cornerModuleConfig(moduleId)?.enabled!==false?moduleId:(enabledCornerModuleIds()[0]||'common');
     const meta=moduleMeta();
-    origin=trigger||document.activeElement;
+    origin=document.querySelector('#dock .corner-entry')||trigger||document.activeElement;
     if(!panel){
-      panel=dialog('my-corner',meta.panelName||meta.name);
-      panel.addEventListener('close',()=>{cornerRevealAnimation?.cancel();cornerRevealAnimation=null;cornerClosing=false;panel.style.clipPath='';panel.style.removeProperty('--corner-backdrop-from');panel.classList.remove('corner-reveal-opening','corner-reveal-closing','memo-editor-mode');finishDrag(true);restoreEntry();flipped.clear();coverOpen.clear();memoEditingId=null;memoFocusId=null;memoWheelLock=0;cancelAnimationFrame(motionFrame);cancelAnimationFrame(fanMotion.frame);fanMotion.frame=0;panel.classList.remove('corner-animating');wheelConsumed=false;swipe=null;});
+      panel=dialog('my-corner',meta.panelName||meta.name);fullscreenShell=document.createElement('div');fullscreenShell.className='corner-fullscreen-shell';while(panel.firstChild)fullscreenShell.append(panel.firstChild);panel.append(fullscreenShell);
+      bindModuleHeader();
+      panel.addEventListener('close',()=>{if(document.fullscreenElement===fullscreenShell&&document.exitFullscreen)void document.exitFullscreen().catch(()=>{});cornerRevealAnimation?.cancel();cornerRevealAnimation=null;cornerClosing=false;panel.style.clipPath='';panel.style.removeProperty('--corner-backdrop-from');panel.classList.remove('corner-reveal-opening','corner-reveal-closing','memo-editor-mode');finishDrag(true);restoreEntry();flipped.clear();coverOpen.clear();memoRenderToken++;memoPaperView?.destroy();memoPaperView=null;memoViewState={view:'notes',page:0};cancelAnimationFrame(motionFrame);cancelAnimationFrame(fanMotion.frame);fanMotion.frame=0;panel.classList.remove('corner-animating');wheelConsumed=false;swipe=null;});
       panel.addEventListener('pointerdown',startDrag);
       panel.addEventListener('pointerdown',onTodoResizeStart);
       panel.addEventListener('dragstart',e=>{if(e.target.closest('.corner-inbox [data-corner-ref]'))e.preventDefault();});
       panel.addEventListener('dragstart',onTodoDragStart);
       panel.addEventListener('dragover',onTodoDragOver);
       panel.addEventListener('drop',onTodoDrop);
-      panel.addEventListener('cancel',e=>{e.preventDefault();if(cornerClosing)return;if(flipped.size)flipCard([...flipped][0],false);else closeCorner();});
+      panel.addEventListener('cancel',e=>{e.preventDefault();if(cornerClosing)return;if(activeModule==='memo'&&memoPaperView?.cancel())return;if(flipped.size)flipCard([...flipped][0],false);else closeCorner();});
       panel.addEventListener('click',onPanelClick);
       panel.addEventListener('change',onPanelChange);
       panel.addEventListener('input',onPanelInput);
@@ -261,11 +274,11 @@
         if(e.target.matches('.corner-card-front')&&['Enter',' '].includes(e.key)){e.preventDefault();activateCard(e.target.closest('[data-corner-card]').dataset.cornerCard);}
       });
       panel.addEventListener('wheel',onWheel,{passive:false});
-      panel.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!e.target.closest('button,a,input,select,.corner-back-scroll'))swipe={x:e.clientX,y:e.clientY};});
+      panel.addEventListener('pointerdown',e=>{if(activeModule!=='memo'&&e.pointerType==='touch'&&!e.target.closest('button,a,input,select,.corner-back-scroll'))swipe={x:e.clientX,y:e.clientY};});
       panel.addEventListener('pointerup',e=>{if(!swipe||drag?.active)return;const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;swipe=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3){navigate(Math.sign(-dx));swallowClickUntil=performance.now()+400;}});
       panel.addEventListener('pointercancel',()=>{swipe=null;});
     }
-    entryAnchor=null;inboxExpanded=null;flipped.clear();coverOpen.clear();wheelLast=0;wheelConsumed=false;wheelSum=0;wheelLock=0;memoFocusId=null;memoWheelLock=0;panel.setAttribute('aria-label',meta.panelName||meta.name);panel.querySelector('.dialog-heading h2')?.replaceChildren(document.createTextNode(meta.panelName||meta.name));panel.dataset.cornerModule=activeModule;const groups=collection().groups;activeId=groups.find(g=>g.id===groupId)?.id||groups.find(g=>!isInbox(g))?.id||ADD_CARD;syncCornerThemePresentation();renderPanel();
+    entryAnchor=null;inboxExpanded=null;flipped.clear();coverOpen.clear();wheelLast=0;wheelConsumed=false;wheelSum=0;wheelLock=0;panel.setAttribute('aria-label',meta.panelName||meta.name);panel.querySelector('.dialog-heading h2')?.replaceChildren(document.createTextNode(meta.panelName||meta.name));panel.dataset.cornerModule=activeModule;const groups=collection().groups;activeId=groups.find(g=>g.id===groupId)?.id||groups.find(g=>!isInbox(g))?.id||ADD_CARD;syncCornerThemePresentation();renderPanel();
     const r=origin?.getBoundingClientRect()||{left:innerWidth/2,top:innerHeight,width:0,height:0};
     const point=event?.detail&&Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)?{x:event.clientX,y:event.clientY}:{x:r.left+r.width/2,y:r.top+r.height/2};
     panel._orbitRevealPoint=event?.detail?.orbit?point:null;
@@ -293,28 +306,78 @@
     coverOpen.clear();
     syncCornerThemePresentation();
     for(const el of panel.querySelectorAll('[data-corner-card]')){const g=collection().groups.find(g=>g.id===el.dataset.cornerCard);if(!g)continue;el.querySelector('.corner-card-logo').innerHTML=cardIcon(g);const empty=el.querySelector('.corner-empty-lines');if(empty)empty.innerHTML=cardIcon(g);const tmp=document.createElement('template');tmp.innerHTML=backCard(g);const choices=el.querySelector('.corner-icon-choices');if(choices)choices.innerHTML=tmp.content.querySelector('.corner-icon-choices').innerHTML;applyCardColor(el,g);}
-    origin=document.querySelector('#dock .corner-entry');moveEntry();syncCornerCords();cornerNotice('已切换为「'+(THEMES[cornerTheme()]?.name||THEMES[dockTheme()]?.name||cornerTheme())+'」');panel.querySelector('[data-corner-next-theme]').blur();
+    origin=document.querySelector('#dock .corner-entry');moveEntry();syncCornerCords();cornerNotice('已切换为「'+(THEMES[cornerTheme()]?.name||THEMES[dockTheme()]?.name||cornerTheme())+'」');panel.querySelector('[data-corner-next-theme]')?.blur();
   }
   let noticeTimer;
-  function cornerNotice(message){let el=panel.querySelector('.corner-top-notice');if(!el){el=document.createElement('div');el.className='corner-top-notice';el.setAttribute('role','status');el.setAttribute('aria-live','polite');panel.append(el);}el.textContent=message;el.classList.add('show');clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>el.classList.remove('show'),2200);}
+  function cornerNotice(message){let el=panel.querySelector('.corner-top-notice');if(!el){el=document.createElement('div');el.className='corner-top-notice';el.setAttribute('role','status');el.setAttribute('aria-live','polite');appendCornerNode(el);}el.textContent=message;el.classList.add('show');clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>el.classList.remove('show'),2200);}
+
+  let moduleMenu,moduleMenuTimer,moduleSwitchBusy=false;
+  function hideModuleMenu(){clearTimeout(moduleMenuTimer);if(moduleMenu)moduleMenu.hidden=true;panel?.querySelector('[data-corner-next-theme]')?.setAttribute('aria-expanded','false');}
+  async function switchCornerModule(id){
+    hideModuleMenu();if(moduleSwitchBusy||!panel?.open||id===activeModule||!enabledCornerModuleIds().includes(id))return;
+    if(id==='toolbox'){cornerNotice('敬请期待');return;}
+    moduleSwitchBusy=true;const body=panel.querySelector('.corner-body');
+    try{
+      if(!reduced())await body.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(-6px)'}],{duration:110,easing:'ease-out',fill:'forwards'}).finished.catch(()=>{});
+      if(!panel.open)return;
+      memoRenderToken++;memoPaperView?.destroy();memoPaperView=null;memoViewState={view:'notes',page:0};
+      finishDrag(true);flipped.clear();coverOpen.clear();inboxExpanded=null;panel.classList.remove('memo-editor-mode');
+      activeModule=id;const meta=moduleMeta();panel.dataset.cornerModule=id;panel.setAttribute('aria-label',meta.panelName||meta.name);
+      const groups=collection().groups;activeId=groups.find(g=>!isInbox(g))?.id||ADD_CARD;
+      await renderPanel();syncCornerCords();
+      body.getAnimations().forEach(a=>a.cancel());
+      if(!reduced())body.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:240,easing:'cubic-bezier(.2,.7,.3,1)'});
+    }finally{moduleSwitchBusy=false;if(!panel.open)body.getAnimations().forEach(a=>a.cancel());}
+  }
+  function showModuleMenu(trigger){
+    clearTimeout(moduleMenuTimer);if(moduleSwitchBusy)return;
+    if(!moduleMenu){moduleMenu=document.createElement('div');moduleMenu.className='corner-module-menu';moduleMenu.id='corner-module-menu';moduleMenu.setAttribute('role','menu');moduleMenu.setAttribute('aria-label','切换我的一隅模块');appendCornerNode(moduleMenu);
+      moduleMenu.addEventListener('pointerenter',()=>clearTimeout(moduleMenuTimer));moduleMenu.addEventListener('pointerleave',()=>{moduleMenuTimer=setTimeout(hideModuleMenu,160)});
+    }
+    moduleMenu.innerHTML=enabledCornerModuleIds().map(id=>'<button type="button" role="menuitem" data-corner-module-target="'+id+'" '+(id===activeModule?'aria-current="true"':'')+'>'+moduleIcon(id)+'<span>'+esc(cornerModuleConfig(id).panelName||cornerModuleConfig(id).entryName||cornerModuleConfig(id).name)+'</span>'+(id===activeModule?'<small>✓</small>':'')+'</button>').join('');
+    const rect=trigger.getBoundingClientRect();moduleMenu.style.left=Math.max(12,Math.min(rect.left,innerWidth-244))+'px';moduleMenu.style.top=(rect.bottom+8)+'px';moduleMenu.hidden=false;trigger.setAttribute('aria-expanded','true');
+  }
+  function bindModuleHeader(){
+    const decorate=()=>{const title=panel.querySelector('[data-corner-next-theme]');if(!title||title.dataset.moduleTitle)return;
+      if(activeModule==='todo'){const heading=title.closest('.corner-stage-heading');panel.querySelector('.corner-body').append(heading);}
+      title.dataset.moduleTitle='true';title.title='点击切换下一个模块，悬停选择模块';title.setAttribute('aria-label',(moduleMeta().panelName||moduleMeta().name)+'，切换模块');title.setAttribute('aria-haspopup','menu');title.setAttribute('aria-expanded','false');title.setAttribute('aria-controls','corner-module-menu');
+      title.insertAdjacentHTML('beforeend','<span class="corner-module-title-icon" aria-hidden="true">'+glyph('<path d="m7 4-4 4 4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>')+'</span>');
+    };
+    new MutationObserver(decorate).observe(panel,{childList:true,subtree:true});
+    panel.addEventListener('pointerover',e=>{const title=e.target.closest('[data-corner-next-theme]');if(title&&e.pointerType!=='touch'&&!title.contains(e.relatedTarget))showModuleMenu(title);});
+    panel.addEventListener('pointerout',e=>{const title=e.target.closest('[data-corner-next-theme]');if(title&&!title.contains(e.relatedTarget))moduleMenuTimer=setTimeout(hideModuleMenu,160);});
+    panel.addEventListener('click',e=>{const title=e.target.closest('[data-corner-next-theme]'),target=e.target.closest('[data-corner-module-target]');
+      if(!title&&!target){if(!e.target.closest('.corner-module-menu'))hideModuleMenu();return;}
+      e.preventDefault();e.stopImmediatePropagation();const ids=enabledCornerModuleIds();void switchCornerModule(target?.dataset.cornerModuleTarget||ids[(ids.indexOf(activeModule)+1)%ids.length]);
+    },true);
+    panel.addEventListener('keydown',e=>{const title=e.target.closest('[data-corner-next-theme]');if(title&&e.key==='ArrowDown'){e.preventDefault();e.stopImmediatePropagation();showModuleMenu(title);moduleMenu.querySelector('button')?.focus();}else if(e.key==='Escape'&&moduleMenu&&!moduleMenu.hidden){e.preventDefault();e.stopImmediatePropagation();hideModuleMenu();panel.querySelector('[data-corner-next-theme]')?.focus();}},true);
+    panel.addEventListener('close',hideModuleMenu);
+  }
   function syncCornerCords(){
     if(!panel?.open)return;
-    for(const [kind,selector] of [['color','.color-pull-cord'],['mode','.mode-pull-cord']]){
+    const cords=[['color','.color-pull-cord'],['mode','.mode-pull-cord'],['fullscreen','.mode-pull-cord']];
+    for(const [kind,selector] of cords){
       const source=document.querySelector('body>'+selector);if(!source)continue;
       let cord=panel.querySelector('[data-corner-cord="'+kind+'"]');
-      if(!cord){cord=source.cloneNode(true);cord.removeAttribute('id');cord.dataset.cornerCord=kind;cord.classList.add('corner-pull-cord');panel.append(cord);let start=null,pull=0,suppress=false;
-        const change=()=>{if(kind==='mode'){prefs.mode={light:'dark',dark:'system',system:'light'}[prefs.mode||'system'];for(const o of Object.values(overrides))if(o&&o.mode)o.mode=prefs.mode;persist();apply();for(const el of panel.querySelectorAll('[data-corner-card]'))applyCardColor(el,collection().groups.find(g=>g.id===el.dataset.cornerCard));syncCornerCords();cornerNotice('已切换为'+({light:'日间模式',dark:'夜间模式',system:'跟随系统'}[prefs.mode]));}else{const [color,name]=nextPalette();prefs.color=color;prefs.explicitColor=color;persist();apply();syncCornerCords();cornerNotice('已切换为「'+name+'」');}};
+      if(!cord){cord=source.cloneNode(true);cord.removeAttribute('id');cord.dataset.cornerCord=kind;cord.classList.add('corner-pull-cord');appendCornerNode(cord);let start=null,pull=0,suppress=false;
+        if(kind==='fullscreen'){cord.classList.add('corner-fullscreen-cord');cord.removeAttribute('data-next-mode');cord.innerHTML='<span class="mode-cord-line"></span><span class="mode-cord-handle">'+glyph('<path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/>')+'</span>';}
+        const syncFullscreen=()=>{const active=document.fullscreenElement===fullscreenShell,handle=cord.querySelector('.mode-cord-handle');cord.dataset.fullscreen=String(active);cord.title=active?'点击或下拉，退出全屏':'点击或下拉，进入全屏';cord.setAttribute('aria-label',cord.title);if(handle)handle.innerHTML=glyph(active?'<path d="M8 3v5H3M16 3v5h5M3 16h5v5M21 16h-5v5"/>':'<path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/>');};
+        if(kind==='fullscreen')document.addEventListener('fullscreenchange',syncFullscreen);
+        const toggleFullscreen=()=>{const method=document.fullscreenElement?document.exitFullscreen:fullscreenShell?.requestFullscreen;if(typeof method!=='function'){cornerNotice('当前浏览器不支持全屏');return;}Promise.resolve(method.call(document.fullscreenElement?document:fullscreenShell)).then(syncFullscreen).catch(()=>cornerNotice('当前浏览器无法切换全屏'));};
+        const change=()=>{if(kind==='fullscreen'){toggleFullscreen();return;}if(kind==='mode'){prefs.mode={light:'dark',dark:'system',system:'light'}[prefs.mode||'system'];for(const o of Object.values(overrides))if(o&&o.mode)o.mode=prefs.mode;persist();apply();for(const el of panel.querySelectorAll('[data-corner-card]'))applyCardColor(el,collection().groups.find(g=>g.id===el.dataset.cornerCard));syncCornerCords();cornerNotice('已切换为'+({light:'日间模式',dark:'夜间模式',system:'跟随系统'}[prefs.mode]));}else{const [color,name]=nextPalette();prefs.color=color;prefs.explicitColor=color;persist();apply();syncCornerCords();cornerNotice('已切换为「'+name+'」');}};
         const release=go=>{cord.style.transform='';if(!reduced())cord.animate([{transform:'translateY('+Math.max(pull,12)+'px)'},{transform:'translateY(-3px)',offset:.6},{transform:'translateY(0)'}],{duration:400,easing:'ease-out'});pull=0;if(go)change();};
-        cord.onpointerdown=e=>{if(e.button!==0)return;start=e.clientY;cord.setPointerCapture(e.pointerId);};
-        cord.onpointermove=e=>{if(start===null)return;pull=Math.max(0,Math.min(65,(e.clientY-start)*.65));cord.style.transform='translateY('+pull+'px)';};
-        cord.onpointerup=e=>{if(start===null)return;const dy=e.clientY-start;start=null;suppress=true;release(dy>=24||Math.abs(dy)<6);setTimeout(()=>suppress=false,0);};
-        cord.onpointercancel=()=>{start=null;release(false);};
-        cord.onclick=e=>{e.stopPropagation();if(!suppress)release(true);};
+        cord.onpointerdown=e=>{e.stopPropagation();if(e.button!==0)return;start=e.clientY;cord.setPointerCapture(e.pointerId);};
+        cord.onpointermove=e=>{if(start===null)return;e.stopPropagation();pull=Math.max(0,Math.min(65,(e.clientY-start)*.65));cord.style.transform='translateY('+pull+'px)';};
+        cord.onpointerup=e=>{if(start===null)return;e.preventDefault();e.stopPropagation();const dy=e.clientY-start;start=null;suppress=true;release(dy>=24||Math.abs(dy)<6);setTimeout(()=>suppress=false,0);};
+        cord.onpointercancel=e=>{e.stopPropagation();start=null;release(false);};
+        cord.onclick=e=>{e.preventDefault();e.stopPropagation();if(!suppress)release(true);};
       }
       const r=source.getBoundingClientRect();cord.style.left=r.left+'px';cord.style.right='auto';cord.style.top=r.top+'px';cord.style.width=r.width+'px';cord.style.height=r.height+'px';
-      cord.title=kind==='mode'?'点击或下拉，切换日夜模式':'点击或下拉，切换主颜色';cord.setAttribute('aria-label',cord.title);
+      if(kind==='fullscreen'){cord.style.left=(r.left-68)+'px';cord.style.height='84px';}
+      cord.title=kind==='fullscreen'?(document.fullscreenElement===fullscreenShell?'点击或下拉，退出全屏':'点击或下拉，进入全屏'):kind==='mode'?'点击或下拉，切换日夜模式':'点击或下拉，切换主颜色';cord.setAttribute('aria-label',cord.title);
       if(kind==='color'){cord.style.setProperty('--cord-color',prefs.color||effective().color);cord.style.setProperty('--next-color',nextPalette()[0]);}
-      else cord.dataset.nextMode=source.dataset.nextMode;
+      else if(kind==='mode')cord.dataset.nextMode=source.dataset.nextMode;
+      else if(kind==='fullscreen'){const handle=cord.querySelector('.mode-cord-handle'),active=document.fullscreenElement===fullscreenShell;if(handle)handle.innerHTML=glyph(active?'<path d="M8 3v5H3M16 3v5h5M3 16h5v5M21 16h-5v5"/>':'<path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/>');cord.dataset.fullscreen=String(active);}
     }
   }
   addEventListener('resize',syncCornerCords);
@@ -325,7 +388,7 @@
     entrySlot=document.createElement('span');entrySlot.className='corner-entry-slot';entrySlot.style.cssText='display:block;width:'+r.width+'px;height:'+r.height+'px';origin.before(entrySlot);
     origin.classList.add('corner-close-entry');origin.style.cssText='position:fixed;left:'+r.left+'px;top:'+r.top+'px;width:'+r.width+'px;height:'+r.height+'px;color:'+style.color;
     origin.innerHTML='<span class="corner-close-symbol">'+glyph('<path d="m6 6 12 12M18 6 6 18"/>')+'</span><span class="dock-label">关闭</span>';
-    origin.setAttribute('aria-label','关闭我的一隅');origin.title='关闭我的一隅';panel.append(origin);
+    origin.setAttribute('aria-label','关闭我的一隅');origin.title='关闭我的一隅';appendCornerNode(origin);
     origin.onclick=e=>{e.preventDefault();e.stopPropagation();closeCorner();};
   }
   function restoreEntry(){
@@ -337,14 +400,15 @@
   }
   function renderPanel() {
 
-    if(activeModule==='memo'){renderMemoPanel();return;}
+    if(activeModule==='memo')return renderMemoPanel();
     if(activeModule==='todo'){renderTodoPanel();return;}
 
     const listScroll=new Map([...panel.querySelectorAll('[data-corner-card]')].map(el=>[el.dataset.cornerCard,el.querySelector('.corner-links')?.scrollTop||0]));
     const {groups}=collection(),entries=sources(),meta=moduleMeta();panel.dataset.cornerModule=activeModule;
     const panelName=meta.panelName||meta.name;
     const content='<div class="corner-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2><button type="button" data-corner-next-theme title="点击切换主题" aria-label="'+esc(panelName)+'，点击切换下一个主题">'+esc(panelName)+'</button></h2><span class="corner-theme-art" aria-hidden="true"></span></div><p>'+esc(meta.subtitle)+'</p></div><button class="corner-deck-arrow previous" data-corner-page="-1" aria-label="上一组卡片">'+glyph('<path d="m15 5-7 7 7 7"/>')+'</button><div class="corner-deck" aria-label="'+esc(panelName)+'分组卡牌" title="滚轮切换 · Shift + 滚轮快速切换">'+groups.map((g,i)=>card(g,i,entries)).join('')+newCardMarkup()+'</div><button class="corner-deck-arrow next" data-corner-page="1" aria-label="下一组卡片">'+glyph('<path d="m9 5 7 7-7 7"/>')+'</button></div>';
-    let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';panel.append(body);}body.innerHTML=content;
+    let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';appendCornerNode(body);}body.innerHTML=content;
+    const heading=body.querySelector('.corner-stage-heading');if(heading)body.append(heading);
     syncCornerThemePresentation();
     layoutFan();
     for(const el of panel.querySelectorAll('[data-corner-card]')){el.querySelector('.corner-links').scrollTop=listScroll.get(el.dataset.cornerCard)||0;if(el.classList.contains('corner-inbox'))syncInbox(el);else{syncFaces(el);el.classList.add('is-settled');}applyCardColor(el,groups.find(g=>g.id===el.dataset.cornerCard));}
@@ -352,29 +416,17 @@
   }
   function memoLibrary(){return moduleCollection('memo');}
   function memoTime(value){const date=new Date(Number(value)||Date.now()),today=new Date();const pad=n=>String(n).padStart(2,'0');if(date.toDateString()===today.toDateString())return '今日 '+pad(date.getHours())+':'+pad(date.getMinutes());return date.getFullYear()+'.'+pad(date.getMonth()+1)+'.'+pad(date.getDate());}
-  function memoNotes(){return [...(panel?.querySelectorAll('.memo-note')||[])];}
-  function syncMemoFocus(){for(const note of memoNotes())note.classList.toggle('is-focus',note.dataset.memoCard===memoFocusId);}
-  function memoScrollTo(id,behavior=reduced()?'auto':'smooth'){
-    const board=panel?.querySelector('.memo-board'),note=panel?.querySelector('.memo-note[data-memo-card="'+id+'"]');
-    if(!board||!note)return;
-    const left=note.offsetLeft+note.offsetWidth/2-board.clientWidth/2;
-    board.scrollTo({left:Math.max(0,Math.min(board.scrollWidth-board.clientWidth,left)),behavior});
-  }
-  function focusMemo(direction){
-    const notes=memoNotes();if(!notes.length)return;
-    let index=notes.findIndex(note=>note.dataset.memoCard===memoFocusId);if(index<0){index=0;memoFocusId=notes[0].dataset.memoCard;}
-    const next=Math.max(0,Math.min(notes.length-1,index+(direction>0?1:-1)));memoFocusId=notes[next].dataset.memoCard;syncMemoFocus();memoScrollTo(memoFocusId);
-  }
-  function memoNoteMarkup(note,index){const editing=memoEditingId===note.id,focused=memoFocusId===note.id;return '<article class="memo-note '+(editing?'is-editing ':'')+(focused?'is-focus':'')+'" data-memo-card="'+note.id+'" style="--memo-order:'+index+';--memo-y:'+((note.__memoCount-index-1)*28)+'px;--memo-tilt:'+((index%2?-1:1)*1.2)+'deg"><div class="memo-note-paper"><div class="memo-note-rule" aria-hidden="true"></div><div class="memo-note-head"><span class="memo-note-icon" aria-hidden="true">'+esc(note.icon||'✦')+'</span><span class="memo-note-time">'+esc(memoTime(note.updatedAt))+'</span></div><h3>'+esc(note.title||'无题')+'</h3><p>'+esc(note.content||'还没有写下什么。')+'</p><footer><span>小记 · '+String(index+1).padStart(2,'0')+'</span><button type="button" class="memo-note-edit" data-memo-edit="'+note.id+'" aria-label="编辑 '+esc(note.title||'这则小记')+'">编辑</button></footer></div></article>';}
-  function memoEditorMarkup(note){if(!note)return '';return '<section class="memo-editor" role="dialog" aria-modal="true" aria-label="编辑小记"><div class="memo-editor-top"><span class="memo-editor-kicker">正在写下</span><button type="button" data-memo-done aria-label="完成编辑" title="完成">'+glyph('<path d="m5 12 4 4L19 6"/>')+'</button></div><label class="memo-editor-title"><span>标题</span><input data-memo-title="'+note.id+'" maxlength="60" value="'+esc(note.title||'')+'" placeholder="给这一刻留一个名字"></label><label class="memo-editor-content"><span>内容</span><textarea data-memo-content="'+note.id+'" maxlength="2000" placeholder="让想法慢慢展开……">'+esc(note.content||'')+'</textarea></label><div class="memo-editor-meta"><span>'+esc(note.icon||'✦')+'</span><span>最后编辑于 '+esc(memoTime(note.updatedAt))+'</span></div></section>';}
   function renderMemoPanel(){
-    const library=memoLibrary(),notes=(Array.isArray(library.notes)?library.notes:[]).map((note,index)=>({...note,__memoOriginalIndex:index})).sort((a,b)=>(Number(a.updatedAt)||0)-(Number(b.updatedAt)||0)||a.__memoOriginalIndex-b.__memoOriginalIndex).map(note=>({...note,__memoCount:library.notes.length})),meta=moduleMeta();panel.dataset.cornerModule='memo';
-    if(notes.length&&!notes.some(note=>note.id===memoFocusId))memoFocusId=notes[notes.length-1].id;
-    const editor=memoEditingId?memoEditorMarkup(notes.find(note=>note.id===memoEditingId)):'';
-    const panelName=meta.panelName||meta.name;
-    const content='<div class="corner-stage memo-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2><button type="button" data-corner-next-theme title="点击切换主题" aria-label="'+esc(panelName)+'，点击切换下一个主题">'+esc(panelName)+'</button></h2><span class="corner-theme-art" aria-hidden="true"></span></div><p>'+esc(meta.subtitle)+'</p></div><div class="memo-board" aria-label="小记卡片，滚轮移动"><div class="memo-track">'+(notes.length?notes.map(memoNoteMarkup).join(''):'<div class="memo-empty"><span>✦</span><p>还没有留下小记</p><small>把此刻的灵感，收进一张纸里</small></div>')+'<button type="button" class="memo-add" data-memo-new aria-label="新建小记"><span>＋</span><strong>写下一笔</strong><small>让念头有处可去</small></button></div></div>'+editor+'</div>';
-    let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';panel.append(body);}body.innerHTML=content;panel.classList.toggle('memo-editor-mode',Boolean(editor));syncCornerThemePresentation();
-    const title=panel.querySelector('[data-memo-title]');requestAnimationFrame(()=>{if(title&&editor)title.focus();if(memoFocusId)memoScrollTo(memoFocusId,editor?'auto':'smooth')});
+    if(memoPaperView)memoViewState=memoPaperView.state;
+    memoPaperView?.destroy();memoPaperView=null;
+    const token=++memoRenderToken,meta=moduleMeta(),memoOwner=owner();panel.dataset.cornerModule='memo';
+    panel.classList.remove('memo-editor-mode');
+    let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';appendCornerNode(body);}
+    const root=document.createElement('div');body.replaceChildren(root);syncCornerThemePresentation();
+    return import('./memo-paper.js?paper=20260924').then(({mountMemoPaper})=>{
+      if(token!==memoRenderToken||!root.isConnected)return;
+      memoPaperView=mountMemoPaper(root,{library:memoLibrary(),save:persist,isCurrent:()=>signed&&owner()===memoOwner,escape:esc,time:memoTime,toast,playSound:playCardSound,state:memoViewState,title:meta.panelName||meta.name,subtitle:meta.subtitle});
+    }).catch(()=>{if(token!==memoRenderToken)return;root.className='memo-paper-load-error';root.textContent='小记暂时未能加载，请重试。';const retry=document.createElement('button');retry.textContent='重试';retry.onclick=renderMemoPanel;root.append(retry);});
   }
   function card(g,index,entries) {
     const skin=cornerThemeSkin();
@@ -435,8 +487,8 @@
     const library=todoLibrary(),meta=moduleMeta(),view=library.view||'week';panel.dataset.cornerModule='todo';
     const inbox=(library.inbox||[]).map(item=>'<div class="todo-inbox-item" draggable="true" data-todo-inbox="'+item.id+'"><span>○</span>'+esc(item.title)+'</div>').join('');
     const board=(library.tasks||[]).map(t=>'<article class="todo-board-item todo-'+(t.color||'blue')+'" draggable="true" data-todo-task="'+t.id+'"><span>○</span><strong>'+esc(t.title)+'</strong><small>'+esc(t.date||'未排期')+'</small></article>').join('');
-    const content='<div class="corner-stage todo-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2>'+esc(meta.panelName||meta.name)+'</h2></div><p>把要做的事，安放在合适的时刻</p></div><div class="todo-toolbar"><div class="todo-view-switch"><button type="button" data-todo-view="week" class="'+(view==='week'?'is-active':'')+'">周视图</button><button type="button" data-todo-view="board" class="'+(view==='board'?'is-active':'')+'">看板视图</button></div><button type="button" class="todo-add" data-todo-add>＋ 新增事项</button></div><div class="todo-layout"><aside class="todo-inbox"><div class="todo-inbox-title"><strong>收集箱</strong><span>'+((library.inbox||[]).length)+'</span></div><p>还没决定日期的事项，先放在这里。</p><div class="todo-inbox-list">'+(inbox||'<small class="todo-empty">收集箱很安静</small>')+'</div><form class="todo-inbox-form" data-todo-form><input name="title" placeholder="添加一件待安排的事" aria-label="添加待安排事项"><button>添加</button></form></aside><main class="todo-main">'+(view==='week'?todoWeekMarkup(library):'<div class="todo-board">'+['today','doing','done'].map((status,i)=>'<section class="todo-board-column" data-todo-status="'+status+'"><header><strong>'+['今天','进行中','已完成'][i]+'</strong><span>'+((library.tasks||[]).filter(t=>(t.status||'today')===status).length)+'</span></header>'+((library.tasks||[]).filter(t=>(t.status||'today')===status).map(t=>'<article class="todo-board-item todo-'+(t.color||'blue')+'" draggable="true" data-todo-task="'+t.id+'"><span>○</span><strong>'+esc(t.title)+'</strong><small>'+esc(t.date||'未排期')+'</small></article>').join('')||'<div class="todo-board-empty">把事项拖到这里</div>')+'</section>').join('')+'</div>')+'</main></div></div>';
-    let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';panel.append(body);}body.innerHTML=content;syncCornerThemePresentation();
+    const content='<div class="corner-stage todo-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2><button type="button" data-corner-next-theme>'+esc(meta.panelName||meta.name)+'</button></h2></div><p>把要做的事，安放在合适的时刻</p></div><div class="todo-toolbar"><div class="todo-view-switch"><button type="button" data-todo-view="week" aria-pressed="'+(view==='week')+'" class="'+(view==='week'?'is-active':'')+'">周视图</button><button type="button" data-todo-view="board" aria-pressed="'+(view==='board')+'" class="'+(view==='board'?'is-active':'')+'">看板视图</button></div><button type="button" class="todo-add" data-todo-add>＋ 新增事项</button></div><div class="todo-layout"><aside class="todo-inbox"><div class="todo-inbox-title"><strong>收集箱</strong><span>'+((library.inbox||[]).length)+'</span></div><p>还没决定日期的事项，先放在这里。</p><div class="todo-inbox-list">'+(inbox||'<small class="todo-empty">收集箱很安静</small>')+'</div><form class="todo-inbox-form" data-todo-form><input name="title" placeholder="添加一件待安排的事" aria-label="添加待安排事项"><button>添加</button></form></aside><main class="todo-main">'+(view==='week'?todoWeekMarkup(library):'<div class="todo-board">'+['today','doing','done'].map((status,i)=>'<section class="todo-board-column" data-todo-status="'+status+'"><header><strong>'+['今天','进行中','已完成'][i]+'</strong><span>'+((library.tasks||[]).filter(t=>(t.status||'today')===status).length)+'</span></header>'+((library.tasks||[]).filter(t=>(t.status||'today')===status).map(t=>'<article class="todo-board-item todo-'+(t.color||'blue')+'" draggable="true" data-todo-task="'+t.id+'"><span>○</span><strong>'+esc(t.title)+'</strong><small>'+esc(t.date||'未排期')+'</small></article>').join('')||'<div class="todo-board-empty">把事项拖到这里</div>')+'</section>').join('')+'</div>')+'</main></div></div>';
+    let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';appendCornerNode(body);}body.innerHTML=content;body.append(body.querySelector('.todo-view-switch'));syncCornerThemePresentation();
   }
   function backCard(g){
     const choices=themeChoices();if(!followsTheme(g)&&g.icon&&!choices.some(x=>x.id===g.icon))choices.push({id:g.icon,name:'当前图标'});
@@ -513,31 +565,19 @@
     if(b?.hasAttribute('data-corner-cancel-delete')){el.querySelector('.corner-delete-confirm').hidden=true;return;}
     if(b?.dataset.cornerConfirmDelete){if(isInbox(g))return;collection().groups=collection().groups.filter(x=>x.id!==g.id);flipped.delete(g.id);persist();renderPanel();return;}
     if(b?.dataset.cornerAddLinks){if(!isInbox(g))openPicker(g.id);return;}
-    if(b?.dataset.cornerRemove){g.refs=g.refs.filter(r=>r.id!==b.dataset.cornerRemove);persist();refreshLinks([g.id]);if(isInbox(g)){panel.querySelector('.corner-feedback')?.remove();const notice=document.createElement('div');notice.className='corner-feedback';notice.setAttribute('role','status');notice.textContent='已移出成功';panel.append(notice);setTimeout(()=>notice.remove(),2800);}return;}
+    if(b?.dataset.cornerRemove){g.refs=g.refs.filter(r=>r.id!==b.dataset.cornerRemove);persist();refreshLinks([g.id]);if(isInbox(g)){panel.querySelector('.corner-feedback')?.remove();const notice=document.createElement('div');notice.className='corner-feedback';notice.setAttribute('role','status');notice.textContent='已移出成功';appendCornerNode(notice);setTimeout(()=>notice.remove(),2800);}return;}
     const ref=b?.dataset.cornerRefUp||b?.dataset.cornerRefDown;
     if(ref){const at=g.refs.findIndex(r=>r.id===ref),to=at+(b.dataset.cornerRefUp?-1:1);if(to>=0&&to<g.refs.length){[g.refs[at],g.refs[to]]=[g.refs[to],g.refs[at]];persist();renderPanel();}return;}
     if(e.target.closest('.corner-card-back')&&!e.target.closest('a,button,input,select,label,fieldset,.corner-appearance-tabs,.corner-icon-choices,.corner-color-options,.corner-delete-confirm')){flipCard(g.id,false);return;}
     if(e.target.closest('.corner-card-front')&&!e.target.closest('a,button,input,select')){if(isInbox(g)){activeId=g.id;layoutFan(true);}else activateCard(g.id);}
   }
   function onMemoPanelClick(e){
-    if(performance.now()<swallowClickUntil){e.preventDefault();e.stopPropagation();return;}
-    if(e.target.closest('[data-corner-next-theme]')){cycleCornerTheme();return;}
-    const done=e.target.closest('[data-memo-done]');if(done){memoFocusId=memoEditingId;memoEditingId=null;renderPanel();return;}
-    const add=e.target.closest('[data-memo-new]');if(add){const library=memoLibrary(),now=Date.now(),note={id:uid(),title:'未命名的灵感',content:'',updatedAt:now,icon:'✦'};library.notes.push(note);persist();memoEditingId=note.id;memoFocusId=note.id;renderPanel();return;}
-    const edit=e.target.closest('[data-memo-edit]');if(edit){const note=memoLibrary().notes.find(item=>item.id===edit.dataset.memoEdit);if(note){memoFocusId=note.id;memoEditingId=note.id;renderPanel();}return;}
-    const card=e.target.closest('[data-memo-card]');if(card){const note=memoLibrary().notes.find(item=>item.id===card.dataset.memoCard);if(note){memoFocusId=note.id;syncMemoFocus();memoScrollTo(note.id);}return;}
-    if(!e.target.closest('button,a,input,textarea,select,.corner-pull-cord,.memo-editor,.corner-close-entry,.memo-board')){
-      const board=panel.querySelector('.memo-board'),bottom=board?.getBoundingClientRect().bottom||innerHeight;
-      if(e.clientY>bottom+28)closeCorner();
-    }
+    if(e.target.closest('[data-corner-next-theme]'))cycleCornerTheme();
   }
+  addEventListener('shiyu-account-state',()=>{if(panel?.open&&activeModule==='memo')panel.close();});
+  addEventListener('storage',event=>{if(!panel?.open||activeModule!=='memo'||(event.key!==null&&event.key!=='yiyu-prototype-v1'))return;try{const state=JSON.parse(event.newValue||'null');if(!state?.signed||(state.prefs?.accountProfile?.id||'local-account')!==owner())panel.close();}catch{panel.close();}});
   function onPanelInput(e){
-    if(activeModule==='memo'){
-      const field=e.target.closest('[data-memo-title],[data-memo-content]');if(!field)return;
-      const note=memoLibrary().notes.find(item=>item.id===(field.dataset.memoTitle||field.dataset.memoContent));if(!note)return;
-      if(field.hasAttribute('data-memo-title'))note.title=field.value;else note.content=field.value;note.updatedAt=Date.now();persist();
-      const meta=panel.querySelector('.memo-editor-meta');if(meta)meta.lastElementChild.textContent='最后编辑于 '+memoTime(note.updatedAt);const card=panel.querySelector('[data-memo-card="'+note.id+'"]');if(card){card.querySelector('h3').textContent=note.title||'无题';card.querySelector('p').textContent=note.content||'还没有写下什么。';card.querySelector('.memo-note-time').textContent=memoTime(note.updatedAt);}return;
-    }
+    if(activeModule==='memo')return;
     const g=collection().groups.find(g=>g.id===e.target.closest('[data-corner-card]')?.dataset.cornerCard);if(!g||isInbox(g))return;
     if(e.target.matches('.corner-custom-color')){if(!window.ShiyuEntitlements?.require('corner-colors','custom','corner'))return;g.color=e.target.value;persist();const el=e.target.closest('.corner-card');applyCardColor(el,g);for(const c of el.querySelectorAll('[data-corner-color]'))c.setAttribute('aria-pressed','false');return;}
     if(e.target.hasAttribute('data-corner-name')){const name=e.target.value.trim();if(name){g.name=name;e.target.closest('.corner-card').querySelector('.corner-card-cover h3').textContent=name;persist();}}
@@ -564,10 +604,7 @@
   function navigate(direction,fast=false){if(flipped.size||drag?.active)return;const ids=[...collection().groups.map(g=>g.id),ADD_CARD],index=ids.indexOf(activeId),next=((index+direction)%ids.length+ids.length)%ids.length;if(next===index||!ids[next])return;activeId=ids[next];layoutFan(true,fast);playCardSound();}
   function onWheel(e){
     if(e.ctrlKey||drag?.active)return;
-    if(activeModule==='memo'){
-      if(e.target.closest('.memo-editor'))return;
-      const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;if(Math.abs(delta)<2)return;e.preventDefault();const now=performance.now();if(now<memoWheelLock)return;memoWheelLock=now+220;focusMemo(delta>0?1:-1);return;
-    }
+    if(activeModule==='memo')return;
     if(flipped.size){if(!e.target.closest('.corner-back-scroll'))e.preventDefault();e.stopPropagation();return;}
     const inner=e.target.closest('.corner-links');if(!e.shiftKey&&inner&&inner.scrollHeight>inner.clientHeight+2&&Math.abs(e.deltaY)>=Math.abs(e.deltaX)){e.stopPropagation();return;}
     if(e.target.closest('input,select'))return;e.preventDefault();
@@ -660,7 +697,7 @@
       if(type==='ref'){const g=findRef(id);if(g?.sort==='frequency'){g.refs=orderedRefs(g);g.sort='manual';}}
       const node=handle.closest(type==='group'?'.corner-card':'.corner-link');drag.node=node;drag.rect=node.getBoundingClientRect();drag.transform=getComputedStyle(node).transform;panel.classList.add('corner-dragging');panel.setPointerCapture(e.pointerId);
       if(type==='group'){node.classList.add('corner-held-card');node.style.transform=drag.transform;updateDragSlots();}
-      else{drag.ghost=node.cloneNode(true);drag.ghost.classList.add('corner-ref-ghost');drag.ghost.removeAttribute('data-corner-ref');for(const n of drag.ghost.querySelectorAll('[data-corner-drag-ref],[data-corner-remove]')){n.removeAttribute('data-corner-drag-ref');n.removeAttribute('data-corner-remove');}drag.ghost.style.width=drag.rect.width+'px';drag.ghost.setAttribute('aria-hidden','true');panel.append(drag.ghost);node.classList.add('corner-held-ref');}
+      else{drag.ghost=node.cloneNode(true);drag.ghost.classList.add('corner-ref-ghost');drag.ghost.removeAttribute('data-corner-ref');for(const n of drag.ghost.querySelectorAll('[data-corner-drag-ref],[data-corner-remove]')){n.removeAttribute('data-corner-drag-ref');n.removeAttribute('data-corner-remove');}drag.ghost.style.width=drag.rect.width+'px';drag.ghost.setAttribute('aria-hidden','true');appendCornerNode(drag.ghost);node.classList.add('corner-held-ref');}
       positionDrag(drag.x,drag.y);
     },320);
   }
@@ -717,7 +754,7 @@
       const stage=panel.querySelector('.todo-stage'),bottom=stage?.getBoundingClientRect().bottom||innerHeight;
       if(e.clientY>bottom){closeCorner();return;}
     }
-    const view=e.target.closest('[data-todo-view]');if(view){todoLibrary().view=view.dataset.todoView;persist();renderTodoPanel();return;}
+    const view=e.target.closest('[data-todo-view]');if(view){todoLibrary().view=view.dataset.todoView;persist();renderTodoPanel();const layout=panel.querySelector('.todo-layout');if(layout&&!reduced())layout.animate([{opacity:.65,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}],{duration:220,easing:'cubic-bezier(.2,.7,.3,1)'});return;}
     const add=e.target.closest('[data-todo-add]');if(add){const title=prompt('给这件事留一个名字');if(title?.trim()){const l=todoLibrary(),d=todoWeekStart();l.tasks.push({id:uid(),title:title.trim(),date:todoDateKey(d),start:9*60,duration:60,color:'blue',status:'today'});persist();renderTodoPanel();}return;}
     const task=e.target.closest('[data-todo-task]');if(task&&!e.target.closest('[data-todo-resize]')){const item=todoLibrary().tasks.find(t=>t.id===task.dataset.todoTask);if(item){item.status=item.status==='done'?'today':'done';item.completed=item.status==='done';persist();renderTodoPanel();}return;}
   }
@@ -728,6 +765,100 @@
   function onTodoDrop(e){if(activeModule!=='todo')return;const zone=e.target.closest('.todo-day-column,.todo-board-column');if(!zone)return;e.preventDefault();const raw=e.dataTransfer.getData('text/plain'),l=todoLibrary();if(raw.startsWith('inbox:')){const id=raw.slice(6),item=(l.inbox||[]).find(x=>x.id===id);if(!item)return;const date=zone.dataset.todoDate||todoDateKey(todoWeekStart()),task={id:uid(),title:item.title,date,start:9*60,duration:60,color:'blue',status:zone.dataset.todoStatus||'today'};l.tasks.push(task);l.inbox=l.inbox.filter(x=>x.id!==id);}else if(raw.startsWith('task:')){const task=l.tasks.find(x=>x.id===raw.slice(5));if(!task)return;if(zone.dataset.todoDate)task.date=zone.dataset.todoDate;if(zone.dataset.todoStatus)task.status=zone.dataset.todoStatus;}persist();renderTodoPanel();}
   // Exact standalone file from the "悬浮菜单对话" task. An iframe isolates
   // its document-wide styles and wheel interaction from the existing home page.
+  function syncHomeOrbitFan(preview){
+    if(preview.id!=='corner-orbit-demo')return;
+    const doc=preview.contentDocument,win=preview.contentWindow,stage=doc.querySelector('.stage'),orbit=doc.querySelector('#orbit');
+    if(!stage||!orbit?._shiyuModuleState)return;
+    const enabled=document.body.dataset.view==='home';
+    stage.classList.toggle('is-home-fan',enabled);
+    if(!orbit._shiyuHomeFan){
+      const style=doc.createElement('style');style.id='shiyu-home-fan';
+      style.textContent=`
+        .stage.is-home-fan .menu-shell{opacity:1!important;transform:none!important;transition:none!important;pointer-events:none!important}
+        .stage.is-home-fan .orbit{clip-path:none!important;transform:none!important;opacity:1!important;transition:none!important;pointer-events:none!important}
+        .stage.is-home-fan .orbit::before,.stage.is-home-fan .orbit::after{display:none!important}
+        .stage.is-home-fan .menu-item{--fan-scale:1;left:50%;top:50%;width:clamp(64px,24vw,var(--fan-item-width,78px));height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:9px 4px;border:0;border-radius:20px;translate:-50% -50%;transform:translate3d(0,0,0) scale(.2);opacity:0;mask:none!important;-webkit-mask:none!important;color:var(--orbit-ink)!important;background:color-mix(in srgb,var(--orbit-surface) 94%,var(--orbit-accent))!important;box-shadow:0 5px 18px color-mix(in srgb,var(--orbit-ink) 9%,transparent);filter:none!important;pointer-events:none!important;transition:background .24s ease,box-shadow .24s ease;will-change:transform,opacity}
+        .stage.is-home-fan.is-hover.is-filled .menu-item{pointer-events:auto!important}
+        .stage.is-home-fan .menu-item:is(:hover,:focus-visible){background:color-mix(in srgb,var(--orbit-accent) 17%,var(--orbit-surface))!important;box-shadow:0 6px 20px color-mix(in srgb,var(--orbit-accent) 18%,transparent);filter:none!important}
+        .stage.is-home-fan .menu-item.is-selected{color:var(--orbit-on-accent)!important;background:var(--orbit-accent)!important;box-shadow:0 6px 22px color-mix(in srgb,var(--orbit-accent) 24%,transparent);filter:none!important}
+        .stage.is-home-fan .menu-item.is-selected::after{content:'';position:absolute;bottom:4px;width:16px;height:2px;border-radius:2px;background:var(--orbit-on-accent);opacity:.8}
+        .stage.is-home-fan .menu-item:focus-visible{outline:2px solid var(--orbit-accent);outline-offset:4px}
+        .stage.is-home-fan .menu-item svg,.stage.is-home-fan .menu-item img{position:static!important;flex:none;width:21px!important;height:21px!important;transform:none!important;stroke-width:1.6!important;color:var(--orbit-ink);transition:none!important}
+        .stage.is-home-fan .menu-item span{position:static!important;width:100%;transform:none!important;font-size:12px!important;line-height:1.2!important;letter-spacing:0!important;font-weight:500!important;text-shadow:none!important;overflow:hidden;text-overflow:ellipsis;display:block!important;white-space:nowrap}
+        .stage.is-home-fan .menu-item.is-selected span{font-weight:650!important}
+        .stage.is-home-fan .menu-item.is-selected :is(svg,span){color:var(--orbit-on-accent)!important}
+      `;
+      doc.head.append(style);
+      let visible=false,lastSignature='',wheelTotal=0,lastWheel=0,lastTrackpadStep=0,lastDirection=0;
+      const animations=new Map(),positions=new Map();
+      const mod=(value,length)=>((value%length)+length)%length;
+      const transform=(x,y,scale=1)=>`translate3d(${x}px,${y}px,0) scale(${scale})`;
+      const snapshot=item=>{
+        const css=win.getComputedStyle(item),matrix=new win.DOMMatrix(css.transform);
+        return {x:matrix.m41,y:matrix.m42,scale:Math.hypot(matrix.a,matrix.b)||1,opacity:Number(css.opacity)};
+      };
+      const animate=(item,frames,options)=>{
+        animations.get(item)?.cancel();
+        const end=frames[frames.length-1];item.style.transform=end.transform;item.style.opacity=end.opacity;
+        if(reduced())return;
+        const animation=item.animate(frames,{duration:480,fill:'backwards',easing:'cubic-bezier(.22,1,.36,1)',...options});animations.set(item,animation);
+        animation.finished.then(()=>{if(animations.get(item)===animation)animations.delete(item)},()=>{});
+      };
+      const render=(animateChange=true)=>{
+        const active=stage.classList.contains('is-home-fan'),state=orbit._shiyuModuleState;
+        if(!active){
+          if(lastSignature){animations.forEach(animation=>animation.cancel());animations.clear();positions.clear();state.items.forEach(item=>{item.style.removeProperty('transform');item.style.removeProperty('opacity');item.removeAttribute('aria-current');item.removeAttribute('tabindex')});}
+          visible=false;lastSignature='';return;
+        }
+        const count=state.items.length,rotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
+        const selected=mod(Math.round(-rotation/state.step),count),open=stage.classList.contains('is-hover')&&stage.classList.contains('is-filled');
+        stage.style.setProperty('--fan-item-width',count>3?'72px':'78px');
+        const radius=stage.clientWidth*(count>3?.375:.345),signature=[state.ids.join(','),selected,open,radius].join('|');
+        if(signature===lastSignature)return;
+        const wasVisible=visible;visible=open;lastSignature=signature;
+        state.items.forEach((item,index)=>{
+          const selectedSlot=Math.floor((count-1)/2),slot=mod(index-selected+selectedSlot,count);
+          const angle=count>1?-90+slot*180/(count-1):0;
+          const radians=angle*Math.PI/180,x=Math.sin(radians)*radius,y=-Math.cos(radians)*radius,scale=index===selected?1.1:1;
+          const current=snapshot(item),previous=positions.get(item),target={x,y,angle};positions.set(item,target);
+          item.classList.toggle('is-selected',index===selected);item.classList.remove('is-pointer-hover');
+          if(index===selected)item.setAttribute('aria-current','true');else item.removeAttribute('aria-current');
+          item.tabIndex=open?0:-1;
+          if(!open){
+            animate(item,[{transform:transform(current.x,current.y,current.scale),opacity:current.opacity},{transform:transform(x*.24,y*.24,.2),opacity:0}],{duration:220});return;
+          }
+          if(!wasVisible||!previous){
+            animate(item,[{transform:transform(x*.24,y*.24,.2),opacity:0},{transform:transform(x,y,scale),opacity:1}],{duration:560,delay:animateChange?slot*55:0,easing:'cubic-bezier(.2,1.18,.32,1)'});return;
+          }
+          if(!animateChange){animate(item,[{transform:transform(x,y,scale),opacity:1}],{duration:0});return;}
+          // The end item fades across the seam. Other items follow the arc,
+          // keeping labels upright and continuing from their actual position.
+          if(Math.abs(previous.angle-angle)>100){
+            animate(item,[{transform:transform(current.x,current.y,current.scale),opacity:current.opacity,offset:0},{transform:transform(current.x*.88,current.y*.88,.65),opacity:0,offset:.42},{transform:transform(x*.88,y*.88,.65),opacity:0,offset:.43},{transform:transform(x,y,scale),opacity:1,offset:1}]);
+          }else{
+            const start=Math.atan2(current.x,-current.y),end=radians,startRadius=Math.hypot(current.x,current.y);
+            const frames=Array.from({length:25},(_,i)=>{const t=i/24,a=start+(end-start)*t,r=startRadius+(radius-startRadius)*t;return {transform:transform(Math.sin(a)*r,-Math.cos(a)*r,current.scale+(scale-current.scale)*t),opacity:current.opacity+(1-current.opacity)*t}});
+            animate(item,frames);
+          }
+        });
+      };
+      const observer=new win.MutationObserver(()=>render());observer.observe(stage,{attributes:true,attributeFilter:['class']});
+      new win.ResizeObserver(()=>render(false)).observe(stage);
+      orbit._shiyuHomeFan={render,settled(index){return animations.get(orbit._shiyuModuleState.items[index])?.finished.catch(()=>{})||Promise.resolve()},wheel(event){
+        if(orbit._shiyuModuleState.items.length<2||!stage.classList.contains('is-filled')||event.ctrlKey||!event.deltaY)return 0;
+        const now=performance.now(),delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?stage.clientHeight:1),direction=Math.sign(delta);
+        if(now-lastWheel>160||direction!==lastDirection)wheelTotal=0;
+        lastWheel=now;lastDirection=direction;
+        // Conventional wheel notches stay one-for-one; fine trackpad deltas
+        // accumulate and shed their inertial tail instead of racing the menu.
+        if(Math.abs(delta)>=40){wheelTotal=0;return direction;}
+        wheelTotal+=delta;
+        if(Math.abs(wheelTotal)<28||now-lastTrackpadStep<190)return 0;
+        wheelTotal=0;lastTrackpadStep=now;return direction;
+      }};
+    }
+    orbit._shiyuHomeFan.render(false);
+  }
   function syncOrbitPreviewTheme(preview){
     if(!preview?.contentDocument)return;
     const documentInOrbit=preview.contentDocument;
@@ -756,18 +887,29 @@
     const sectorModuleIds=enabledCornerModuleIds();
     const orbit=documentInOrbit.querySelector('#orbit'),items=[...documentInOrbit.querySelectorAll('.menu-item')],activeItems=items.slice(0,sectorModuleIds.length),stage=documentInOrbit.querySelector('.stage');
     stage?.classList.toggle('is-single-module',activeItems.length<2);
-    const sectorStep=360/activeItems.length;
+    const sectorStep=360/activeItems.length,previousModules=orbit?._shiyuModuleState;
+    if(previousModules&&previousModules.ids.join(',')!==sectorModuleIds.join(',')){
+      const previousRotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
+      const previousIndex=((Math.round(-previousRotation/previousModules.step)%previousModules.ids.length)+previousModules.ids.length)%previousModules.ids.length;
+      const selectedIndex=Math.max(0,sectorModuleIds.indexOf(previousModules.ids[previousIndex]));
+      orbit.style.setProperty('--rotation',`${-selectedIndex*sectorStep}deg`);
+      activeItems.forEach((item,index)=>item.classList.toggle('is-selected',index===selectedIndex));
+    }
+    if(orbit)orbit._shiyuModuleState={ids:sectorModuleIds,items:activeItems,step:sectorStep};
     const threeLabels=sectorModuleIds.map(id=>cornerModuleConfig(id).entryName||cornerModuleConfig(id).name);
     activeItems.forEach((item,index)=>{
+      item.hidden=false;
       item.querySelector('span')?.replaceChildren(documentInOrbit.createTextNode(threeLabels[index]));
       item.setAttribute('aria-label',threeLabels[index]);
       item.style.setProperty('--angle',`${index*sectorStep}deg`);
-      const iconMarkup=moduleIcon(sectorModuleIds[index]);
-      if(item.dataset.shiyuModuleIcon!==sectorModuleIds[index]){
+      const homeFanIcon=preview.id==='corner-orbit-demo'&&document.body.dataset.view==='home';
+      const iconMarkup=homeFanIcon&&sectorModuleIds[index]!=='toolbox'?glyph(CORNER_MODULES[sectorModuleIds[index]].icon):moduleIcon(sectorModuleIds[index]);
+      const iconKey=sectorModuleIds[index]+(homeFanIcon?'-line':'')+(sectorModuleIds[index]==='toolbox'?':'+(cornerModuleConfig('toolbox').icon||''):'');
+      if(item.dataset.shiyuModuleIcon!==iconKey){
         const holder=documentInOrbit.createElement('template');holder.innerHTML=iconMarkup;
-        const icon=holder.content.firstElementChild,source=item.querySelector('svg');
+        const icon=holder.content.firstElementChild,source=item.querySelector('svg,img');
         if(icon&&source)source.replaceWith(icon);
-        item.dataset.shiyuModuleIcon=sectorModuleIds[index];
+        item.dataset.shiyuModuleIcon=iconKey;
       }
     });
     items.slice(activeItems.length).forEach(item=>{item.hidden=true;item.classList.remove('is-selected');});
@@ -776,7 +918,7 @@
         // The item itself rotates around the center. Keep its label's local
         // baseline horizontal so that the baseline stays perpendicular to
         // the radius and the whole label follows the turntable naturally.
-        activeItems.forEach(item=>item.style.setProperty('--content-rotation','0deg'));
+        orbit._shiyuModuleState.items.forEach(item=>item.style.setProperty('--content-rotation','0deg'));
       };
       const observer=new preview.contentWindow.MutationObserver(updateTextOrientation);observer.observe(orbit,{attributes:true,attributeFilter:['style']});
       orbit.dataset.shiyuTextOrientation='orbit';updateTextOrientation();
@@ -790,52 +932,86 @@
         const trigger=document.querySelector('#dock .corner-entry');if(!trigger)return;
         const frameRect=preview.getBoundingClientRect();
         const point={detail:{orbit:true},clientX:frameRect.left+(event?.clientX??frameRect.width/2),clientY:frameRect.top+(event?.clientY??frameRect.height/2)};
-        const moduleId=sectorModuleIds[mod(index,sectorModuleIds.length)];
+        const {ids,items}=orbit._shiyuModuleState;
+        const moduleId=ids[mod(index,ids.length)];
         opening=true;
-        const feedback=event?.target?.closest?.('.core-hit')?documentInOrbit.querySelector('.core'):activeItems[mod(index,activeItems.length)];
+        const feedback=event?.target?.closest?.('.core-hit')?documentInOrbit.querySelector('.core'):items[mod(index,items.length)];
         const animation=!reduced()?feedback?.animate([{scale:'1',opacity:1},{scale:'.95',opacity:.75},{scale:'1',opacity:1}],{duration:180,easing:'ease-out'}):null;
-        (animation?animation.finished.catch(()=>{}):Promise.resolve()).then(()=>{opening=false;openCorner(trigger,null,point,moduleId);});
+        const homeFan=stage.classList.contains('is-home-fan');
+        // Let the clicked module reach the selected position before opening it.
+        // Wheel and repeated clicks cannot retarget this pending activation.
+        Promise.all([animation?.finished.catch(()=>{}),homeFan?orbit._shiyuHomeFan?.settled(mod(index,items.length)):null]).then(()=>{
+          if(homeFan&&feedback?.classList.contains('menu-item')){const rect=feedback.getBoundingClientRect(),host=preview.getBoundingClientRect();point.clientX=host.left+rect.left+rect.width/2;point.clientY=host.top+rect.top+rect.height/2;}
+          opening=false;openCorner(trigger,null,point,moduleId);
+        });
       };
       const indexFromPointer=event=>{
+        const {step,items}=orbit._shiyuModuleState;
         const rect=stage.getBoundingClientRect(),x=event.clientX-rect.left-rect.width/2,y=event.clientY-rect.top-rect.height/2;
         const matrix=new preview.contentWindow.DOMMatrix(preview.contentWindow.getComputedStyle(orbit).transform);
         const rotation=Math.atan2(matrix.b,matrix.a)*180/Math.PI;
-        return mod(Math.floor((Math.atan2(x,-y)*180/Math.PI-rotation+sectorStep/2)/sectorStep),activeItems.length);
+        return mod(Math.floor((Math.atan2(x,-y)*180/Math.PI-rotation+step/2)/step),items.length);
       };
-      orbit.addEventListener('pointermove',event=>{const index=indexFromPointer(event);activeItems.forEach((item,i)=>item.classList.toggle('is-pointer-hover',i===index));});
-      orbit.addEventListener('pointerleave',()=>activeItems.forEach(item=>item.classList.remove('is-pointer-hover')));
+      orbit.addEventListener('pointermove',event=>{if(stage.classList.contains('is-home-fan'))return;const index=indexFromPointer(event);orbit._shiyuModuleState.items.forEach((item,i)=>item.classList.toggle('is-pointer-hover',i===index));});
+      orbit.addEventListener('pointerleave',()=>orbit._shiyuModuleState.items.forEach(item=>item.classList.remove('is-pointer-hover')));
       const setThreeRotation=(nextRotation,announce=false)=>{
+        const {ids,items,step}=orbit._shiyuModuleState;
         const previous=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
-        const rotation=Math.round(nextRotation/sectorStep)*sectorStep;
+        const rotation=Math.round(nextRotation/step)*step;
         orbit.style.setProperty('--rotation',`${rotation}deg`);
-        const selected=mod(Math.round(-rotation/sectorStep),activeItems.length);
-        activeItems.forEach((item,index)=>item.classList.toggle('is-selected',index===selected));
-        try{localStorage.setItem('shiyu-corner-selected-module',sectorModuleIds[selected]||'');}catch{}
+        const selected=mod(Math.round(-rotation/step),items.length);
+        items.forEach((item,index)=>item.classList.toggle('is-selected',index===selected));
+        orbit._shiyuHomeFan?.render();
+        try{localStorage.setItem('shiyu-corner-selected-module',ids[selected]||'');}catch{}
         if(announce&&rotation!==previous)playCardSound();
       };
       const nearestRotationForIndex=(index,current)=>{
-        const base=-index*sectorStep,turns=Math.round((current-base)/360);
+        const base=-index*orbit._shiyuModuleState.step,turns=Math.round((current-base)/360);
         return base+turns*360;
       };
       stage?.addEventListener('wheel',event=>{
         if(!stage.classList.contains('is-hover'))return;
+        if(stage.classList.contains('is-home-fan')){
+          if(event.ctrlKey){event.stopImmediatePropagation();return;}
+          event.preventDefault();event.stopImmediatePropagation();
+          if(opening)return;
+          const direction=orbit._shiyuHomeFan?.wheel(event);if(!direction)return;
+          prepareCardAudio();
+          const rotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
+          setThreeRotation(rotation-direction*orbit._shiyuModuleState.step,true);return;
+        }
         prepareCardAudio();
         event.preventDefault();event.stopImmediatePropagation();
         const rotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
-        setThreeRotation(rotation+(event.deltaY>0?sectorStep:-sectorStep),true);
+        const step=orbit._shiyuModuleState.step;setThreeRotation(rotation+(event.deltaY>0?step:-step),true);
       },{capture:true,passive:false});
       orbit.addEventListener('click',event=>{
         if(!stage?.classList.contains('is-hover'))return;
         if(event.target?.closest?.('.core-hit,.core'))return;
         event.preventDefault();event.stopImmediatePropagation();
-        const index=indexFromPointer(event);
+        const homeFan=stage.classList.contains('is-home-fan');
+        if(homeFan&&opening)return;
+        const index=homeFan?orbit._shiyuModuleState.items.indexOf(event.target.closest('.menu-item')):indexFromPointer(event);
+        if(index<0||homeFan&&!stage.classList.contains('is-filled'))return;
         const currentRotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0;
         // Keep the current revolution. Clicking after several wheel turns now
         // takes the shortest local step instead of rewinding to turn zero.
         setThreeRotation(nearestRotationForIndex(index,currentRotation),true);
         openOrbitModule(index,event);
       },{capture:true});
-      let initialIndex=0;try{const saved=localStorage.getItem('shiyu-corner-selected-module');const found=sectorModuleIds.indexOf(saved);if(found>=0)initialIndex=found;}catch{}
+      orbit.addEventListener('keydown',event=>{
+        if(!stage.classList.contains('is-home-fan')||!stage.classList.contains('is-filled'))return;
+        if(opening){if(['ArrowRight','ArrowDown','ArrowLeft','ArrowUp','Enter',' '].includes(event.key)){event.preventDefault();event.stopImmediatePropagation();}return;}
+        const rotation=Number.parseFloat(orbit.style.getPropertyValue('--rotation'))||0,{step,items}=orbit._shiyuModuleState;
+        if(['ArrowRight','ArrowDown','ArrowLeft','ArrowUp'].includes(event.key)){
+          event.preventDefault();event.stopImmediatePropagation();
+          const direction=['ArrowRight','ArrowDown'].includes(event.key)?1:-1;
+          setThreeRotation(rotation-direction*step,true);items[mod(Math.round(-rotation/step)+direction,items.length)].focus();
+        }else if(event.key==='Enter'||event.key===' '){
+          event.preventDefault();event.stopImmediatePropagation();event.target.closest('.menu-item')?.click();
+        }
+      },{capture:true});
+      let initialIndex=Math.floor((sectorModuleIds.length-1)/2);try{const saved=localStorage.getItem('shiyu-corner-selected-module');const found=sectorModuleIds.indexOf(saved);if(found>=0)initialIndex=found;}catch{}
       setThreeRotation(-initialIndex*sectorStep);orbit.dataset.shiyuThreeMenu='true';
       orbit._shiyuOpenOrbitModule=openOrbitModule;
     }
@@ -860,7 +1036,8 @@
         if(suppressClick||dragging)return;
         event.preventDefault();event.stopImmediatePropagation();
         const rotation=Number.parseFloat(orbit?.style.getPropertyValue('--rotation'))||0;
-        const selected=((Math.round(-rotation/sectorStep)%sectorModuleIds.length)+sectorModuleIds.length)%sectorModuleIds.length;
+        const {ids,step}=orbit._shiyuModuleState;
+        const selected=((Math.round(-rotation/step)%ids.length)+ids.length)%ids.length;
         orbit?._shiyuOpenOrbitModule?.(selected,event);
       });
       documentInOrbit.addEventListener('click',event=>{if(suppressClick){event.preventDefault();event.stopImmediatePropagation();}},true);
@@ -884,7 +1061,7 @@
           :'';
     const css=`
       ${fontFace}
-      :root{color-scheme:light!important;--orbit-accent:${accent};--orbit-surface:${surface};--orbit-ink:${ink};--orbit-muted:${muted};--orbit-line:${line};--orbit-font:${font}}
+      :root{color-scheme:light!important;--orbit-accent:${accent};--orbit-on-accent:${read('--selection-contrast','#fff')};--orbit-surface:${surface};--orbit-ink:${ink};--orbit-muted:${muted};--orbit-line:${line};--orbit-font:${font}}
       html,body{background:transparent!important}
       body,button,.menu-item span,.core-title,.core-subtitle,.status-line{color:var(--orbit-ink)!important;font-family:var(--orbit-font)!important}
       body::before,body::after{display:none!important}
@@ -921,7 +1098,7 @@
       .stage:not(.is-hover) .core{background:color-mix(in srgb,var(--orbit-surface) 28%,transparent)!important;border-color:color-mix(in srgb,var(--orbit-ink) 20%,transparent)!important;box-shadow:0 8px 25px color-mix(in srgb,#111326 12%,transparent)!important;backdrop-filter:blur(12px) saturate(1.08)!important;-webkit-backdrop-filter:blur(12px) saturate(1.08)!important}
       .stage.is-hover .core{opacity:1!important}
       .stage.is-single-module .orbit,.stage.is-single-module .orbit-track{display:none!important}
-      .core-hit{cursor:pointer!important}
+      .core,.core-hit{cursor:pointer!important}
       .core-hit.is-dragging{cursor:grabbing!important}
       .core::before{border-color:color-mix(in srgb,var(--orbit-accent) 32%,transparent)!important}
       .core::after{border-color:color-mix(in srgb,var(--orbit-accent) 28%,transparent)!important}
@@ -978,7 +1155,7 @@
         .stage.is-hover.is-filled .menu-shell{opacity:1!important;transform:scale(1)!important;pointer-events:auto!important}
       `;
       documentInOrbit.head.append(demoStyle);
-      stage.addEventListener('wheel',event=>{event.stopImmediatePropagation();},{capture:true,passive:true});
+      stage.addEventListener('wheel',event=>{if(!stage.classList.contains('is-home-fan'))event.stopImmediatePropagation();},{capture:true,passive:true});
       // One animation loop updates magnetic properties only; shape and fill stay independent.
       let magnetFrame=0,lastMagnetTime=0,returning=false,wiggleFrame=0;
       const magnet={x:0,y:0,angle:0,vx:0,vy:0,va:0,tx:0,ty:0,ta:0};
@@ -1004,6 +1181,7 @@
       stage.addEventListener('pointerleave',event=>{const rect=stage.getBoundingClientRect();if(Number.isFinite(event.clientX)&&event.clientX>=rect.left&&event.clientX<=rect.right&&event.clientY>=rect.top&&event.clientY<=rect.bottom)return;stage.style.setProperty('--label-x','0px');stage.style.setProperty('--label-y','0px');aimMagnet(0,0,0,true)});
       */
     }
+    syncHomeOrbitFan(preview);
     if(preview.dataset.themeReady!=='true'&&!preview._orbitRevealPending){
       preview._orbitRevealPending=true;
       const core=documentInOrbit.querySelector('.core');
@@ -1099,7 +1277,7 @@
     if(!demo){
       demo=document.createElement('iframe');demo.id='corner-orbit-demo';demo.title='我的一隅 · 自动展开预览';demo.dataset.themeReady='false';
       // Register before the module wheel listener: this version opens on hover only.
-      demo.addEventListener('load',()=>{demo.contentDocument.querySelector('.stage')?.addEventListener('wheel',event=>event.stopImmediatePropagation(),{capture:true,passive:true});syncOrbitPreviewTheme(demo)});
+      demo.addEventListener('load',()=>{demo.contentDocument.querySelector('.stage')?.addEventListener('wheel',event=>{if(!event.currentTarget.classList.contains('is-home-fan'))event.stopImmediatePropagation()},{capture:true,passive:true});syncOrbitPreviewTheme(demo)});
       demo.src='liquid-orbit-menu.html?interaction=hover-preview';document.body.append(demo);
     }
     demo.hidden=!['home','space'].includes(document.body.dataset.view);syncOrbitPreviewTheme(demo);alignOrbitPreview(demo);
@@ -1282,7 +1460,7 @@
    destinations('space');
    if(batch){
      const heading=d.querySelector('h2'),panel=selectionStep(d,items,selected,()=>{panel.hidden=true;form.hidden=false;heading.textContent='第二步 · 选择目标位置';positions();form.querySelector('select').focus()});
-     const filters=document.createElement('div');filters.className='destination-cascade bookmark-source-cascade';filters.innerHTML='<label>空间<select data-source-space aria-label="筛选空间"></select></label><label>场景<select data-source-scene aria-label="筛选场景"></select></label><label>分组<select data-source-group aria-label="筛选分组"></select></label>';panel.prepend(filters);
+     const filters=document.createElement('div');filters.className='destination-cascade bookmark-source-cascade';filters.innerHTML='<label>空间<select data-source-space aria-label="筛选空间"></select></label><label>场景<select data-source-scene aria-label="筛选场景"></select></label><label>分组<select data-source-group aria-label="筛选分组"></select></label>';prependCornerNode(filters);
      const source={...ctx},sourceSelect=name=>filters.querySelector('[data-source-'+name+']');
      function sourceOptions(){sourceSelect('space').innerHTML=options(data,source.s);sourceSelect('scene').innerHTML=options(source.s.scenes,source.c);sourceSelect('group').innerHTML=options(source.c?.groups||[],source.g);enhanceControls();}
      function sourceChanged(){ctx={...source,item:source.g?.items[0]};items.splice(0,items.length,...(source.g?.items||[]));selected.clear();panel.refreshItems();sourceOptions();}

@@ -1,0 +1,8 @@
+{
+  "name": "shiyu-memo-paper",
+  "private": true,
+  "type": "module",
+  "scripts": {"build": "node build.cjs"},
+  "dependencies": {"three": "0.160.1", "cannon-es": "0.20.0"},
+  "devDependencies": {"esbuild": "0.25.10"}
+}

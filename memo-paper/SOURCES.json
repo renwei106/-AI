@@ -1,0 +1,41 @@
+{
+  "repository": "https://github.com/item-develop/paper-crumple-demo",
+  "retrieved": "2026-09-24",
+  "files": [
+    {
+      "path": "memo-paper/upstream/main-vat.js",
+      "url": "https://raw.githubusercontent.com/item-develop/paper-crumple-demo/main/src/main-vat.js",
+      "sha256": "d1ab55a705a5135178604a6450ca2b605ede3a8ddef81b63379891cf53efafbb"
+    },
+    {
+      "path": "memo-paper/upstream/paper-vat.js",
+      "url": "https://raw.githubusercontent.com/item-develop/paper-crumple-demo/main/src/paper-vat.js",
+      "sha256": "b85c266f5086dee7ef74ab3471aa0c80f1daf8b2748db1e922da3804f94f05b8"
+    },
+    {
+      "path": "memo-paper/upstream/paper.js",
+      "url": "https://raw.githubusercontent.com/item-develop/paper-crumple-demo/main/src/paper.js",
+      "sha256": "628ff0fd813306fbf1ed0cfcefcd8ac4156061158a1f09431f0fa16aba787cb1"
+    },
+    {
+      "path": "dist/assets/memo-paper/vat/geo/vertex_animation_textures1_mesh.fbx",
+      "url": "https://raw.githubusercontent.com/item-develop/paper-crumple-demo/main/vat/geo/vertex_animation_textures1_mesh.fbx",
+      "sha256": "1f8882cb799ec3c2788d4f65e99521ca3acd69d3a4cc1903b22bd19250e721a1"
+    },
+    {
+      "path": "dist/assets/memo-paper/vat/tex/vertex_animation_textures1_pos.exr",
+      "url": "https://raw.githubusercontent.com/item-develop/paper-crumple-demo/main/vat/tex/vertex_animation_textures1_pos.exr",
+      "sha256": "88ea8f26c5f6b261d0f21a8703243d4d0d6599091ecec35b7c4f417c965aaff8"
+    },
+    {
+      "path": "memo-paper/upstream/codepen-xxJMbbg.js",
+      "url": "https://codepen.io/supah/pen/xxJMbbg",
+      "sha256": "732b50eb22e135e76ab99d573084ca70bb497410fced41318991c832008e32fe"
+    },
+    {
+      "path": "memo-paper/upstream/codepen-xxJMbbg.scss",
+      "url": "https://codepen.io/supah/pen/xxJMbbg",
+      "sha256": "003ad520aaf7c890378997de129a6236e41ec27afa30c4968ec6f677f79c9917"
+    }
+  ]
+}
