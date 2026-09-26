@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="edge" x1="22" y1="16" x2="103" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#78957f"/>
+      <stop offset="0.42" stop-color="#3f624d"/>
+      <stop offset="1" stop-color="#21392b"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="30" y1="20" x2="88" y2="92" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#dce9df" stop-opacity=".9"/>
+      <stop offset=".38" stop-color="#a9c0ae" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#6f9279" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="depth" x="-35%" y="-35%" width="180%" height="190%">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#102218" flood-opacity=".3"/>
+      <feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="#0d1c13" flood-opacity=".38"/>
+    </filter>
+  </defs>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#depth)">
+    <path d="M25 62V39c0-12 8-20 20-20h39c12 0 20 8 20 20v45c0 12-8 20-20 20H45c-12 0-20-8-20-20V62h34c16 0 28-12 28-28V20M67 67l37 37" stroke="#15291d" stroke-width="13"/>
+    <path d="M25 62V39c0-12 8-20 20-20h39c12 0 20 8 20 20v45c0 12-8 20-20 20H45c-12 0-20-8-20-20V62h34c16 0 28-12 28-28V20M67 67l37 37" stroke="url(#edge)" stroke-width="10"/>
+    <path d="M27 58V39c0-10 8-18 18-18h37M28 65h31c17 0 30-13 30-30V23M70 68l31 31" stroke="url(#shine)" stroke-width="2.6" opacity=".9"/>
+  </g>
+</svg>

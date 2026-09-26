@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>拾隅浏览器插件图标设计稿</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;padding:64px;font-family:"Microsoft YaHei",sans-serif;background:#eeefe9;color:#263329}.page{max-width:1050px;margin:auto}.eyebrow{font-size:12px;letter-spacing:3px;color:#6c796e}.title{font:500 32px/1.4 Georgia,"Microsoft YaHei",serif;margin:14px 0 8px}.sub{color:#718076;margin:0 0 42px}.stage{display:grid;grid-template-columns:1.2fr .8fr;gap:24px}.hero,.sizes{border-radius:26px;background:#fafbf7;box-shadow:0 18px 50px #24332912}.hero{min-height:450px;display:grid;place-items:center;background:linear-gradient(135deg,#fcfdf9,#e3e8e2)}.hero img{width:260px;height:260px}.sizes{padding:32px}.sizes h2{font-size:15px;margin:0 0 26px}.row{display:flex;align-items:end;gap:26px;margin-bottom:30px}.sample{text-align:center;color:#7b857d;font-size:11px}.sample div{display:grid;place-items:center;margin-bottom:9px}.sample img{width:100%;height:100%}.dark{padding:22px;border-radius:18px;background:#19211d;display:flex;align-items:center;gap:20px;margin-top:18px;color:#dfe8e1}.dark img{width:48px;height:48px}.dark b{display:block;font-size:13px}.dark span{font-size:11px;color:#93a197}.note{font-size:12px;line-height:1.8;color:#718076;margin-top:24px}.chip{display:inline-block;padding:5px 9px;border-radius:999px;background:#e4eae4;color:#44614d;margin-right:7px}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="eyebrow">SHIYU / EXTENSION ICON CONCEPT</div>
+    <h1 class="title">拾隅浏览器插件 · 纯图标 3D 方案</h1>
+    <p class="sub">沿用首页左上角标志轮廓，去除背景色块，以材质、明暗和投影建立轻微立体感。</p>
+    <section class="stage">
+      <div class="hero"><img src="shiyu-mark-3d.svg" alt="拾隅 3D 图标设计稿"></div>
+      <div class="sizes">
+        <h2>浏览器实际尺寸辨识</h2>
+        <div class="row">
+          <div class="sample"><div style="width:16px;height:16px"><img src="shiyu-mark-3d.svg"></div>16 px</div>
+          <div class="sample"><div style="width:32px;height:32px"><img src="shiyu-mark-3d.svg"></div>32 px</div>
+          <div class="sample"><div style="width:48px;height:48px"><img src="shiyu-mark-3d.svg"></div>48 px</div>
+          <div class="sample"><div style="width:96px;height:96px"><img src="shiyu-mark-3d.svg"></div>96 px</div>
+        </div>
+        <div class="dark"><img src="shiyu-mark-3d.svg"><div><b>深色浏览器工具栏</b><span>透明底，不出现方形背景块</span></div></div>
+        <p class="note"><span class="chip">透明背景</span><span class="chip">首页同轮廓</span><span class="chip">轻 3D</span><br>确认后再输出插件需要的 16、32、48、128 px PNG，并替换安装包。</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
