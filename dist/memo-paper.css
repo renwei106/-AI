@@ -1,5 +1,5 @@
 /* Scoped to 我的小记; other corner modules retain their existing presentation. */
-#my-corner[data-corner-module=memo] .memo-paper-app{position:absolute;inset:0;color:var(--ink);font-family:var(--font);background:var(--bg);overflow:hidden}
+#my-corner[data-corner-module=memo] .memo-paper-app{position:absolute;inset:0;color:var(--ink);font-family:var(--font);background:transparent;overflow:hidden}
 .memo-paper-app [hidden]{display:none!important}
 .memo-paper-app button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .memo-paper-app button:disabled{cursor:default;opacity:.4}
@@ -96,11 +96,11 @@ body[data-dark=true] .memo-view-tabs button[aria-pressed=true]::after{background
 .memo-cover-excerpt{font:17px/1.95 Georgia,"Songti SC","Noto Serif SC",serif;letter-spacing:.02em;white-space:pre-wrap;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:6;overflow:hidden}
 .memo-cover-foot{position:absolute;left:30px;right:30px;bottom:28px;display:flex;justify-content:space-between;gap:8px;color:var(--muted);font:10px var(--font);letter-spacing:.05em}
 .memo-cover-foot>span{opacity:0;transition:opacity .2s}.memo-cover:hover .memo-cover-foot>span,.memo-cover:focus-within .memo-cover-foot>span{opacity:1}
-.memo-cover-discard{position:absolute;right:18px;top:-40px;display:flex;align-items:center;gap:6px;border:0;border-radius:20px;padding:8px 14px;background:var(--surface);color:var(--muted);font-size:11px!important;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s;box-shadow:0 4px 16px #0000000b}
+.memo-cover-discard{position:absolute;right:18px;top:-40px;display:flex;align-items:center;gap:6px;border:0;border-radius:20px;padding:8px 14px;background:var(--surface);color:var(--muted);font-size:11px!important;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s,color .2s,background .2s;box-shadow:0 4px 16px #0000000b}
 .memo-cover-discard::after{content:"";position:absolute;inset:100% -15px -22px}
 .memo-cover-discard svg{width:14px;height:14px}
-.memo-cover:hover .memo-cover-discard,.memo-cover:focus-within .memo-cover-discard{opacity:1;transform:none}
-.memo-cover-discard:hover{color:var(--accent)}
+.memo-cover:hover .memo-cover-discard,.memo-cover:focus-within .memo-cover-discard{opacity:.58;transform:none}
+.memo-cover:hover .memo-cover-discard:is(:hover,:focus-visible),.memo-cover:focus-within .memo-cover-discard:is(:hover,:focus-visible){opacity:1;color:var(--ink);background:color-mix(in srgb,var(--surface) 86%,var(--ink))}
 .memo-add-cover .memo-cover-inner{background:color-mix(in srgb,var(--surface) 94%,var(--accent))}
 .memo-add-cover .memo-cover-head{font-size:11px}
 .memo-cover-plus{display:grid;place-items:center;margin:48px 0 24px;width:46px;height:46px;border-radius:50%;background:color-mix(in srgb,var(--accent) 8%,transparent);color:var(--accent)}
@@ -191,11 +191,11 @@ body[data-dark=true] .memo-view-tabs button[aria-pressed=true]::after{background
 @media(max-width:700px){.memo-color-popover>div{gap:6px}}
 
 /* Archive actions share the cover's hover level; the original discard stays put. */
-.memo-cover-archive{position:absolute;left:18px;top:-40px;display:flex;align-items:center;gap:6px;border:0;border-radius:20px;padding:8px 14px;background:var(--surface);color:var(--muted);font-size:11px!important;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s;box-shadow:0 4px 16px #0000000b}
+.memo-cover-archive{position:absolute;left:18px;top:-40px;display:flex;align-items:center;gap:6px;border:0;border-radius:20px;padding:8px 14px;background:var(--surface);color:var(--muted);font-size:11px!important;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s,color .2s,background .2s;box-shadow:0 4px 16px #0000000b}
 .memo-cover-archive::after{content:"";position:absolute;inset:100% -15px -22px}
 .memo-cover-archive svg{width:14px;height:14px}
-.memo-cover:hover .memo-cover-archive,.memo-cover:focus-within .memo-cover-archive{opacity:1;transform:none}
-.memo-cover-archive:hover{color:var(--accent)}
+.memo-cover:hover .memo-cover-archive,.memo-cover:focus-within .memo-cover-archive{opacity:.58;transform:none}
+.memo-cover:hover .memo-cover-archive:is(:hover,:focus-visible),.memo-cover:focus-within .memo-cover-archive:is(:hover,:focus-visible){opacity:1;color:var(--ink);background:color-mix(in srgb,var(--surface) 86%,var(--ink))}
 .memo-paper-app:not([data-memo-view=notes]) .memo-cover-archive{display:none}
 .memo-archive-dock{position:absolute;z-index:5;left:6vw;bottom:55px;display:grid;place-items:center;box-sizing:border-box;width:112px;height:82px;padding:15px 20px;border:0;border-radius:0;background:transparent;color:var(--ink);box-shadow:none}
 .memo-archive-dock:hover,.memo-archive-dock[aria-expanded=true]{background:transparent}
@@ -280,7 +280,8 @@ body[data-dark=true] .memo-view-tabs button[aria-pressed=true]::after{background
   color:var(--muted);
   font:14px var(--font);
   letter-spacing:.04em;
-  transition:color .2s;
+  opacity:.6;
+  transition:color .2s,opacity .2s;
 }
 #my-corner[data-corner-module=todo] .todo-view-switch button{
   padding:0 0 12px;
@@ -291,10 +292,11 @@ body[data-dark=true] .memo-view-tabs button[aria-pressed=true]::after{background
   color:var(--muted);
   font:14px var(--font);
   letter-spacing:.04em;
-  transition:color .2s;
+  opacity:.6;
+  transition:color .2s,opacity .2s;
 }
-#my-corner :is(.memo-view-tabs,.todo-view-switch) button:is([aria-pressed=true],.is-active){color:var(--accent)}
-#my-corner[data-corner-module=todo] .todo-view-switch button.is-active{background:none;color:var(--accent);box-shadow:none}
+#my-corner :is(.memo-view-tabs,.todo-view-switch) button:is([aria-pressed=true],.is-active){color:var(--ink);font-weight:700;opacity:1}
+#my-corner[data-corner-module=todo] .todo-view-switch button.is-active{background:none;color:var(--ink);font-weight:700;opacity:1;box-shadow:none}
 #my-corner :is(.memo-view-tabs,.todo-view-switch) button::after{
   content:"";
   position:absolute;

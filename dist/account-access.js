@@ -64,6 +64,11 @@
     signed = true;
     verifiedUserId = user.id;
     prefs.accountProfile = { ...prefs.accountProfile, id: user.id, name: prefs.accountProfile?.name || user.name, phone: user.phone || '', email: user.email || '', avatar: prefs.accountProfile?.avatar || ACCOUNT_AVATARS[0] };
+    if (user.cornerUiHints?.closeGuideAcknowledgedAt && prefs.cornerCloseGuideAcknowledgedV1?.[user.id] !== true) {
+      prefs.cornerCloseGuideAcknowledgedV1 ??= {};
+      prefs.cornerCloseGuideAcknowledgedV1[user.id] = true;
+      window.dispatchEvent(new Event('shiyu-corner-guide-synced'));
+    }
     if (Array.isArray(accountData)) { data = clone(accountData); prefs.accountDataUserId = user.id; accountDataRefreshPending = false; normalizeSelection(); }
     syncMembershipFromUser(user);
     syncCornerLoginState();
@@ -268,7 +273,7 @@
   };
   const originalNavigationGesture = navigationGesture;
   navigationGesture = function accountNavigationGesture(delta, ...args) {
-    if (view === 'home' && delta > 0 && !signed) { const now = Date.now(); if (downArmedAt && now - downArmedAt < 2400) { downArmedAt = 0; openLogin('再向下滚动一次即可进入你的空间。登录后即可继续进入。'); return; } downArmedAt = now; toast('再向下滚动一次，进入你的空间。','bottom'); return; }
+    if (view === 'home' && delta > 0 && !signed) { if (prefs.homeEntryGesture === 'click') return; const now = Date.now(); if (downArmedAt && now - downArmedAt < 2400) { downArmedAt = 0; openLogin('再向下滚动一次即可进入你的空间。登录后即可继续进入。'); return; } downArmedAt = now; toast('再向下滚动一次，进入你的空间。','bottom'); return; }
     return originalNavigationGesture(delta, ...args);
   };
   const originalWorkspace = workspace;

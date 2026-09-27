@@ -964,9 +964,9 @@
   const settingsBeforeEntry=renderSettings;
   renderSettings=function(){settingsBeforeEntry();if(scope!=='global')return;const tabs=document.querySelector('#settings .settings-tabs');if(!tabs)return;tabs.insertAdjacentHTML('beforeend','<button role="tab" data-settings-tab="space-entry" aria-selected="'+(settingsTab==='space-entry')+'">空间</button>');if(settingsTab==='space-entry')document.querySelector('#settings .settings-panel').innerHTML=entryPanel()};
   function entryPanel(){
-    const gestureNote=prefs.homeEntryGesture==='double'?'从首页连续向下滑动两次，即可进入我的空间':'从首页向下滑动一次，即可进入我的空间';
+    const gestureNote=prefs.homeEntryGesture==='double'?'从首页连续向下滑动两次，或点击底部入口进入我的空间。':'点击首页底部入口进入我的空间。';
     const themeNote=prefs.spaceThemePolicy==='default'?'每次进入空间时，从默认主题开始':'再次进入空间时，接着上次离开时的主题';
-    return '<section class="space-entry-settings"><h3>进入空间的方式</h3><div class="space-entry-row"><div><i>'+icons.down+'</i><b>首页下滑</b></div>'+choices('homeEntryGesture',[['single','单次滑动'],['double','连续滑动']],prefs)+'<small>'+gestureNote+'</small></div><h3>空间打开样式</h3><div class="space-entry-row"><div><i>'+icons.grid+'</i><b>进入时显示</b></div>'+choices('spaceThemePolicy',[['default','默认样式'],['last','上次切换的样式']],prefs)+'<small>'+themeNote+'</small></div></section>';
+    return '<section class="space-entry-settings"><h3>进入空间的方式</h3><div class="space-entry-row"><div><i>'+icons.down+'</i><b>首页进入空间</b></div>'+choices('homeEntryGesture',[['double','连续滑动＋点击'],['click','仅点击进入']],prefs)+'<small>'+gestureNote+'</small></div><h3>空间打开样式</h3><div class="space-entry-row"><div><i>'+icons.grid+'</i><b>进入时显示</b></div>'+choices('spaceThemePolicy',[['default','默认样式'],['last','上次切换的样式']],prefs)+'<small>'+themeNote+'</small></div></section>';
   }
   const originalRender=render;let lastView=view,lastSid=spaceId;
   render=function(){const entering=view==='space'&&(lastView!=='space'||lastSid!==spaceId),preferred=entering?entryPresentation(spaceId):null,active=dialog?.open;

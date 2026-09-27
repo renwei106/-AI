@@ -51,20 +51,12 @@ http.createServer(async(req,res)=>{
     }
     res.writeHead(404);res.end('Not found');return
   }
-  // Shared local review configuration; never persist module overrides.
+  // Use the admin service's module availability in the local preview.
   if((process.env.SHIYU_PREVIEW_REVIEW==='1'||process.env.SHIYU_PREVIEW_MEMO==='1')&&host==='127.0.0.1'&&req.method==='GET'&&req.url.split('?')[0]==='/api/shiyu/operations'){
     try{
       const response=await fetch('http://127.0.0.1:5175/api/shiyu/operations',{headers:{cookie:req.headers.cookie||'',accept:'application/json'},signal:AbortSignal.timeout(5000)})
       if(!response.ok)throw new Error('Operations unavailable')
       const config=await response.json()
-      config.corner??={};config.corner.modules??=[]
-      const modules=config.corner.modules
-      const entries=process.env.SHIYU_PREVIEW_REVIEW==='1'?[['common','常用'],['memo','小记'],['todo','待办']]:[['memo','小记']]
-      for(const [id,name] of entries){
-        const module=modules.find(module=>module.id===id)
-        if(module)module.enabled=true
-        else modules.push({id,enabled:true,entryName:name,panelName:'我的'+name,icon:''})
-      }
       res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'})
       res.end(JSON.stringify(config));return
     }catch{

@@ -65,7 +65,7 @@ export function mountMemoPaper(root, api) {
   const signal=new AbortController(),sound=api.playSound?null:previewSound();
   let engine,disposed=false,busy=false,selectedId=null,editorIsTrash=false,editorIsArchived=false,confirmIds=null,archiveRenderKey='';
   let editorMode='preview',colorNoteId=null,colorAnchor=null,colorCloseTimer;
-  let carousel,generation=0,fallback=false,drag=null,suppressClick=false,focusReturn=null,viewReady=0;
+  let carousel,generation=0,fallback=false,drag=null,suppressClick=false,focusReturn=null,viewReady=0,wheelSwitch=false;
   let activeNotes=[],currentTrash=[],animations=[];
   let draft=null,editorClosing=false,editorMotion=null,editorCoverMotion=null,compositionBefore=null;
   const isolated=new Map();
@@ -176,7 +176,7 @@ export function mountMemoPaper(root, api) {
     }));
     activeNotes.forEach(note=>paintNote(cardFor(note.id),note));
     state.active=Math.min(state.active,activeNotes.length);
-    carousel=createMemoCarousel([...deck.children],{initial:state.active,onChange(index,audible){closeColors();state.active=index;root.dataset.activeCard=String(index);updatePosition();if(audible)playSound();}});
+    carousel=createMemoCarousel([...deck.children],{initial:state.active,onChange(index,audible){closeColors();state.active=index;root.dataset.activeCard=String(index);updatePosition();if(audible&&wheelSwitch&&isCurrent())playSound();}});
   }
   function syncTrash(){
     state.page=Math.min(Math.max(0,state.page),Math.max(0,Math.ceil(trash().length/PAGE_SIZE)-1));
@@ -303,7 +303,7 @@ export function mountMemoPaper(root, api) {
     animations.forEach(animation=>animation.cancel());
     closeNote();state.view=view;viewReady=performance.now()+(reduced?0:700);
     engine?.cancelDrag();
-    root.dataset.focusedPaper=id||'';updateUI();playSound();
+    root.dataset.focusedPaper=id||'';updateUI();
     for(const {card,from}of positions){if(!card.isConnected)continue;card.style.transition='none';const style=getComputedStyle(card),to={left:style.left,top:style.top,transform:style.transform,transformOrigin:style.transformOrigin};animateElement(card,[from,to],700);card.style.removeProperty('transition');}
     if(view==='archive'){
       animateElement(shelf,[{opacity:0,transform:'translateY(-20px) scale(.97)'},{opacity:1,transform:'none'}],560);
@@ -327,7 +327,7 @@ export function mountMemoPaper(root, api) {
     note.deletedAt=Date.now();api.save();setBusy(true);root.classList.add('is-tossing');
     if(currentTrash.length>=PAGE_SIZE)engine?.setNotes(currentTrash.slice(-PAGE_SIZE+1).map(paperNote));
     // VAT / physics takes over the actual cover position, then falls behind it.
-    engine?.tossNote(paperNote(note),rect,angle);clearEditor();card?.classList.add('is-discarded');playSound();
+    engine?.tossNote(paperNote(note),rect,angle);clearEditor();card?.classList.add('is-discarded');
     await new Promise(resolve=>setTimeout(resolve,reduced?0:180));if(!isCurrent())return;
     renderCards();root.classList.remove('is-tossing');
     await new Promise(resolve=>setTimeout(resolve,reduced?0:650));if(!isCurrent())return;
@@ -340,7 +340,7 @@ export function mountMemoPaper(root, api) {
     closeColors();const card=cardFor(id),source=cardGeometry(card),target=q('.memo-archive-spine').getBoundingClientRect();
     const flight=document.createElement('div');flight.className='memo-archive-flight';flight.inert=true;flight.setAttribute('aria-hidden','true');flight.innerHTML=card.querySelector('.memo-cover-inner').outerHTML+`<span class="memo-color-trigger">${star}</span>`;
     paintNote(flight,note);Object.assign(flight.style,{left:source.x-source.width/2+'px',top:source.y-source.height/2+'px',width:source.width+'px',height:source.height+'px'});
-    setBusy(true);card.style.visibility='hidden';root.append(flight);playSound();
+    setBusy(true);card.style.visibility='hidden';root.append(flight);
     const dx=target.x+target.width/2-source.x,dy=target.y+target.height/2-source.y;
     const motion=animateElement(flight,[{transform:`rotate(${source.angle}deg)`,opacity:1},{transform:`translate(${dx}px,${dy}px) rotate(0deg) scale(${target.width/source.width},${target.height/source.height})`,opacity:.7}],620,{fill:'forwards'});
     if(motion)await motion.finished.catch(()=>{});flight.remove();if(!isCurrent())return;
@@ -446,7 +446,7 @@ export function mountMemoPaper(root, api) {
   root.addEventListener('compositionend',event=>{readDraftInput(event);compositionBefore=null;},{signal:signal.signal});
   root.addEventListener('wheel',event=>{
     if(drag||event.ctrlKey||event.target.closest('.memo-paper-editor,.memo-confirm-slot,.memo-color-popover')||busy||selectedId||state.view!=='notes')return;
-    event.preventDefault();event.stopPropagation();carousel.wheel(event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?host.clientHeight:1));
+    event.preventDefault();event.stopPropagation();wheelSwitch=true;try{carousel.wheel(event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?host.clientHeight:1));}finally{wheelSwitch=false;}
   },{passive:false,signal:signal.signal});
 
   function sortSlots(){
