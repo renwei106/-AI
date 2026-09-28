@@ -22,7 +22,7 @@ done
 if cmp -s "$old_admin/pnpm-lock.yaml" "$admin_release/pnpm-lock.yaml" && cmp -s "$old_admin/package.json" "$admin_release/package.json"; then
   ln -s "$(readlink -f "$old_admin/node_modules")" "$admin_release/node_modules"
 else
-  (cd "$admin_release" && PATH=/opt/node-v24/bin:$PATH CI=1 pnpm install --frozen-lockfile)
+  (cd "$admin_release" && PATH=/opt/node-v24/bin:$PATH NODE_OPTIONS=--max-old-space-size=384 CI=1 pnpm install --frozen-lockfile --child-concurrency=1 --network-concurrency=4)
 fi
 if [ -d "$old_admin/.local" ]; then ln -s "$(readlink -f "$old_admin/.local")" "$admin_release/.local"; fi
 if [ -d "$old_admin/mocks" ]; then
