@@ -15,7 +15,7 @@ async function startGlobeTheme(){
   const stars=new Stars();stars.addToScene(scene);const earth=new Earth(1.48,textureURL);earth.addToScene(scene);
   state={canvas,stage,scene,camera,renderer,controls,stars,earth,frame:0};
   const loading=stage.querySelector('[data-globe-loading]');
-  const resize=()=>{if(!state||!stage.isConnected)return;const rect=stage.getBoundingClientRect(),w=Math.max(1,rect.width),h=Math.max(1,rect.height);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)};
+  const resize=()=>{if(!state||!stage.isConnected)return;const rect=stage.getBoundingClientRect(),w=Math.max(1,rect.width),h=Math.max(1,rect.height);camera.aspect=w/h;const halfFov=THREE.MathUtils.degToRad(camera.fov/2),fitAngle=Math.min(halfFov,Math.atan(Math.tan(halfFov)*camera.aspect)),distance=innerWidth<=1100?Math.max(6.45,1.65/Math.sin(fitAngle)):6.45;camera.position.setLength(distance);camera.updateProjectionMatrix();renderer.setSize(w,h,false)};
   const frame=()=>{if(!state||!stage.isConnected||document.body.dataset.theme!=='globe'){stopGlobeTheme();return}resize();stars.update(.012);controls.update();renderer.render(scene,camera);state.frame=requestAnimationFrame(frame)};
   addEventListener('resize',resize);state.resize=resize;resize();if(loading)loading.hidden=true;frame();
 }

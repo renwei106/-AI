@@ -105,10 +105,19 @@
     const reduced=()=>config.motion!=='normal'||matchMedia('(prefers-reduced-motion: reduce)').matches;
     function notify(message){const el=root.querySelector('.pet-notice');el.textContent=message;el.hidden=false;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>el.hidden=true,3200);}
     const context=()=>adapter.context?.()||{};
+    const compactHome=()=>context().area==='home'&&!context().app&&innerWidth<=1100;
+    function viewportBounds(){
+      if(!compactHome())return {left:0,top:0,right:innerWidth,bottom:innerHeight,width:innerWidth,height:innerHeight};
+      const v=window.visualViewport,s=getComputedStyle(root),inset=name=>parseFloat(s.getPropertyValue('--home-safe-'+name))||0;
+      const zoomed=v&&Math.abs(v.scale-1)>.05,left=(zoomed?0:v?.offsetLeft||0)+inset('left'),top=(zoomed?0:v?.offsetTop||0)+inset('top');
+      const right=(zoomed?innerWidth:(v?.offsetLeft||0)+(v?.width||innerWidth))-inset('right'),bottom=(zoomed?innerHeight:(v?.offsetTop||0)+(v?.height||innerHeight))-inset('bottom');
+      return {left,top,right,bottom,width:right-left,height:bottom-top};
+    }
     function place(){
       size={small:60,normal:76,large:92}[config.size];root.style.setProperty('--pet-size',size+'px');
+      if(compactHome()&&innerWidth<=600){size={small:52,normal:60,large:76}[config.size];root.style.setProperty('--pet-size',size+'px');}
       if(!drag?.active){const p=config.position;point=p?{x:p.x*innerWidth/p.width,y:p.y*innerHeight/p.height}:{x:innerWidth-76,y:innerHeight-142};}
-      point.x=clamp(point.x,size/2+10,Math.max(size/2+10,innerWidth-size/2-10));point.y=clamp(point.y,size/2+10,Math.max(size/2+10,innerHeight-size/2-10));
+      const b=viewportBounds();point.x=clamp(point.x,b.left+size/2+10,Math.max(b.left+size/2+10,b.right-size/2-10));point.y=clamp(point.y,b.top+size/2+10,Math.max(b.top+size/2+10,b.bottom-size/2-10));
       root.style.left=(point.x-size/2)+'px';root.style.top=(point.y-size/2)+'px';
     }
     function refresh(){
@@ -137,6 +146,7 @@
       layout();
     }
     function layout(){
+      const boundsView=viewportBounds(),useCompact=compactHome()&&(innerWidth<=600||boundsView.height<460);
       const items=[...menu.querySelectorAll('.pet-shortcut')],apps=items.filter(b=>!b.classList.contains('pet-nav')),nav=items.filter(b=>b.classList.contains('pet-nav'));
       const candidates=[[-Math.PI/2,'up'],[Math.PI/2,'down'],[Math.PI,'left'],[0,'right'],[-3*Math.PI/4,'upper-left'],[-Math.PI/4,'upper-right'],[3*Math.PI/4,'lower-left'],[Math.PI/4,'lower-right']];
       const edge=205;let preferred='up';
@@ -152,12 +162,12 @@
         const a=angle+(i-(group.length-1)/2)*spread/Math.max(1,group.length-1);
         return {el,r,x:Math.cos(a)*r,y:Math.sin(a)*r,...bounds.get(el)};
       });
-      const fits=points=>points.every(p=>point.x+p.x-p.width/2>=8&&point.x+p.x+p.width/2<=innerWidth-8&&point.y+p.y-p.height/2>=8&&point.y+p.y+p.height/2<=innerHeight-8);
+      const fits=points=>points.every(p=>point.x+p.x-p.width/2>=boundsView.left+8&&point.x+p.x+p.width/2<=boundsView.right-8&&point.y+p.y-p.height/2>=boundsView.top+8&&point.y+p.y+p.height/2<=boundsView.bottom-8);
       const separated=points=>points.every((a,i)=>[...points.slice(i+1),...obstacles].every(b=>Math.abs(a.x-b.x)>=(a.width+b.width)/2+4||Math.abs(a.y-b.y)>=(a.height+b.height)/2+4));
       const ordered=[...candidates].sort((a,b)=>Number(b[1]===preferred)-Number(a[1]===preferred));
       if(direction)ordered.sort((a,b)=>Number(b[1]===direction)-Number(a[1]===direction));
       let chosen;
-      search:for(const [angle,name] of ordered){
+      search:for(const [angle,name] of (useCompact?[]:ordered)){
         // Corners open inward over a quarter circle. Slightly inset its ends at the drag limit.
         const spreads=[...(name.includes('-')?[]:[Math.PI*.84,Math.PI*.65]),Math.PI/2,Math.PI/2-.07,Math.PI/2-.14,Math.PI/2-.21];
         // Mirror the arc slots on the left so world / home / space still run from top to bottom.
@@ -178,16 +188,16 @@
         const radius=Math.max(180,...chosen.points.map(p=>p.r))+40;
         corridor=[{x:0,y:0},...Array.from({length:12},(_,i)=>{const angle=chosen.angle-chosen.spread/2+i*chosen.spread/11;return {x:Math.cos(angle)*radius,y:Math.sin(angle)*radius};})];
       }else{
-        const rows=Math.ceil(items.length/3),width=Math.min(284,innerWidth-20),height=Math.min(innerHeight-24,rows*64+Math.max(0,rows-1)*6+44);
-        menu.style.setProperty('--compact-x',(clamp(point.x-width/2,10,innerWidth-width-10)-point.x+size/2)+'px');
-        menu.style.setProperty('--compact-y',(clamp(point.y>innerHeight/2?point.y-size/2-height-12:point.y+size/2+12,10,innerHeight-height-10)-point.y+size/2)+'px');
+        const rows=Math.ceil(items.length/3),width=Math.min(284,boundsView.width-20),height=Math.min(boundsView.height-24,rows*64+Math.max(0,rows-1)*6+(useCompact?62:44));
+        menu.style.setProperty('--compact-x',(clamp(point.x-width/2,boundsView.left+10,boundsView.right-width-10)-point.x+size/2)+'px');
+        menu.style.setProperty('--compact-y',(clamp(point.y>(boundsView.top+boundsView.bottom)/2?point.y-size/2-height-12:point.y+size/2+12,boundsView.top+10,boundsView.bottom-height-10)-point.y+size/2)+'px');
         menu.style.setProperty('--compact-width',width+'px');
       }
       if(panelKind)positionPanel();
     }
     function open(){if(root.hidden||root.inert||drag?.active||Date.now()<suppressUntil)return;clearTimeout(leaveTimer);if(!opened){direction=null;opened=true;root.dataset.open='true';menu.hidden=false;core.setAttribute('aria-expanded','true');buildMenu();}}
     function close(){clearTimeout(enterTimer);clearTimeout(leaveTimer);opened=false;pinned=false;inCorridor=false;root.dataset.open='false';menu.hidden=true;panel.hidden=true;panelKind='';core.setAttribute('aria-expanded','false');direction=null;}
-    function positionPanel(){const width=Math.min(260,innerWidth-20),height=Math.min(340,innerHeight-24);panel.style.width=width+'px';panel.style.maxHeight=height+'px';panel.style.left=(clamp(point.x-width/2,10,innerWidth-width-10)-point.x+size/2)+'px';panel.style.top=(clamp(point.y>innerHeight/2?point.y-size/2-height-12:point.y+size/2+12,12,innerHeight-height-12)-point.y+size/2)+'px';}
+    function positionPanel(){const b=viewportBounds(),width=Math.min(260,b.width-20),height=Math.min(340,b.height-24);panel.style.width=width+'px';panel.style.maxHeight=height+'px';panel.style.left=(clamp(point.x-width/2,b.left+10,b.right-width-10)-point.x+size/2)+'px';panel.style.top=(clamp(point.y>(b.top+b.bottom)/2?point.y-size/2-height-12:point.y+size/2+12,b.top+12,b.bottom-height-12)-point.y+size/2)+'px';}
     async function showPanel(kind){
       if(kind==='spaces'&&!await adapter.authorize?.('space'))return;
       panelKind=kind;pinned=true;panel.hidden=false;
@@ -247,6 +257,7 @@
     new MutationObserver(records=>{if(records.some(r=>!root.contains(r.target)))schedule();}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['open','hidden','class','data-dark','data-mode','data-view','data-corner-module']});
     document.addEventListener('fullscreenchange',()=>{close();schedule();});
     window.addEventListener('resize',()=>{finish(false);close();refresh();});
+    window.visualViewport?.addEventListener('resize',()=>{if(compactHome()){finish(false);close();schedule();}});
     for(const name of ['popstate','hashchange','shiyu-account-state','shiyu-pet-context'])window.addEventListener(name,()=>{close();schedule();});
     window.addEventListener('shiyu-operations-config',schedule);
     const sync=()=>{const next=read();if(next.updated!==config.updated){config=next;close();}refresh();};
@@ -256,6 +267,7 @@
 
     function settingsMarkup(){
       const choices=(key,values)=>'<div class="pet-setting-choices">'+values.map(([id,label])=>`<button type="button" data-pet-pref="${key}" data-value="${id}" aria-pressed="${String(config[key])===id}">${label}</button>`).join('')+'</div>';
+    window.visualViewport?.addEventListener('resize',()=>{if(compactHome()){finish(false);close();schedule();}});
       return '<div class="pet-preferences" data-motion="'+config.motion+'"><div class="pet-setting-row"><div><h3>桌面宠物</h3><p>在首页、空间、世界与子应用中陪伴你。</p></div>'+choices('enabled',[['true','开启'],['false','关闭']])+'</div><div class="pet-skin-choices">'+[...new Set([...(adapter.skinOrder?.()||[]),...Object.keys(skins)])].filter(id=>skins[id]&&adapter.skinAllowed?.(id)!==false).map(id=>[id,skins[id]]).map(([id,[name,description]])=>`<button type="button" class="pet-skin-choice" data-pet-pref="skin" data-value="${id}" aria-pressed="${skin===id}">${art(id)}<b>${escape(adapter.skinName?.(id)||name)}</b><span>${description}</span></button>`).join('')+'</div><div class="pet-setting-row"><h3>宠物大小</h3>'+choices('size',[['small','小'],['normal','标准'],['large','大']])+'</div><div class="pet-setting-row"><div><h3>动作强度</h3><p>系统开启“减少动态效果”时保持静止。</p></div>'+choices('motion',[['normal','正常'],['gentle','轻微'],['off','静止']])+'</div><div class="pet-setting-row"><h3>位置记忆</h3><p>长按宠物拖动，松开后保存；切换主题保持原位。</p></div><button type="button" data-pet-reset>恢复默认位置</button></div></div>';
     }
     function bindSettings(container){

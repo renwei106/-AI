@@ -565,6 +565,7 @@ const HOME_COPY_SELECTOR='.home .customizable-copy,.home [data-flow-title],.home
 function fitHomeText(){
  if(view!=='home')return;
  document.querySelectorAll(HOME_COPY_SELECTOR).forEach(el=>{
+  if(matchMedia('(max-width:1100px)').matches){el.style.removeProperty('font-size');el.style.setProperty('white-space','pre-wrap','important');el.style.setProperty('overflow-wrap','anywhere','important');el.style.setProperty('word-break','normal','important');el.style.setProperty('max-width','100%','important');el.style.width='100%';el.style.boxSizing='border-box';return;}
   el.style.removeProperty('font-size');el.style.setProperty('white-space','pre','important');el.style.setProperty('overflow-wrap','normal','important');el.style.setProperty('word-break','normal','important');el.style.setProperty('max-width','none','important');
   const parent=el.parentElement,pr=parent.getBoundingClientRect(),ps=getComputedStyle(parent),es=getComputedStyle(el),paddingLeft=parseFloat(ps.paddingLeft)||0,paddingRight=parseFloat(ps.paddingRight)||0;
   const left=Math.max(16,pr.left+paddingLeft),right=Math.min(innerWidth-16,pr.right-paddingRight),available=right-left;if(available<=0||!el.getClientRects().length)return;
@@ -1245,7 +1246,9 @@ THEMES.paper.desc='把日常的小事，编成自己的头条。';
   const validEmail=value=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value).trim());
   const cloneValue=value=>JSON.parse(JSON.stringify(value));
   const clearLoginPrefill=d=>{
-    const clear=()=>d.querySelectorAll('[data-login-account],[data-login-credential]').forEach(input=>{input.value='';input.removeAttribute('value')});
+    const inputs=[...d.querySelectorAll('[data-login-account],[data-login-credential]')],edited=new WeakSet();
+    inputs.forEach(input=>input.addEventListener('input',()=>edited.add(input),{once:true}));
+    const clear=()=>inputs.forEach(input=>{if(!input.isConnected||edited.has(input))return;input.value='';input.removeAttribute('value')});
     clear();
     requestAnimationFrame(()=>{clear();setTimeout(clear,80)});
   };

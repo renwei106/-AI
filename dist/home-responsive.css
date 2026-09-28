@@ -1,0 +1,149 @@
+/* Home, its theme controls, login and companion only. Desktop rules stay intact. */
+@media (max-width:1100px) {
+  body[data-view=home]:not(.world-active) {
+    --home-gutter:clamp(16px,4vw,32px);
+    --home-safe-top:env(safe-area-inset-top,0px);
+    --home-safe-bottom:env(safe-area-inset-bottom,0px);
+    --home-safe-left:env(safe-area-inset-left,0px);
+    --home-safe-right:env(safe-area-inset-right,0px);
+  }
+  body[data-view=home]:not(.world-active)>header {
+    padding-left:max(var(--home-gutter),var(--home-safe-left));
+    padding-right:max(var(--home-gutter),var(--home-safe-right));
+  }
+  body[data-view=home]:not(.world-active) .brand-theme-menu {
+    max-width:calc(100vw - 32px);max-height:calc(100dvh - 100px - var(--home-safe-top));
+    overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  }
+  body[data-view=home]:not(.world-active) .brand-theme-menu button { min-height:44px; }
+  body[data-view=home]:not(.world-active) .home .base-composition { min-width:0; }
+  body[data-view=home]:not(.world-active) .home .search-area { max-width:100%;min-width:0; }
+  body[data-view=home]:not(.world-active) .home input { min-width:0; }
+  body[data-view=home]:not(.world-active) .home-flip .flip-face { gap:clamp(4px,1.2vw,14px); }
+  body[data-view=home]:not(.world-active) .home-flip .digit {
+    width:clamp(42px,14vw,132px);height:clamp(70px,20vw,178px);font-size:clamp(44px,13vw,118px);
+  }
+  body[data-view=home]:not(.world-active) .home-flip .flip-face:not(.focus-unit-face)>.clock-seconds {
+    position:relative;left:auto;bottom:auto;margin-left:0;align-self:flex-end;flex:none;
+  }
+  body[data-view=home]:not(.world-active) .clock-seconds .second-card {
+    width:clamp(27px,6vw,56px);height:clamp(38px,8vw,68px);font-size:clamp(20px,4.8vw,34px);
+  }
+  body[data-view=home]:not(.world-active) .home-cosmos { overflow:clip; }
+  body[data-view=home]:not(.world-active) .home-globe .globe-stage {
+    position:absolute;inset:28% 0 2%;transform:none;
+  }
+  body[data-view=home]:not(.world-active) .home-globe .globe-copy {
+    top:2%;left:0;width:100%;text-align:center;
+  }
+  body[data-view=home]:not(.world-active) .globe-copy h1 { font-size:clamp(24px,4.6vw,40px); }
+  body[data-view=home]:not(.world-active) .globe-copy h1 span { white-space:normal; }
+  body[data-view=home]:not(.world-active) .music-composition {
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,60px);width:100%;
+  }
+  body[data-view=home]:not(.world-active) .record-sleeve { width:min(100%,360px);height:auto;aspect-ratio:1; }
+  body[data-view=home]:not(.world-active) .music-info { min-width:0; }
+  body[data-view=home]:not(.world-active) .music-info h1 { font-size:clamp(24px,3.4vw,38px); }
+  body[data-view=home]:not(.world-active) .home-paper .paper-life { height:auto;min-height:0; }
+  body[data-view=home]:not(.world-active) .home-paper .paper-life .paper-columns {
+    grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);height:auto;flex:none;
+  }
+  body[data-view=home]:not(.world-active) .paper-life .paper-columns>* { min-width:0;overflow:visible; }
+  body[data-view=home]:not(.world-active) .paper-life .paper-index { grid-column:1/-1;border-left:0;padding-left:0; }
+  body[data-view=home]:not(.world-active) .paper-life .paper-lead>.paper-cover { height:280px;flex:none; }
+  body[data-view=home]:not(.world-active) #settings {
+    width:min(720px,calc(100% - 24px));max-height:calc(100dvh - 24px);box-sizing:border-box;
+    margin:auto;padding:24px;overflow-y:auto;overscroll-behavior:contain;
+  }
+  body[data-view=home]:not(.world-active) #settings .settings-tabs { overflow-x:auto;flex-wrap:nowrap; }
+  body[data-view=home]:not(.world-active) #settings .settings-tabs>button { flex:none;min-height:44px; }
+}
+
+@media (max-width:600px) {
+  body[data-view=home]:not(.world-active)>header { box-sizing:content-box;align-items:flex-start;padding-top:calc(16px + var(--home-safe-top));height:92px; }
+  body[data-view=home]:not(.world-active)>header .header-right {
+    gap:2px;translate:none!important;margin-right:60px;
+  }
+  body[data-view=home]:not(.world-active)>header .brand-discovery { flex:none; }
+  body[data-view=home]:not(.world-active)>header .brand { white-space:nowrap; }
+  body[data-view=home]:not(.world-active)>header [data-v5=fullscreen] { position:absolute;left:var(--home-gutter);top:calc(60px + var(--home-safe-top)); }
+  body[data-view=home]:not(.world-active)>header .icon-button { width:44px;height:44px;flex:none; }
+  body[data-view=home]:not(.world-active)>header .brand { min-height:44px; }
+  body[data-view=home]:not(.world-active)>header .brand-theme-menu { position:fixed;top:calc(74px + var(--home-safe-top));left:16px;width:220px; }
+  body[data-view=home]:not(.world-active)>.world-entry { top:calc(70px + var(--home-safe-top));min-height:32px;max-width:calc(100% - 100px); }
+  body[data-view=home]:not(.world-active)>.utility-search {
+    right:max(16px,var(--home-safe-right))!important;bottom:calc(12px + var(--home-safe-bottom))!important;
+  }
+  body[data-view=home]:not(.world-active)>.utility-search button { min-height:44px; }
+  body[data-view=home]:not(.world-active)>.utility-search kbd { display:none; }
+  body[data-view=home]:not(.world-active) .scroll-invitation {
+    bottom:calc(62px + var(--home-safe-bottom))!important;min-height:44px;max-width:calc(100% - 32px);white-space:normal;font-size:12px;
+  }
+  body[data-view=home]:not(.world-active) .home { padding-bottom:150px;min-height:calc(100svh - 108px - var(--home-safe-top)); }
+  body[data-view=home]:not(.world-active) :is(.home-flow,.home-globe) { height:calc(100svh - 108px - var(--home-safe-top)); }
+  body[data-view=home]:not(.world-active) .base-composition h1 { font-size:clamp(24px,6.8vw,34px);line-height:1.5; }
+  body[data-view=home]:not(.world-active) .base-composition .intro { font-size:13px;line-height:1.8; }
+  body[data-view=home]:not(.world-active) .home input { font-size:16px; }
+  body[data-view=home]:not(.world-active) .home .search-tabs button { min-height:44px; }
+  body[data-view=home]:not(.world-active) .music-composition { grid-template-columns:minmax(0,1fr);gap:24px; }
+  body[data-view=home]:not(.world-active) .record-sleeve { width:min(68vw,280px); }
+  body[data-view=home]:not(.world-active) .music-info { width:100%; }
+  body[data-view=home]:not(.world-active) .player-controls { gap:12px; }
+  body[data-view=home]:not(.world-active) .player-controls button { min-height:44px;min-width:44px; }
+  body[data-view=home]:not(.world-active) .home-paper .paper-life .paper-columns { grid-template-columns:minmax(0,1fr); }
+  body[data-view=home]:not(.world-active) .paper-life .paper-saved { border-left:0;padding-left:0; }
+  body[data-view=home]:not(.world-active) .home-paper .masthead h1 { font-size:clamp(32px,10vw,48px);letter-spacing:.12em; }
+  body[data-view=home]:not(.world-active) .globe-copy p { font-size:12px;line-height:1.7; }
+  body[data-view=home]:not(.world-active) .poly-tools { bottom:calc(210px + var(--home-safe-bottom)); }
+  body[data-view=home]:not(.world-active) .poly-effects { bottom:calc(260px + var(--home-safe-bottom));max-height:calc(100dvh - 340px); }
+  body[data-view=home]:not(.world-active) .inspiration-style-menu { flex-wrap:wrap;max-width:calc(100vw - 32px); }
+  body[data-view=home]:not(.world-active) .inspiration-style-menu button { min-height:44px; }
+  body[data-view=home]:not(.world-active) #settings { padding:20px 16px; }
+  body[data-view=home]:not(.world-active) .desktop-pet .pet-panel-heading button { width:44px;height:44px; }
+  body[data-view=home]:not(.world-active) .desktop-pet[data-compact=true] .pet-menu { padding-bottom:48px;max-height:calc(var(--home-visual-height,100dvh) - 24px); }
+  body[data-view=home]:not(.world-active) .desktop-pet .pet-settings-entry { width:40px;height:40px;padding:10px; }
+}
+
+/* A bounded, scrollable login works with both a virtual keyboard and a short landscape window. */
+@media (max-width:1100px), (pointer:coarse) {
+  #login[open] {
+    position:fixed;box-sizing:border-box;width:min(440px,calc(100% - 24px));
+    max-height:calc(var(--home-visual-height,100dvh) - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+    top:calc(var(--home-visual-top,0px) + 12px + env(safe-area-inset-top,0px));
+    bottom:calc(100% - var(--home-visual-top,0px) - var(--home-visual-height,100dvh) + 12px + env(safe-area-inset-bottom,0px));margin:auto;padding:24px;overflow-y:auto;overscroll-behavior:contain;
+    scroll-padding-block:20px;-webkit-overflow-scrolling:touch;
+  }
+  #login .account-login-content input { font-size:16px;min-height:44px;min-width:0;box-sizing:border-box; }
+  #login .account-country-input,#login .account-input-row { min-width:0; }
+  #login .account-input-row button { min-height:44px;flex:none; }
+  #login .primary,#login .dialog-close-control { min-height:44px; }
+  #login .dialog-close-control { min-width:44px; }
+  #login .dialog-heading { position:sticky;top:-24px;z-index:3;background:var(--surface);padding-block:8px; }
+  #login .login-method-switcher { gap:8px; }
+  #login .login-method-switcher button { min-height:64px; }
+  #login .wechat-inline-qr { width:min(260px,100%);height:auto;aspect-ratio:1; }
+  #login .wechat-inline-qr img,#login .wechat-inline-qr canvas { max-width:100%;height:auto; }
+  #login .login-legal { font-size:12px;line-height:1.8; }
+  .login-agreement-dialog { box-sizing:border-box;max-height:calc(var(--home-visual-height,100dvh) - 24px);overflow-y:auto; }
+}
+@media (max-width:420px) {
+  #login[open] { padding:24px 18px; }
+  #login .account-login-content>label { display:flex;flex-direction:column;align-items:stretch;gap:8px;white-space:normal; }
+  #login .account-field-caption { width:auto;flex:none; }
+  #login .account-login-content:has([data-code-send])>.account-status { margin-left:0;width:100%; }
+  #login .account-country-input,#login .account-input-row { width:100%;box-sizing:border-box;flex:none; }
+  #login .dialog-heading h2 { font-size:21px; }
+}
+@media (max-height:600px) and (max-width:1100px) {
+  body[data-view=home]:not(.world-active) .home { min-height:480px; }
+  body[data-view=home]:not(.world-active) .home-flip { min-height:420px; }
+  body[data-view=home]:not(.world-active) .base-composition { margin-top:0; }
+}
+@media (pointer:coarse) {
+  body[data-view=home]:not(.world-active) .home-cosmos { overflow:clip; }
+  body[data-view=home]:not(.world-active) .brand-theme-menu button,
+  body[data-view=home]:not(.world-active)>header .icon-button { min-height:44px;min-width:44px; }
+  body[data-view=home]:not(.world-active).global-chrome-idle header,
+  body[data-view=home]:not(.world-active).global-chrome-idle .utility-search,
+  body[data-view=home]:not(.world-active).global-chrome-idle .scroll-invitation { opacity:1; }
+}
