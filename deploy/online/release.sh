@@ -19,7 +19,7 @@ for name in .local .local-shares .local-feedback; do
   if [ -d "$old_front/$name" ]; then ln -s "$(readlink -f "$old_front/$name")" "$front_release/$name"; fi
 done
 # New dependencies belong to this release so rollback never reuses a mutated tree.
-if cmp -s "$old_admin/pnpm-lock.yaml" "$admin_release/pnpm-lock.yaml" && cmp -s "$old_admin/package.json" "$admin_release/package.json"; then
+if cmp -s "$old_admin/pnpm-lock.yaml" "$admin_release/pnpm-lock.yaml" && cmp -s "$old_admin/package.json" "$admin_release/package.json" && cmp -s "$old_admin/pnpm-workspace.yaml" "$admin_release/pnpm-workspace.yaml"; then
   ln -s "$(readlink -f "$old_admin/node_modules")" "$admin_release/node_modules"
 else
   (cd "$admin_release" && PATH=/opt/node-v24/bin:$PATH NODE_OPTIONS=--max-old-space-size=384 CI=1 pnpm install --frozen-lockfile --child-concurrency=1 --network-concurrency=4)
