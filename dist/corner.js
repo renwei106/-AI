@@ -651,7 +651,7 @@
   }
   function onPanelChange(e){if(e.target.hasAttribute('data-corner-name')&&!e.target.value.trim()){const g=collection().groups.find(g=>g.id===e.target.dataset.cornerName);e.target.value=g.name;}}
   const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function fanMetrics(){const deck=panel.querySelector('.corner-deck'),width=deck.clientWidth||innerWidth-96,cardWidth=innerWidth<=760?Math.min(340,width-72):330;return {deck,cardWidth,step:cardWidth+40,half:Math.max(0,Math.floor((width-cardWidth)/(2*(cardWidth+40))))};}
+  function fanMetrics(){const deck=panel.querySelector('.corner-deck'),width=deck.clientWidth||innerWidth-96,cardWidth=activeModule==='common'&&innerWidth<=600?Math.min(340,width-40):innerWidth<=760?Math.min(340,width-72):330;return {deck,cardWidth,step:cardWidth+40,half:Math.max(0,Math.floor((width-cardWidth)/(2*(cardWidth+40))))};}
   function fanOffset(distance,m){return distance<=m.half+1?distance*m.step:(m.half+1)*m.step+(distance-m.half-1)*30;}
   function paintFan(position){
     const m=fanMetrics(),ids=[...collection().groups.map(g=>g.id),ADD_CARD];panel.classList.toggle('corner-editing',flipped.size>0);

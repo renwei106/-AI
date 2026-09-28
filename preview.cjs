@@ -17,7 +17,7 @@ async function handlePayment(req,res){
   }
 }
 const routes={
-  '/pages-responsive.js':'pages-responsive.js','/pages-responsive.css':'pages-responsive.css','/home-responsive.css':'home-responsive.css','/home-responsive.js':'home-responsive.js',
+  '/corner-responsive.css':'corner-responsive.css','/pages-responsive.js':'pages-responsive.js','/pages-responsive.css':'pages-responsive.css','/home-responsive.css':'home-responsive.css','/home-responsive.js':'home-responsive.js',
   '/analytics.js':'analytics.js',
   '/desktop-pet.js':'desktop-pet.js','/desktop-pet.css':'desktop-pet.css','/desktop-pet-host.js':'desktop-pet-host.js','/feature-config.js':'feature-config.js',
   '/assets/desktop-pet/paper-person.webp':'assets/desktop-pet/paper-person.webp',
