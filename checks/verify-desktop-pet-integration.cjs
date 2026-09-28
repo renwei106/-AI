@@ -11,8 +11,11 @@ async function compareSurfaces(browser){
  const before=await fixture(browser,true,true),after=await fixture(browser);
  for(const area of ['home','space']){
   for(const f of [before,after]){await f.page.evaluate(area=>{view=area;render();},area);await f.page.evaluate(()=>document.fonts.ready);await f.page.addStyleTag({content:'#desktop-pet{display:none!important}'});await f.page.waitForTimeout(350);}
+  // The retired launcher is an intended removal. Mask the same rectangles in both captures.
+  const regions=await before.page.locator('#corner-orbit-demo,#corner-orbit-preview,#dock').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}).filter(r=>r.width&&r.height));
+  for(const f of [before,after])await f.page.evaluate(regions=>{document.querySelectorAll('[data-retired-entry-mask]').forEach(n=>n.remove());for(const r of regions){const n=document.createElement('div');n.dataset.retiredEntryMask='';n.style.cssText=`position:fixed;left:${r.x}px;top:${r.y}px;width:${r.width}px;height:${r.height}px;background:#f0f;z-index:2147483647;pointer-events:none`;document.body.append(n);}},regions);
   const captures=[];
-  for(const [i,f]of [before,after].entries()){const buffer=await f.page.screenshot({animations:'disabled',mask:[f.page.locator('#corner-orbit-demo'),f.page.locator('#corner-orbit-preview')]});fs.writeFileSync(path.join(out,`regression-${area}-${i?'after':'before'}.png`),buffer);captures.push(await sharp(buffer).ensureAlpha().raw().toBuffer());}
+  for(const [i,f]of [before,after].entries()){const buffer=await f.page.screenshot({animations:'disabled'});fs.writeFileSync(path.join(out,`regression-${area}-${i?'after':'before'}.png`),buffer);captures.push(await sharp(buffer).ensureAlpha().raw().toBuffer());}
   let changed=0;for(let i=0;i<captures[0].length;i+=4){if(Math.max(...[0,1,2].map(k=>Math.abs(captures[0][i+k]-captures[1][i+k])))>15)changed++;}
   const ratio=changed/(1440*960);assert(ratio<.002,`unrelated ${area} visuals changed: ${ratio}`);console.log(`PASS ${area} baseline image: ${(ratio*100).toFixed(4)}% pixels changed outside pet`);
  }
@@ -35,10 +38,12 @@ async function layersAndInput(browser){
  await p.setViewportSize({width:320,height:480});await click(p,'more','__more');
  await p.screenshot({path:path.join(out,'compact-all-apps.png')});
  const panel=await p.locator('.pet-panel').boundingBox();assert(panel.x>=0&&panel.y>=0&&panel.x+panel.width<=320&&panel.y+panel.height<=480);
- assert.equal(await p.locator('.pet-panel [data-pet-action=app]').count(),8,'overflow preserves the entire application catalog');
+ assert.deepEqual(await p.locator('.pet-panel [data-pet-action=app]').evaluateAll(nodes=>nodes.map(node=>node.dataset.petId)),['common','memo','todo','icons','palette','cutout','toolbox'],'overflow preserves all current applications; the retired emoji app stays excluded');
  await p.locator('.pet-panel').hover();await p.mouse.wheel(0,-160);await p.waitForTimeout(220);await p.mouse.wheel(0,-160);await p.waitForTimeout(220);
  assert.equal(await p.evaluate(()=>document.body.classList.contains('world-active')),false,'scrolling pet entries does not activate page navigation gestures');
- await p.setViewportSize({width:1440,height:960});await click(p,'settings');
+ await p.setViewportSize({width:1440,height:960});
+ // The browser can acknowledge a resize before the pet's resize handler closes its menu.
+ await p.waitForFunction(()=>document.querySelector('#desktop-pet').dataset.open==='false');await click(p,'settings');
  await p.locator('[data-pet-pref=skin][data-value=sprout]').click();await p.waitForFunction(()=>ShiyuDesktopPet.read().skin==='sprout');
  await p.locator('[data-pet-pref=enabled][data-value=false]').click();await p.waitForFunction(()=>ShiyuDesktopPet.read().enabled===false);
  await p.locator('#settings').evaluate(d=>d.close());assert(await p.locator('#desktop-pet').isHidden());
@@ -85,4 +90,4 @@ async function entryPolicies(browser){
  const locked=await p.evaluate(async()=>{document.body.classList.add('theme-preview-corner-disabled');const result=await ShiyuCorner.openModule('common');document.body.classList.remove('theme-preview-corner-disabled');return result;});assert.equal(locked,false,'new application adapter respects the expired-theme gate');
  assert.deepEqual(f.errors,[]);await f.context.close();console.log('PASS last space, world detail/list resume, disabled modules, world audience and theme-expiry gates');
 }
-(async()=>{const b=await chromium.launch({channel:'msedge',headless:true});try{await compareSurfaces(b);await layersAndInput(b);await subApps(b);await entryPolicies(b);}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
+(async()=>{const b=await chromium.launch({channel:'msedge',headless:true,args:['--disable-lcd-text']});try{await compareSurfaces(b);await layersAndInput(b);await subApps(b);await entryPolicies(b);}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

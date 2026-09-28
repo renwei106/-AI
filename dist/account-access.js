@@ -71,7 +71,6 @@
     }
     if (Array.isArray(accountData)) { data = clone(accountData); prefs.accountDataUserId = user.id; accountDataRefreshPending = false; normalizeSelection(); }
     syncMembershipFromUser(user);
-    syncCornerLoginState();
     return changed;
   }
   function clearAccount() {
@@ -79,7 +78,7 @@
     invalidateAccount(); signed = false; verifiedUserId = '';
     prefs.accountProfile = {}; prefs.accountDataUserId = ''; prefs.membership = null; prefs.membershipDemo = null; prefs.demoMemberOrders = [];
     data = clone(seed); normalizeSelection(); view = location.hostname === 'space.shiyubox.com' ? 'space' : 'home'; pending = null;
-    publishMembership(null); syncCornerLoginState(); rawPersist();
+    publishMembership(null); rawPersist();
     closeAccountDialogs();
     window.dispatchEvent(new CustomEvent('shiyu-account-state', { detail: { authenticated: false } }));
     render();
@@ -148,13 +147,6 @@
     window.dispatchEvent(new CustomEvent('shiyu-user-entitlements', { detail: snapshot }));
   }
   publishMembership(null, false);
-
-  // The bottom "我的一隅" preview is only discoverable after login. Keep the
-  // entry itself visible so an unsigned visitor can click it and open login.
-  const syncCornerLoginState = () => {
-    document.body.classList.toggle('account-unsigned', !signed);
-  };
-  syncCornerLoginState();
 
   persist = function accountPersist() {
     if (!originalPersist()) return;
@@ -240,8 +232,7 @@
   }
 
   function isSpaceEntry(target) {
-    return target.closest?.('[data-action="space"],[data-v2="enter"],[data-space],[data-heading-space],.space-option,.dock-label')
-      || target.closest?.('.corner-entry:not(.corner-close-entry)');
+    return target.closest?.('[data-action="space"],[data-v2="enter"],[data-space],[data-heading-space],.space-option,.dock-label');
   }
 
   // Capture before the existing navigation handlers so an unsigned visitor cannot enter a space.
@@ -256,10 +247,8 @@
     openLogin();
   }, true);
 
-  // Login UI upgrades can complete through the shared account dialog. Keep
-  // the corner preview in sync when that flow finishes outside this module.
+  // Keep membership in sync when login completes through the shared account dialog.
   window.addEventListener('shiyu-account-state', event => {
-    syncCornerLoginState();
     if (event.detail?.user && event.detail.user.id === accountId()) { syncMembershipFromUser(event.detail.user); originalPersist(); }
     else { if (!signed) { prefs.membership = null; publishMembership(null); } void refreshMembership(); }
   });

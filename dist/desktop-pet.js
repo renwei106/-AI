@@ -4,7 +4,9 @@
   if (window.ShiyuDesktopPet) return;
   const KEY = 'shiyu-desktop-pet-v1', COOKIE = 'shiyu_pet_v1';
   const defaults = { enabled: true, skin: 'cat', size: 'normal', motion: 'normal', position: null, home: '', updated: 0 };
-  const skins = { cat: ['隅猫', '眨眨眼，陪你安放日常'], bird: ['纸雀', '轻轻展翅，把灵感带来'], sprout: ['芽芽', '慢慢生长，陪你发现新意'] };
+  const skins = { cat: ['隅猫', '眨眨眼，陪你安放日常'], bird: ['纸雀', '轻轻展翅，把灵感带来'], sprout: ['芽芽', '慢慢生长，陪你发现新意'], line: ['线条人物', '轻轻晃一晃，向你挥挥手'], paper: ['纸片人物', '草帽轻轻晃，陪你慢慢来'] };
+  const paperAsset = new URL('assets/desktop-pet/paper-person.webp', document.currentScript?.src || location.href).href;
+  let artId = 0;
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
   const svg = paths => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
@@ -17,6 +19,7 @@
     down: svg('<path d="m6 9 6 6 6-6"/>')
   };
   function art(skin) {
+    if (skin === 'line' || skin === 'paper') return humanArt(skin);
     const common = '<ellipse class="pet-ground" cx="48" cy="94" rx="26" ry="3"/>';
     const eyes = '<g class="pet-eyes"><path d="M35 44v3m24-3v3"/></g><path d="m45 51 3 2 3-2M48 53v3m-4 0q4 4 8 0"/>';
     const shapes = {
@@ -25,6 +28,49 @@
       sprout: `<g class="pet-body"><path class="pet-feet" d="M33 82v9h-7m35-9v9h7"/><path class="pet-sprout-body" d="M23 55c0-18 8-27 25-27s25 9 25 27c0 20-9 30-25 30S23 75 23 55Z"/><g class="pet-leaves"><path class="pet-stem" d="M48 31V17"/><path class="pet-leaf" d="M48 24C27 25 24 11 26 6c14-1 24 4 22 18Z"/><path class="pet-leaf pet-leaf-light" d="M48 21C49 6 61 3 73 7c-3 14-11 19-25 14Z"/></g><g class="pet-eyes"><path d="M36 49v3m24-3v3"/></g><path d="M41 61q7 7 14 0"/><path class="pet-cheeks" d="M27 59h5m33 0h5"/><path class="pet-paw pet-stem" d="M24 62q-10 2-12-6"/><path class="pet-stem" d="M73 62q8 1 10-4"/></g>`
     };
     return `<svg class="pet-art" viewBox="0 0 96 104" fill="none" stroke="var(--pet-outline)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${common}${shapes[skin] || shapes.cat}</svg>`;
+  }
+  function humanArt(skin) {
+    if (skin === 'line') return `<svg class="pet-art pet-human pet-human-line" viewBox="0 0 96 104" fill="none" stroke="var(--pet-line-ink)" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <g class="pet-human-balance">
+        <path d="m36 63-2 26 9 1 5-20 5 20 9-1-2-27M35 84l9 1m8 0 10-1"/>
+        <g class="pet-human-arm-rest"><path d="M35 44c-7 1-9 8-11 17l7 3 7-15M24 62l-1 5q0 5 4 5l4-7m-7 1 4 1"/></g>
+        <path d="m41 39-7 5 3 13-2 7q13 4 26-1l-2-11 3-8-8-5M42 38v4l6 5 6-5v-5M39 43l4 8 5-4 5 4 5-8M48 48v14M52 54h5M41 58l-1 4"/>
+        <g class="pet-human-arm-wave"><path d="M61 44c7 2 9 10 10 17l-7 3-5-13M64 64l1 5q2 5 5 3l2-3-1-7m-6 5 5-2"/></g>
+        <g class="pet-human-head-look"><g class="pet-human-head-nod">
+          <path d="M36 22q-4-2-4 3t4 5m25-8q4-2 4 3t-4 5M36 21c-1 11 3 18 12 18s14-7 13-18M36 24l1-7q5 3 9-2 5 5 12 1l3 9"/>
+          <path d="M34 22c-5-4-3-9 1-10-2-5 4-8 8-5 1-5 8-5 10-1 5-4 10 0 9 5 5 1 6 7 1 11M36 11q3 3 6-1m9 1q4 3 7-1"/>
+          <g class="pet-human-eyes"><path d="M42 25v1.5m13-1.5v1.5"/></g>
+          <path d="m48 27-1 3h2m-6 3q5 3 10-1" stroke-width="1.35"/>
+        </g></g>
+      </g>
+      <path class="pet-human-feet" d="m34 89-3 4q-1 3 3 3h10l-1-6m10 0-1 6h12q3-1 0-4l-2-3M32 94h11m10 0h11M36 92h3m17 0h3"/>
+    </svg>`;
+    // Reuse one transparent illustration as articulated layers. Unique mask IDs allow
+    // the floating pet and its settings preview to coexist without SVG collisions.
+    const id = `pet-paper-${++artId}`;
+    const head = 'M0 0H1024V438H0Z';
+    const left = 'M411 451L445 461L438 590L423 651L396 728L368 760L346 772L338 810L296 871L229 897H0V451Z';
+    const right = 'M605 449H1024V920H743L690 831L673 784L640 773L616 746L594 650L591 619L602 554Z';
+    const picture = `<image href="${escape(paperAsset)}" width="1024" height="1536"/>`;
+    return `<svg class="pet-art pet-human pet-human-paper" viewBox="0 0 96 104" aria-hidden="true">
+      <svg x="12.4" y="-3.2" width="71.2" height="106.8" viewBox="0 0 1024 1536" overflow="visible">
+        <defs>
+          <clipPath id="${id}-head"><path d="${head}"/></clipPath>
+          <clipPath id="${id}-left"><path d="${left}"/></clipPath>
+          <clipPath id="${id}-right"><path d="${right}"/></clipPath>
+          <clipPath id="${id}-feet"><path d="M0 1330H1024V1536H0Z"/></clipPath>
+          <mask id="${id}-body" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1536" style="mask-type:luminance"><path fill="white" d="M0 0H1024V1338H0Z"/><path fill="black" d="${head}"/><path fill="black" d="${left}"/><path fill="black" d="${right}"/></mask>
+          <mask id="${id}-below-head" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1536" style="mask-type:luminance"><path fill="white" d="M0 0H1024V1536H0Z"/><path fill="black" d="${head}"/></mask>
+        </defs>
+        <g class="pet-human-balance">
+          <g mask="url(#${id}-body)">${picture}</g>
+          <g class="pet-human-arm-rest"><g mask="url(#${id}-below-head)" clip-path="url(#${id}-left)">${picture}</g></g>
+          <g class="pet-human-arm-wave"><g mask="url(#${id}-below-head)" clip-path="url(#${id}-right)">${picture}</g></g>
+          <g class="pet-human-head-look"><g class="pet-human-head-nod"><g clip-path="url(#${id}-head)">${picture}</g><g class="pet-paper-blink" fill="#f5d5b6"><ellipse cx="459" cy="328" rx="13" ry="19"/><ellipse cx="550" cy="318" rx="13" ry="19"/><path d="M450 331q9 5 18-1m73-9q9 5 18-1" fill="none" stroke="#705440" stroke-width="4" stroke-linecap="round"/></g></g></g>
+        </g>
+        <g class="pet-human-feet" clip-path="url(#${id}-feet)">${picture}</g>
+      </svg>
+    </svg>`;
   }
   function normalize(value) {
     const v = value && typeof value === 'object' ? value : {};
@@ -69,21 +115,23 @@
       const ctx=context(),host=adapter.host?.()||document.fullscreenElement||document.body;
       if(root.parentNode!==host)host.append(root);
       const blocked=adapter.blocked?.()??Boolean(document.querySelector('dialog[open]'));
-      root.hidden=!config.enabled||blocked;root.inert=blocked;
+      const available=adapter.available?.()!==false;
+      root.hidden=!config.enabled||blocked||!available;root.inert=blocked||!available;
       root.dataset.motion=matchMedia('(prefers-reduced-motion: reduce)').matches?'off':config.motion;
       root.dataset.dark=String(ctx.dark??(document.body.dataset.dark==='true'||document.body.classList.contains('dark')));
       if(ctx.accent)root.style.setProperty('--pet-accent',ctx.accent);
-      if(skin!==config.skin){skin=config.skin;core.innerHTML=art(skin);core.setAttribute('aria-label',`${skins[skin][0]}，点击展开快捷入口，长按拖动`);}
+      const visibleSkin=adapter.skinAllowed?.(config.skin)===false?[...new Set([...(adapter.skinOrder?.()||[]),...Object.keys(skins)])].find(id=>skins[id]&&adapter.skinAllowed?.(id)!==false)||'cat':config.skin;
+      if(skin!==visibleSkin){skin=visibleSkin;core.innerHTML=art(skin);core.setAttribute('aria-label',`${adapter.skinName?.(skin)||skins[skin][0]}，点击展开快捷入口，长按拖动`);}
       place();
       const next=JSON.stringify([ctx.area,ctx.app,ctx.worldEnabled]);
       if(next!==contextKey){contextKey=next;signature='';if(opened)buildMenu();}
-      if(blocked||!config.enabled)close();
+      if(blocked||!config.enabled||!available)close();
     }
     function button(action,id,label,icon,nav=false,current=false){return `<button type="button" class="pet-shortcut${nav?' pet-nav':''}" data-pet-action="${action}" data-pet-id="${escape(id)}" aria-label="${escape(label)}"${current?' aria-current="page"':''}><span class="pet-shortcut-icon">${icon||icons.space}</span><span class="pet-shortcut-label">${escape(label)}</span></button>`;}
     function buildMenu(){
       const apps=adapter.apps?.()||[],ctx=context();
       const visible=apps.length>5?[...apps.slice(0,4),{id:'__more',label:'更多应用',icon:icons.more}]:apps;
-      const nav=[...(ctx.worldEnabled===false?[]:[['world','世界',icons.world]]),['home',ctx.area==='home'&&!ctx.app?'首页':'回首页',icons.home],['space','空间',icons.space]];
+      const nav=[...(ctx.worldEnabled===false?[]:[['world',adapter.navigationName?.('world')||'世界',icons.world]]),['home',ctx.area==='home'&&!ctx.app?'首页':'回首页',icons.home],['space',adapter.navigationName?.('spaceViews')||'空间',icons.space]];
       const html=visible.map(app=>button(app.id==='__more'?'more':'app',app.id,app.label,app.icon,false,ctx.app===app.id)).join('')+nav.map(([id,label,icon])=>button('navigate',id,label,icon,true,ctx.area===id&&!ctx.app)).join('')+'<button type="button" class="pet-settings-entry" data-pet-action="settings" aria-label="桌面宠物设置" title="桌面宠物设置">'+icons.settings+'</button>';
       if(signature!==html){menu.innerHTML=html;signature=html;}
       layout();
@@ -208,7 +256,7 @@
 
     function settingsMarkup(){
       const choices=(key,values)=>'<div class="pet-setting-choices">'+values.map(([id,label])=>`<button type="button" data-pet-pref="${key}" data-value="${id}" aria-pressed="${String(config[key])===id}">${label}</button>`).join('')+'</div>';
-      return '<div class="pet-preferences"><div class="pet-setting-row"><div><h3>桌面宠物</h3><p>在首页、空间、世界与子应用中陪伴你。</p></div>'+choices('enabled',[['true','开启'],['false','关闭']])+'</div><div class="pet-skin-choices">'+Object.entries(skins).map(([id,[name,description]])=>`<button type="button" class="pet-skin-choice" data-pet-pref="skin" data-value="${id}" aria-pressed="${config.skin===id}">${art(id)}<b>${name}</b><span>${description}</span></button>`).join('')+'</div><div class="pet-setting-row"><h3>宠物大小</h3>'+choices('size',[['small','小'],['normal','标准'],['large','大']])+'</div><div class="pet-setting-row"><div><h3>动作强度</h3><p>系统开启“减少动态效果”时保持静止。</p></div>'+choices('motion',[['normal','正常'],['gentle','轻微'],['off','静止']])+'</div><div class="pet-setting-row"><div><h3>位置记忆</h3><p>长按宠物拖动，松开后保存；切换主题保持原位。</p></div><button type="button" data-pet-reset>恢复默认位置</button></div></div>';
+      return '<div class="pet-preferences" data-motion="'+config.motion+'"><div class="pet-setting-row"><div><h3>桌面宠物</h3><p>在首页、空间、世界与子应用中陪伴你。</p></div>'+choices('enabled',[['true','开启'],['false','关闭']])+'</div><div class="pet-skin-choices">'+[...new Set([...(adapter.skinOrder?.()||[]),...Object.keys(skins)])].filter(id=>skins[id]&&adapter.skinAllowed?.(id)!==false).map(id=>[id,skins[id]]).map(([id,[name,description]])=>`<button type="button" class="pet-skin-choice" data-pet-pref="skin" data-value="${id}" aria-pressed="${skin===id}">${art(id)}<b>${escape(adapter.skinName?.(id)||name)}</b><span>${description}</span></button>`).join('')+'</div><div class="pet-setting-row"><h3>宠物大小</h3>'+choices('size',[['small','小'],['normal','标准'],['large','大']])+'</div><div class="pet-setting-row"><div><h3>动作强度</h3><p>系统开启“减少动态效果”时保持静止。</p></div>'+choices('motion',[['normal','正常'],['gentle','轻微'],['off','静止']])+'</div><div class="pet-setting-row"><h3>位置记忆</h3><p>长按宠物拖动，松开后保存；切换主题保持原位。</p></div><button type="button" data-pet-reset>恢复默认位置</button></div></div>';
     }
     function bindSettings(container){
       container.innerHTML=settingsMarkup();

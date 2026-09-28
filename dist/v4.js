@@ -1136,7 +1136,7 @@ THEMES.paper.desc='把日常的小事，编成自己的头条。';
   if(root.nodeType===1&&!root.closest('dialog')&&!root.querySelector('dialog'))return;
   const buttons=[...(root.matches?.(candidates)?[root]:[]),...root.querySelectorAll(candidates)];
   for(const button of buttons){
-   if(!button.closest('dialog')||button.matches('.corner-entry,.corner-close-entry')||button.querySelector('[data-dialog-close-icon]'))continue;
+   if(!button.closest('dialog')||button.matches('.corner-close-entry')||button.querySelector('[data-dialog-close-icon]'))continue;
    const label=button.getAttribute('aria-label')||'',text=button.textContent.trim();
    if(!label.startsWith('关闭')&&!['×','✕'].includes(text))continue;
    button.classList.add('dialog-close-control');

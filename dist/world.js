@@ -1,6 +1,7 @@
 /* Published operations configuration and isolated admin preview. */
 (()=>{
  const token=new URLSearchParams(location.search).get('operations-preview'),key='shiyu-operations-preview-v1';
+ const previewAdminOrigin=location.hostname==='shiyubox.com'?'https://admin.shiyubox.com':'http://127.0.0.1:5175';
  const worldAppearance={lightBackground:'#eadcc2',lightAccent:'#856544',darkBackground:'#29251f',darkAccent:'#c8a775'};
  const normalizeAppearance=value=>Object.fromEntries(Object.entries(worldAppearance).map(([key,fallback])=>[key,/^#[0-9a-f]{6}$/i.test(value?.[key])?value[key]:fallback]));
  const empty={world:{enabled:false,audience:'all',percentage:100,whitelist:'',blacklist:'',title:'一个值得慢慢探索的世界',description:'发现精选网址、学习路线与创作素材，遇见更多值得收藏的灵感。'},announcement:{enabled:false},update:{enabled:false}};
@@ -10,7 +11,7 @@
  const user=()=>identities()[0]||'guest';
  const bucket=id=>{let hash=2166136261;for(const c of id)hash=Math.imul(hash^c.charCodeAt(0),16777619);return (hash>>>0)%100};
  const worldHost=location.hostname==='world.shiyubox.com';
- const eligible=()=>{const w=config.world,ids=identities(),black=lists(w.blacklist);if(ids.some(id=>black.includes(id)))return false;if(!w.enabled&&!worldHost)return false;const white=lists(w.whitelist),listed=ids.some(id=>white.includes(id));if(worldHost)return true;if(w.audience==='whitelist')return listed;if(w.audience==='percentage')return listed||bucket(user())<Number(w.percentage);return true};
+ const eligible=()=>{const w=config.world;if(typeof w.eligible==='boolean')return w.eligible;const ids=identities(),black=lists(w.blacklist);if(ids.some(id=>black.includes(id)))return false;if(!w.enabled&&!worldHost)return false;const white=lists(w.whitelist),listed=ids.some(id=>white.includes(id));if(worldHost)return true;if(w.audience==='whitelist')return listed;if(w.audience==='percentage')return listed||bucket(user())<Number(w.percentage);return true};
  const receipt=(kind)=>'shiyu-notice-read:'+user()+':'+kind+':'+String(config[kind]?.revision||'');
  const read=kind=>{try{return localStorage.getItem(receipt(kind))==='yes'}catch{return false}};
  function mark(kind){try{localStorage.setItem(receipt(kind),'yes')}catch{}syncEntry()}
@@ -37,7 +38,7 @@
   if(!config.update.enabled||read('update')||dismissed()||document.querySelector('.shiyu-update-prompt'))return;
   const box=document.createElement('aside');box.className='shiyu-update-prompt';box.setAttribute('aria-label','版本更新通知');box.setAttribute('role','status');box.innerHTML='<span class="ops-update-icon">'+svgIcon('<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/>')+'</span><div><small>有新版本 · '+esc(config.update.revision)+'</small><b>'+esc(config.update.title)+'</b><button data-ops-view>查看更新 →</button></div><button class="ops-dismiss" aria-label="稍后提醒">×</button>';document.body.append(box);box.querySelector('[data-ops-view]').onclick=()=>details('update');box.querySelector('.ops-dismiss').onclick=()=>{try{sessionStorage.setItem(receipt('update')+':later','yes')}catch{}box.remove()};
  }
- function normalize(value){const notice=n=>({enabled:!!n?.enabled,revision:String(n?.revision||'').slice(0,40),title:String(n?.title||'').slice(0,160),body:String(n?.body||'').slice(0,12000)});const w=value?.world||{};return {world:{...empty.world,appearance:normalizeAppearance(w.appearance),enabled:w.enabled===true,audience:w.audience==='whitelist'||w.audience==='percentage'?w.audience:'all',percentage:Math.min(100,Math.max(0,Number(w.percentage)||0)),whitelist:String(w.whitelist||'').slice(0,30000),blacklist:String(w.blacklist||'').slice(0,30000),title:String(w.title||empty.world.title).slice(0,60),description:String(w.description||empty.world.description).slice(0,1000)},announcement:notice(value?.announcement),update:notice(value?.update),platformCreators:Array.isArray(value?.platformCreators)?value.platformCreators:[]}}
+ function normalize(value){const notice=n=>({enabled:!!n?.enabled,revision:String(n?.revision||'').slice(0,40),title:String(n?.title||'').slice(0,160),body:String(n?.body||'').slice(0,12000)});const w=value?.world||{};return {world:{...empty.world,appearance:normalizeAppearance(w.appearance),enabled:w.enabled===true,eligible:typeof w.eligible==='boolean'?w.eligible:undefined,audience:w.audience==='whitelist'||w.audience==='percentage'?w.audience:'all',percentage:Math.min(100,Math.max(0,Number(w.percentage)||0)),whitelist:String(w.whitelist||'').slice(0,30000),blacklist:String(w.blacklist||'').slice(0,30000),title:String(w.title||empty.world.title).slice(0,60),description:String(w.description||empty.world.description).slice(0,1000)},announcement:notice(value?.announcement),update:notice(value?.update),platformCreators:Array.isArray(value?.platformCreators)?value.platformCreators:[]}}
  function publish(){syncEntry();deliver();dispatchEvent(new CustomEvent('shiyu-operations-config',{detail:{worldEnabled:config.world.enabled,platformCreators:config.platformCreators}}))}
  async function loadPublished(force=false){
   if(token&&!force)return;if(loadingPublished)return loadingPublished;
@@ -45,7 +46,7 @@
   return loadingPublished;
  }
  addEventListener('message',event=>{
-  if(!token||event.source!==window.opener||event.origin!=='http://127.0.0.1:5175'||event.data?.type!=='shiyu-operations-preview'||event.data?.token!==token)return;
+  if(!token||event.source!==window.opener||event.origin!==previewAdminOrigin||event.data?.type!=='shiyu-operations-preview'||event.data?.token!==token)return;
   previewReceived=true;
   config=normalize(event.data.draft);identity=String(event.data.identity||'preview-user-001');previewKind=event.data.kind;
   if(previewKind==='announcement'||previewKind==='update'){config[previewKind].enabled=true;const other=previewKind==='announcement'?'update':'announcement';config[other].enabled=false;try{localStorage.removeItem(receipt(previewKind));sessionStorage.removeItem(receipt('update')+':later')}catch{}}
@@ -54,8 +55,8 @@
  });
  window.ShiyuOperations=Object.freeze({enterWorld:()=>{if(eligible())return true;if(!config.world.enabled)return false;waiting();return false},center,worldAppearance:()=>normalizeAppearance(config.world.appearance)});
  document.addEventListener('click',event=>{if(event.target.closest('#world-page [data-ops-center]'))center()});
- addEventListener('focus',()=>{if(token)deliver();else void loadPublished()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(token)deliver();else void loadPublished()}});
- setTimeout(()=>{syncEntry();if(token){deliver();if(window.opener)window.opener.postMessage({type:'shiyu-operations-ready',token},'http://127.0.0.1:5175');setTimeout(()=>{if(!previewReceived)void loadPublished(true)},500)}else void loadPublished()},0);
+ addEventListener('focus',()=>{if(token)deliver();else void loadPublished()});addEventListener('shiyu-account-state',()=>{if(!token)void loadPublished()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(token)deliver();else void loadPublished()}});
+ setTimeout(()=>{syncEntry();if(token){deliver();if(window.opener)window.opener.postMessage({type:'shiyu-operations-ready',token},previewAdminOrigin);setTimeout(()=>{if(!previewReceived)void loadPublished(true)},500)}else void loadPublished()},0);
 })();
 /* An isolated public discovery surface, sharing the global day/night preference. */
 (()=>{

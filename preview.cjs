@@ -17,7 +17,9 @@ async function handlePayment(req,res){
   }
 }
 const routes={
-  '/desktop-pet.js':'desktop-pet.js','/desktop-pet.css':'desktop-pet.css','/desktop-pet-host.js':'desktop-pet-host.js',
+  '/analytics.js':'analytics.js',
+  '/desktop-pet.js':'desktop-pet.js','/desktop-pet.css':'desktop-pet.css','/desktop-pet-host.js':'desktop-pet-host.js','/feature-config.js':'feature-config.js',
+  '/assets/desktop-pet/paper-person.webp':'assets/desktop-pet/paper-person.webp',
   '/site-filing.js':'site-filing.js','/site-filing.css':'site-filing.css',
   '/i18n-client.js':'i18n-client.js','/i18n-client.css':'i18n-client.css',
   '/member-payment.js':'member-payment.js','/member-payment.css':'member-payment.css',
@@ -28,7 +30,6 @@ const routes={
   '/memoir-theme.css':'memoir-theme.css','/memoir-theme.js':'memoir-theme.js',
   '/memo-paper.css':'memo-paper.css','/memo-paper.js':'memo-paper.js',
  '/corner.css':'corner.css','/corner.js':'corner.js','/earth-theme.css':'earth-theme.css','/earth-theme.js':'earth-theme.js','/earth-source.js':'earth-source.js',
-  '/liquid-orbit-menu.html':'liquid-orbit-menu.html',
   '/':'index.html','/index.html':'index.html','/style.css':'style.css','/app.js':'app.js','/v4.js':'v4.js','/v4.css':'v4.css','/account-access.js':'account-access.js',
   '/space-atlas.js':'space-atlas.js','/space-atlas.css':'space-atlas.css','/assets/reading/valley-closed.webp':'assets/reading/valley-closed.webp','/assets/reading/valley-open.webp':'assets/reading/valley-open.webp',
   '/surge-theme.css':'surge-theme.css','/surge-theme.js':'surge-theme.js','/flow-theme.css':'flow-theme.css','/flow-theme.js':'flow-theme.js','/reading-theme.css':'reading-theme.css','/reading-theme.js':'reading-theme.js',
@@ -55,10 +56,11 @@ http.createServer(async(req,res)=>{
   // Use the admin service's module availability in the local preview.
   if((process.env.SHIYU_PREVIEW_REVIEW==='1'||process.env.SHIYU_PREVIEW_MEMO==='1')&&host==='127.0.0.1'&&req.method==='GET'&&req.url.split('?')[0]==='/api/shiyu/operations'){
     try{
-      const response=await fetch('http://127.0.0.1:5175/api/shiyu/operations',{headers:{cookie:req.headers.cookie||'',accept:'application/json'},signal:AbortSignal.timeout(5000)})
+      const response=await fetch('http://127.0.0.1:5175/api/shiyu/operations',{headers:{cookie:req.headers.cookie||'',accept:'application/json',...(req.headers.origin?{origin:req.headers.origin}:{})},signal:AbortSignal.timeout(5000)})
       if(!response.ok)throw new Error('Operations unavailable')
       const config=await response.json()
-      res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'})
+      const allowedOrigin=['http://127.0.0.1:4173','http://localhost:4173'].includes(req.headers.origin)?req.headers.origin:''
+      res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...(allowedOrigin?{'Access-Control-Allow-Origin':allowedOrigin,'Access-Control-Allow-Credentials':'true','Vary':'Origin'}:{})})
       res.end(JSON.stringify(config));return
     }catch{
       res.writeHead(503,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'})

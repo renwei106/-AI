@@ -35,4 +35,40 @@
 body[data-dark=true] .pet-preferences{--pet-control:color-mix(in srgb,var(--pet-accent) 55%,#f2f3e8)}
 .pet-setting-choices button[aria-pressed=true]{color:var(--pet-control)}
 .pet-skin-choice[aria-pressed=true] b::after{content:' ✓';color:var(--pet-control)}
+/* Human companions have their own rig and motion; existing animal artwork is unchanged. */
+.desktop-pet,.pet-preferences{--pet-line-ink:#4c504a}
+.desktop-pet[data-dark=true],body[data-dark=true] .pet-preferences{--pet-line-ink:#f3eedf}
+.pet-human{--human-sway:3deg;--human-nod:6deg;--human-wave:-112deg;--human-wave-back:-92deg;--human-lift:-2px;--human-head-origin:48px 39px;--human-balance-origin:48px 90px;--human-left-origin:35px 46px;--human-right-origin:61px 46px}
+.pet-human-line{filter:drop-shadow(0 1px 1px #ffffff24)}
+.pet-human-paper{--human-sway:2.8deg;--human-nod:3deg;--human-lift:-24px;--human-head-origin:513px 438px;--human-balance-origin:512px 1334px;--human-left-origin:422px 483px;--human-right-origin:621px 485px;filter:drop-shadow(0 1px 1px #40342628)}
+.desktop-pet[data-dark=true] .pet-human-paper,body[data-dark=true] .pet-preferences .pet-human-paper{filter:drop-shadow(0 1px 2px #0005)}
+.pet-human-balance{transform-origin:var(--human-balance-origin)}
+.pet-human-head-look,.pet-human-head-nod{transform-origin:var(--human-head-origin)}
+.pet-human-arm-rest{transform-origin:var(--human-left-origin)}
+.pet-human-arm-wave{transform-origin:var(--human-right-origin)}
+.pet-human-eyes{transform-origin:48px 26px}
+.pet-paper-blink{opacity:0}
+.desktop-pet:not([data-motion=off]) .pet-human-balance{animation:pet-human-sway 4.8s ease-in-out infinite}
+.desktop-pet:not([data-motion=off]) .pet-human-head-nod{animation:pet-human-nod 12.8s ease-in-out infinite}
+.desktop-pet:not([data-motion=off]) .pet-human-arm-rest{animation:pet-human-fidget 10.4s ease-in-out infinite}
+.desktop-pet:not([data-motion=off]) .pet-human-eyes{animation:pet-blink 8.6s infinite}
+.desktop-pet:not([data-motion=off]) .pet-paper-blink{animation:pet-paper-blink 8.6s step-end infinite}
+.desktop-pet[data-motion=gentle] .pet-human,.pet-preferences[data-motion=gentle] .pet-human{--human-sway:1.3deg;--human-nod:2deg;--human-wave:-75deg;--human-wave-back:-64deg}
+.desktop-pet[data-motion=gentle] .pet-human-balance{animation-duration:6.8s}
+.desktop-pet[data-open=true] .pet-human{--human-sway:.65deg}
+.desktop-pet[data-open=true] .pet-human-balance{animation-duration:6.8s}
+.desktop-pet[data-open=true]:not([data-motion=off]) .pet-human-head-look{transform:rotate(-4deg);transition:transform .3s ease}
+.desktop-pet[data-open=true]:not([data-motion=off]) .pet-human-head-nod{animation:none}
+.desktop-pet[data-open=true]:not([data-motion=off]) .pet-human-arm-wave{animation:pet-human-wave 1.5s ease-in-out both}
+.desktop-pet[data-dragging=true]:not([data-motion=off]) .pet-human-balance{animation:none;transform:translateY(var(--human-lift)) skewX(-5deg)}
+.desktop-pet[data-dragging=true]:not([data-motion=off]) .pet-human-head-nod,.desktop-pet[data-dragging=true]:not([data-motion=off]) .pet-human-arm-rest{animation:none;transform:rotate(7deg)}
+.desktop-pet[data-dragging=true]:not([data-motion=off]) .pet-human-arm-wave{animation:none;transform:rotate(-9deg)}
+.pet-preferences:not([data-motion=off]) .pet-skin-choice:hover .pet-human-head-look{transform:rotate(-4deg);transition:transform .25s}
+.pet-preferences:not([data-motion=off]) .pet-skin-choice:hover .pet-human-arm-wave{animation:pet-human-wave 1.5s ease-in-out both}
+@keyframes pet-human-sway{0%,100%{transform:skewX(calc(var(--human-sway)*-1))}50%{transform:skewX(var(--human-sway))}}
+@keyframes pet-human-nod{0%,68%,86%,100%{transform:rotate(0)}73%{transform:rotate(var(--human-nod))}79%{transform:rotate(calc(var(--human-nod)*-.5))}}
+@keyframes pet-human-fidget{0%,76%,100%{transform:rotate(0)}82%,88%{transform:rotate(-7deg)}85%{transform:rotate(-3deg)}}
+@keyframes pet-human-wave{0%,100%{transform:rotate(0)}25%,60%{transform:rotate(var(--human-wave))}43%,77%{transform:rotate(var(--human-wave-back))}}
+@keyframes pet-paper-blink{0%,43%,47%,100%{opacity:0}45%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.desktop-pet *,.pet-preferences *{animation:none!important;transition:none!important}}
+@media(prefers-reduced-motion:reduce){.pet-preferences .pet-human-head-look{transform:none!important}}

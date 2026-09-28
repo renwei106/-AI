@@ -4,12 +4,12 @@
 
 - 导航站基线：`4dc9aee81ccaf4a70a3b6be60e42bbdc3f06fdc5`。
 - 工具集基线：`bf950d6`，在对应仓库单独保留修改。
-- 原「我的一隅」、各主题页面、账号页面和应用内操作入口继续保留。
+- 已按后续要求移除「我的一隅」旧入口、悬浮菜单与专用设置；保留各主题页面、账号页面、子应用内容及已有收藏、小记、待办数据。
 - 当前改动仅在本地，未修改线上配置、数据或发布资源。
 
 ## 文件与接入
 
-- `dist/desktop-pet.js`：三款 SVG 造型、动作、菜单布局、拖拽、位置与设置保存。`ShiyuDesktopPet.mount(adapter)` 只创建一个实例。
+- `dist/desktop-pet.js`：五款造型、动作、菜单布局、拖拽、位置与设置保存。新增线条人物与纸片人物，原三款 SVG 不变。`ShiyuDesktopPet.mount(adapter)` 只创建一个实例。
 - `dist/desktop-pet.css`：宠物独立样式，使用项目 `--accent` 及语义派生色。
 - `dist/desktop-pet-host.js`：拾隅的页面、子应用、个性化设置、登录校验适配。
 - 工具集的同名 `desktop-pet-host.js`：连接现有轻应用路由、登录会话和离开编辑页确认；共享核心文件与导航站完全一致。
@@ -40,14 +40,22 @@ $env:SHIYU_PREVIEW_URL='http://127.0.0.1:4341/'
 node checks/verify-desktop-pet.cjs
 node checks/verify-desktop-pet-corners.cjs
 node checks/verify-desktop-pet-integration.cjs
+node checks/verify-retired-home-entry.cjs
+node checks/verify-desktop-pet-humans.cjs
 node checks/sync-desktop-pet.cjs
 ```
 
 测试 API 均由内存 fixture 截获，不写真实账号或后台数据。截图放在 `.local/desktop-pet/`。
 
-覆盖：拖动时只移动宠物、刷新与换主题的位置保持、四边四角展开、菜单完整入口、键盘和触屏尺寸、三款造型、关闭再开启、空间/世界/应用互跳、图谱层、独立轻应用位置延续、原有离开确认、访客/会话过期/会话服务异常拦截，以及同主题、同视口的旧页面截图对照。
+覆盖：拖动时只移动宠物、刷新与换主题的位置保持、四边四角展开、菜单完整入口、键盘和触屏尺寸、五款造型、关闭再开启、空间/世界/应用互跳、图谱层、独立轻应用位置延续、原有离开确认、访客/会话过期/会话服务异常拦截，以及同主题、同视口的旧页面截图对照。
+
+人物追加以 `.local/desktop-pet/human-baseline/` 中的当前工作区快照为基线，保留先前旧入口移除的未提交改动。线条人物用分组 SVG 描线并随深浅主题切换线色；纸片人物使用内置 imagegen 生成的透明插画，保存到 `dist/assets/desktop-pet/paper-person.webp`，由 SVG 遮罩分成身体、头部、手臂与固定双脚，复用一张图片。152 KB 图像按需随人物使用加载，在工具集保留同路径副本。原始 PNG 与动态预览位于 `.local/desktop-pet/`，生产代码不引用该本地目录。生成提示词见 `DESKTOP-PET-HUMANS-ASSET.md`。
+
+新人物待机每 4.8 秒轻晃，每约 9～13 秒眨眼、侧头或轻动手臂；悬停招手一次并减小身体动作，拖动轻倾，松手复用已有落地动作。正常大小的头部左右位移约 4～6 px，双脚与保存的坐标不变。轻微模式减小幅度，静止与系统减少动态效果会停用新人物动效。人物测试额外覆盖新造型选择、设置中途登录过期、刷新恢复、深浅主题、各动作强度、脚下固定、角落、窄屏设置与独立子应用的本地图像加载。
 
 角落回归额外覆盖正常动效下的三种大小 × 四个拖动极限位置，检查扇形角度、按钮完整显示、互不重叠和实际点击命中，验证端点悬停路径、角落跳转、刷新恢复及窄屏动效。已复现并修复小号宠物在右下极限位置误用方形布局的问题；修复前文件保存在 `.local/desktop-pet/corner-baseline-20260928-092005/`，同页面、主题和视口的截图位于 `.local/desktop-pet/corner-before-small-upper-left.png` 与 `corner-after-small-upper-left.png`。
+
+旧入口移除以 `7686ca0` 为基线。删除 `liquid-orbit-menu.html`、对应预览路由、iframe 挂载与事件监听、入口专用设置及样式。子应用独立创建关闭按钮，仍由桌面宠物打开；旧的应用排序与用户数据继续读取，不清理存储。移除回归覆盖不同主题、悬停、切页、窄屏、访客、关闭应用、小记编辑与原有数据恢复；旧入口不再出现在 DOM 中，也不再发起旧菜单资源请求。截图以 `retired-entry-` 开头。历史检查中直接操作旧 iframe 或 `.corner-entry` 的步骤已失效，当前入口使用上述桌面宠物检查。
 
 旧 `tests/account-session-ui.cjs` 当前仍查找 `[data-account-tab="password"]`，与现有邮箱登录界面不符，不能把该脚本未跑完称为通过；本次没有为了测试改动登录界面。
 

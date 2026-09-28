@@ -18,7 +18,12 @@ tar -xzf "/tmp/shiyu-admin-$release_id.tgz" -C "$admin_release"
 for name in .local .local-shares .local-feedback; do
   if [ -d "$old_front/$name" ]; then ln -s "$(readlink -f "$old_front/$name")" "$front_release/$name"; fi
 done
-ln -s "$(readlink -f "$old_admin/node_modules")" "$admin_release/node_modules"
+# New dependencies belong to this release so rollback never reuses a mutated tree.
+if cmp -s "$old_admin/pnpm-lock.yaml" "$admin_release/pnpm-lock.yaml" && cmp -s "$old_admin/package.json" "$admin_release/package.json"; then
+  ln -s "$(readlink -f "$old_admin/node_modules")" "$admin_release/node_modules"
+else
+  (cd "$admin_release" && PATH=/opt/node-v24/bin:$PATH CI=1 pnpm install --frozen-lockfile)
+fi
 if [ -d "$old_admin/.local" ]; then ln -s "$(readlink -f "$old_admin/.local")" "$admin_release/.local"; fi
 if [ -d "$old_admin/mocks" ]; then
   mv "$admin_release/mocks" "$admin_release/mocks.bundled"
@@ -41,6 +46,12 @@ chown -hR shiyu:shiyu "$front_release"
 /usr/bin/node --check "$front_release/preview.cjs"
 /usr/bin/node --check "$front_release/i18n/frontend-server.cjs"
 /opt/node-v22/bin/node --check "$admin_release/shiyu-i18n/service.cjs"
+cd "$admin_release"
+/opt/node-v22/bin/node -e 'require.resolve("@ant-design/plots"); const {DatabaseSync}=require("node:sqlite");const db=new DatabaseSync(":memory:");db.close()'
+
+analytics_dropin=/etc/systemd/system/shiyu-admin.service.d/analytics.conf
+previous_dropin="$admin_release/analytics.conf.previous"
+if [ -f "$analytics_dropin" ]; then cp -p "$analytics_dropin" "$previous_dropin"; fi
 
 switch_link() { ln -sfn "$1" "$2.next"; mv -Tf "$2.next" "$2"; }
 rollback() {
@@ -48,10 +59,15 @@ rollback() {
   echo 'Release failed; restoring both previous versions.' >&2
   switch_link "$old_front" /opt/shiyu/current
   switch_link "$old_admin" /opt/shiyu-admin/current
+  if [ -f "$previous_dropin" ]; then cp -p "$previous_dropin" "$analytics_dropin"; else rm -f "$analytics_dropin"; fi
+  systemctl daemon-reload
   systemctl restart shiyu-admin.service shiyu-preview.service
   exit 1
 }
 trap rollback ERR
+mkdir -p "$(dirname "$analytics_dropin")"
+printf '[Service]\nEnvironment=SHIYU_ANALYTICS_ENV=production\n' > "$analytics_dropin"
+systemctl daemon-reload
 switch_link "$admin_release" /opt/shiyu-admin/current
 switch_link "$front_release" /opt/shiyu/current
 systemctl restart shiyu-admin.service shiyu-preview.service
@@ -60,6 +76,12 @@ for i in {1..30}; do
   sleep 1
 done
 systemctl is-active --quiet shiyu-admin.service shiyu-preview.service
+curl -fsS http://127.0.0.1:5175/src/ShiyuAnalytics.tsx -o /dev/null
+curl -fsS http://127.0.0.1:5175/src/AnalyticsCharts.tsx -o /dev/null
+curl -fsS http://127.0.0.1:4318/analytics.js -o /dev/null
+curl -fsS http://127.0.0.1:4318/feature-config.js -o /dev/null
+curl -fsS http://127.0.0.1:4318/assets/desktop-pet/paper-person.webp -o /dev/null
+test "$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:5175/api/shiyu/analytics/home)" = '403'
 curl -fsS http://127.0.0.1:4318/api/shiyu/operations -o "/tmp/shiyu-operations-$release_id.json"
 grep -q 'corner' "/tmp/shiyu-operations-$release_id.json"
 grep -q 'membershipColor' "/tmp/shiyu-operations-$release_id.json"

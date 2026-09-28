@@ -16,9 +16,10 @@ async function fixture(browser,authenticated=true,useBaseline=false){
  const f={context,authenticated,unavailable:false,operations:structuredClone(operations),errors:[]};
  if(useBaseline){
   const {execFileSync}=require('node:child_process');
-  for(const file of ['index.html','account-access.js','corner.js','world.js']){
-   const body=execFileSync('git',['show','4dc9aee:dist/'+file],{cwd:path.resolve(__dirname,'..'),encoding:'utf8'});
-   await context.route(file==='index.html'?base:'**/'+file+'*',route=>route.fulfill({contentType:file.endsWith('.html')?'text/html; charset=utf-8':'text/javascript; charset=utf-8',body}));
+  const revision=typeof useBaseline==='string'?useBaseline:'4dc9aee';
+  for(const file of ['index.html','account-access.js','corner.js','corner.css','world.js','liquid-orbit-menu.html']){
+   const body=execFileSync('git',['show',revision+':dist/'+file],{cwd:path.resolve(__dirname,'..'),encoding:'utf8'});
+   await context.route(file==='index.html'?base:'**/'+file+'*',route=>route.fulfill({contentType:file.endsWith('.html')?'text/html; charset=utf-8':file.endsWith('.css')?'text/css; charset=utf-8':'text/javascript; charset=utf-8',body}));
   }
  }
  await context.addInitScript(({user,spaces,authenticated})=>{if(window!==window.top||!/^https?:$/.test(location.protocol))return;if(!localStorage.getItem('yiyu-prototype-v1'))localStorage.setItem('yiyu-prototype-v1',JSON.stringify({signed:authenticated,data:spaces,prefs:{theme:'base',mode:'light',accountProfile:authenticated?user:null,accountDataUserId:authenticated?user.id:null,brandGuideDismissed:true,inspirationMockV1:true,firstSpaceCapacityV1:true,twelveSpacePreviewAdded:true,cornerCloseGuideAcknowledgedV1:{[user.id]:true}}}));},{user,spaces,authenticated});
