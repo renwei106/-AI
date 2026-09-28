@@ -127,7 +127,7 @@
     el.innerHTML='<button type="button" class="global-search-trigger" aria-label="搜索全部网址" aria-expanded="false" title="搜索全部网址">'+icons.search+'</button><div class="global-search-field"><input type="search" aria-label="搜索全部空间的网址" placeholder="搜索全部空间的网址" autocomplete="off"></div><div class="global-search-results" hidden></div>';
     host.prepend(el);const input=el.querySelector('input'),trigger=el.querySelector('button'),results=el.querySelector('.global-search-results');
     const expand=()=>{el.classList.add('is-open');trigger.setAttribute('aria-expanded','true')},close=()=>{el.classList.remove('is-open');trigger.setAttribute('aria-expanded','false');results.hidden=true};
-    el.onpointerenter=expand;trigger.onclick=()=>{expand();input.focus()};el.onpointerleave=()=>{if(!el.contains(document.activeElement))close()};el.onfocusout=()=>requestAnimationFrame(()=>{if(!el.contains(document.activeElement)&&!el.matches(':hover'))close()});
+    el.onpointerenter=e=>{if(e.pointerType!=='touch')expand()};trigger.onclick=()=>{expand();input.focus()};el.onpointerleave=()=>{if(!el.contains(document.activeElement))close()};el.onfocusout=()=>requestAnimationFrame(()=>{if(!el.contains(document.activeElement)&&!el.matches(':hover'))close()});
     input.oninput=()=>{const q=input.value.trim().toLowerCase();results.hidden=!q;if(!q)return;
       const matches=allItems().filter(x=>x.item.join(' ').toLowerCase().includes(q)||x.path.toLowerCase().includes(q));
       results.innerHTML=matches.slice(0,60).map(x=>'<a href="'+esc(safeURL(x.item[1]))+'" target="_blank" rel="noopener noreferrer"><i>'+bookmarkMark(x.item)+'</i><span><b>'+esc(x.item[0])+'</b><small>'+esc(x.path)+'</small></span>'+icons.open+'</a>').join('')+'<p>'+(!matches.length?'没有找到，试试名称或网址':'共 '+matches.length+' 个网址'+(matches.length>60?' · 请补充关键词缩小范围':''))+'</p>';
@@ -185,6 +185,7 @@
       dialog.addEventListener('input',input);
       dialog.addEventListener('keydown',keydown);
       dialog.addEventListener('close',resetReturnWheel);
+      dialog.addEventListener('close',clearTouches);
       dialog.addEventListener('close',()=>{const goHome=leavingForHome;leavingForHome=false;atlasClosing=false;clearTimeout(atlasTransitionTimer);atlasTransitionTimer=0;dialog.classList.remove('atlas-ready','atlas-direct-entry');cancelAnimationFrame(raf);resizeObserver?.disconnect();state.hover=null;state.drag=null;clearTimeout(noticeTimer);clearTimeout(viewMenuTimer);hideModeMenu();document.body.classList.remove('atlas-active','atlas-transitioning');const sharedHomeTab=dialog.querySelector('.space-home-tab');if(sharedHomeTab)document.body.append(sharedHomeTab);if(view==='space'&&spaceId===state.sid){rememberPresentation(spaceId,goHome?'atlas':'daily');writeSaved()}if(goHome)return;render();requestAnimationFrame(()=>document.querySelector('.workspace .space-mode-entry')?.focus({preventScroll:true}))});
       dialog.addEventListener('cancel',e=>{if(!query('.at-drawer').hidden){e.preventDefault();closeDrawer()}else if(document.querySelector('.workspace .global-search-results:not([hidden])')){e.preventDefault();clearSearch()}});
       dialog.addEventListener('wheel',wheel,{passive:false});
@@ -234,7 +235,7 @@
     resizeObserver?.disconnect();const observedCanvas=query('.at-canvas');let observedWidth=observedCanvas.clientWidth,observedHeight=observedCanvas.clientHeight;
     resizeObserver=new ResizeObserver(()=>{if(dialog.open){positionChrome();const resized=observedCanvas.clientWidth!==observedWidth||observedCanvas.clientHeight!==observedHeight;if(!resized)return;observedWidth=observedCanvas.clientWidth;observedHeight=observedCanvas.clientHeight;if((observedWidth<650)!==compactLayout)renderGraph(get(state.focus));else layout(true);needsPaint=true}});resizeObserver.observe(observedCanvas);
     const picker=query('.at-view-picker');
-    picker.onpointerenter=openViewPicker;picker.onpointerleave=()=>{clearTimeout(viewMenuTimer);viewMenuTimer=setTimeout(closeViewPicker,180)};
+    picker.onpointerenter=e=>{if(e.pointerType!=='touch')openViewPicker()};picker.onpointerleave=e=>{if(e.pointerType==='touch')return;clearTimeout(viewMenuTimer);viewMenuTimer=setTimeout(closeViewPicker,180)};
     picker.onfocusin=openViewPicker;picker.onfocusout=()=>requestAnimationFrame(()=>{if(!picker.contains(document.activeElement)&&!picker.matches(':hover'))closeViewPicker()});
     renderGraph(n);
     needsPaint=true;
@@ -733,7 +734,7 @@
     if(action==='daily'){setContext(get(state.focus));closeAtlas('daily');return}
     if(action==='home'){leaveAtlasForHome();return}
     if(action==='toggle-dimension'){const options=availableViewOptions(state.mode==='3d'?'2d':'3d');if(options.length)selectGraphView(options[0],'toggle-dimension');return}
-    if(action==='views'){const options=availableViewOptions(state.mode),current=state.mode==='2d'?state.layout:state.scene3d;if(options.length)selectGraphView(options[(options.indexOf(current)+1)%options.length]);return}
+    if(action==='views'){if(e.pointerType==='touch'||matchMedia('(hover:none)').matches){openViewPicker();return}const options=availableViewOptions(state.mode),current=state.mode==='2d'?state.layout:state.scene3d;if(options.length)selectGraphView(options[(options.indexOf(current)+1)%options.length]);return}
     if(action==='focus-scene'){closeViewPicker();returnToDefaultView();query('.at-canvas').focus({preventScroll:true});return}
     if(action==='back'){const p=get(state.focus).parent;if(p)focus(p);return}
     if(action==='spaces'){drawer('切换空间',`<div class="at-drawer-list">${data.map(s=>`<button data-at-space="${esc(s.id)}" aria-current="${s.id===state.sid}">${esc(s.name)}<small>${s.scenes.length} 个场景</small></button>`).join('')}</div>`);return}
@@ -852,7 +853,28 @@
     info.plans[info.key]=values;return {info,values};
   }
   function restoreMotion(positions,camera){refresh();query('.at-canvas').getAnimations().forEach(animation=>animation.cancel());Object.assign(state,camera);needsPaint=true;paint(0);for(const r of visible){const prev=positions.get(r.entity);if(prev){r.ox=prev.x-r.baseX;r.oy=prev.y-r.baseY}}state.settling=true;needsPaint=true}
+  // Two fingers zoom the graph without committing a pending node reorder.
+  const touchPoints=new Map();let pinchDistance=0;
+  function clearTouches(){touchPoints.clear();pinchDistance=0}
+  function touchDown(e){
+    if(e.pointerType!=='touch'||!e.target.closest('.at-canvas'))return false;
+    touchPoints.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(touchPoints.size<2)return false;
+    pointerUp({type:'pointercancel'});
+    const [a,b]=[...touchPoints.values()];pinchDistance=Math.hypot(a.x-b.x,a.y-b.y);
+    query('.at-canvas').setPointerCapture(e.pointerId);state.suppressClickUntil=performance.now()+500;
+    e.preventDefault();return true;
+  }
+  function touchMove(e){
+    if(!touchPoints.has(e.pointerId))return false;
+    touchPoints.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(touchPoints.size<2)return false;
+    const [a,b]=[...touchPoints.values()],distance=Math.hypot(a.x-b.x,a.y-b.y),box=query('.at-canvas').getBoundingClientRect();
+    if(pinchDistance>0)zoomBy(distance/pinchDistance,{x:(a.x+b.x)/2-box.left,y:(a.y+b.y)/2-box.top});
+    pinchDistance=distance;state.suppressClickUntil=performance.now()+500;e.preventDefault();return true;
+  }
   function pointerDown(e){
+    if(touchDown(e))return;
     const canvas=e.target.closest('.at-canvas');if(!canvas||e.button!==0||e.target.closest('.at-node-menu'))return;
     cameraReturn=null;
     const node=e.target.closest('.at-node');
@@ -869,6 +891,7 @@
     for(const r of visible){r.previewX=targetKeys.has(r.key)?sourceSlot.x-targetSlot.x:0;r.previewY=targetKeys.has(r.key)?sourceSlot.y-targetSlot.y:0}
   }
   function pointerMove(e){
+    if(touchMove(e))return;
     const d=state.drag;if(!d)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;
     if(d.waitForHold&&!d.holdReady){d.lastX=e.clientX;d.lastY=e.clientY;if(Math.hypot(dx,dy)>=6)d.preventOpen=true;e.preventDefault();return}
     if(d.fromFocus){if(!d.moved&&Math.hypot(dx,dy)<6)return;if(!d.moved){d.moved=true;clearHover();query('.at-canvas').setPointerCapture(e.pointerId);query('.at-canvas').classList.add('is-dragging')}e.preventDefault()}
@@ -890,6 +913,7 @@
     needsPaint=true;
   }
   function pointerUp(e){
+    if(e?.pointerId!==undefined){touchPoints.delete(e.pointerId);if(touchPoints.size<2)pinchDistance=0;}
     clearTimeout(state.drag?.holdTimer);
     if(state.drag?.holdReady||state.drag?.preventOpen){state.suppressClickUntil=performance.now()+400;nodeEls.forEach(el=>el.classList.remove('is-held'))}
     if(state.drag?.fromFocus&&state.drag.moved)state.suppressClickUntil=performance.now()+400;

@@ -99,6 +99,7 @@
   if (!rail.querySelector('.plan-label')) rail.innerHTML = '<div class="plan-label"><strong>可选套餐</strong><small>选择与你相伴的时光</small></div>';
   const columns = `var(--member-label-width, 280px) repeat(${plans.length},minmax(180px,1fr))`;
   rail.style.gridTemplateColumns = columns;
+  d.style.setProperty("--member-plan-count", plans.length);
   plans.forEach(plan => {
    const button = document.createElement('button'), free = plan.id === 'free'; button.className = plan.id === selectedId ? 'selected-plan' : ''; button.setAttribute('aria-pressed', String(plan.id === selectedId)); button.dataset.publishedPlan = plan.id;
    button.innerHTML = `<small>${esc(plan.tag || '')}</small><h3>${esc(plan.name)}</h3><strong><em>¥</em>${Number(plan.price)}</strong><del>${plan.original > plan.price ? '¥' + Number(plan.original) : ''}</del><span>${esc(plan.cycle || (free ? '长期' : plan.days + ' 天'))}</span>`;
