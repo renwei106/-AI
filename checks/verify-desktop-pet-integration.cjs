@@ -23,8 +23,11 @@ async function compareSurfaces(browser){
 }
 async function layersAndInput(browser){
  const f=await fixture(browser),p=f.page;
+ const pageArt=await p.locator('#desktop-pet .pet-art').boundingBox();
  await click(p,'navigate','space');await p.waitForFunction(()=>view==='space');
  await p.locator('.space-mode-entry').click();await p.locator('#space-atlas[open]').waitFor();await p.locator('#space-atlas #desktop-pet').waitFor();
+ const atlasArt=await p.locator('#space-atlas #desktop-pet .pet-art').boundingBox();
+ assert.deepEqual({width:atlasArt.width,height:atlasArt.height},{width:pageArt.width,height:pageArt.height},'graph view keeps the global pet artwork size');
  await p.screenshot({path:path.join(out,'atlas-pet.png')});
  await click(p,'navigate','home');await p.waitForFunction(()=>view==='home'&&!document.querySelector('#space-atlas[open]'));
  await click(p,'app','common');await p.locator('#my-corner[open]').waitFor();

@@ -7,11 +7,11 @@
 #space-atlas.atlas-direct-entry{transition:none}
 #space-atlas::backdrop{background:#0003;backdrop-filter:blur(8px)}
 body[data-dark=true] #space-atlas{--ink:#efefea;--muted:#b0b0b8;--line:#ffffff18}
-#space-atlas *{box-sizing:border-box}
-#space-atlas button,#space-atlas a{font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
-#space-atlas button{font-size:12px}
-#space-atlas svg{display:block;width:18px;height:18px;flex:none}
-#space-atlas button:focus-visible,#space-atlas a:focus-visible,#space-atlas input:focus-visible{outline:2px solid var(--at-accent);outline-offset:3px}
+#space-atlas .at-shell *{box-sizing:border-box}
+#space-atlas .at-shell button,#space-atlas .at-shell a{font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
+#space-atlas .at-shell button{font-size:12px}
+#space-atlas .at-shell svg{display:block;width:18px;height:18px;flex:none}
+#space-atlas .at-shell button:focus-visible,#space-atlas .at-shell a:focus-visible,#space-atlas .at-shell input:focus-visible{outline:2px solid var(--at-accent);outline-offset:3px}
 #space-atlas .at-shell{height:100%;display:flex;flex-direction:column;padding:22px 30px 0}
 #space-atlas .at-top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex:none}
 #space-atlas .at-brand{display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:2px}
