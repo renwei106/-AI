@@ -17,6 +17,7 @@ async function handlePayment(req,res){
   }
 }
 const routes={
+  '/desktop-pet.js':'desktop-pet.js','/desktop-pet.css':'desktop-pet.css','/desktop-pet-host.js':'desktop-pet-host.js',
   '/site-filing.js':'site-filing.js','/site-filing.css':'site-filing.css',
   '/i18n-client.js':'i18n-client.js','/i18n-client.css':'i18n-client.css',
   '/member-payment.js':'member-payment.js','/member-payment.css':'member-payment.css',

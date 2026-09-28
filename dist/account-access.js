@@ -99,6 +99,8 @@
   }
   window.ShiyuAccountSession = {
     applyLogin,
+    // New private entry points must verify the server session, not cached `signed` alone.
+    verify: () => refreshMembership(),
     login(payload) {
       return withAuthLock(async () => {
         authBusy = true; invalidateAccount();
@@ -191,7 +193,7 @@
       if (result.authenticated !== true || !result.user?.id) {
         if (signed || sharedIdentity()) clearAccount();
         else { verifiedUserId = ''; publishMembership({ member: false, entitlements: result.entitlements || [] }); }
-        return;
+        return false;
       }
       const previousMembership = JSON.stringify(prefs.membership || null), previousProfile = JSON.stringify(prefs.accountProfile || {});
       const changed = adoptUser(result.user);
@@ -200,6 +202,7 @@
         await loadAccountData(result.user.id);
       }
       if (verifiedUserId === result.user.id && (changed || previousMembership !== JSON.stringify(prefs.membership || null) || previousProfile !== JSON.stringify(prefs.accountProfile || {}))) render();
+      return (!authBusy && requestId === membershipRequest && verifiedUserId === result.user.id && localIdentity() === result.user.id && sharedIdentity() === result.user.id) || undefined;
     } catch { if (requestId === membershipRequest && currentTicket(ticket)) { verifiedUserId = null; publishMembership(null, false); } }
     finally { markAccountReady(); }
   }

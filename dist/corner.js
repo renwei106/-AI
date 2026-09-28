@@ -1536,6 +1536,19 @@
   };
   // A website action adds only that website; card-level collection tools stay separate.
   window.ShiyuCorner=Object.freeze({
+    shortcuts:()=>homeShelfModuleIds().map(id=>({id,label:cornerModuleConfig(id).entryName||cornerModuleConfig(id).name||id,icon:moduleIcon(id)})),
+    async openModule(id,trigger){
+      if(!enabledCornerModuleIds().includes(id)||!requireCornerModuleAuth(id))return false;
+      if(document.body.classList.contains('theme-preview-corner-disabled')){toast('当前主题体验已结束，请切换可用主题后再打开应用。');return false;}
+      if(panel?.classList.contains('memo-editor-mode'))return false;
+      if(panel?.open){await switchCornerModule(id);return true;}
+      openCorner(trigger,null,null,id);return Boolean(panel?.open);
+    },
+    closeModule(){
+      if(!panel?.open)return Promise.resolve(true);
+      if(panel.classList.contains('memo-editor-mode'))return Promise.resolve(false);
+      return new Promise(resolve=>{panel.addEventListener('close',()=>resolve(true),{once:true});closeCorner();});
+    },
     cards:()=>moduleCollection('common').groups.map(g=>({id:g.id,name:g.name,icon:cardIcon(g),inbox:isInbox(g)})),
     addBookmark(source,gid){
       const x=sources().find(x=>x.sid===source.sid&&x.cid===source.cid&&x.gid===source.gid&&x.url===source.url);
