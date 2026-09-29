@@ -28,7 +28,11 @@
     if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('仅支持不含账号密码的 HTTP / HTTPS 网页。');
     const title = String(input.title || '').trim(), description = String(input.description || '').trim();
     if (!title || title.length > 100 || description.length > 300) throw new Error('名称需为 1–100 字，备注不超过 300 字。');
-    return [title, url.href, description, Array.from(title)[0]];
+    const rawIcon = String(input.icon || '').trim();
+    let icon = '';
+    if (/^data:image\/(?:png|jpeg|webp);base64,/i.test(rawIcon) && rawIcon.length <= 100_000) icon = rawIcon;
+    else try { const parsed = new URL(rawIcon); if (['http:', 'https:'].includes(parsed.protocol) && !parsed.username && !parsed.password) icon = parsed.href; } catch {}
+    return [title, url.href, description, icon || url.origin + '/favicon.ico'];
   }
   function destination(value, target) {
     const s = value.data?.find(x => x.id === target?.spaceId);
@@ -83,7 +87,7 @@
     const entries = value.prefs?.extensionInbox || [], entry = entries.find(x => x.id === input.id);
     if (!entry) throw new Error('这条待整理收藏已变更，请刷新。');
     const { group, label } = destination(value, input);
-    if (!group.items.some(x => x[1] === entry.item[1])) group.items.push(bookmark({ title: entry.item[0], url: entry.item[1], description: entry.item[2] }));
+    if (!group.items.some(x => x[1] === entry.item[1])) group.items.push(bookmark({ title: entry.item[0], url: entry.item[1], description: entry.item[2], icon: entry.item[3] }));
     value.prefs.extensionInbox = entries.filter(x => x.id !== input.id);
     commit(value); return { label };
   }
@@ -94,7 +98,7 @@
     let label='';
     if(input.action==='archive'){
       const target=destination(value,input);label=target.label;
-      const items=selected.map(x=>bookmark({title:x.item[0],url:x.item[1],description:x.item[2]}));
+      const items=selected.map(x=>bookmark({title:x.item[0],url:x.item[1],description:x.item[2],icon:x.item[3]}));
       for(const item of items)if(!target.group.items.some(x=>x[1]===item[1]))target.group.items.push(item);
       value.prefs.extensionInbox=entries.filter(x=>!ids.has(x.id));
     }else if(input.action==='clear')value.prefs.extensionInbox=entries.filter(x=>!ids.has(x.id));

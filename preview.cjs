@@ -1,6 +1,6 @@
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path')
 const port=Number(process.env.PORT)||4318,host=process.env.HOST||'127.0.0.1',root=path.join(__dirname,'dist')
-const shareHandler=require('./share-server.cjs'),themeConfigProxy=require('./theme-config-proxy.cjs'),extensionRoutes=require('./extension-routes.cjs'),shiyuUserProxy=require('./shiyu-user-proxy.cjs')
+const shareHandler=require('./share-server.cjs'),themeConfigProxy=require('./theme-config-proxy.cjs'),extensionRoutes=require('./extension-routes.cjs'),shiyuUserProxy=require('./shiyu-user-proxy.cjs'),faviconResolver=require('./favicon-resolver.cjs')
 const feedbackHandler=require('./feedback-server.cjs')
 const {localized}=require('./i18n/frontend-server.cjs')
 let paymentHandler
@@ -19,7 +19,7 @@ async function handlePayment(req,res){
 const routes={
   '/todo-calendar.js':'todo-calendar.js','/todo-calendar-core.js':'todo-calendar-core.js','/todo-calendar.css':'todo-calendar.css',
   '/home-responsive.css':'home-responsive.css','/home-responsive.js':'home-responsive.js',
-  '/analytics.js':'analytics.js','/tool-auth-bridge.js':'tool-auth-bridge.js',
+  '/analytics.js':'analytics.js','/tool-auth-bridge.js':'tool-auth-bridge.js','/bookmark-logo.js':'bookmark-logo.js',
   '/desktop-pet.js':'desktop-pet.js','/desktop-pet.css':'desktop-pet.css','/desktop-pet-host.js':'desktop-pet-host.js','/feature-config.js':'feature-config.js',
   '/assets/desktop-pet/paper-person.webp':'assets/desktop-pet/paper-person.webp',
   '/site-filing.js':'site-filing.js','/site-filing.css':'site-filing.css',
@@ -74,6 +74,7 @@ http.createServer(async(req,res)=>{
   if(await require('./theme-access/server.cjs').handler(req,res))return
   if(await handlePayment(req,res))return
   if(await feedbackHandler(req,res))return
+  if(await faviconResolver.handler(req,res))return
   if(shiyuUserProxy(req,res))return
   if(/^\/extension\/(integration|store)\.js\?/.test(req.url)&&await localized(req,res,req.url.split('?')[0].slice(1),root))return
   if(extensionRoutes(req,res))return
