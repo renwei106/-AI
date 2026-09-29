@@ -1,4 +1,4 @@
-拾隅 · 网址收藏 1.0.0
+拾隅 · 网址收藏 0.2.1
 
 下载的是一个 ZIP。解压后，里面同时有 shiyu-extension.crx 和包含 manifest.json 的插件文件。
 

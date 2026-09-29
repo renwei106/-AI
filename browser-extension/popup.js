@@ -48,7 +48,7 @@ async function call(type, extra = {}) {
     if (type === 'state') return { ...demoState, theme: previewTheme() };
     if (type === 'save') return { label: mode === 'temporary' ? '稍后整理' : '所选分组' };
     if (type === 'search') { const query = String(extra.payload?.query || '').toLocaleLowerCase(); const items = demoSearchItems.filter(item => [item.title, item.url, item.description, item.path].some(value => value.toLocaleLowerCase().includes(query))); return { total: items.length, items }; }
-    if (type === 'version') return { current: '1.0.0', latest: '1.0.0', hasUpdate: false, browser: 'chrome' };
+    if (type === 'version') return { current: '0.2.1', latest: '0.2.1', hasUpdate: false, browser: 'chrome' };
     return;
   }
   const response = await extensionApi.runtime.sendMessage({ type, ...extra });

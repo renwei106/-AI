@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "拾隅 · 网址收藏",
-  "version": "1.0.0",
+  "version": "0.2.1",
   "description": "一键收下当前网页，稍后整理，或归入拾隅的空间、场景和分组。",
   "minimum_chrome_version": "102",
   "permissions": ["activeTab", "storage", "scripting"],
