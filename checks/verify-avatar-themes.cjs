@@ -1,0 +1,25 @@
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const assert=require('node:assert/strict'),path=require('node:path'),fs=require('node:fs');
+const out=path.join(__dirname,'avatar-theme-review');fs.mkdirSync(out,{recursive:true});let browser;
+(async()=>{
+ browser=await chromium.launch({channel:'msedge',headless:true});
+ const page=await browser.newPage({viewport:{width:1440,height:960}}),errors=[];
+ page.on('pageerror',error=>{if(/avatar|three|webgl/i.test(error.stack||error.message))errors.push(error.stack||error.message)});
+ await page.goto('http://127.0.0.1:4318/',{waitUntil:'domcontentloaded'});
+ await page.evaluate(()=>{prefs.theme='avatarGirl';prefs.mode='light';prefs.brandGuideDismissed=true;render()});
+ await page.locator('#avatar-theme-canvas').waitFor();await page.waitForTimeout(900);
+ const stage=await page.locator('.avatar-stage').boundingBox();assert(stage&&stage.width>1000&&stage.height>700,JSON.stringify(stage));
+ await page.mouse.move(stage.x+stage.width*.12,stage.y+stage.height*.4);await page.waitForTimeout(180);const left=await page.evaluate(()=>window.__avatarDebug?.headYaw??null);
+ await page.mouse.move(stage.x+stage.width*.88,stage.y+stage.height*.4);await page.waitForTimeout(180);const right=await page.evaluate(()=>window.__avatarDebug?.headYaw??null);
+ await page.mouse.move(stage.x+stage.width*.5,stage.y+stage.height*.5);await page.mouse.down();await page.mouse.move(stage.x+stage.width*.8,stage.y+stage.height*.5,{steps:8});await page.waitForTimeout(160);const dragged=await page.evaluate(()=>window.__avatarDebug?.bodyYaw??null);await page.mouse.up();
+ assert(left<-.15&&right>.15,JSON.stringify({left,right}));assert(dragged>.2,JSON.stringify({dragged}));assert.equal(await page.locator('#search-form').count(),0);assert.equal((await page.locator('.avatar-copy h1').textContent()).trim(),'阿织');
+ await page.screenshot({path:path.join(out,'azhi-3d-desktop.png')});
+ await page.evaluate(()=>{prefs.theme='avatarVideo';render()});await page.locator('.avatar-video-turn-frame').first().waitFor({state:'attached'});await page.waitForFunction(()=>document.querySelector('[data-avatar-video-stage]')?.dataset.framesReady==='true');
+ assert.equal(await page.locator('#avatar-theme-canvas').count(),0);assert.equal(await page.locator('#search-form').count(),0);assert(await page.locator('.avatar-video-idle').evaluate(video=>video.readyState>=2&&!video.paused&&video.loop&&video.muted));
+ const videoStage=await page.locator('[data-avatar-video-stage]').boundingBox();await page.mouse.move(videoStage.x+videoStage.width*.08,videoStage.y+videoStage.height*.45);await page.waitForTimeout(16);const videoLeft=await page.locator('.avatar-video-turn-frame.is-current').getAttribute('src');await page.mouse.move(videoStage.x+videoStage.width*.92,videoStage.y+videoStage.height*.45);await page.waitForTimeout(16);const videoRight=await page.locator('.avatar-video-turn-frame.is-current').getAttribute('src');assert.match(videoLeft,/frame-01\.jpg$/);assert.match(videoRight,/frame-15\.jpg$/);await page.waitForTimeout(900);assert.equal(await page.locator('[data-avatar-video-stage]').getAttribute('class'),'avatar-composition avatar-video-composition is-following');assert.equal(await page.locator('.avatar-video-idle').evaluate(video=>video.paused),true);
+ await page.screenshot({path:path.join(out,'azhi-video-desktop.png')});
+ await page.evaluate(()=>{prefs.theme='avatarScrub';render()});await page.locator('.avatar-scrub-canvas').waitFor();await page.waitForFunction(()=>document.querySelector('[data-avatar-scrub-stage]')?.dataset.timelineReady==='true');const scrubStage=await page.locator('[data-avatar-scrub-stage]').boundingBox();await page.mouse.move(scrubStage.x+scrubStage.width*.5,scrubStage.y+scrubStage.height*.08);await page.waitForTimeout(20);const scrubTop=await page.evaluate(()=>window.__avatarScrubDebug?.frame);await page.mouse.move(scrubStage.x+scrubStage.width*.5,scrubStage.y+scrubStage.height*.92,{steps:30});await page.waitForTimeout(20);const scrubBottom=await page.evaluate(()=>window.__avatarScrubDebug?.frame);assert(scrubTop<=10&&scrubBottom>=110,JSON.stringify({scrubTop,scrubBottom}));await page.screenshot({path:path.join(out,'azhi-timeline-desktop.png')});
+ await page.setViewportSize({width:390,height:844});await page.waitForTimeout(500);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);await page.screenshot({path:path.join(out,'azhi-timeline-mobile.png')});
+ await page.evaluate(()=>{prefs.theme='base';render()});assert.equal(await page.locator('.avatar-video').count(),0);assert.deepEqual(errors,[]);
+ console.log('PASS same girl renders as interactive 3D and autoplaying video, simple copy, centered composition, mobile fits');
+})().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>browser?.close());

@@ -11,8 +11,8 @@ const user={id:'pet-local-check',name:'宠物体验',email:'pet@example.test',pr
 const spaces=[{id:'work',name:'工作空间',icon:'folder',scenes:[{id:'daily',name:'日常',groups:[{id:'tools',name:'常用',items:[['示例网址','https://example.test/','仅本地测试','网']]}]}]},{id:'life',name:'生活空间',icon:'leaf',scenes:[{id:'life-daily',name:'日常',groups:[{id:'life-tools',name:'日常收藏',items:[]}]}]}];
 const modules=['common','memo','todo','icons','palette','emoji','cutout','toolbox'].map((id,i)=>({id,entryName:['我的收藏','我的小记','我的待办','轻图标','轻色卡','轻表情','轻抠图','百宝箱'][i],enabled:true}));
 const operations={world:{enabled:true,audience:'all'},announcement:{enabled:false},update:{enabled:false},corner:{modules}};
-async function fixture(browser,authenticated=true,useBaseline=false){
- const context=await browser.newContext({viewport:{width:1440,height:960},reducedMotion:'reduce',serviceWorkers:'block'});
+async function fixture(browser,authenticated=true,useBaseline=false,reduceMotion=true){
+ const context=await browser.newContext({viewport:{width:1440,height:960},reducedMotion:reduceMotion?'reduce':'no-preference',serviceWorkers:'block'});
  const f={context,authenticated,unavailable:false,operations:structuredClone(operations),errors:[]};
  if(useBaseline){
   const {execFileSync}=require('node:child_process');
@@ -61,9 +61,9 @@ async function geometry(p){return p.locator('#desktop-pet').boundingBox();}
 async function verify(browser){
  const f=await fixture(browser),p=f.page;
  await p.evaluate(()=>{window.__petNode=document.querySelector('#desktop-pet');});
- await core(p).waitFor();assert.equal(await p.locator('#desktop-pet').count(),1);
+ await core(p).waitFor();assert.equal(await p.locator('#desktop-pet').count(),1);assert.equal(await p.locator('#desktop-pet').getAttribute('aria-label'),'桌面伙伴');
  await p.screenshot({path:path.join(out,'home-cat.png')});
- await openPet(p);await p.screenshot({path:path.join(out,'menu-corner.png')});
+ await openPet(p);assert.equal(await p.locator('#desktop-pet .pet-menu [data-pet-action="navigate"][data-pet-id="space"] .pet-shortcut-label').textContent(),'我的空间','space shortcut uses the clarified label');await p.screenshot({path:path.join(out,'menu-corner.png')});
  assert.equal(await p.locator('#desktop-pet').getAttribute('data-compact'),'false','corner supports a radial menu');
  await p.mouse.click(500,700);
  const mainBefore=await p.locator('#main').boundingBox();await movePet(p,720,670);
@@ -89,7 +89,8 @@ async function verify(browser){
  await select(p,'app','todo');await p.waitForFunction(()=>document.querySelector('#my-corner').dataset.cornerModule==='todo');
  await p.screenshot({path:path.join(out,'todo-pet.png')});
  await select(p,'navigate','home');await p.waitForFunction(()=>view==='home'&&!document.querySelector('#my-corner[open]'));
- await select(p,'settings');await p.locator('#settings[open] [data-pet-pref="skin"]').first().waitFor();
+ await select(p,'settings');await p.locator('#settings[open] [data-pet-pref="skin"]').first().waitFor();assert.equal(await p.locator('#settings [data-settings-tab="desktop-pet"]').textContent(),'桌面伙伴');assert.equal(await p.locator('#settings .pet-preferences h3').first().textContent(),'桌面伙伴');assert.equal(await p.locator('#settings [data-pet-pref="skin"][data-value="line"] b').textContent(),'小线');assert.equal(await p.locator('#settings [data-pet-pref="skin"][data-value="paper"] b').textContent(),'小满');
+ assert.equal(await p.locator('#desktop-pet').getAttribute('data-roaming'),'false');await p.locator('[data-pet-pref="roaming"][data-value="roam"]').click();await p.waitForFunction(()=>ShiyuDesktopPet.read().roaming==='roam');assert.equal(await p.locator('#desktop-pet').getAttribute('data-roaming'),'true','roaming is enabled on the theme page');await p.locator('[data-pet-pref="roaming"][data-value="fixed"]').click();await p.waitForFunction(()=>ShiyuDesktopPet.read().roaming==='fixed');assert.equal(await p.locator('#desktop-pet').getAttribute('data-roaming'),'false');
  await p.locator('[data-pet-pref="skin"][data-value="bird"]').click();
  await p.waitForFunction(()=>ShiyuDesktopPet.read().skin==='bird');
  await p.screenshot({path:path.join(out,'settings-bird.png')});
@@ -112,5 +113,26 @@ async function verify(browser){
  const offline=await fixture(browser);offline.unavailable=true;await select(offline.page,'app','common');await offline.page.waitForTimeout(200);assert.equal(await offline.page.locator('#my-corner[open]').count(),0,'unavailable session check fails closed');assert.equal(await offline.page.locator('#login[open]').count(),0,'network failure does not discard active identity');await offline.context.close();
  console.log('PASS pet drag, persistence, themes, navigation, account gates, settings, boundaries, mobile');
 }
+async function roaming(browser){
+ const f=await fixture(browser,true,false,false),p=f.page;
+ await p.evaluate(()=>{for(const [x,y]of [[170,210],[830,300],[1080,650]]){const el=document.createElement('div');el.dataset.petPerch='';el.style.cssText=`position:fixed;left:${x}px;top:${y}px;width:110px;height:54px;pointer-events:none;background:#26352b;border-radius:14px`;document.body.append(el);}});
+ await select(p,'settings');await p.locator('[data-pet-pref="roaming"][data-value="roam"]').click();await p.waitForFunction(()=>ShiyuDesktopPet.read().roaming==='roam');await p.locator('#settings .dialog-heading [data-action="close"]').click();
+ assert.equal(await p.locator('#desktop-pet').getAttribute('data-roaming'),'true');
+ await p.waitForFunction(()=>document.querySelector('#desktop-pet')?.dataset.roamPhase==='run',null,{timeout:18000});
+ await p.waitForFunction(()=>document.querySelector('#desktop-pet')?.dataset.roamPhase==='jump',null,{timeout:2500});
+ await p.waitForFunction(()=>document.querySelector('#desktop-pet')?.dataset.roamPhase==='land',null,{timeout:4000});
+ assert.equal(await p.evaluate(()=>ShiyuDesktopPet.read().position),null,'autonomous movement must not overwrite the saved position');
+ await select(p,'navigate','space');await p.waitForFunction(()=>view==='space');assert.equal(await p.locator('#desktop-pet').getAttribute('data-roaming'),'false','roaming is disabled away from theme home');
+ assert.equal(await p.evaluate(()=>ShiyuDesktopPet.read().position),null);assert.deepEqual(f.errors,[]);await f.context.close();console.log('PASS theme-only roaming, run/jump or flight motion, and transient position persistence');
+}
+async function sameSurface(browser){
+ const f=await fixture(browser,true,false,false),p=f.page;
+ await p.evaluate(()=>{const box=document.querySelector('#desktop-pet').getBoundingClientRect(),el=document.createElement('div');el.dataset.petPerch='';el.style.cssText=`position:fixed;left:${box.left-150}px;top:${box.top+24}px;width:360px;height:70px;pointer-events:none;background:#26352b;border-radius:14px`;document.body.append(el);});
+ await select(p,'settings');await p.locator('[data-pet-pref="roaming"][data-value="roam"]').click();await p.waitForFunction(()=>ShiyuDesktopPet.read().roaming==='roam');await p.locator('#settings .dialog-heading [data-action="close"]').click();
+ await p.waitForFunction(()=>['walk','run'].includes(document.querySelector('#desktop-pet')?.dataset.roamPhase),null,{timeout:18000});
+ assert(['walk','run'].includes(await p.locator('#desktop-pet').getAttribute('data-roam-route')),`same surface uses a grounded walk/run route, got ${await p.locator('#desktop-pet').getAttribute('data-roam-route')}`);
+ await p.waitForFunction(()=>document.querySelector('#desktop-pet')?.dataset.roamPhase==='idle',null,{timeout:7000});
+ assert.deepEqual(f.errors,[]);await f.context.close();console.log('PASS same-surface roaming stays grounded and walks or runs without jumping');
+}
 function innerWidthFallback(){return 1440;}
-if(require.main===module)(async()=>{fs.mkdirSync(out,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true});try{if(process.argv.includes('--baseline'))await baseline(browser);else await verify(browser);}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
+if(require.main===module)(async()=>{fs.mkdirSync(out,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true});try{if(process.argv.includes('--baseline'))await baseline(browser);else if(process.argv.includes('--roaming'))await roaming(browser);else if(process.argv.includes('--same-surface'))await sameSurface(browser);else{await verify(browser);await roaming(browser);await sameSurface(browser);}}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -15,10 +15,19 @@
   };
   let accountEpoch = 0, verifiedUserId = null, authBusy = false, authQueue = Promise.resolve(), logoutRequest = null;
   let accountDataRefreshPending = true;
+  if (location.hostname === 'space.shiyubox.com') {
+    const guard = document.createElement('style');
+    guard.textContent = 'html:not(.shiyu-account-ready) #main{visibility:hidden}';
+    document.head.append(guard);
+  }
   const rawPersist = persist;
   const appliedLogins = new WeakSet();
   function invalidateAccount() { accountEpoch++; membershipRequest++; verifiedUserId = null; accountDataRefreshPending = true; clearTimeout(syncTimer); clearTimeout(membershipExpiryTimer); document.documentElement.classList.remove('shiyu-account-ready'); }
-  function markAccountReady() { document.documentElement.classList.toggle('shiyu-account-ready', !authBusy && verifiedUserId !== null && verifiedUserId === localIdentity()); }
+  function markAccountReady() {
+    const ready = !authBusy && verifiedUserId !== null && verifiedUserId === localIdentity();
+    document.documentElement.classList.toggle('shiyu-account-ready', ready);
+    if (ready) window.dispatchEvent(new CustomEvent('shiyu-session-ready', {detail:{authenticated:!!signed}}));
+  }
   const profileKey = id => 'shiyu-account-profile:' + id;
   const profileFields = ['name', 'avatar', 'realName', 'gender', 'birthday', 'profileCompleted'];
   function savedProfile(id) {
@@ -270,7 +279,7 @@
   };
   const originalWorkspace = workspace;
   workspace = function accountWorkspace(...args) {
-    if (!signed && location.hostname !== 'space.shiyubox.com') { view = 'home'; openLogin(); render(); return; }
+    if (!signed || (location.hostname === 'space.shiyubox.com' && verifiedUserId !== accountId())) { view = 'home'; openLogin(); render(); return; }
     return originalWorkspace(...args);
   };
 
@@ -359,6 +368,14 @@
   // to the page so the header and membership surfaces do not stay stale.
   window.addEventListener('focus', () => { void refreshMembership(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) void refreshMembership(); });
+
+  // Direct private URLs must wait for server verification and retain their destination.
+  let directSpacePending = location.hostname === 'space.shiyubox.com';
+  window.addEventListener('shiyu-session-ready', event => {
+    if (!directSpacePending) return;
+    if (!event.detail.authenticated) { view = 'home'; render(); openLogin(); return; }
+    directSpacePending = false; view = 'space'; render();
+  });
 
   // Keep the account slot reserved but invisible until the first membership
   // snapshot has been checked. This prevents a stale badge from flashing on

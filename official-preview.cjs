@@ -6,6 +6,17 @@ const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=
 const port = Number(process.env.OFFICIAL_PORT) || 4320;
 http.createServer((req, res) => {
   const pathname = new URL(req.url, 'http://localhost').pathname;
+  if (pathname === '/api/shiyu/operations') {
+    fetch('http://127.0.0.1:5175/api/shiyu/operations').then(async upstream => {
+      res.writeHead(upstream.status, {'Content-Type':'application/json','Cache-Control':'no-store'}); res.end(await upstream.text());
+    }).catch(() => { res.writeHead(503, {'Content-Type':'application/json'}); res.end('{"world":{"enabled":false}}'); }); return;
+  }
+  if (pathname.startsWith('/install/')) {
+    const installRoot=path.resolve(__dirname,'dist/install');
+    const file=path.resolve(installRoot,pathname.slice('/install/'.length)||'index.html');
+    if(!file.startsWith(installRoot+path.sep)){res.writeHead(403);res.end();return;}
+    fs.readFile(file,(err,data)=>{if(err){res.writeHead(404);res.end();return;}res.writeHead(200,{'Content-Type':path.extname(file)==='.webmanifest'?'application/manifest+json':types[path.extname(file)]||'application/octet-stream','Cache-Control':'no-cache'});res.end(data)});return;
+  }
   if (pathname === '/') { res.writeHead(302, { Location: 'http://127.0.0.1:4318/' }); res.end(); return; }
   if (pathname === '/official') { res.writeHead(302, { Location: '/official/' }); res.end(); return; }
   if (!pathname.startsWith('/official/')) { res.writeHead(404); res.end('Not found'); return; }

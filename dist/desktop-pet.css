@@ -25,15 +25,18 @@
 .pet-notice{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);max-width:calc(100vw - 40px);width:max-content;background:var(--pet-surface);color:var(--pet-ink);padding:12px 18px;border-radius:14px;font-size:12px;box-shadow:0 4px 22px #20322220;z-index:10;pointer-events:none}
 .desktop-pet[data-compact=true] .pet-menu{inset:auto;left:var(--compact-x);top:var(--compact-y);width:var(--compact-width);box-sizing:border-box;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:14px 8px 30px;background:var(--pet-surface);border-radius:20px;pointer-events:auto;box-shadow:0 6px 26px #20322218;max-height:calc(100vh - 24px);overflow:auto}.desktop-pet[data-compact=true] .pet-menu>.pet-shortcut{position:static;width:auto;height:64px;margin:0;transform:none;animation:none}.desktop-pet[data-compact=true] .pet-menu .pet-settings-entry{right:8px;bottom:5px}
 .pet-preferences{color:var(--ink,#343b35)}.pet-setting-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0}.pet-setting-row h3{margin:0;font-size:14px;font-weight:600}.pet-setting-row p{margin:7px 0 0;color:var(--muted,#72786f);font-size:12px;line-height:1.7}.pet-setting-choices{display:flex;gap:5px;flex-shrink:0}.pet-setting-choices button,.pet-setting-row>button{padding:8px 12px;border:0;border-radius:10px;background:var(--soft,#eff1ec);font-size:12px}.pet-setting-choices button[aria-pressed=true]{color:var(--accent);background:color-mix(in srgb,var(--accent) 13%,transparent)}.pet-skin-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.pet-skin-choice{display:flex;flex-direction:column;align-items:center;gap:7px;padding:17px 8px;border:1px solid transparent;border-radius:18px;background:var(--soft,#eff1ec)}.pet-skin-choice[aria-pressed=true]{border-color:color-mix(in srgb,var(--accent) 40%,transparent);background:color-mix(in srgb,var(--accent) 9%,var(--surface,#fff))}.pet-skin-choice .pet-art{width:76px;height:84px;margin-bottom:6px}.pet-skin-choice b{font-size:13px;font-weight:600}.pet-skin-choice span{font-size:10px;color:var(--muted);line-height:1.6}.pet-skin-choice:hover .pet-head{transform:rotate(-5deg)}.pet-skin-choice:hover .pet-wing{transform:rotate(-15deg)}.pet-skin-choice:hover .pet-leaves{transform:rotate(8deg)}
-@keyframes pet-breathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.025)}}
-@keyframes pet-blink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.1)}}
+@keyframes pet-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
+@keyframes pet-blink{0%,43%,47%,100%{transform:translateY(0)}45%{transform:scaleY(.1)}}
 @keyframes pet-tail{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(6deg)}}
 @keyframes pet-leaves{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(5deg)}}
-@keyframes pet-land{0%{transform:scale(.95,1.04)}40%{transform:scale(1.05,.94)}100%{transform:none}}
+@keyframes pet-land{0%{transform:translateY(-3px)}40%{transform:translateY(1px)}100%{transform:none}}
 @keyframes pet-unfurl{from{opacity:0;transform:translate(calc(var(--item-x)*.7),calc(var(--item-y)*.7)) rotate(-10deg) scale(.75)}to{opacity:1;transform:translate(var(--item-x),var(--item-y))}}
 @media(max-width:600px){.pet-setting-row{flex-wrap:wrap}.pet-skin-choices{gap:7px}.pet-skin-choice span{display:none}.pet-skin-choice .pet-art{width:64px;height:72px}}
 body[data-dark=true] .pet-preferences{--pet-control:color-mix(in srgb,var(--pet-accent) 55%,#f2f3e8)}
-.pet-setting-choices button[aria-pressed=true]{color:var(--pet-control)}
+.pet-setting-choices button[aria-pressed=false]{opacity:.56}
+.pet-setting-choices button[aria-pressed=false]:is(:hover,:focus-visible){opacity:.82}
+.pet-setting-choices button[aria-pressed=true]{opacity:1;color:var(--ink);background:color-mix(in srgb,var(--pet-control) 18%,var(--surface,#fff));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pet-control) 45%,transparent)}
+body[data-dark=true] .pet-setting-choices button[aria-pressed=true]{background:color-mix(in srgb,var(--pet-control) 24%,var(--surface,#262b2a));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pet-control) 60%,transparent)}
 .pet-skin-choice[aria-pressed=true] b::after{content:' ✓';color:var(--pet-control)}
 /* Human companions have their own rig and motion; existing animal artwork is unchanged. */
 .desktop-pet,.pet-preferences{--pet-line-ink:#4c504a}
@@ -60,15 +63,98 @@ body[data-dark=true] .pet-preferences{--pet-control:color-mix(in srgb,var(--pet-
 .desktop-pet[data-open=true]:not([data-motion=off]) .pet-human-head-look{transform:rotate(-4deg);transition:transform .3s ease}
 .desktop-pet[data-open=true]:not([data-motion=off]) .pet-human-head-nod{animation:none}
 .desktop-pet[data-open=true]:not([data-motion=off]) .pet-human-arm-wave{animation:pet-human-wave 1.5s ease-in-out both}
-.desktop-pet[data-dragging=true]:not([data-motion=off]) .pet-human-balance{animation:none;transform:translateY(var(--human-lift)) skewX(-5deg)}
+.desktop-pet[data-dragging=true]:not([data-motion=off]) .pet-human-balance{animation:none;transform:translateY(var(--human-lift)) rotate(-5deg)}
 .desktop-pet[data-dragging=true]:not([data-motion=off]) .pet-human-head-nod,.desktop-pet[data-dragging=true]:not([data-motion=off]) .pet-human-arm-rest{animation:none;transform:rotate(7deg)}
 .desktop-pet[data-dragging=true]:not([data-motion=off]) .pet-human-arm-wave{animation:none;transform:rotate(-9deg)}
 .pet-preferences:not([data-motion=off]) .pet-skin-choice:hover .pet-human-head-look{transform:rotate(-4deg);transition:transform .25s}
 .pet-preferences:not([data-motion=off]) .pet-skin-choice:hover .pet-human-arm-wave{animation:pet-human-wave 1.5s ease-in-out both}
-@keyframes pet-human-sway{0%,100%{transform:skewX(calc(var(--human-sway)*-1))}50%{transform:skewX(var(--human-sway))}}
+@keyframes pet-human-sway{0%,100%{transform:rotate(calc(var(--human-sway)*-1))}50%{transform:rotate(var(--human-sway))}}
 @keyframes pet-human-nod{0%,68%,86%,100%{transform:rotate(0)}73%{transform:rotate(var(--human-nod))}79%{transform:rotate(calc(var(--human-nod)*-.5))}}
 @keyframes pet-human-fidget{0%,76%,100%{transform:rotate(0)}82%,88%{transform:rotate(-7deg)}85%{transform:rotate(-3deg)}}
 @keyframes pet-human-wave{0%,100%{transform:rotate(0)}25%,60%{transform:rotate(var(--human-wave))}43%,77%{transform:rotate(var(--human-wave-back))}}
 @keyframes pet-paper-blink{0%,43%,47%,100%{opacity:0}45%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.desktop-pet *,.pet-preferences *{animation:none!important;transition:none!important}}
 @media(prefers-reduced-motion:reduce){.pet-preferences .pet-human-head-look{transform:none!important}}
+/* Rigid joint movement only: idle observation differs from the greeting. */
+.desktop-pet[data-skin=paper] .pet-human-seated,.pet-human-seated{overflow:visible;border-radius:0;--human-balance-origin:48px 93px;--human-lift:-3px}
+.desktop-pet[data-motion=normal] :is(.pet-body,.pet-human-balance,.pet-human-arm-rest,.pet-human-arm-wave,.pet-human-head-nod,.pet-leaves){animation:none;transform:none}
+.desktop-pet[data-motion=normal][data-skin=cat] .pet-head{animation:pet-cat-look 6.5s ease-in-out infinite}
+.desktop-pet[data-motion=normal][data-skin=cat] .pet-tail{animation:pet-tail 5s ease-in-out infinite}
+.desktop-pet[data-motion=normal][data-skin=bird] .pet-body{animation:pet-bird-hop 6s ease-in-out infinite}
+.desktop-pet[data-motion=normal][data-skin=sprout] .pet-leaves{animation:pet-leaf-listen 6.8s ease-in-out infinite}
+.desktop-pet[data-motion=normal][data-skin=line] .pet-human-head-look{animation:pet-human-look 7s ease-in-out infinite}
+.desktop-pet[data-motion=normal][data-skin=line] .pet-human-arm-rest{animation:pet-human-fidget 7s ease-in-out infinite}
+.desktop-pet[data-motion=normal][data-skin=paper] .pet-human-balance{animation:pet-seated-settle 7s ease-in-out infinite}
+/* Greeting uses joints and gestures that are absent from each idle sequence. */
+.desktop-pet[data-motion=normal][data-open=true] :is(.pet-body,.pet-head,.pet-leaves,.pet-human-balance,.pet-human-head-look,.pet-human-arm-rest){animation:none;transform:none}
+.desktop-pet[data-motion=normal][data-open=true][data-skin=cat] .pet-head{transform:rotate(-7deg);transition:transform .3s}
+.desktop-pet[data-motion=normal][data-open=true][data-skin=cat] .pet-paw{animation:pet-paw-hello 1.4s ease-in-out both;transform-origin:30px 75px}
+.desktop-pet[data-motion=normal][data-open=true][data-skin=bird] .pet-body{animation:pet-bird-hello 1.6s ease-in-out both}
+.desktop-pet[data-motion=normal][data-open=true][data-skin=bird] .pet-wing{animation:pet-wing-hello 1.6s ease-in-out both;transform-origin:28px 54px}
+.desktop-pet[data-motion=normal][data-open=true][data-skin=sprout] .pet-body{animation:pet-sprout-hello 1.5s ease-in-out both}
+.desktop-pet[data-motion=normal][data-open=true][data-skin=sprout] .pet-paw{transform-origin:24px 62px;animation:pet-sprout-hand 1.5s ease-in-out both}
+.desktop-pet[data-motion=normal][data-open=true][data-skin=line] .pet-human-arm-wave{animation:pet-human-wave 1.5s ease-in-out both}
+.desktop-pet[data-motion=normal][data-open=true][data-skin=line] .pet-human-head-look{animation:pet-line-hello 1.5s ease-in-out both}
+.desktop-pet[data-motion=normal][data-open=true][data-skin=paper] .pet-human-balance{animation:pet-seated-hello 1.5s ease-in-out both}
+.desktop-pet[data-dragging=true] .pet-art *{animation:none!important}
+@keyframes pet-cat-look{0%,58%,100%{transform:none}70%{transform:rotate(-10deg)}83%{transform:rotate(8deg)}93%{transform:rotate(-3deg)}}
+@keyframes pet-paw-hello{0%,100%{transform:none}25%,65%{transform:rotate(48deg)}45%,82%{transform:rotate(23deg)}}
+@keyframes pet-bird-hop{0%,64%,100%{transform:none}72%{transform:translate(3px,-7px) rotate(3deg)}80%{transform:translateX(5px)}89%{transform:translate(2px,-5px) rotate(-3deg)}}
+@keyframes pet-bird-hello{0%,100%{transform:none}25%{transform:translate(-4px,-12px) rotate(-6deg)}50%{transform:translate(4px,-16px) rotate(5deg)}75%{transform:translate(5px,-9px)}}
+@keyframes pet-wing-hello{0%,100%{transform:none}15%,35%,55%,75%{transform:rotate(-48deg)}25%,45%,65%,85%{transform:rotate(12deg)}}
+@keyframes pet-leaf-listen{0%,60%,100%{transform:none}72%{transform:rotate(-18deg)}85%{transform:rotate(15deg)}94%{transform:rotate(-6deg)}}
+@keyframes pet-sprout-hello{0%,100%{transform:none}25%{transform:translate(-3px,-4px) rotate(-10deg)}50%{transform:translate(3px,-5px) rotate(10deg)}75%{transform:rotate(-5deg)}}
+@keyframes pet-sprout-hand{0%,100%{transform:none}30%,65%{transform:rotate(35deg)}48%,82%{transform:rotate(10deg)}}
+@keyframes pet-human-look{0%,62%,100%{transform:none}74%{transform:rotate(10deg)}87%{transform:rotate(-7deg)}}
+@keyframes pet-line-hello{0%,100%{transform:none}30%,65%{transform:rotate(-6deg)}48%{transform:rotate(3deg)}}
+@keyframes pet-seated-settle{0%,60%,100%{transform:none}73%{transform:translateX(-2px) rotate(-2deg)}88%{transform:translateX(1px) rotate(1deg)}}
+@keyframes pet-seated-hello{0%,100%{transform:none}30%{transform:rotate(-7deg)}55%{transform:rotate(-4deg)}75%{transform:rotate(-7deg)}}
+@media(prefers-reduced-motion:reduce){.desktop-pet *{animation:none!important;transition:none!important}}
+/* Pose animation preserves anatomy; only uniform scaling aligns sprite sizes. */
+.pet-girl-sprite{position:relative;width:100%;height:100%;display:block;filter:drop-shadow(0 2px 1px #40342618)}
+.pet-girl-frame{position:absolute;left:5%;top:5%;width:90%;height:90%;overflow:hidden;transform:scale(var(--girl-scale,.78));transform-origin:50% 94%;transition:transform .14s linear}
+.pet-girl-run-frame{position:absolute;left:5%;top:5%;width:90%;height:90%;overflow:hidden;display:none;transform:scale(1);transform-origin:50% 94%}
+.desktop-pet[data-skin=paper]:is([data-girl-action=run],[data-girl-action=walk]) .pet-girl-frame{display:none}
+.desktop-pet[data-skin=paper]:is([data-girl-action=run],[data-girl-action=walk]) .pet-girl-run-frame{display:block}
+.desktop-pet[data-skin=paper][data-dragging=true][data-girl-action=run] .pet-girl-run-frame{animation:pet-girl-run .18s ease-in-out infinite alternate!important}
+.desktop-pet[data-skin=paper]:is([data-dragging=true],[data-roaming=true])[data-facing=left] .pet-girl-sprite{transform:scaleX(-1)}
+.desktop-pet[data-skin=paper][data-landing=true] .pet-art{animation:none}
+@media(prefers-reduced-motion:reduce){.pet-girl-frame{transition:none!important}}
+/* The articulated controller owns the four vector companions' joints. */
+.desktop-pet[data-rig=joint]:not([data-skin=paper]) .pet-art *{animation:none!important;transition:none;}
+.pet-cat-gait{opacity:0;transform-origin:0 0}.pet-cat-gait .gait-legs path{stroke:var(--pet-outline);fill:none;stroke-width:4;stroke-linecap:round}
+.desktop-pet[data-rig=joint]:not([data-skin=paper])[data-landing=true] .pet-art{animation:none}
+
+.desktop-pet[data-idle="true"] { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+.desktop-pet[data-roaming=true][data-roam-phase=run] .pet-character{animation:pet-roam-run .24s ease-in-out infinite alternate}
+.desktop-pet[data-roaming=true][data-roam-phase=walk] .pet-character{animation:pet-roam-walk .42s ease-in-out infinite alternate}
+.desktop-pet[data-roaming=true][data-roam-phase=takeoff] .pet-character{animation:pet-roam-takeoff .19s ease-in-out infinite alternate}
+.desktop-pet[data-roaming=true][data-roam-phase=jump] .pet-character{animation:pet-roam-jump .42s ease-out infinite alternate}
+.desktop-pet[data-roaming=true][data-roam-phase=land] .pet-character{animation:pet-roam-land .23s ease-out}
+.desktop-pet[data-roaming=true][data-roam-phase=flight][data-skin=bird] .pet-character{animation:pet-roam-flight .38s ease-in-out infinite alternate}
+.desktop-pet[data-roaming=true][data-motion=gentle][data-roam-phase=jump] .pet-character,.desktop-pet[data-roaming=true][data-motion=gentle][data-roam-phase=flight] .pet-character{animation-duration:.62s}
+@keyframes pet-roam-run{from{transform:translateY(0) scaleY(1)}to{transform:translateY(-2px) scaleY(.97)}}
+@keyframes pet-roam-walk{from{transform:translateY(0) scaleY(1)}to{transform:translateY(-1px) scaleY(.99)}}
+@keyframes pet-roam-takeoff{from{transform:translateY(0) scaleY(1)}to{transform:translateY(1px) scaleY(.96)}}
+@keyframes pet-roam-jump{from{transform:translateY(1px) scaleY(.94)}to{transform:translateY(-2px) scaleY(1.035)}}
+@keyframes pet-roam-land{0%{transform:translateY(-2px) scaleY(1.02)}55%{transform:translateY(1px) scaleY(.97)}100%{transform:translateY(0) scaleY(1)}}
+@keyframes pet-roam-flight{from{transform:translateY(2px) scaleY(.97)}to{transform:translateY(-2px) scaleY(1.025)}}
+
+/* A wheel-selected shortcut gets a clear ring instead of the old context dot. */
+.desktop-pet .pet-shortcut[aria-current] .pet-shortcut-icon::after{display:none}
+.desktop-pet .pet-shortcut[data-selected=true] .pet-shortcut-icon{background:color-mix(in srgb,var(--pet-accent) 20%,var(--pet-surface));box-shadow:0 0 0 3px var(--pet-accent),0 6px 18px #20322222;transform:scale(1.08)}
+.desktop-pet .pet-shortcut[data-selected=true] .pet-shortcut-label{background:var(--pet-accent);color:#fff;box-shadow:0 2px 8px #20322226}
+.desktop-pet .pet-shortcut[data-selected=true].pet-nav .pet-shortcut-icon{box-shadow:0 0 0 2px var(--pet-accent),0 4px 12px #20322222}
+.desktop-pet .pet-shortcut-icon:has(>img.corner-config-icon){overflow:hidden;border-radius:50%}
+.desktop-pet .pet-shortcut-icon>img.corner-config-icon{width:100%;height:100%;max-width:none;object-fit:cover;border-radius:50%;transform:scale(1.18)}
+
+/* Keep third-party logos the same visual size as the other shortcut glyphs. */
+.desktop-pet .pet-shortcut-icon:has(>img.corner-config-icon){overflow:visible;border-radius:16px}
+.desktop-pet .pet-shortcut-icon>img.corner-config-icon{width:23px;height:23px;max-width:23px;max-height:23px;object-fit:cover;border-radius:50%;transform:none}
+
+/* A quiet dialogue bubble stays inside the viewport and its tail tracks the pet. */
+.desktop-pet .pet-speech{position:fixed;z-index:1201;display:block;width:max-content;max-width:min(178px,calc(100vw - 24px));padding:7px 10px;border:1px solid color-mix(in srgb,var(--pet-muted) 12%,transparent);border-radius:13px;background:color-mix(in srgb,var(--pet-surface) 94%,transparent);color:var(--pet-muted);box-shadow:0 4px 14px #20322212;font-size:10px;line-height:1.5;text-align:center;pointer-events:none;backdrop-filter:blur(9px);opacity:.82;white-space:normal}
+.desktop-pet .pet-speech::after{content:'';position:absolute;left:var(--pet-speech-tail-x,50%);bottom:-7px;width:13px;height:8px;transform:translateX(-50%) rotate(var(--pet-speech-tail-angle,0deg));transform-origin:50% 50%;background:color-mix(in srgb,var(--pet-surface) 94%,transparent);clip-path:polygon(0 0,100% 0,52% 100%);filter:drop-shadow(0 1px color-mix(in srgb,var(--pet-muted) 12%,transparent))}
+.desktop-pet .pet-speech[data-tail-edge=top]::after{top:-7px;bottom:auto}
+.desktop-pet .pet-speech-text{display:block;min-width:0;min-height:14px;color:var(--pet-muted);white-space:normal}
+@keyframes pet-girl-run{from{transform:translateY(0)}to{transform:translateY(-3px)}}

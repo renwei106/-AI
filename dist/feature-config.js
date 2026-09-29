@@ -5,10 +5,11 @@
  const escapeId=value=>String(value||'');
  const access=id=>config?.access?.[id]!==false;
  const category=id=>access(id)&&config?.personalization?.[id]?.enabled!==false;
- const option=(id,value)=>{const key=escapeId(value),choices=config?.personalization?.[id]?.options;const selected=id==='colors'?Object.keys(choices||{}).find(item=>item===key||choices[item]?.value===key)||(key==='custom'||/^#[0-9a-f]{6}$/i.test(key)?'custom':key):key;return category(id)&&choices?.[selected]?.enabled!==false};
+ const experimentalThemes=new Set(['avatarGirl','avatarVideo','avatarScrub']);
+ const option=(id,value)=>{const key=escapeId(value);if(id==='themes'&&experimentalThemes.has(key))return true;const choices=config?.personalization?.[id]?.options;const selected=id==='colors'?Object.keys(choices||{}).find(item=>item===key||choices[item]?.value===key)||(key==='custom'||/^#[0-9a-f]{6}$/i.test(key)?'custom':key):key;return category(id)&&choices?.[selected]?.enabled!==false};
  const label=(key,fallback)=>config?.optionNames?.[key]||fallback;
  const optionLabel=(id,value,fallback)=>config?.personalization?.[id]?.options?.[id==='colors'?colorKey(escapeId(value)):escapeId(value)]?.name||fallback;
- const order=id=>config?.personalization?.[id]?.order||Object.keys(config?.personalization?.[id]?.options||{});
+ const order=id=>{const values=config?.personalization?.[id]?.order||Object.keys(config?.personalization?.[id]?.options||{});return id==='themes'?[...values,...[...experimentalThemes].filter(value=>!values.includes(value))]:values};
  const first=(id,fallback)=>{const choices=config?.personalization?.[id]?.options||{},key=order(id).find(key=>key!=='custom'&&choices[key]?.enabled);return id==='colors'?(choices[key]?.value||key||fallback):(key||fallback)};
  const colorKey=value=>Object.keys(config?.personalization?.colors?.options||{}).find(id=>id===value||config.personalization.colors.options[id]?.value===value)||'custom';
  const applyColorCatalog=()=>{if(!config?.personalization?.colors||typeof PALETTES==='undefined')return;const choices=config.personalization.colors.options;PALETTES.splice(0,PALETTES.length,...order('colors').filter(id=>id!=='custom'&&choices[id]?.enabled).map(id=>[choices[id].value||id,choices[id].name]));};

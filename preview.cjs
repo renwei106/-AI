@@ -17,19 +17,23 @@ async function handlePayment(req,res){
   }
 }
 const routes={
-  '/analytics.js':'analytics.js',
+  '/todo-calendar.js':'todo-calendar.js','/todo-calendar-core.js':'todo-calendar-core.js','/todo-calendar.css':'todo-calendar.css',
+  '/home-responsive.css':'home-responsive.css','/home-responsive.js':'home-responsive.js',
+  '/analytics.js':'analytics.js','/tool-auth-bridge.js':'tool-auth-bridge.js',
   '/desktop-pet.js':'desktop-pet.js','/desktop-pet.css':'desktop-pet.css','/desktop-pet-host.js':'desktop-pet-host.js','/feature-config.js':'feature-config.js',
   '/assets/desktop-pet/paper-person.webp':'assets/desktop-pet/paper-person.webp',
   '/site-filing.js':'site-filing.js','/site-filing.css':'site-filing.css',
   '/i18n-client.js':'i18n-client.js','/i18n-client.css':'i18n-client.css',
   '/member-payment.js':'member-payment.js','/member-payment.css':'member-payment.css',
-  '/world.css':'world.css','/world-config.js':'world-config.js','/world.js':'world.js',
+  '/world.css':'world.css','/world-config.js':'world-config.js','/world-material-home.css':'world-material-home.css','/world-material-home.js':'world-material-home.js','/world.js':'world.js',
   '/member-plan-config.js':'member-plan-config.js',
   '/member-entitlements.js':'member-entitlements.js','/member-invitations.js':'member-invitations.js',
   '/feedback.css':'feedback.css','/feedback.js':'feedback.js',
   '/memoir-theme.css':'memoir-theme.css','/memoir-theme.js':'memoir-theme.js',
   '/memo-paper.css':'memo-paper.css','/memo-paper.js':'memo-paper.js',
  '/corner.css':'corner.css','/corner.js':'corner.js','/earth-theme.css':'earth-theme.css','/earth-theme.js':'earth-theme.js','/earth-source.js':'earth-source.js',
+  '/avatar-theme.css':'avatar-theme.css','/avatar-theme.js':'avatar-theme.js','/avatar-video-theme.js':'avatar-video-theme.js','/avatar-scrub-theme.js':'avatar-scrub-theme.js','/avatar-character-factory.js':'avatar-character-factory.js','/avatar-motion-engine.js':'avatar-motion-engine.js',
+  '/assets/avatar/azhi-idle.webm':'assets/avatar/azhi-idle.webm',
   '/':'index.html','/index.html':'index.html','/robots.txt':'robots.txt','/sitemap.xml':'sitemap.xml','/style.css':'style.css','/app.js':'app.js','/v4.js':'v4.js','/v4.css':'v4.css','/account-access.js':'account-access.js',
   '/space-atlas.js':'space-atlas.js','/space-atlas.css':'space-atlas.css','/assets/reading/valley-closed.webp':'assets/reading/valley-closed.webp','/assets/reading/valley-open.webp':'assets/reading/valley-open.webp',
   '/surge-theme.css':'surge-theme.css','/surge-theme.js':'surge-theme.js','/flow-theme.css':'flow-theme.css','/flow-theme.js':'flow-theme.js','/reading-theme.css':'reading-theme.css','/reading-theme.js':'reading-theme.js',
@@ -78,6 +82,8 @@ http.createServer(async(req,res)=>{
   const pathname=req.url.split('?')[0]
   const fontAsset=/^\/assets\/fonts\/shiyu-(?:youfeng|qingya-song|wenrun-kai)\/[A-Za-z0-9._-]+\.woff2$/i.test(pathname)?pathname.slice(1):''
   let file=routes[pathname]||fontAsset||(/^\/assets\/site-icons\/[a-z0-9._-]+\.(?:svg|ico|png|webp)$/i.test(pathname)?pathname.slice(1):'')
+  if(/^\/assets\/avatar\/turn\/frame-\d{2}\.jpg$/.test(pathname))file=pathname.slice(1)
+  if(/^\/assets\/avatar\/timeline\/frame-\d{3}\.jpg$/.test(pathname))file=pathname.slice(1)
   if(/^\/assets\/toolbox\/(?:common|memo|todo|icons|emoji|cutout)\.svg$/.test(pathname))file=pathname.slice(1)
   if(/^\/assets\/memo-paper\/(?:engine\.js|carousel\.js|LICENSE|THIRD_PARTY_NOTICES\.txt|vat\/geo\/vertex_animation_textures1_mesh\.fbx|vat\/tex\/vertex_animation_textures1_pos\.exr)$/.test(pathname))file=pathname.slice(1)
   if(pathname==='/official/')file='official/index.html'
@@ -91,7 +97,7 @@ http.createServer(async(req,res)=>{
   // open for long sessions. Never let a previous UI bundle survive a refresh.
   res.setHeader('Cache-Control','no-store, max-age=0')
   if(/\.(?:fbx|exr)$/.test(file)){res.setHeader('Content-Type','application/octet-stream');fs.createReadStream(fullPath).pipe(res);return}
-  res.setHeader('Content-Type',file.endsWith('.svg')?'image/svg+xml':file.endsWith('.xml')?'application/xml; charset=utf-8':file.endsWith('.txt')?'text/plain; charset=utf-8':file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webp')?'image/webp':file.endsWith('.woff2')?'font/woff2':file.endsWith('.css')?'text/css; charset=utf-8':file.endsWith('.js')?'text/javascript; charset=utf-8':'text/html; charset=utf-8')
+  res.setHeader('Content-Type',file.endsWith('.svg')?'image/svg+xml':file.endsWith('.xml')?'application/xml; charset=utf-8':file.endsWith('.txt')?'text/plain; charset=utf-8':file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webp')?'image/webp':file.endsWith('.webm')?'video/webm':file.endsWith('.woff2')?'font/woff2':file.endsWith('.css')?'text/css; charset=utf-8':file.endsWith('.js')?'text/javascript; charset=utf-8':'text/html; charset=utf-8')
   const stream=fs.createReadStream(fullPath)
   stream.on('error',()=>{if(!res.headersSent)res.writeHead(404);res.end('Not found')})
   stream.pipe(res)

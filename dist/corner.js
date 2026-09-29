@@ -176,6 +176,7 @@
     }
     const account=prefs[rootKey][owner()] ??= {};
     const library=account[moduleId] ??= {groups:[],stageVersion:1};
+    if(moduleId==='todo')return library;
     if(!library.groups.some(g=>!isInbox(g))){
       meta.groups.forEach((name,i)=>library.groups.push({id:uid(),name,iconMode:'theme',iconSlot:i,refs:[]}));
       persist();
@@ -192,15 +193,6 @@
         {id:uid(),title:"未采用的文案",content:"活动标题备选：周末一起走走。\n\n这版文案暂时没有采用，先放进废纸团。以后需要参考或重新修改时，可以再捡回来。",updatedAt:now-1000*60*60*12,deletedAt:now-1000*60*35,icon:'◌'},
         {id:uid(),title:"归档文档",content:"日常记录中，值得长期保留的内容可以归档，例如整理好的灵感、项目复盘、学习总结和常用文案。\n\n归档后，内容会从日常小记中收起，集中保存在“已归档”里，方便以后查阅和复用。这样，小记里可以专注保留正在使用、还需要修改的内容。\n\n归档内容会保留，需要补充时也可以恢复编辑。",updatedAt:now-1000*60*60*24*3,archivedAt:now-1000*60*60,icon:'✦'}
       ];persist();
-    }
-    if(moduleId==='todo'&&library.tasks===undefined){
-      const base=new Date();base.setHours(0,0,0,0);const iso=d=>d.toISOString().slice(0,10);
-      library.tasks=[
-        {id:uid(),title:'晨间整理',date:iso(base),start:8*60,duration:60,color:'sand',status:'today'},
-        {id:uid(),title:'推进重要事项',date:iso(base),start:9*60,duration:180,color:'blue',status:'today'},
-        {id:uid(),title:'留一段专注时间',date:iso(base),start:13*60,duration:180,color:'teal',status:'today'},
-        {id:uid(),title:'收束今日工作',date:iso(base),start:17*60,duration:60,color:'olive',status:'today'}
-      ];library.inbox=[{id:uid(),title:'还未决定日期的事项'}];persist();
     }
     ensureInbox(library);return library;
   }
@@ -244,6 +236,7 @@
   }
   function closeCorner() {
     if(!panel?.open||cornerClosing)return;
+    if(activeModule==='todo'&&todoCalendarView&&!todoCalendarView.canLeave()){todoCalendarView.cancel();return;}
     if(document.fullscreenElement===fullscreenShell&&document.exitFullscreen){document.exitFullscreen().then(()=>{if(panel?.open)closeCorner();},()=>{if(panel?.open)closeCorner();});return;}
     if(reduced()||typeof panel.animate!=='function'){panel.close();return;}
     cornerClosing=true;
@@ -308,18 +301,18 @@
     if(!panel){
       panel=dialog('my-corner',meta.panelName||meta.name);fullscreenShell=document.createElement('div');fullscreenShell.className='corner-fullscreen-shell';while(panel.firstChild)fullscreenShell.append(panel.firstChild);panel.append(fullscreenShell);
       mountModuleClose();bindModuleHeader();
-      panel.addEventListener('close',()=>{const routeUrl=new URL(location.href);if(routeUrl.searchParams.has('corner')){routeUrl.searchParams.delete('corner');history.replaceState(history.state,'',routeUrl);}if(document.fullscreenElement===fullscreenShell&&document.exitFullscreen)void document.exitFullscreen().catch(()=>{});cornerRevealAnimation?.cancel();cornerRevealAnimation=null;cornerClosing=false;panel.style.clipPath='';panel.style.removeProperty('--corner-backdrop-from');panel.classList.remove('corner-reveal-opening','corner-reveal-closing','memo-editor-mode');finishDrag(true);queueMicrotask(()=>requestAnimationFrame(()=>origin?.isConnected&&origin.focus({preventScroll:true})));flipped.clear();coverOpen.clear();memoRenderToken++;memoPaperView?.destroy();memoPaperView=null;memoViewState={view:'notes',page:0};cancelAnimationFrame(motionFrame);cancelAnimationFrame(fanMotion.frame);clearTimeout(edgeBounceTimer);fanMotion.frame=0;panel.classList.remove('corner-animating');wheelConsumed=false;swipe=null;});
+      panel.addEventListener('close',()=>{destroyTodoCalendar();const routeUrl=new URL(location.href);if(routeUrl.searchParams.has('corner')){routeUrl.searchParams.delete('corner');history.replaceState(history.state,'',routeUrl);}if(document.fullscreenElement===fullscreenShell&&document.exitFullscreen)void document.exitFullscreen().catch(()=>{});cornerRevealAnimation?.cancel();cornerRevealAnimation=null;cornerClosing=false;panel.style.clipPath='';panel.style.removeProperty('--corner-backdrop-from');panel.classList.remove('corner-reveal-opening','corner-reveal-closing','memo-editor-mode');finishDrag(true);queueMicrotask(()=>requestAnimationFrame(()=>origin?.isConnected&&origin.focus({preventScroll:true})));flipped.clear();coverOpen.clear();memoRenderToken++;memoPaperView?.destroy();memoPaperView=null;memoViewState={view:'notes',page:0};cancelAnimationFrame(motionFrame);cancelAnimationFrame(fanMotion.frame);clearTimeout(edgeBounceTimer);fanMotion.frame=0;panel.classList.remove('corner-animating');wheelConsumed=false;swipe=null;});
       panel.addEventListener('pointerdown',startDrag);
-      panel.addEventListener('pointerdown',onTodoResizeStart);
+
       panel.addEventListener('dragstart',e=>{if(e.target.closest('.corner-inbox [data-corner-ref]'))e.preventDefault();});
-      panel.addEventListener('dragstart',onTodoDragStart);
-      panel.addEventListener('dragover',onTodoDragOver);
-      panel.addEventListener('drop',onTodoDrop);
-      panel.addEventListener('cancel',e=>{e.preventDefault();if(cornerClosing)return;if(activeModule==='memo'&&memoPaperView?.cancel())return;if(flipped.size)flipCard([...flipped][0],false);else closeCorner();});
+
+
+
+      panel.addEventListener('cancel',e=>{e.preventDefault();if(cornerClosing)return;if(activeModule==='memo'&&memoPaperView?.cancel())return;if(activeModule==='todo'&&todoCalendarView?.cancel())return;if(flipped.size)flipCard([...flipped][0],false);else closeCorner();});
       panel.addEventListener('click',onPanelClick);
       panel.addEventListener('change',onPanelChange);
       panel.addEventListener('input',onPanelInput);
-      panel.addEventListener('submit',onTodoSubmit);
+
 
       panel.addEventListener('pointerover',e=>{const card=e.target.closest?.('[data-corner-card]:not(.corner-inbox)');if(card&&panel.contains(card))card.classList.add('is-pointer-hover');});
       panel.addEventListener('pointerout',e=>{const card=e.target.closest?.('[data-corner-card]:not(.corner-inbox)');if(card&&(!e.relatedTarget||!card.contains(e.relatedTarget)))card.classList.remove('is-pointer-hover');});
@@ -330,7 +323,7 @@
         if(e.target.matches('.corner-card-front')&&['Enter',' '].includes(e.key)){e.preventDefault();activateCard(e.target.closest('[data-corner-card]').dataset.cornerCard);}
       });
       panel.addEventListener('wheel',onWheel,{passive:false});
-      panel.addEventListener('pointerdown',e=>{if(activeModule!=='memo'&&e.pointerType==='touch'&&!e.target.closest('button,a,input,select,.corner-back-scroll'))swipe={x:e.clientX,y:e.clientY};});
+      panel.addEventListener('pointerdown',e=>{if(!['memo','todo'].includes(activeModule)&&e.pointerType==='touch'&&!e.target.closest('button,a,input,select,.corner-back-scroll'))swipe={x:e.clientX,y:e.clientY};});
       panel.addEventListener('pointerup',e=>{if(!swipe||drag?.active)return;const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;swipe=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3){navigate(Math.sign(-dx));swallowClickUntil=performance.now()+400;}});
       panel.addEventListener('pointercancel',()=>{swipe=null;});
     }
@@ -373,11 +366,12 @@
   async function switchCornerModule(id){
     hideModuleMenu();if(moduleSwitchBusy||!panel?.open||id===activeModule||!enabledCornerModuleIds().includes(id))return;
     if(!requireCornerModuleAuth(id))return;
+    if(activeModule==='todo'&&todoCalendarView&&!todoCalendarView.canLeave()){todoCalendarView.cancel();return;}
     moduleSwitchBusy=true;const body=panel.querySelector('.corner-body');
     try{
       if(!reduced())await body.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(-6px)'}],{duration:110,easing:'ease-out',fill:'forwards'}).finished.catch(()=>{});
       if(!panel.open)return;
-      memoRenderToken++;memoPaperView?.destroy();memoPaperView=null;memoViewState={view:'notes',page:0};
+      destroyTodoCalendar();memoRenderToken++;memoPaperView?.destroy();memoPaperView=null;memoViewState={view:'notes',page:0};
       finishDrag(true);clearTimeout(edgeBounceTimer);cancelAnimationFrame(fanMotion.frame);fanMotion.frame=0;flipped.clear();coverOpen.clear();inboxExpanded=null;panel.classList.remove('memo-editor-mode');
       activeModule=id;const routeUrl=new URL(location.href);routeUrl.searchParams.set('corner',id);history.replaceState({corner:true},'',routeUrl);const meta=moduleMeta();panel.dataset.cornerModule=id;panel.setAttribute('aria-label',meta.panelName||meta.name);
       const groups=(id==='toolbox'||isExternalTool(id))?[]:collection().groups;activeId=groups.find(g=>!isInbox(g))?.id||ADD_CARD;
@@ -397,7 +391,7 @@
   }
   function bindModuleHeader(){
     const decorate=()=>{const title=panel.querySelector('[data-corner-next-theme]');if(!title||title.dataset.moduleTitle)return;
-      if(activeModule==='todo'){const heading=title.closest('.corner-stage-heading');panel.querySelector('.corner-body').append(heading);}
+      if(activeModule==='todo'){const heading=title.closest('.corner-stage-heading');if(heading)panel.querySelector('.corner-body').append(heading);}
       title.dataset.moduleTitle='true';title.title='点击切换下一个模块，悬停选择模块';title.setAttribute('aria-label',(moduleMeta().panelName||moduleMeta().name)+'，切换模块');title.setAttribute('aria-haspopup','menu');title.setAttribute('aria-expanded','false');title.setAttribute('aria-controls','corner-module-menu');
       title.insertAdjacentHTML('beforeend','<span class="corner-module-title-icon" aria-hidden="true">'+glyph('<path d="m7 4-4 4 4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>')+'</span>');
     };
@@ -451,7 +445,10 @@
   function renderToolboxPanel(){
     panel.dataset.cornerModule='toolbox';const modules=catalogModules(),ordered=shortcutModuleIds().filter(id=>id!=='toolbox'&&modules.includes(id));
     const card=(id,index,row)=>{const item=cornerModuleConfig(id),title=item.panelName||item.entryName||item.name||id;return '<article class="corner-tool-card '+esc(id)+'-choice" data-tool-card="'+esc(id)+'" style="--tool-order:'+index+';--tool-row:'+row+'"><button type="button" class="corner-tool-open" data-corner-open-tool="'+esc(id)+'" aria-label="打开'+esc(title)+'">'+toolboxCardArt(id)+'<span class="corner-tool-copy"><strong>'+esc(title)+'</strong></span><span class="corner-tool-arrow" aria-hidden="true">↗</span></button></article>';};
-    const count=ordered.length,rows=[0,1,2,3,4].map(row=>{const shift=count?row*count/3:0,offset=count?Math.floor(shift)%count:0,phase=shift-Math.floor(shift),cycle=[...ordered.slice(offset),...ordered.slice(0,offset)],items=[...cycle,...cycle,...cycle];return '<div class="corner-tool-row" data-tool-row="'+row+'" data-tool-phase="'+phase+'" style="--tool-render-count:'+items.length+'">'+items.map((id,index)=>card(id,index,row)).join('')+'</div>';}).join('');
+    // The tilted canvas is seven tiles wide. Each repeated cycle must cover that
+    // canvas plus the fractional row stagger, even with only one enabled tool.
+    // Three short catalog copies leave a visible tail near the modulo boundary.
+    const count=ordered.length,rows=[0,1,2,3,4].map(row=>{const shift=count?row*count/3:0,offset=count?Math.floor(shift)%count:0,phase=shift-Math.floor(shift),sequence=[...ordered.slice(offset),...ordered.slice(0,offset)],cycle=Array.from({length:count?Math.ceil(8/count):0},()=>sequence).flat(),items=[...cycle,...cycle,...cycle];return '<div class="corner-tool-row" data-tool-row="'+row+'" data-tool-phase="'+phase+'" style="--tool-render-count:'+items.length+'">'+items.map((id,index)=>card(id,index,row)).join('')+'</div>';}).join('');
     let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';appendCornerNode(body);}const keepMotion=Boolean(body.querySelector('.corner-toolbox-scroll')),position=keepMotion?toolboxMotion.target:0;if(toolboxMotion.frame)cancelAnimationFrame(toolboxMotion.frame);toolboxMotion.frame=0;toolboxMotion.lastFrame=0;body.innerHTML='<section class="corner-toolbox"><div class="corner-toolbox-scroll" tabindex="0" aria-label="工具百宝箱，滚轮循环浏览全部工具"><div class="corner-tool-grid">'+(modules.length?rows:'<p class="corner-toolbox-empty">暂无已启用工具</p>')+'</div></div></section>';toolboxMotion.positions=[position,position,position,position,position];toolboxMotion.target=position;requestAnimationFrame(()=>{if(activeModule!=='toolbox')return;body.querySelectorAll('.corner-tool-row').forEach(row=>paintToolboxRow(row,position))});syncCornerThemePresentation();
   }
   function onToolboxClick(e){const open=e.target.closest('[data-corner-open-tool]');if(open){void switchCornerModule(open.dataset.cornerOpenTool);}}
@@ -464,7 +461,7 @@
     if(activeModule==='toolbox')return renderToolboxPanel();
     if(isExternalTool(activeModule))return renderExternalToolPanel();
     if(activeModule==='memo')return renderMemoPanel();
-    if(activeModule==='todo'){renderTodoPanel();return;}
+    if(activeModule==='todo')return renderTodoPanel();
 
     const listScroll=new Map([...panel.querySelectorAll('[data-corner-card]')].map(el=>[el.dataset.cornerCard,el.querySelector('.corner-links')?.scrollTop||0]));
     const {groups}=collection(),entries=sources(),meta=moduleMeta();panel.dataset.cornerModule=activeModule;
@@ -533,25 +530,29 @@
     el.style.setProperty('--corner-space-ink',dark?'color-mix(in srgb,'+surface+' 68%,#081329)':'color-mix(in srgb,'+surface+' 78%,#ffffff)');
     el.style.setProperty('--corner-star',dark?'#e9f1ff':'#2b4059');
   }
-  function todoLibrary(){return moduleCollection('todo');}
-  function todoDateKey(date){return date.toISOString().slice(0,10)}
-  function todoWeekStart(){const d=new Date();d.setHours(0,0,0,0);const day=d.getDay()||7;d.setDate(d.getDate()-day+1);return d}
-  function todoTime(min){const h=Math.floor(min/60),m=min%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}
-  function todoWeekMarkup(library){
-    const start=todoWeekStart(),days=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return d}),today=todoDateKey(new Date());
-    const labels=['一','二','三','四','五','六','日'];
-    const head=days.map((d,i)=>'<div class="todo-day-head '+(todoDateKey(d)===today?'is-today':'')+'"><span>周'+labels[i]+'</span><b>'+d.getDate()+'</b></div>').join('');
-    const rows=Array.from({length:24},(_,i)=>'<div class="todo-hour"><span>'+String(i).padStart(2,'0')+':00</span></div>').join('');
-    const grid=days.map(d=>'<div class="todo-day-column" data-todo-date="'+todoDateKey(d)+'"></div>').join('');
-    const events=(library.tasks||[]).filter(t=>days.some(d=>todoDateKey(d)===t.date)).map(t=>{const col=days.findIndex(d=>todoDateKey(d)===t.date);return '<article class="todo-event todo-'+(t.color||'blue')+'" draggable="true" data-todo-task="'+t.id+'" style="--todo-col:'+(col+1)+';--todo-start:'+Number(t.start||540)+';--todo-duration:'+Number(t.duration||60)+'"><button class="todo-event-resize" data-todo-resize="'+t.id+'" aria-label="调整时长"></button><strong>'+esc(t.title)+'</strong><small>'+todoTime(t.start||540)+' – '+todoTime((t.start||540)+(t.duration||60))+'</small></article>'}).join('');
-    return '<div class="todo-week"><div class="todo-calendar-head"><div class="todo-month-label">'+(start.getMonth()+1)+'月 · 本周</div>'+head+'</div><div class="todo-calendar-body"><div class="todo-time-axis">'+rows+'</div><div class="todo-grid">'+grid+'<div class="todo-grid-lines">'+rows+'</div>'+events+'</div></div></div>';
-  }
+  let todoCalendarView=null,todoRenderToken=0;
+  function destroyTodoCalendar(){todoRenderToken++;todoCalendarView?.destroy();todoCalendarView=null;}
   function renderTodoPanel(){
-    const library=todoLibrary(),meta=moduleMeta(),view=library.view||'week';panel.dataset.cornerModule='todo';
-    const inbox=(library.inbox||[]).map(item=>'<div class="todo-inbox-item" draggable="true" data-todo-inbox="'+item.id+'"><span>○</span>'+esc(item.title)+'</div>').join('');
-    const board=(library.tasks||[]).map(t=>'<article class="todo-board-item todo-'+(t.color||'blue')+'" draggable="true" data-todo-task="'+t.id+'"><span>○</span><strong>'+esc(t.title)+'</strong><small>'+esc(t.date||'未排期')+'</small></article>').join('');
-    const content='<div class="corner-stage todo-stage"><div class="corner-stage-heading"><div class="corner-heading-title"><h2><button type="button" data-corner-next-theme>'+esc(meta.panelName||meta.name)+'</button></h2></div><p>把要做的事，安放在合适的时刻</p></div><div class="todo-toolbar"><div class="todo-view-switch"><button type="button" data-todo-view="week" aria-pressed="'+(view==='week')+'" class="'+(view==='week'?'is-active':'')+'">周视图</button><button type="button" data-todo-view="board" aria-pressed="'+(view==='board')+'" class="'+(view==='board'?'is-active':'')+'">看板视图</button></div><button type="button" class="todo-add" data-todo-add>＋ 新增事项</button></div><div class="todo-layout"><aside class="todo-inbox"><div class="todo-inbox-title"><strong>收集箱</strong><span>'+((library.inbox||[]).length)+'</span></div><p>还没决定日期的事项，先放在这里。</p><div class="todo-inbox-list">'+(inbox||'<small class="todo-empty">收集箱很安静</small>')+'</div><form class="todo-inbox-form" data-todo-form><input name="title" placeholder="添加一件待安排的事" aria-label="添加待安排事项"><button>添加</button></form></aside><main class="todo-main">'+(view==='week'?todoWeekMarkup(library):'<div class="todo-board">'+['today','doing','done'].map((status,i)=>'<section class="todo-board-column" data-todo-status="'+status+'"><header><strong>'+['今天','进行中','已完成'][i]+'</strong><span>'+((library.tasks||[]).filter(t=>(t.status||'today')===status).length)+'</span></header>'+((library.tasks||[]).filter(t=>(t.status||'today')===status).map(t=>'<article class="todo-board-item todo-'+(t.color||'blue')+'" draggable="true" data-todo-task="'+t.id+'"><span>○</span><strong>'+esc(t.title)+'</strong><small>'+esc(t.date||'未排期')+'</small></article>').join('')||'<div class="todo-board-empty">把事项拖到这里</div>')+'</section>').join('')+'</div>')+'</main></div></div>';
-    let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';appendCornerNode(body);}body.innerHTML=content;body.append(body.querySelector('.todo-view-switch'));syncCornerThemePresentation();
+    panel.dataset.cornerModule='todo';syncCornerThemePresentation();
+    if(todoCalendarView&&panel.querySelector('.tc-root')?.isConnected)return;
+    destroyTodoCalendar();const token=todoRenderToken,todoOwner=owner(),library=moduleCollection('todo');
+    let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';appendCornerNode(body);}
+    const root=document.createElement('div');root.className='tc-root';root.textContent='正在打开待办…';body.replaceChildren(root);
+    const isCurrent=()=>signed&&owner()===todoOwner&&prefs.cornerModules?.[todoOwner]?.todo===library;
+    return import('./todo-calendar.js?v=20260929').then(({mountTodoCalendar})=>{
+      if(token!==todoRenderToken||!root.isConnected||activeModule!=='todo')return;
+      root.textContent='';
+      todoCalendarView=mountTodoCalendar(root,{library,isCurrent,accent:()=>resolveThemeColor(),readLatest(){try{return JSON.parse(localStorage.getItem('yiyu-prototype-v1')||'{}').prefs?.cornerModules?.[todoOwner]?.todo?.calendarV2||null;}catch{return null;}},save(next,expected){
+        if(!isCurrent())throw Error('账号已切换，请重新进入待办。');
+        const stored=JSON.parse(localStorage.getItem('yiyu-prototype-v1')||'{}');
+        const remote=stored.prefs?.cornerModules?.[todoOwner]?.todo?.calendarV2;
+        if(remote&&(remote.revision||0)!==expected)throw Error('其他窗口已更新待办，请保留输入后刷新，避免覆盖修改。');
+        const previous=library.calendarV2;library.calendarV2=next;
+        try{persist();const saved=JSON.parse(localStorage.getItem('yiyu-prototype-v1')||'{}').prefs?.cornerModules?.[todoOwner]?.todo?.calendarV2;
+          if(JSON.stringify(saved)!==JSON.stringify(next))throw Error('本机保存失败，请检查浏览器存储空间后重试。');
+        }catch(error){library.calendarV2=previous;throw error;}
+      }});
+    }).catch(error=>{if(token!==todoRenderToken||!root.isConnected)return;root.textContent='待办暂未能加载：'+error.message;const retry=document.createElement('button');retry.textContent='重试';retry.onclick=renderTodoPanel;root.append(retry);});
   }
   function backCard(g){
     const choices=defaultIconChoices();if(!usesDefaultIcon(g)&&g.icon&&!choices.some(x=>x.id===g.icon))choices.push({id:g.icon,name:'当前图标'});
@@ -600,7 +601,7 @@
     if(activeModule==='toolbox'){onToolboxClick(e);return;}
     if(isExternalTool(activeModule)){onExternalToolClick(e);return;}
     if(activeModule==='memo'){onMemoPanelClick(e);return;}
-    if(activeModule==='todo'){onTodoPanelClick(e);return;}
+    if(activeModule==='todo')return;
     if(performance.now()<swallowClickUntil){e.preventDefault();e.stopPropagation();return;}
     const b=e.target.closest('button'),el=e.target.closest('[data-corner-card]'),g=el&&collection().groups.find(g=>g.id===el.dataset.cornerCard);
     if(!e.target.closest('button,a,input,select,[data-corner-card],.corner-pull-cord')&&!drag?.active){const cards=[...panel.querySelectorAll('.corner-card:not(.is-away)')].map(card=>card.getBoundingClientRect()).filter(box=>box.right>0&&box.left<innerWidth),bottom=Math.max(...cards.map(box=>box.bottom));if(cards.length&&e.clientY>bottom){closeCorner();return;}}
@@ -678,6 +679,7 @@
     edgeBounceTimer=setTimeout(()=>{fanMotion.target=index;fanMotion.tau=145;if(!fanMotion.frame){fanMotion.last=performance.now();fanMotion.frame=requestAnimationFrame(advanceFan);}},125);
   }
   function onWheel(e){
+    if(activeModule==='todo')return;
     if(e.ctrlKey||drag?.active)return;
     if(activeModule==='toolbox'){
       const scroller=e.target.closest('.corner-toolbox-scroll');
@@ -854,20 +856,6 @@
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&switchMenu&&!switchMenu.hidden){closeSwitch();switchOrigin?.focus();}});
   addEventListener('resize',()=>{closeSwitch();if(panel?.open)layoutFan();});
-  function onTodoPanelClick(e){
-    if(!e.target.closest('button,a,input,textarea,select,.corner-pull-cord,.todo-stage,.corner-close-entry')){
-      const stage=panel.querySelector('.todo-stage'),bottom=stage?.getBoundingClientRect().bottom||innerHeight;
-      if(e.clientY>bottom){closeCorner();return;}
-    }
-    const view=e.target.closest('[data-todo-view]');if(view){todoLibrary().view=view.dataset.todoView;persist();renderTodoPanel();const layout=panel.querySelector('.todo-layout');if(layout&&!reduced())layout.animate([{opacity:.65,transform:'translateY(5px)'},{opacity:1,transform:'translateY(0)'}],{duration:220,easing:'cubic-bezier(.2,.7,.3,1)'});return;}
-    const add=e.target.closest('[data-todo-add]');if(add){const title=prompt('给这件事留一个名字');if(title?.trim()){const l=todoLibrary(),d=todoWeekStart();l.tasks.push({id:uid(),title:title.trim(),date:todoDateKey(d),start:9*60,duration:60,color:'blue',status:'today'});persist();renderTodoPanel();}return;}
-    const task=e.target.closest('[data-todo-task]');if(task&&!e.target.closest('[data-todo-resize]')){const item=todoLibrary().tasks.find(t=>t.id===task.dataset.todoTask);if(item){item.status=item.status==='done'?'today':'done';item.completed=item.status==='done';persist();renderTodoPanel();}return;}
-  }
-  function onTodoDragStart(e){if(activeModule!=='todo')return;const item=e.target.closest('[data-todo-task],[data-todo-inbox]');if(!item)return;e.dataTransfer.setData('text/plain',item.dataset.todoTask?'task:'+item.dataset.todoTask:'inbox:'+item.dataset.todoInbox);e.dataTransfer.effectAllowed='move';}
-  function onTodoResizeStart(e){if(activeModule!=='todo')return;const handle=e.target.closest('[data-todo-resize]');if(!handle)return;e.preventDefault();const task=todoLibrary().tasks.find(t=>t.id===handle.dataset.todoResize);if(!task)return;const startY=e.clientY,startDuration=Number(task.duration)||60;const move=ev=>{task.duration=Math.max(30,Math.round((startDuration+(ev.clientY-startY)*1440/(panel.querySelector('.todo-calendar-body')?.clientHeight||620))/15)*15);renderTodoPanel()};const up=()=>{removeEventListener('pointermove',move);removeEventListener('pointerup',up);persist()};addEventListener('pointermove',move);addEventListener('pointerup',up,{once:true});}
-  function onTodoSubmit(e){if(activeModule!=='todo'||!e.target.matches('[data-todo-form]'))return;e.preventDefault();const input=e.target.elements.title,title=input.value.trim();if(!title)return;const l=todoLibrary();l.inbox??=[];l.inbox.push({id:uid(),title});input.value='';persist();renderTodoPanel();}
-  function onTodoDragOver(e){if(activeModule==='todo'&&e.target.closest('.todo-day-column,.todo-board-column')){e.preventDefault();e.dataTransfer.dropEffect='move';}}
-  function onTodoDrop(e){if(activeModule!=='todo')return;const zone=e.target.closest('.todo-day-column,.todo-board-column');if(!zone)return;e.preventDefault();const raw=e.dataTransfer.getData('text/plain'),l=todoLibrary();if(raw.startsWith('inbox:')){const id=raw.slice(6),item=(l.inbox||[]).find(x=>x.id===id);if(!item)return;const date=zone.dataset.todoDate||todoDateKey(todoWeekStart()),task={id:uid(),title:item.title,date,start:9*60,duration:60,color:'blue',status:zone.dataset.todoStatus||'today'};l.tasks.push(task);l.inbox=l.inbox.filter(x=>x.id!==id);}else if(raw.startsWith('task:')){const task=l.tasks.find(x=>x.id===raw.slice(5));if(!task)return;if(zone.dataset.todoDate)task.date=zone.dataset.todoDate;if(zone.dataset.todoStatus)task.status=zone.dataset.todoStatus;}persist();renderTodoPanel();}
   let lastCardLimit=cardLimit();
   addEventListener('shiyu-user-entitlements',()=>{const next=cardLimit();if(next===lastCardLimit)return;lastCardLimit=next;if(panel?.open)renderPanel()});
   const previousDock=dock;
@@ -878,6 +866,7 @@
   };
   // A website action adds only that website; card-level collection tools stay separate.
   window.ShiyuCorner=Object.freeze({
+    playShortcutSound:playCardSound,
     shortcuts:()=>shortcutModuleIds().map(id=>({id,label:cornerModuleConfig(id).entryName||cornerModuleConfig(id).name||id,icon:moduleIcon(id)})),
     async openModule(id,trigger){
       if(!enabledCornerModuleIds().includes(id)||!requireCornerModuleAuth(id))return false;
@@ -888,7 +877,7 @@
     },
     closeModule(){
       if(!panel?.open)return Promise.resolve(true);
-      if(panel.classList.contains('memo-editor-mode'))return Promise.resolve(false);
+      if(panel.classList.contains('memo-editor-mode')||(activeModule==='todo'&&todoCalendarView&&!todoCalendarView.canLeave()))return Promise.resolve(false);
       return new Promise(resolve=>{panel.addEventListener('close',()=>resolve(true),{once:true});closeCorner();});
     },
     cards:()=>moduleCollection('common').groups.map(g=>({id:g.id,name:g.name,icon:cardIcon(g),inbox:isInbox(g)})),

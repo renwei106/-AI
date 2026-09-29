@@ -44,6 +44,7 @@
     skinOrder:()=>window.ShiyuFeatureConfig?.order('pet')||[],
     skinName:id=>window.ShiyuFeatureConfig?.optionLabel('pet',id,'')||'',
     navigationName:id=>window.ShiyuFeatureConfig?.label(id,'')||'',
+    playSound:()=>window.ShiyuCorner?.playShortcutSound?.(),
     context:()=>{rememberSpace();return {area:document.body.classList.contains('world-active')?'world':view,app:document.querySelector('#my-corner[open]')?.dataset.cornerModule,worldEnabled:!document.body.classList.contains('world-entry-disabled'),dark:document.body.classList.contains('world-active')?document.querySelector('#world-page')?.dataset.mode==='dark':document.body.dataset.dark==='true',accent:resolveThemeColor()};},
     apps:()=>window.ShiyuCorner?.shortcuts()||[],
     spaces:()=>signed?data.map(s=>({id:s.id,label:s.name})):[],
@@ -75,7 +76,7 @@
   renderSettings=function(){
     originalSettings();if(scope!=='global')return;
     const tabs=document.querySelector('#settings .settings-tabs');if(!tabs)return;
-    if(!tabs.querySelector('[data-settings-tab="desktop-pet"]'))tabs.insertAdjacentHTML('beforeend','<button type="button" role="tab" data-settings-tab="desktop-pet" aria-selected="'+(settingsTab==='desktop-pet')+'">桌面宠物</button>');
+    if(!tabs.querySelector('[data-settings-tab="desktop-pet"]'))tabs.insertAdjacentHTML('beforeend','<button type="button" role="tab" data-settings-tab="desktop-pet" aria-selected="'+(settingsTab==='desktop-pet')+'">桌面伙伴</button>');
     if(settingsTab==='desktop-pet'){
       const note=document.querySelector('#settings .scope-note');if(note)note.textContent='全局生效，宠物的位置和形象不随主题或空间变化。';
       const container=document.querySelector('#settings .settings-panel');pet.bindSettings(container);

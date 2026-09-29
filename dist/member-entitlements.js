@@ -53,7 +53,7 @@
   function requirements(button) {
     const d = button.dataset, key = d.pref;
     if (['font', 'width'].includes(key)) return [[key === 'font' ? 'global-fonts' : 'global-layouts', d.value]];
-    if (key === 'color') { const listed = options('global-colors').some(o => normalize(o.id) === normalize(d.value)) || (typeof PALETTES !== 'undefined' && PALETTES.some(([id]) => normalize(id) === normalize(d.value))); return [[listed ? 'global-colors' : 'global-custom-color', listed ? d.value : undefined]]; }
+    if (key === 'color') { if (typeof PALETTES !== 'undefined' && PALETTES.some(([id]) => normalize(id) === normalize(d.value))) return []; const listed = options('global-colors').some(o => normalize(o.id) === normalize(d.value)); return [[listed ? 'global-colors' : 'global-custom-color', listed ? d.value : undefined]]; }
     if (d.preferenceMode && d.value === 'space') return [['space-' + ({ font: 'font', width: 'layout', color: 'color' }[d.preferenceMode])]];
     if (d.spaceFont) return [['space-font'], ['global-fonts', d.spaceFont]];
     if (d.spaceWidth) return [['space-layout'], ['global-layouts', d.spaceWidth]];
