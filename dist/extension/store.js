@@ -58,6 +58,26 @@
     group.items.push(item); commit(value); return { label };
   }
   function inbox() { const value = read(); requireLogin(value); return value.prefs?.extensionInbox || []; }
+  function search(input) {
+    const value = read(); requireLogin(value, input?.accountId);
+    const query = String(input?.query || '').trim().toLocaleLowerCase();
+    if (!query) return { total: 0, items: [] };
+    const found = [], seen = new Set();
+    const add = (item, path) => {
+      if (!Array.isArray(item) || typeof item[1] !== 'string' || seen.has(item[1])) return;
+      let url; try { url = new URL(item[1]); } catch { return; }
+      if (!['http:', 'https:'].includes(url.protocol)) return;
+      const title = String(item[0] || url.hostname), description = String(item[2] || '');
+      if (![title, url.href, description, path].some(text => text.toLocaleLowerCase().includes(query))) return;
+      seen.add(url.href); found.push({ title, url: url.href, description, path, domain: url.hostname.replace(/^www\./i, '') });
+    };
+    for (const space of value.data || []) for (const scene of space.scenes || []) for (const group of scene.groups || []) {
+      const path = [space.name, scene.name, group.name].join(' / ');
+      for (const item of group.items || []) add(item, path);
+    }
+    for (const entry of value.prefs?.extensionInbox || []) add(entry.item, '稍后整理');
+    return { total: found.length, items: found.slice(0, 5) };
+  }
   function move(input) {
     const value = read(); requireLogin(value, input.accountId);
     const entries = value.prefs?.extensionInbox || [], entry = entries.find(x => x.id === input.id);
@@ -91,5 +111,5 @@
     for(const [title,url,category] of examples)if(!inbox.some(x=>x.item[1]===url))inbox.push({id:crypto.randomUUID(),item:[title,url,'演示网址，可归档或清除'],category,demo:true,createdAt:Date.now()});
     value.prefs.laterDemoOwners[id]=true;commit(value);
   }
-  root.ShiyuExtensionStore = Object.freeze({ snapshot, save, inbox, move, updateInbox, seedInboxDemo, KEY, EVENT_KEY });
+  root.ShiyuExtensionStore = Object.freeze({ snapshot, save, search, inbox, move, updateInbox, seedInboxDemo, KEY, EVENT_KEY });
 })(globalThis);

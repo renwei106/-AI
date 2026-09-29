@@ -86,11 +86,11 @@
     try {
       if (request?.type === 'state') {
         const value = store.snapshot();
-        try { const response = await fetch('/api/shiyu/operations', { cache: 'no-store' }); if (response.ok) value.officialFont = (await response.json()).officialFont; } catch {}
         if (value.signed) { const theme = effective(); value.theme = { color: theme.color || '#48614c', mode: theme.mode || 'system' }; }
         return { ok: true, value };
       }
       if (request?.type === 'save') return { ok: true, value: store.save(request.payload) };
+      if (request?.type === 'search') return { ok: true, value: store.search(request.payload) };
       return { ok: false, error: '不支持的插件操作。' };
     } catch (error) { return { ok: false, error: error.message }; }
   } });

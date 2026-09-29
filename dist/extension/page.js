@@ -24,7 +24,7 @@ const browsers = [
   { id: 'qq', name: 'QQ 浏览器', short: 'QQ', icon: 'assets/browsers/qq.svg', address: 'chrome://extensions', install: 'crx' },
   { id: 'quark', name: '夸克浏览器', short: '夸克', icon: 'assets/browsers/quark.svg', address: 'chrome://extensions', install: 'crx' },
   { id: 'firefox', name: 'Firefox 火狐', short: 'Firefox', icon: 'assets/browsers/firefox.svg', address: 'about:addons', install: 'xpi' }
-].map(browser => ({ ...browser, download: `downloads/shiyu-extension-${browser.id}-0.1.1.zip` }));
+].map(browser => ({ ...browser, download: `downloads/shiyu-extension-${browser.id}-1.0.0.zip` }));
 let selectedBrowser = null;
 let firefoxRelease = { ready: false };
 fetch('firefox-release.json', { cache: 'no-store' }).then(response => response.ok ? response.json() : null).then(async release => {
@@ -86,7 +86,8 @@ function detectBrowser() {
   if (/Chrome\//.test(agent)) return 'chrome';
   return browsers[0].id;
 }
-selectBrowser(browsers.find(browser => browser.id === detectBrowser()) || browsers[0]);
+const requestedBrowser = new URLSearchParams(location.search).get('browser');
+selectBrowser(browsers.find(browser => browser.id === requestedBrowser) || browsers.find(browser => browser.id === detectBrowser()) || browsers[0]);
 document.querySelector('#browser-download').onclick = () => {
   if (!selectedBrowser) return;
   if (selectedBrowser.id === 'firefox' && !firefoxRelease.ready) return;
