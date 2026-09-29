@@ -44,6 +44,7 @@ printf '%s\n' "$front_commit" > "$front_release/RELEASE_COMMIT"
 printf '%s\n' "$admin_commit" > "$admin_release/RELEASE_COMMIT"
 chown -hR shiyu:shiyu "$front_release"
 /usr/bin/node --check "$front_release/preview.cjs"
+/usr/bin/node -e 'const fs=require("fs"),path=require("path");const root=process.argv[1];for(const match of fs.readFileSync(path.join(root,"preview.cjs"),"utf8").matchAll(/require\(["\x27](\.[^"\x27]+)["\x27]\)/g)){require.resolve(path.resolve(root,match[1]));}' "$front_release"
 /usr/bin/node --check "$front_release/i18n/frontend-server.cjs"
 /opt/node-v22/bin/node --check "$admin_release/shiyu-i18n/service.cjs"
 cd "$admin_release"
@@ -72,7 +73,7 @@ switch_link "$admin_release" /opt/shiyu-admin/current
 switch_link "$front_release" /opt/shiyu/current
 systemctl restart shiyu-admin.service shiyu-preview.service
 for i in {1..30}; do
-  if curl -fsS http://127.0.0.1:5175/ >/dev/null 2>&1 && curl -fsS http://127.0.0.1:4318/ >/dev/null 2>&1; then break; fi
+  if curl --max-time 5 -fsS http://127.0.0.1:5175/ >/dev/null 2>&1 && curl --max-time 5 -fsS http://127.0.0.1:4318/ >/dev/null 2>&1; then break; fi
   sleep 1
 done
 systemctl is-active --quiet shiyu-admin.service shiyu-preview.service

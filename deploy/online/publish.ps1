@@ -28,7 +28,7 @@ $adminCommit = (& git -C $adminRoot rev-parse HEAD).Trim()
 try {
   & git -C $adminRoot archive --format=tar.gz -o $adminArchive HEAD
   if ($LASTEXITCODE -ne 0) { throw 'Failed to archive admin source.' }
-  & git -C $repoRoot archive --format=tar.gz -o $frontArchive HEAD dist preview.cjs share-server.cjs theme-config-proxy.cjs extension-routes.cjs shiyu-user-proxy.cjs feedback-server.cjs theme-access i18n payments config
+  & git -C $repoRoot archive --format=tar.gz -o $frontArchive HEAD dist preview.cjs share-server.cjs theme-config-proxy.cjs extension-routes.cjs shiyu-user-proxy.cjs favicon-resolver.cjs feedback-server.cjs theme-access i18n payments config
   if ($LASTEXITCODE -ne 0) { throw 'Failed to archive frontend source.' }
   & scp.exe -i $KeyPath -o BatchMode=yes $adminArchive $frontArchive (Join-Path $PSScriptRoot 'release.sh') "${target}:/tmp/"
   if ($LASTEXITCODE -ne 0) { throw 'Failed to upload release.' }
