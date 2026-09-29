@@ -26,7 +26,7 @@ const {fixture}=require('./verify-desktop-pet.cjs');
   await pet.evaluate(el=>el.dataset.roamPhase='idle');await p.clock.runFor(60);
   const out=path.join(__dirname,'swordswoman-source');await p.screenshot({path:path.join(out,'frontend.png')});
   await p.clock.resume();await p.reload({waitUntil:'networkidle'});assert.equal(await pet.getAttribute('data-skin'),'swordswoman','account remembers selected skin');
-  f.operations.personalization.pet.options.swordswoman.enabled=false;await p.evaluate(()=>ShiyuFeatureConfig.refresh());assert.notEqual(await pet.getAttribute('data-skin'),'swordswoman','backend switch hides disabled companion');
+  f.operations.personalization.pet.options.swordswoman.enabled=false;await p.evaluate(()=>ShiyuFeatureConfig.refresh());await p.waitForFunction(()=>document.querySelector('#desktop-pet').dataset.skin!=='swordswoman');assert.notEqual(await pet.getAttribute('data-skin'),'swordswoman','backend switch hides disabled companion');
   assert.deepEqual(f.errors,[]);await f.context.close();console.log('PASS swordswoman default preservation, backend name/switch/actions, all states, timing and account persistence');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
