@@ -75,7 +75,9 @@
   if(loading)return loading;
   loading=fetch('/api/shiyu/operations',{credentials:'include',cache:'no-store'}).then(async response=>{
    if(!response.ok)throw Error('配置加载失败');const next=await response.json();
-   config={access:next.access||{},personalization:next.personalization||{},optionNames:next.optionNames||{}};
+   const incoming={access:next.access||{},personalization:next.personalization||{},petActions:next.petActions||{},petTiming:next.petTiming||{},optionNames:next.optionNames||{}};
+   if(JSON.stringify(config)===JSON.stringify(incoming))return;
+   config=incoming;
    applyColorCatalog();
    window.dispatchEvent(new Event('shiyu-feature-config'));
    window.dispatchEvent(new Event('shiyu-pet-context'));
@@ -84,7 +86,8 @@
   }).catch(()=>{}).finally(()=>{loading=null});
   return loading;
  }
- window.ShiyuFeatureConfig=Object.freeze({allowed:access,category,option,label,optionLabel,order,refresh});
+ window.ShiyuFeatureConfig=Object.freeze({allowed:access,category,option,label,optionLabel,order,petAction:id=>config?.petActions?.[id]!==false,petTiming:()=>config?.petTiming,refresh});
+ setInterval(()=>{if(!document.hidden)void refresh()},30000);
  window.addEventListener('shiyu-account-state',()=>void refresh());
  window.addEventListener('focus',()=>void refresh());
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh()});

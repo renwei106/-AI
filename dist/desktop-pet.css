@@ -19,6 +19,7 @@
 .pet-shortcut[aria-current] .pet-shortcut-icon::after{content:'';position:absolute;width:4px;height:4px;border-radius:50%;background:var(--pet-accent);margin-top:30px}
 .pet-nav{width:66px;height:64px;margin:-32px 0 0 -33px;gap:4px}.pet-nav .pet-shortcut-icon{width:32px;height:32px;border-radius:12px;box-shadow:none}.pet-nav .pet-shortcut-icon svg{width:17px;height:17px}.pet-nav .pet-shortcut-label{font-size:11px;line-height:14px;color:var(--pet-muted)}
 .pet-settings-entry{position:absolute;right:-3px;bottom:-4px;width:25px;height:25px;border:0;border-radius:50%;padding:5px;background:var(--pet-surface);color:var(--pet-muted)!important}.pet-settings-entry svg{width:100%;height:100%}
+.pet-mode-entry{position:absolute;left:-3px;bottom:-4px;width:25px;height:25px;border:0;border-radius:50%;padding:5px;background:var(--pet-surface);color:var(--pet-muted)!important}.pet-mode-entry svg{width:100%;height:100%}.pet-mode-entry:hover,.pet-settings-entry:hover{color:var(--pet-control)!important;background:color-mix(in srgb,var(--pet-accent) 12%,var(--pet-surface))}
 .desktop-pet[data-open=true][data-motion=normal]:not([data-compact=true]) .pet-menu>.pet-shortcut{animation:pet-unfurl .24s both;animation-delay:calc(var(--item-order)*15ms)}
 .pet-panel{position:absolute;z-index:5;background:var(--pet-surface);color:var(--pet-ink);border-radius:20px;padding:12px;box-sizing:border-box;box-shadow:0 8px 35px #15211920;overflow:auto;overscroll-behavior:contain;pointer-events:auto;text-align:left}
 .pet-panel-heading{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 10px;font-size:13px}.pet-panel-heading button{border:0;background:transparent;font-size:22px;width:28px;height:28px}.pet-panel .pet-shortcut{position:static;transform:none;margin:0;width:100%;height:49px;display:flex;flex-direction:row;justify-content:flex-start;padding:4px 6px;gap:12px}.pet-panel .pet-shortcut:hover{background:var(--pet-soft)}.pet-panel .pet-shortcut-icon{width:33px;height:33px;background:transparent;box-shadow:none}.pet-panel .pet-shortcut-label{font-size:12px;background:transparent}
@@ -56,7 +57,7 @@ body[data-dark=true] .pet-setting-choices button[aria-pressed=true]{background:c
 .desktop-pet:not([data-motion=off]) .pet-human-arm-rest{animation:pet-human-fidget 10.4s ease-in-out infinite}
 .desktop-pet:not([data-motion=off]) .pet-human-eyes{animation:pet-blink 8.6s infinite}
 .desktop-pet:not([data-motion=off]) .pet-paper-blink{animation:pet-paper-blink 8.6s step-end infinite}
-.desktop-pet[data-motion=gentle] .pet-human,.pet-preferences[data-motion=gentle] .pet-human{--human-sway:1.3deg;--human-nod:2deg;--human-wave:-75deg;--human-wave-back:-64deg}
+.desktop-pet[data-motion=gentle] .pet-human,.pet-preferences[data-motion=quiet] .pet-human{--human-sway:1.3deg;--human-nod:2deg;--human-wave:-75deg;--human-wave-back:-64deg}
 .desktop-pet[data-motion=gentle] .pet-human-balance{animation-duration:6.8s}
 .desktop-pet[data-open=true] .pet-human{--human-sway:.65deg}
 .desktop-pet[data-open=true] .pet-human-balance{animation-duration:6.8s}
@@ -112,18 +113,14 @@ body[data-dark=true] .pet-setting-choices button[aria-pressed=true]{background:c
 @media(prefers-reduced-motion:reduce){.desktop-pet *{animation:none!important;transition:none!important}}
 /* Pose animation preserves anatomy; only uniform scaling aligns sprite sizes. */
 .pet-girl-sprite{position:relative;width:100%;height:100%;display:block;filter:drop-shadow(0 2px 1px #40342618)}
-.pet-girl-frame{position:absolute;left:5%;top:5%;width:90%;height:90%;overflow:hidden;transform:scale(var(--girl-scale,.78));transform-origin:50% 94%;transition:transform .14s linear}
-.pet-girl-run-frame{position:absolute;left:5%;top:5%;width:90%;height:90%;overflow:hidden;display:none;transform:scale(1);transform-origin:50% 94%}
-.desktop-pet[data-skin=paper]:is([data-girl-action=run],[data-girl-action=walk]) .pet-girl-frame{display:none}
-.desktop-pet[data-skin=paper]:is([data-girl-action=run],[data-girl-action=walk]) .pet-girl-run-frame{display:block}
-.desktop-pet[data-skin=paper][data-dragging=true][data-girl-action=run] .pet-girl-run-frame{animation:pet-girl-run .18s ease-in-out infinite alternate!important}
-.desktop-pet[data-skin=paper]:is([data-dragging=true],[data-roaming=true])[data-facing=left] .pet-girl-sprite{transform:scaleX(-1)}
+.pet-girl-cutout{position:absolute;left:5%;top:5%;width:90%;height:90%;object-fit:contain;object-position:center bottom;pointer-events:none}
+.desktop-pet[data-skin=paper][data-dragging=true][data-girl-action=run] .pet-girl-cutout{animation:pet-girl-run .18s ease-in-out infinite alternate!important}
+.desktop-pet:is([data-skin=paper],[data-skin=swordswoman]):is([data-dragging=true],[data-roaming=true])[data-facing=left] .pet-girl-sprite{transform:scaleX(-1)}
 .desktop-pet[data-skin=paper][data-landing=true] .pet-art{animation:none}
-@media(prefers-reduced-motion:reduce){.pet-girl-frame{transition:none!important}}
 /* The articulated controller owns the four vector companions' joints. */
-.desktop-pet[data-rig=joint]:not([data-skin=paper]) .pet-art *{animation:none!important;transition:none;}
+.desktop-pet[data-rig=joint]:not([data-skin=paper]):not([data-skin=swordswoman]) .pet-art *{animation:none!important;transition:none;}
 .pet-cat-gait{opacity:0;transform-origin:0 0}.pet-cat-gait .gait-legs path{stroke:var(--pet-outline);fill:none;stroke-width:4;stroke-linecap:round}
-.desktop-pet[data-rig=joint]:not([data-skin=paper])[data-landing=true] .pet-art{animation:none}
+.desktop-pet[data-rig=joint]:not([data-skin=paper]):not([data-skin=swordswoman])[data-landing=true] .pet-art{animation:none}
 
 .desktop-pet[data-idle="true"] { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
 .desktop-pet[data-roaming=true][data-roam-phase=run] .pet-character{animation:pet-roam-run .24s ease-in-out infinite alternate}
@@ -158,3 +155,5 @@ body[data-dark=true] .pet-setting-choices button[aria-pressed=true]{background:c
 .desktop-pet .pet-speech[data-tail-edge=top]::after{top:-7px;bottom:auto}
 .desktop-pet .pet-speech-text{display:block;min-width:0;min-height:14px;color:var(--pet-muted);white-space:normal}
 @keyframes pet-girl-run{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+
+.desktop-pet[data-skin=swordswoman][data-landing=true] .pet-art{animation:none}

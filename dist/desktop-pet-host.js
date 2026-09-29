@@ -38,11 +38,14 @@
   function showPetSettings(){scope='global';settingsTab='desktop-pet';renderSettings();show('#settings');}
   pet=window.ShiyuDesktopPet.mount({
     homeURL:['localhost','127.0.0.1'].includes(location.hostname)?location.origin+'/':'https://shiyubox.com/',
+    accountKey:()=>signed&&prefs.accountProfile?.id||'',
     authorize,host:surface,blocked,
     available:()=>window.ShiyuFeatureConfig?.category('pet')!==false,
     skinAllowed:id=>window.ShiyuFeatureConfig?.option('pet',id)!==false,
     skinOrder:()=>window.ShiyuFeatureConfig?.order('pet')||[],
     skinName:id=>window.ShiyuFeatureConfig?.optionLabel('pet',id,'')||'',
+    petActionEnabled:id=>window.ShiyuFeatureConfig?.petAction(id)!==false,
+    petTiming:()=>window.ShiyuFeatureConfig?.petTiming(),
     navigationName:id=>window.ShiyuFeatureConfig?.label(id,'')||'',
     playSound:()=>window.ShiyuCorner?.playShortcutSound?.(),
     context:()=>{rememberSpace();return {area:document.body.classList.contains('world-active')?'world':view,app:document.querySelector('#my-corner[open]')?.dataset.cornerModule,worldEnabled:!document.body.classList.contains('world-entry-disabled'),dark:document.body.classList.contains('world-active')?document.querySelector('#world-page')?.dataset.mode==='dark':document.body.dataset.dark==='true',accent:resolveThemeColor()};},
@@ -72,6 +75,8 @@
       }else if(id==='world'&&signed)window.ShiyuWorld?.resume?.();
     }
   });
+  window.addEventListener('shiyu-account-state',()=>pet.refresh());
+  window.addEventListener('shiyu-session-ready',()=>pet.refresh());
   const originalSettings=renderSettings;
   renderSettings=function(){
     originalSettings();if(scope!=='global')return;
