@@ -1,0 +1,22 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const assert=require('node:assert/strict');
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {choices}=JSON.parse(fs.readFileSync(path.join(__dirname,'palette-reference.json'),'utf8'));
+const rgb=hex=>hex.match(/[a-f0-9]{2}/gi).map(x=>parseInt(x,16));
+const mix=(a,b,amount)=>'#'+rgb(a).map((x,i)=>Math.round(x*amount+rgb(b)[i]*(1-amount)).toString(16).padStart(2,'0')).join('');
+const luminance=hex=>rgb(hex).map(x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4}).reduce((s,x,i)=>s+x*[.2126,.7152,.0722][i],0);
+const contrast=(a,b)=>(Math.max(luminance(a),luminance(b))+.05)/(Math.min(luminance(a),luminance(b))+.05);
+const cards=choices.map(({name,value,previous})=>{
+  const chroma=hex=>Math.max(...rgb(hex))-Math.min(...rgb(hex));
+  assert(chroma(value)>chroma(previous.value),name+' has richer color than version 1');
+  const on=contrast(value,'#ffffff')>contrast(value,'#000000')?'#ffffff':'#000000';
+  assert(contrast(value,on)>=4.5,name+' readable button label');
+  const day=mix(value,'#ffffff',.32),night=mix(value,'#14171b',.23);
+  assert(contrast(day,'#2d332d')>=4.5);assert(contrast(night,'#eeeee5')>=4.5);
+  return `<article><div class="swatch" style="background:${value};color:${on}"><b>${name}</b><code>${value.toUpperCase()}</code></div><div class="previous"><i style="background:${previous.value}"></i><span>上一版</span><span>→ 更饱满</span></div><section style="background:${day};color:#2d332d"><small>日间背景</small><h3>让喜欢，自有归处</h3><div class="search" style="background:${mix(value,'#ffffff',.05)}">搜索喜欢的内容 <b style="background:${value};color:${on}">↗</b></div></section><section style="background:${night};color:#eeeee5"><small>深色背景</small><h3>留一点柔和的光</h3><div class="search" style="background:${mix(value,'#20242a',.18)}">搜索喜欢的内容 <b style="background:${value};color:${on}">↗</b></div></section></article>`;
+}).join('');
+// The proposal illustrates palette roles; it does not replace any application page.
+const html=`<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>拾隅配色方案第二版</title><style>*{box-sizing:border-box}body{margin:0;padding:48px 40px;background:#f6f7f9;color:#293239;font-family:'Microsoft YaHei',sans-serif}header{margin:0 0 30px}header p{margin:0 0 10px;color:#657179;font-size:12px;letter-spacing:2px}h1{font-size:29px;font-weight:600;margin:0 0 13px}header span{font-size:14px;color:#637077}.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:14px}article{border-radius:18px;overflow:hidden;background:white;box-shadow:0 3px 20px #17202b06}.swatch{height:132px;padding:28px 20px;color:#17201b;display:flex;flex-direction:column;justify-content:space-between}.swatch b{font-size:17px;font-weight:600}code{font:12px Consolas,monospace;letter-spacing:1px}.previous{height:53px;display:flex;align-items:center;gap:7px;padding:0 13px;font-size:10px;color:#6c7479}.previous i{width:18px;height:18px;border-radius:50%;flex:none}.previous span:last-child{margin-left:auto}section{padding:24px 14px;height:174px}small{font-size:10px;letter-spacing:1px;opacity:.75}h3{font-size:13px;font-weight:500;margin:22px 0 17px}.search{font-size:9px;border-radius:9px;padding:8px;display:flex;align-items:center;justify-content:space-between}.search b{width:25px;height:25px;border-radius:7px;display:grid;place-items:center;font-size:15px}footer{margin-top:25px;display:flex;justify-content:space-between;color:#747d83;font-size:11px;line-height:1.9}footer b{font-weight:500;color:#4d585f}</style><header><p>SHIYU / COLOR STUDY 02</p><h1>深一点，也亮得起来。</h1><span>提高色彩饱和度，保留适中的明度 · 翡翠、琥珀、澄海与莓果的通透色感</span></header><div class="grid">${cards}</div><footer><span>第二版原创色值 · 参考 Radix 实色强调色的思路，重新调整色相、浓度与明度。<br>预览同步加浓日夜背景；按钮文字按底色匹配深浅。</span><b>第二版本地方案 · 尚未应用到线上</b></footer></html>`;
+fs.writeFileSync(path.join(__dirname,'preview.html'),html);
+(async()=>{const browser=await chromium.launch({channel:'msedge',headless:true});try{const page=await browser.newPage({viewport:{width:1470,height:800},deviceScaleFactor:1});await page.goto('file:///'+path.join(__dirname,'preview.html').replaceAll('\\','/'));await page.screenshot({path:path.join(__dirname,'preview.png'),fullPage:true});console.log('PASS: all 7 candidates have richer color than v1; sample text and button contrast checked; v2 preview rendered.')}finally{await browser.close()}})().catch(error=>{console.error(error);process.exitCode=1});

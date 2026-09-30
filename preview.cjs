@@ -34,8 +34,9 @@ const routes={
  '/corner.css':'corner.css','/corner.js':'corner.js','/earth-theme.css':'earth-theme.css','/earth-theme.js':'earth-theme.js','/earth-source.js':'earth-source.js',
   '/avatar-theme.css':'avatar-theme.css','/avatar-theme.js':'avatar-theme.js','/avatar-video-theme.js':'avatar-video-theme.js','/avatar-scrub-theme.js':'avatar-scrub-theme.js','/avatar-character-factory.js':'avatar-character-factory.js','/avatar-motion-engine.js':'avatar-motion-engine.js',
   '/assets/avatar/azhi-idle.webm':'assets/avatar/azhi-idle.webm',
-  '/':'index.html','/index.html':'index.html','/robots.txt':'robots.txt','/sitemap.xml':'sitemap.xml','/style.css':'style.css','/app.js':'app.js','/v4.js':'v4.js','/v4.css':'v4.css','/account-access.js':'account-access.js',
+  '/':'index.html','/index.html':'index.html','/robots.txt':'robots.txt','/sitemap.xml':'sitemap.xml','/style.css':'style.css','/app.js':'app.js','/account-surfaces.js':'account-surfaces.js','/v4.js':'v4.js','/v4.css':'v4.css','/account-access.js':'account-access.js',
   '/space-atlas.js':'space-atlas.js','/space-atlas.css':'space-atlas.css','/assets/reading/valley-closed.webp':'assets/reading/valley-closed.webp','/assets/reading/valley-open.webp':'assets/reading/valley-open.webp',
+  '/paper-edition.css':'paper-edition.css','/paper-edition.js':'paper-edition.js',
   '/surge-theme.css':'surge-theme.css','/surge-theme.js':'surge-theme.js','/flow-theme.css':'flow-theme.css','/flow-theme.js':'flow-theme.js','/reading-theme.css':'reading-theme.css','/reading-theme.js':'reading-theme.js',
   '/poly-theme.css':'poly-theme.css','/poly-theme.js':'poly-theme.js','/poly-engine.js':'poly-engine.js','/poly-worker.js':'poly-worker.js','/theme-availability.js':'theme-availability.js',
   '/assets/poly/delaunator.min.js':'assets/poly/delaunator.min.js','/poster-sea.png':'poster-sea.png','/poster-night.png':'poster-night.png','/poster-road.png':'poster-road.png'
@@ -83,6 +84,7 @@ http.createServer(async(req,res)=>{
   const pathname=req.url.split('?')[0]
   const fontAsset=/^\/assets\/fonts\/shiyu-(?:youfeng|qingya-song|wenrun-kai)\/[A-Za-z0-9._-]+\.woff2$/i.test(pathname)?pathname.slice(1):''
   let file=routes[pathname]||fontAsset||(/^\/assets\/site-icons\/[a-z0-9._-]+\.(?:svg|ico|png|webp)$/i.test(pathname)?pathname.slice(1):'')
+  if(/^\/assets\/memoir\/(?:gulls|cruise|sail|alpine)\.webp$/.test(pathname))file=pathname.slice(1)
   if(/^\/assets\/avatar\/turn\/frame-\d{2}\.jpg$/.test(pathname))file=pathname.slice(1)
   if(/^\/assets\/avatar\/timeline\/frame-\d{3}\.jpg$/.test(pathname))file=pathname.slice(1)
   if(/^\/assets\/toolbox\/(?:common|memo|todo|icons|emoji|cutout)\.svg$/.test(pathname))file=pathname.slice(1)

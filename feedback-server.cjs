@@ -93,7 +93,7 @@ function createFeedbackHandler(options = {}) {
         membershipExpiresAt: signedIn ? text(identity.membershipExpiresAt, 50, '会员有效期') || null : null,
         membershipSource: signedIn && ['membership', 'demo'].includes(identity.membershipSource) ? identity.membershipSource : 'none',
         source: signedIn ? 'client-profile' : 'guest', verified: false },
-      context: { page: text(context.page, 200, '来源页面'), theme: text(context.theme, 40, '主题'),
+      context: { page: text(context.page, 200, '来源页面'), source: 'pc-feedback', theme: text(context.theme, 40, '主题'),
         mode: text(context.mode, 20, '明暗模式'), viewport: text(context.viewport, 30, '窗口尺寸') }
     };
   }

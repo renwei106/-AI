@@ -32,12 +32,31 @@ function scan(root,ts){const entries={},files={};const names=fs.readdirSync(root
 function validateTranslation(source,text){if(typeof text!=='string'||!text.trim()||/[<>]/.test(text))throw new Error('译文无效');const tokens=s=>(s.match(variable)||[]).sort().join('|');if(tokens(source)!==tokens(text))throw new Error('译文中的变量占位符必须与原文一致');return text}
 function replaceText(text,dictionary){let result=text;for(const p of parts(text).reverse()){const t=validateTranslation(p.source,dictionary[p.id]);const safe=p.attribute?t.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'):t;result=result.slice(0,p.start)+safe+result.slice(p.end)}return result}
 function compile(source,filename,inventory,dictionary){const info=inventory.files[filename];if(!info)return source;if(hash(source)!==info.hash)throw new Error('源文案已变化，请重新扫描并发布语言包');const escape=s=>s.replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/\$\{/g,'\\${');function segment(start,end,nodes){let value=source.slice(start,end);for(const n of [...nodes].reverse()){let text=replaceText(n.value,dictionary),code;if(n.html)code=text;else if(!n.template)code=JSON.stringify(text);else{code='`'+escape(text).replace(variable,token=>{const i=Number(token.match(/\d+/)[0]),e=n.expressions[i];return '${'+segment(e.start,e.end,e.nodes)+'}'})+'`'}value=value.slice(0,n.start-start)+code+value.slice(n.end-start)}return value}return segment(0,source.length,info.nodes)}
-function renderCurrent(source,filename,ts,dictionary={}){
+function localizeImports(source,filename,ts,locale){
+ const ast=ts.createSourceFile(filename,source,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS),edits=[];
+ function visit(node){
+  const specifier=ts.isImportDeclaration(node)||ts.isExportDeclaration(node)?node.moduleSpecifier:ts.isCallExpression(node)&&node.expression.kind===ts.SyntaxKind.ImportKeyword?node.arguments[0]:null;
+  if(specifier&&ts.isStringLiteral(specifier)&&/^\.?\.?\//.test(specifier.text)){
+   const url=new URL(specifier.text,'http://local/'+filename);
+   if(/^\/[\w-]+\.js$/.test(url.pathname)||/^\/extension\/(integration|store)\.js$/.test(url.pathname)){
+    url.searchParams.set('locale',locale);
+    const relative=specifier.text.split(/[?#]/)[0];
+    edits.push({start:specifier.getStart(ast),end:specifier.end,text:JSON.stringify(relative+url.search+url.hash)});
+   }
+  }
+  ts.forEachChild(node,visit);
+ }
+ visit(ast);
+ for(const edit of edits.sort((a,b)=>b.start-a.start))source=source.slice(0,edit.start)+edit.text+source.slice(edit.end);
+ return source;
+}
+function renderCurrent(source,filename,ts,dictionary={},locale='en'){
  const nodes=literals(source,filename,ts),current={};
  // A release contains approved text, never an alternative application version.
  // New or changed copy remains in the source language until it is published.
  walkNodes(nodes,node=>{for(const p of parts(node.value))current[p.id]=dictionary[p.id]??p.source});
- return compile(source,filename,{files:{[filename]:{hash:hash(source),nodes}}},current);
+ const result=compile(source,filename,{files:{[filename]:{hash:hash(source),nodes}}},current);
+ return filename.endsWith('.js')?localizeImports(result,filename,ts,locale):result;
 }
 module.exports={hash,parts,scan,compile,validateTranslation,renderCurrent};
 

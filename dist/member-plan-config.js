@@ -3,7 +3,7 @@
  'use strict';
  let plans = [], selectedId = null, loading = true, refreshing = null;
  const expandedBenefits = new Set();
- const resourceKeys = { '首页主题': 'themes', '字体选择': 'global-fonts', '配色选择': 'global-colors', '页面布局': 'global-layouts', '网址展示样式': 'regular-styles', '常用卡片': 'corner-colors' };
+ const resourceKeys = { ['首页主题']: 'themes', ['字体选择']: 'global-fonts', ['配色选择']: 'global-colors', ['页面布局']: 'global-layouts', ['网址展示样式']: 'regular-styles', ['常用卡片']: 'corner-colors' };
  const attr = value => esc(String(value)).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
  const publish = (ready = true) => { window.__shiyuMemberCatalog = { ready, plans }; window.dispatchEvent(new CustomEvent('shiyu-member-catalog', { detail: window.__shiyuMemberCatalog })); };
  const original = openMemberCenter;
@@ -119,7 +119,7 @@
   refreshing = (async () => {
    try {
     const response = await fetch('/api/shiyu/plans', { cache: 'no-store' }); if (!response.ok) throw Error();
-    const data = await response.json(), next = (data.items || []).filter(plan => plan.enabled !== false); loading = false;
+    const raw = await response.json(), data = window.ShiyuI18n?.catalog(raw)||raw, next = (data.items || []).filter(plan => plan.enabled !== false); loading = false;
     if (JSON.stringify(plans) === JSON.stringify(next) && window.__shiyuMemberCatalog?.ready) return;
     plans = next; const paid = plans.filter(plan => plan.id !== 'free'); selectedId = paid.some(plan => plan.id === selectedId) ? selectedId : paid.find(plan => plan.isDefault)?.id || paid[0]?.id || null;
     if (paid.length) { MEMBER_CONFIG.plans = paid.map(plan => ({ ...plan, auto: plan.autoRenew, saving: plan.cycle })); selectedMemberPlan = Math.max(0, paid.findIndex(plan => plan.id === selectedId)); freeMemberSelected = false; }

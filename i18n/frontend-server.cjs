@@ -23,14 +23,14 @@ async function localized(req,res,file,root){
  }
  content??=fs.readFileSync(path.join(root,file),'utf8');
  if(file==='index.html'){
-  const client={locale,settings:state.settings,country:region};
+  const client={locale,settings:state.settings,country:region,dictionary:state.dictionaries?.[locale]||{}};
   content=content.replace(/<html lang="[^"]*"/,'<html lang="'+locale+'"');
   if(locale!=='zh-CN')content=content.replace(/(<script\b[^>]*\bsrc=")([^"#]+\.js(?:\?[^"#]*)?)(")/g,(all,start,src,end)=>{
    if(/^(?:https?:)?\/\//.test(src)||/^\/?(?:i18n-|assets\/)/.test(src))return all;
    const target=new URL(src,'http://localhost');target.searchParams.set('locale',locale);
    return start+(src.startsWith('/')?target.pathname:target.pathname.slice(1))+target.search+end;
   });
-  content=content.replace('</head>','<script>window.SHIYU_LOCALE_STATE='+JSON.stringify(client).replace(/</g,'\\u003c')+'</script><link rel="stylesheet" href="/i18n-client.css"><script src="/i18n-client.js" defer></script></head>');
+  content=content.replace('</head>','<script>window.SHIYU_LOCALE_STATE='+JSON.stringify(client).replace(/</g,'\\u003c')+';'+fs.readFileSync(path.join(__dirname,'runtime.js'),'utf8')+'</script><link rel="stylesheet" href="/i18n-client.css"><script src="/i18n-client.js" defer></script></head>');
  }
  res.writeHead(200,{'Content-Type':file.endsWith('.html')?'text/html; charset=utf-8':'text/javascript; charset=utf-8','Cache-Control':'no-store','Vary':'Cookie','Content-Language':locale});res.end(content);return true;
 }

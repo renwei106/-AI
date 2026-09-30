@@ -167,7 +167,7 @@
   function membershipFromUser(user) {
     if (!user || user.member !== true) return null;
     const label = String(user.memberExpiresAt || '').trim();
-    if (user.permanent === true || user.membership?.permanent === true || label === '永久') return { ...user.membership, member: true, permanent: true, expiresAt: null, label: '永久' };
+    if (user.permanent === true || user.membership?.permanent === true || /^永久$/.test(label)) return { ...user.membership, member: true, permanent: true, expiresAt: null, label: '永久' };
     const parsed = typeof user.expiresAt === 'number' ? user.expiresAt : Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(label) ? `${label}T23:59:59+08:00` : label);
     return Number.isFinite(parsed) && parsed > Date.now() ? { ...user.membership, member: true, permanent: false, expiresAt: parsed, label } : null;
   }

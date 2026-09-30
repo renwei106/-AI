@@ -74,7 +74,7 @@
  async function refresh(){
   if(loading)return loading;
   loading=fetch('/api/shiyu/operations',{credentials:'include',cache:'no-store'}).then(async response=>{
-   if(!response.ok)throw Error('配置加载失败');const next=await response.json();
+   if(!response.ok)throw Error('配置加载失败');const raw=await response.json(),next=window.ShiyuI18n?.operations(raw)||raw;
    const incoming={access:next.access||{},personalization:next.personalization||{},petActions:next.petActions||{},petTiming:next.petTiming||{},optionNames:next.optionNames||{}};
    if(JSON.stringify(config)===JSON.stringify(incoming))return;
    config=incoming;

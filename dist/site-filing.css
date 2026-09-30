@@ -24,3 +24,15 @@ body[data-view=space] #groups>.group:has(>.site-filing)>:not(.site-filing){flex-
 }
 @media(max-width:760px){body[data-view=home] #main>.site-filing{position:relative;bottom:auto;left:auto;width:100%;padding:12px 20px;justify-content:center;text-align:center}}
 @media(max-width:760px){body[data-view=space]:not(.atlas-active) #groups>.group:not([hidden]):has(>.site-filing){min-height:max(0px,calc(100svh - var(--filing-group-start,0px)))}}
+/* A single viewport footer is shared by every theme and space view. */
+body>.site-filing{position:fixed;left:4.5%;bottom:16px;width:min(480px,40%);padding:0;justify-content:flex-start;text-align:left;color:var(--muted);font-size:11px}
+@media(max-width:760px){body>.site-filing{left:12px;bottom:max(8px,env(safe-area-inset-bottom));width:calc(100% - 24px);justify-content:center;text-align:center;font-size:10px}}
+body>.site-filing{z-index:38;top:auto!important;bottom:16px!important;min-height:22px;align-items:center}
+@media(max-width:760px){body>.site-filing{justify-content:flex-start;text-align:left;bottom:16px!important}}
+/* Keep registration visible but intentionally subordinate to the page content. */
+body>.site-filing{color:color-mix(in srgb,var(--muted) 42%,transparent)}
+/* Each surface positions the same backend registration independently. */
+body[data-view=space]>.site-filing{left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);justify-content:center;text-align:center}
+body.atlas-active>.site-filing{display:none}
+#space-atlas>.site-filing{left:50%;transform:translateX(-50%);bottom:16px;width:max-content;max-width:calc(100% - 32px);padding:0;min-height:22px;align-items:center}
+body.world-active .world-footer>.site-filing{display:flex;position:static;transform:none;width:auto;flex:1;min-width:0;margin:0;padding:0 16px;align-items:center;justify-content:center;text-align:center;opacity:1}

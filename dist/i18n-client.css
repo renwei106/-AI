@@ -12,3 +12,5 @@
 #member-center .member-heading .shiyu-language-picker .shiyu-language-trigger{display:grid;place-items:center;box-sizing:border-box;width:32px;height:32px;min-height:32px;padding:0;margin:0;background:transparent;color:var(--ink);line-height:1}
 /* Text may wrap within the shared layout; language never selects a layout. */
 :is(dialog,.ops-body,.ops-notice-list){overflow-wrap:anywhere}
+/* Keep the atlas label and both icons inside its existing pill in English. */
+html[lang=en] #space-atlas .at-view-picker>.at-quiet>.at-view-current{min-width:max-content;flex-shrink:0}

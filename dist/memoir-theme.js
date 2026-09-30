@@ -7,12 +7,12 @@
   const liveURLs=new Map();
   const owner=()=>signed?(prefs.accountProfile?.id||'local-account'):'guest';
   function defaults(){return {auto:true,photos:[
-    {id:'memoir-sea',url:'poster-sea.png',title:'那年，海风很轻',text:'后来去过很多地方\n还是记得那天，风吹过的声音'},
-    {id:'memoir-road',url:'poster-road.png',title:'去远方的路上',text:'没有急着抵达\n沿途的光，就已经值得收藏'},
+    {id:'memoir-sea',url:'assets/memoir/gulls.webp',title:'海风与飞鸟',text:'让风吹过羽翼\n把波光留在此刻'},
+    {id:'memoir-road',url:'assets/memoir/cruise.webp',title:'向蔚蓝出发',text:'海面铺开新的航线\n远方，也可以慢慢抵达'},
     {id:'memoir-night',url:'poster-night.png',title:'总有一盏灯等你',text:'城市慢慢安静下来\n平凡的一天，也有值得记住的瞬间'},
-    {id:'memoir-distance',url:'poster-road.png',title:'把日子过成风景',text:'走过的每一步\n都藏着后来想念的自己'},
-    {id:'memoir-tide',url:'poster-sea.png',title:'下次，还来这里',text:'海会记得每一次相逢\n我们也会，有新的故事'}]};}
-  function album(){if(draft)return draft;const a=(prefs.memoirAlbums??={})[owner()]??=defaults();const base=defaults().photos;while(a.photos.length<MAX)a.photos.push({...base[a.photos.length]});return a;}
+    {id:'memoir-distance',url:'assets/memoir/sail.webp',title:'一帆清澈',text:'沿着浪花的方向\n留一点时间，给自由'},
+    {id:'memoir-tide',url:'assets/memoir/alpine.webp',title:'山野开满了光',text:'穿过花海与草坡\n今天的风景，刚刚好'}]};}
+  function album(){if(draft)return draft;const a=(prefs.memoirAlbums??={})[owner()]??=defaults();const base=defaults().photos;while(a.photos.length<MAX)a.photos.push({...base[a.photos.length]});for(const photo of a.photos){if(!photo.key&&['poster-sea.png','poster-road.png'].includes(photo.url)){const replacement=base.find(item=>item.id===photo.id);if(replacement)photo.url=replacement.url;}}return a;}
   const pendingKeys=new Set();
   function database(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>r.result.createObjectStore('files');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
   async function fileStore(method,key,value){const db=await database();try{return await new Promise((resolve,reject)=>{const tx=db.transaction('files',method==='get'?'readonly':'readwrite'),request=tx.objectStore('files')[method](...(method==='put'?[value,key]:[key]));let result;request.onsuccess=()=>result=request.result;tx.oncomplete=()=>resolve(result);tx.onerror=tx.onabort=()=>reject(tx.error||new Error('无法保存照片'));});}finally{db.close();}}
@@ -46,14 +46,16 @@
         stack.querySelector('.is-front').animate([{transform:'translate(4px,-6px) rotate(-5deg)'},{transform:'translate(0,0) rotate(0)'}],{duration:950,easing:'cubic-bezier(.25,.7,.25,1)'});
         host.querySelector('.memoir-copy').animate([{opacity:.3},{opacity:1}],{duration:650});
       }
-      stack.querySelectorAll('img').forEach(img=>img.onerror=()=>{img.onerror=null;img.src='poster-sea.png';status('图片暂时无法读取，可在右侧编辑中重新选择');});
+      stack.querySelectorAll('img').forEach(img=>img.onerror=()=>{img.onerror=null;img.src='assets/memoir/gulls.webp';status('图片暂时无法读取，可在右侧编辑中重新选择');});
     }catch(error){if(turn===generation)status(error.message);}
     schedule();
   }
   function change(step){if(performance.now()<transitionUntil)return;const photos=album().photos;index=(index+step+photos.length)%photos.length;paint(true);}
-  function stopMusic(){if(musicOwned&&playing)toggleMusic();musicOwned=false;}
+  function stopMusic(){if(musicOwned){stopThemeMusic();syncMusic();}musicOwned=false;}
   function syncMusic(){const button=document.querySelector('[data-memoir-music]');if(button){button.setAttribute('aria-pressed',String(playing));button.setAttribute('aria-label',playing?'停止音乐':'播放音乐');button.title=playing?'停止音乐':'播放音乐';button.innerHTML=svg('<path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/>'+(playing?'':'<path d="m4 4 16 16"/>'));}const name=document.querySelector('[data-memoir-track]');if(name){name.textContent=TRACKS[trackIndex].name;name.title='点击切换下一首音乐';}}
-  async function toggleSound(){musicOwned=true;await toggleMusic();syncMusic();}
+  const previousMusicThemeActive=musicThemeActive;musicThemeActive=function(){return previousMusicThemeActive()||(view==='home'&&effective().theme==='cinema');};
+  const previousMusicUI=syncMusicUI;syncMusicUI=function(){previousMusicUI();syncMusic();};
+  async function toggleSound(){if(audioBusy)return;musicOwned=true;if(muted)toggleMute();await toggleMusic();syncMusic();}
   const previousMusicSync=syncMusicUI;syncMusicUI=function(){previousMusicSync();syncMusic();};
   function mount(){
     const root=document.querySelector('.home-cinema');if(!root)return;
@@ -102,7 +104,7 @@
     };
     input.onchange=()=>{pendingURL=applyURL();};input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();pendingURL=applyURL();}};
   }
-  THEMES.cinema.name='人生拾影';THEMES.cinema.en='A LIFE IN FRAMES';THEME_IDENTITIES.cinema=['人生拾影','lib-Camera'];
+  THEMES.cinema.name='人生拾影';THEMES.cinema.en='A LIFE IN FRAMES';THEME_IDENTITIES.cinema=['人生拾影','lib-Mountain'];
   const previousHome=home;home=function(){clearTimeout(timer);generation++;releaseURLs();if(effective().theme!=='cinema'&&effective().theme!=='music')stopMusic();previousHome();if(effective().theme==='cinema')mount();};
   const previousWorkspace=workspace;workspace=function(){clearTimeout(timer);generation++;releaseURLs();stopMusic();previousWorkspace();};
   document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(timer);stopMusic();}else schedule();});

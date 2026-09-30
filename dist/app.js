@@ -82,7 +82,7 @@ const THEMES={
  base:{name:'基础风格',en:'ESSENTIAL',desc:'留白之间，轻松开始。',mode:'light',color:'#48614c',font:'sans',mini:'拾 隅'},
  paper:{name:'报纸风',en:'THE DAILY',desc:'把你的收藏，编成今日头条。',mode:'light',color:'#45433c',font:'serif',mini:'拾隅日报'},
  music:{name:'音乐风',en:'SIDE A',desc:'让每一刻，都有自己的节奏。',mode:'dark',color:'#bd9055',font:'serif',mini:'◉'},
- cinema:{name:'电影风',en:'NOW SHOWING',desc:'今天这部电影，由你主演。',mode:'dark',color:'#ba794f',font:'serif',mini:'此刻'},
+ cinema:{name:'人生拾影',en:'NOW SHOWING',desc:'今天这部电影，由你主演。',mode:'dark',color:'#ba794f',font:'serif',mini:'此刻'},
   cosmos:{name:'宇宙风',en:'ORBIT',desc:'在浩瀚里，找到自己的坐标。',mode:'dark',color:'#8b83d1',font:'sans',mini:'◌'},
   globe:{name:'星海行旅',en:'CELESTIAL VOYAGE',desc:'让一颗蓝色星球，在掌心缓缓自转。',mode:'dark',color:'#5f82bd',font:'sans',mini:'◉'},
  avatarGirl:{name:'阿织 · 3D',en:'AZHI 3D',desc:'实时注视、转身与呼吸。',mode:'light',color:'#4f806a',font:'sans',mini:'◉'},

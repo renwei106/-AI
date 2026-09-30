@@ -214,3 +214,11 @@ body[data-dark=true] #my-corner[data-corner-module=todo] .tc-root{--tc-toolbar:#
 #my-corner[data-corner-module=todo] .tc-root .tc-date-nav .tc-date-control .tc-control-button{display:block;min-height:32px;padding:5px 7px;text-align:center}
 #my-corner[data-corner-module=todo] .tc-root .tc-date-nav .tc-date-control .tc-control-button svg{display:none}
 #my-corner[data-corner-module=todo] .tc-root .tc-date-nav .tc-period-today{font-size:12px!important;padding:5px 8px!important}
+/* Keep application switching in the shared header; layout selection lives at bottom left. */
+#my-corner[data-corner-module=todo] .tc-root .tc-layout-launcher{position:fixed;left:24px;bottom:12px;z-index:36}
+#my-corner[data-corner-module=todo] .tc-root .tc-layout-launcher .tc-view-trigger{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--tc-panel);color:var(--ink);font-size:12px}
+#my-corner[data-corner-module=todo] .tc-root .tc-layout-launcher .tc-layout-menu{top:auto;bottom:calc(100% + 10px);left:0}
+#my-corner[data-corner-module=todo] .tc-root .tc-brand [data-corner-next-theme]{display:flex;align-items:center;gap:9px;white-space:nowrap}
+/* Keep drag gestures from selecting text, without affecting editor fields. */
+#my-corner[data-corner-module=todo] .tc-task-row,#my-corner[data-corner-module=todo] [data-tc-group-head],body.tc-dragging{user-select:none;-webkit-user-select:none}
+#my-corner[data-corner-module=todo] .tc-root button.tc-primary,#my-corner[data-corner-module=todo] .tc-root button.tc-primary:is(:hover,:focus-visible){color:var(--tc-button-ink,#fff)!important}

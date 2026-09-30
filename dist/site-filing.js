@@ -33,14 +33,7 @@
   function mount() {
     queued = false;
     if (!config || !(config.icp?.number || config.police?.number)) return;
-    const main = document.querySelector('#main');
-    const targets = [];
-    if (document.body.dataset.view === 'home' && main) targets.push(main);
-    if (document.body.dataset.view === 'space') {
-      targets.push(...document.querySelectorAll('#groups > .group'));
-      const atlas = document.querySelector('#space-atlas');
-      if (atlas) targets.push(atlas);
-    }
+    const targets = [document.body, document.querySelector('#world-page .world-footer'), document.querySelector('#space-atlas[open]')].filter(Boolean);
     document.querySelectorAll('.site-filing').forEach(node => {
       if (!targets.includes(node.parentElement)) node.remove();
     });
@@ -49,8 +42,11 @@
         target.style.setProperty('--filing-group-start', `${Math.max(0, target.getBoundingClientRect().top + window.scrollY)}px`);
       }
       const current = target.querySelector(':scope > .site-filing');
-      if (!current) target.append(footer());
-      else if (target.lastElementChild !== current) target.append(current);
+      if (!current) {
+        const node = footer();
+        if (target.matches('.world-footer')) target.insertBefore(node, target.querySelector('.world-footer-actions'));
+        else target.append(node);
+      }
     }
   }
   function schedule() {
@@ -72,7 +68,7 @@
     } catch { /* Retain the last successful configuration during a connection failure. */ }
     finally { loading = false; }
   }
-  new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-view'] });
+  new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-view', 'open'] });
   window.addEventListener('focus', load);
   window.addEventListener('resize', schedule);
   if (document.querySelector('#main')) new ResizeObserver(schedule).observe(document.querySelector('#main'));

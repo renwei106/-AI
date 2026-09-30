@@ -2,6 +2,7 @@ const fs=require('node:fs'),path=require('node:path');
 const {scan,hash,compile,validateTranslation,renderCurrent}=require('./catalog.cjs');
 const {GROUPS}=require('./groups.cjs');
 const {createProvider}=require('./provider.cjs');
+const {appendConfigCopy}=require('./config-copy.cjs');
 const LANGUAGES=[{code:'zh-CN',name:'简体中文'},{code:'en',name:'English'},{code:'ja',name:'日本語'}];
 const validLocale=code=>LANGUAGES.some(l=>l.code===code);
 function validateSettings(value){
@@ -23,14 +24,14 @@ function createService({root,store,ts,fetcher=fetch}){
   const source=fs.readFileSync(target,'utf8'),dictionary=data.releases[locale]?.dictionary||{};
   const key=locale+':'+file,version=hash(source)+':'+hash(JSON.stringify(dictionary)),cached=assetCache.get(key);
   if(cached?.version===version)return cached.content;
-  const content=locale==='zh-CN'?source:renderCurrent(source,file,ts,dictionary);
+  const content=locale==='zh-CN'?source:renderCurrent(source,file,ts,dictionary,locale);
   assetCache.set(key,{version,content});return content;
  }
  const write=data=>{fs.mkdirSync(path.dirname(store),{recursive:true});fs.writeFileSync(store+'.tmp',JSON.stringify(data));fs.renameSync(store+'.tmp',store)};
  let translating=false;
  const translationProvider=createProvider(store,fetcher);
  const provider=translationProvider.status;
- function sync(data){data.inventory=scan(root,ts);for(const e of Object.values(data.inventory.entries))data.entries[e.id]={...data.entries[e.id],...e};return data}
+ function sync(data){data.inventory=appendConfigCopy(scan(root,ts),store);for(const e of Object.values(data.inventory.entries))data.entries[e.id]={...data.entries[e.id],...e};return data}
  function coverage(data,locale){const rows=Object.values(data.inventory.entries);return {total:rows.length,translated:rows.filter(e=>data.entries[e.id]?.translations?.[locale]?.text).length,approved:rows.filter(e=>data.entries[e.id]?.translations?.[locale]?.approved).length}}
  async function translate(texts,locale){if(!['en','ja'].includes(locale))throw new Error('请选择英文或日文');return translationProvider.translate(texts,locale)}
 
@@ -41,7 +42,7 @@ function createService({root,store,ts,fetcher=fetch}){
   const files={};for(const file of Object.keys(data.inventory.files)){files[file]=compile(fs.readFileSync(path.join(root,file),'utf8'),file,data.inventory,dictionary,ts);if(file.endsWith('.js')&&ts.createSourceFile(file,files[file],ts.ScriptTarget.Latest,true,ts.ScriptKind.JS).parseDiagnostics.length)throw new Error(file+'语言资源校验失败')}
   data.releases[locale]={sourceHash:hash(JSON.stringify(data.inventory.files)),dictionary,files,publishedAt:new Date().toISOString(),fallbackCount};return {ok:true,fallbackCount};
  }
- function publicState(data){return {settings:data.settings,revision:hash(JSON.stringify(data.settings)),notices:Object.fromEntries(Object.entries(data.notices).filter(([,n])=>n.published).map(([k,n])=>{const published=n.published,translations={...published.translations};for(const l of LANGUAGES){const t=translations[l.code];if(!t?.approved||!t.title?.trim()||!t.body?.trim())translations[l.code]=published.translations['zh-CN']}return [k,{...published,translations}]}))}}
+ function publicState(data){return {dictionaries:Object.fromEntries(Object.entries(data.releases).map(([locale,release])=>[locale,Object.fromEntries(Object.entries(release.dictionary||{}).filter(([id,text])=>data.entries[id]&&text!==data.entries[id].source).map(([id,text])=>[data.entries[id].source,text]))])),settings:data.settings,revision:hash(JSON.stringify(data.settings)),notices:Object.fromEntries(Object.entries(data.notices).filter(([,n])=>n.published).map(([k,n])=>{const published=n.published,translations={...published.translations};for(const l of LANGUAGES){const t=translations[l.code];if(!t?.approved||!t.title?.trim()||!t.body?.trim())translations[l.code]=published.translations['zh-CN']}return [k,{...published,translations}]}))}}
  async function action(method,route,body={}){let data=read();
   if(route==='provider'&&method==='PUT')return translationProvider.save(body);
   if(route==='provider/test'&&method==='POST')return translationProvider.test(body);

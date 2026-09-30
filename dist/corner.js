@@ -17,13 +17,15 @@
     todo:{entryName:'我的待办',panelName:'我的待办',enabled:true},
     toolbox:{entryName:'百宝箱',panelName:'百宝箱',enabled:true},
   });
+  const MATERIAL_TOOLS={studio:{name:'轻图标',art:'icons',route:'icon'},palette:{name:'轻色卡',art:'palette',route:'color'},cutout:{name:'轻抠图',art:'cutout'},emoji:{name:'轻表情',art:'emoji',route:'emoji'}};
+  let materialIds=[];
   let remoteCornerModules=null,remoteCornerAllowed=false;
   const cornerModuleConfig=id=>({...CORNER_MODULES[id],...CORNER_MODULE_SETTINGS[id],...(remoteCornerModules?.[id]||{})});
   const enabledCornerModuleIds=()=>{if(!remoteCornerAllowed||window.ShiyuFeatureConfig?.allowed('corner')===false)return [];const source=remoteCornerModules?Object.keys(remoteCornerModules):Object.keys(CORNER_MODULE_SETTINGS),ids=[...new Set(source)].filter(id=>id!=='toolbox'&&id!=='emoji'&&cornerModuleConfig(id).enabled!==false);ids.push('toolbox');return ids.length?ids:['common','toolbox'];};
   const cornerPins=()=>{prefs.cornerPinnedModulesV1??={};const key=owner(),saved=prefs.cornerPinnedModulesV1[key];if(!Array.isArray(saved)){prefs.cornerPinnedModulesV1[key]=['common','memo','todo'];return prefs.cornerPinnedModulesV1[key];}return saved;};
   const shortcutModuleIds=()=>{const enabled=enabledCornerModuleIds();if(!enabled.length)return [];const modules=enabled.filter(id=>id!=='toolbox'),saved=prefs.cornerShelfOrderV1?.[owner()],ordered=[...new Set((Array.isArray(saved)?saved:[]).filter(id=>modules.includes(id)))],all=[...ordered,...modules.filter(id=>!ordered.includes(id))],pins=cornerPins();return [...all.filter(id=>pins.includes(id)),...all.filter(id=>!pins.includes(id)),'toolbox'];};
   const isExternalTool=id=>!['common','memo','todo','toolbox'].includes(id)&&(!CORNER_MODULES[id]||Boolean(CORNER_MODULES[id].toolPath)||Boolean(String(cornerModuleConfig(id)?.href||'').trim()));
-  const toolTarget=id=>{const configured=String(cornerModuleConfig(id)?.href||'').trim();if(/^https?:\/\//i.test(configured))return configured;if(CORNER_MODULES[id]?.toolPath&&(location.hostname==='127.0.0.1'||location.hostname==='localhost'))return 'http://127.0.0.1:4173/'+CORNER_MODULES[id].toolPath;return '';};
+  const toolTarget=id=>{const configured=String(cornerModuleConfig(id)?.href||'').trim();if(/^https?:\/\//i.test(configured)){const target=new URL(configured);if(['127.0.0.1','localhost'].includes(location.hostname)&&target.hostname==='tool.shiyubox.com')return 'http://'+location.hostname+':4173'+target.pathname+target.search+target.hash;return configured;}if(CORNER_MODULES[id]?.toolPath&&(location.hostname==='127.0.0.1'||location.hostname==='localhost'))return 'http://127.0.0.1:4173/'+CORNER_MODULES[id].toolPath;return '';};
   const toolArtSvg=(path,size,color)=>'<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="'+path+'" stroke="'+color+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const toolboxCardArt=id=>{
     if(id==='common')return '<span class="tool-art common-art" aria-hidden="true"><svg viewBox="0 0 120 100" fill="none"><g class="common-sheet common-sheet-back"><rect x="35" y="17" width="55" height="65" rx="9"/><path d="M47 31h23M47 39h16"/></g><g class="common-sheet common-sheet-middle"><rect x="30" y="14" width="55" height="65" rx="9"/><path d="M42 29h23M42 37h17"/></g><g class="common-sheet common-sheet-front"><rect x="25" y="11" width="55" height="65" rx="9"/><path d="M38 29h27M38 38h20M38 47h24"/><path class="common-bookmark" d="M59 59v12l6-4 6 4V59"/></g></svg></span>';
@@ -61,10 +63,11 @@
       let response=localAdmin?await fetch('http://127.0.0.1:5175/api/shiyu/operations',{credentials:'omit',cache:'no-store'}).catch(()=>null):null;
       if(!response?.ok)response=await fetch('/api/shiyu/operations',{credentials:'include',cache:'no-store'});
       if(!response.ok)return;
-      const data=await response.json();remoteCornerAllowed=data?.access?.corner!==false;const modules=Array.isArray(data?.corner?.modules)?data.corner.modules:[];
-      if(!modules.length)return;
+      const raw=await response.json(),data=window.ShiyuI18n?.operations(raw)||raw;remoteCornerAllowed=data?.access?.corner!==false;const modules=Array.isArray(data?.corner?.modules)?data.corner.modules:[];
+      const nextMaterials=data?.world?.enabled===true&&data?.world?.eligible!==false&&data?.access?.world!==false&&data?.world?.modules?.materials===true?Object.keys(MATERIAL_TOOLS).filter(id=>data.world.children?.materials?.[id]===true):[];
+      const materialsChanged=JSON.stringify(materialIds)!==JSON.stringify(nextMaterials);materialIds=nextMaterials;
       const next=Object.fromEntries(modules.map(module=>[module.id,{enabled:module.enabled!==false,entryName:String(module.entryName||'').trim(),panelName:String(module.panelName||'').trim(),icon:typeof module.icon==='string'?module.icon:'',href:typeof module.href==='string'?module.href:'',description:typeof module.description==='string'?module.description:'',category:typeof module.category==='string'?module.category:'',backgroundImage:typeof module.backgroundImage==='string'?module.backgroundImage:''}]));
-      if(JSON.stringify(remoteCornerModules)===JSON.stringify(next))return;
+      if(!materialsChanged&&JSON.stringify(remoteCornerModules)===JSON.stringify(next))return;
       remoteCornerModules=next;
       if(!panel?.open&&!enabledCornerModuleIds().includes(activeModule))activeModule=enabledCornerModuleIds()[0]||'common';
       if(panel?.open&&activeModule==='toolbox')renderToolboxPanel();
@@ -407,7 +410,7 @@
   }
   function syncCornerCords(){
     if(!panel?.open)return;
-    const cords=[['color','.color-pull-cord'],['mode','.mode-pull-cord'],['fullscreen','.mode-pull-cord']];
+    const cords=[['mode','.mode-pull-cord:not(.global-fullscreen-cord)'],['fullscreen','.global-fullscreen-cord']];
     for(const [kind,selector] of cords){
       const source=document.querySelector('body>'+selector);if(!source)continue;
       let cord=panel.querySelector('[data-corner-cord="'+kind+'"]');
@@ -425,7 +428,7 @@
         cord.onclick=e=>{e.preventDefault();e.stopPropagation();if(!suppress)release(true);};
       }
       const r=source.getBoundingClientRect();cord.style.left=r.left+'px';cord.style.right='auto';cord.style.top=r.top+'px';cord.style.width=r.width+'px';cord.style.height=r.height+'px';
-      if(kind==='fullscreen'){cord.style.left=(r.left-68)+'px';cord.style.height='84px';}
+      if(kind==='fullscreen'){cord.style.left=r.left+'px';cord.style.height=r.height+'px';}
       cord.title=kind==='fullscreen'?(document.fullscreenElement===fullscreenShell?'点击或下拉，退出全屏':'点击或下拉，进入全屏'):kind==='mode'?'点击或下拉，切换日夜模式':'点击或下拉，切换主颜色';cord.setAttribute('aria-label',cord.title);
       if(kind==='color'){cord.style.setProperty('--cord-color',prefs.color||effective().color);cord.style.setProperty('--next-color',nextPalette()[0]);}
       else if(kind==='mode')cord.dataset.nextMode=source.dataset.nextMode;
@@ -438,20 +441,20 @@
   function mountModuleClose(){
     const button=document.createElement('button');button.type='button';button.className='corner-close-entry';
     button.setAttribute('aria-label','关闭当前应用');button.title='关闭当前应用';
-    button.innerHTML='<svg class="corner-close-shape" viewBox="0 0 120 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0H120C91 0 85 6 77 24C71 39 66 44 60 44C54 44 49 39 43 24C35 6 29 0 0 0Z"/></svg><span class="corner-close-icon corner-close-x" aria-hidden="true">'+glyph('<path d="m6 6 12 12M18 6 6 18"/>')+'</span>';
+    button.innerHTML='<svg class="corner-close-shape" viewBox="0 0 120 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0H120C91 0 85 6 77 24C71 39 66 44 60 44C54 44 49 39 43 24C35 6 29 0 0 0Z"/></svg><span class="corner-close-icon corner-close-x" aria-hidden="true">'+glyph('<path d="m6 6 12 12M18 6 6 18"/>')+'</span><span class="corner-close-icon corner-close-home" aria-hidden="true">'+glyph('<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>')+'</span>';
     button.onclick=event=>{event.preventDefault();event.stopPropagation();closeCorner();};appendCornerNode(button);
   }
-  function catalogModules(){return enabledCornerModuleIds().filter(id=>id!=='toolbox');}
+  function catalogModules(){return [...enabledCornerModuleIds().filter(id=>id!=='toolbox'&&!['icons','palette','cutout','emoji'].includes(id)),...materialIds.map(id=>'material:'+id)];}
   function renderToolboxPanel(){
-    panel.dataset.cornerModule='toolbox';const modules=catalogModules(),ordered=shortcutModuleIds().filter(id=>id!=='toolbox'&&modules.includes(id));
-    const card=(id,index,row)=>{const item=cornerModuleConfig(id),title=item.panelName||item.entryName||item.name||id;return '<article class="corner-tool-card '+esc(id)+'-choice" data-tool-card="'+esc(id)+'" style="--tool-order:'+index+';--tool-row:'+row+'"><button type="button" class="corner-tool-open" data-corner-open-tool="'+esc(id)+'" aria-label="打开'+esc(title)+'">'+toolboxCardArt(id)+'<span class="corner-tool-copy"><strong>'+esc(title)+'</strong></span><span class="corner-tool-arrow" aria-hidden="true">↗</span></button></article>';};
+    panel.dataset.cornerModule='toolbox';const modules=catalogModules(),ordered=[...shortcutModuleIds().filter(id=>modules.includes(id)),...modules.filter(id=>id.startsWith('material:'))];
+    const card=(id,index,row)=>{const material=MATERIAL_TOOLS[id.replace('material:','')],item=id.startsWith('material:')?material:cornerModuleConfig(id),title=item.panelName||item.entryName||item.name||id;return '<article class="corner-tool-card '+esc(id)+'-choice" data-tool-card="'+esc(id)+'" style="--tool-order:'+index+';--tool-row:'+row+'"><button type="button" class="corner-tool-open" data-corner-open-tool="'+esc(id)+'" aria-label="打开'+esc(title)+'">'+toolboxCardArt(material?.art||id)+'<span class="corner-tool-copy"><strong>'+esc(title)+'</strong></span><span class="corner-tool-arrow" aria-hidden="true">↗</span></button></article>';};
     // The tilted canvas is seven tiles wide. Each repeated cycle must cover that
     // canvas plus the fractional row stagger, even with only one enabled tool.
     // Three short catalog copies leave a visible tail near the modulo boundary.
     const count=ordered.length,rows=[0,1,2,3,4].map(row=>{const shift=count?row*count/3:0,offset=count?Math.floor(shift)%count:0,phase=shift-Math.floor(shift),sequence=[...ordered.slice(offset),...ordered.slice(0,offset)],cycle=Array.from({length:count?Math.ceil(8/count):0},()=>sequence).flat(),items=[...cycle,...cycle,...cycle];return '<div class="corner-tool-row" data-tool-row="'+row+'" data-tool-phase="'+phase+'" style="--tool-render-count:'+items.length+'">'+items.map((id,index)=>card(id,index,row)).join('')+'</div>';}).join('');
     let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';appendCornerNode(body);}const keepMotion=Boolean(body.querySelector('.corner-toolbox-scroll')),position=keepMotion?toolboxMotion.target:0;if(toolboxMotion.frame)cancelAnimationFrame(toolboxMotion.frame);toolboxMotion.frame=0;toolboxMotion.lastFrame=0;body.innerHTML='<section class="corner-toolbox"><div class="corner-toolbox-scroll" tabindex="0" aria-label="工具百宝箱，滚轮循环浏览全部工具"><div class="corner-tool-grid">'+(modules.length?rows:'<p class="corner-toolbox-empty">暂无已启用工具</p>')+'</div></div></section>';toolboxMotion.positions=[position,position,position,position,position];toolboxMotion.target=position;requestAnimationFrame(()=>{if(activeModule!=='toolbox')return;body.querySelectorAll('.corner-tool-row').forEach(row=>paintToolboxRow(row,position))});syncCornerThemePresentation();
   }
-  function onToolboxClick(e){const open=e.target.closest('[data-corner-open-tool]');if(open){void switchCornerModule(open.dataset.cornerOpenTool);}}
+  function onToolboxClick(e){const open=e.target.closest('[data-corner-open-tool]');if(!open)return;const id=open.dataset.cornerOpenTool;if(id.startsWith('material:')){const key=id.slice(9);if(!materialIds.includes(key))return;const tool=MATERIAL_TOOLS[key];if(!tool.route){cornerNotice('该工具敬请期待');return;}window.open((['127.0.0.1','localhost'].includes(location.hostname)?'http://'+location.hostname+':4173/#':'https://tool.shiyubox.com/#')+tool.route,'_blank','noopener,noreferrer');return;}void switchCornerModule(id);}
   function renderExternalToolPanel(){
     const id=activeModule,item=cornerModuleConfig(id),meta=moduleMeta(),title=item.panelName||item.entryName||item.name||id,description=item.description||CORNER_MODULES[id]?.description||item.subtitle||'打开这个工具，在轻应用中继续使用。',target=toolTarget(id);panel.dataset.cornerModule=id;let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';appendCornerNode(body);}body.innerHTML='<section class="corner-tool-cover"><header class="corner-tool-cover-heading"><h2><button type="button" data-corner-next-theme>'+esc(title)+'</button></h2><p>'+esc(item.subtitle||'轻应用 · 工具')+'</p></header><article class="corner-tool-cover-card"><div class="corner-tool-cover-icon">'+moduleIcon(id)+'</div><div><small>'+(esc(item.category||CORNER_MODULES[id]?.category||'轻应用工具'))+'</small><h3>'+esc(title)+'</h3><p>'+esc(description)+'</p></div><button type="button" class="corner-tool-launch" data-corner-launch-tool="'+esc(id)+'" '+(!target?'disabled':'')+'>'+ (target?'打开轻应用':'暂未配置工具地址') +' '+glyph('<path d="M7 17 17 7M8 7h9v9"/>')+'</button></article></section>';syncCornerThemePresentation();
   }
@@ -539,7 +542,7 @@
     let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';appendCornerNode(body);}
     const root=document.createElement('div');root.className='tc-root';root.textContent='正在打开待办…';body.replaceChildren(root);
     const isCurrent=()=>signed&&owner()===todoOwner&&prefs.cornerModules?.[todoOwner]?.todo===library;
-    return import('./todo-calendar.js?v=20260929').then(({mountTodoCalendar})=>{
+    return import('./todo-calendar.js?v=20260930-view-cycle').then(({mountTodoCalendar})=>{
       if(token!==todoRenderToken||!root.isConnected||activeModule!=='todo')return;
       root.textContent='';
       todoCalendarView=mountTodoCalendar(root,{library,isCurrent,accent:()=>resolveThemeColor(),readLatest(){try{return JSON.parse(localStorage.getItem('yiyu-prototype-v1')||'{}').prefs?.cornerModules?.[todoOwner]?.todo?.calendarV2||null;}catch{return null;}},save(next,expected){

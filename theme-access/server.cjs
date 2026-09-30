@@ -27,6 +27,9 @@ function allowedOrigins(req){
   const forwardedHost=String(req.headers['x-forwarded-host']||'').split(',')[0].trim();
   const forwardedProto=String(req.headers['x-forwarded-proto']||'').split(',')[0].trim()||'https';
   for(const host of [req.headers.host,forwardedHost])if(host)origins.add(`${forwardedProto}://${host}`);
+  // Local previews may use an available port other than 4318. Only trust
+  // the exact loopback host/port of a direct local HTTP connection.
+  if(!req.socket?.encrypted&&['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket?.remoteAddress)&&/^(127\.0\.0\.1|localhost|\[::1\])(?::\d+)?$/.test(req.headers.host||''))origins.add(`http://${req.headers.host}`);
   return origins;
 }
 async function handler(req,res){

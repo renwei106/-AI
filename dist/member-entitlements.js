@@ -106,7 +106,8 @@
   if (document.body) start(); else document.addEventListener('DOMContentLoaded', start, { once: true });
   function refreshResources() {
     if (refreshing) return refreshing;
-    refreshing = fetch('/api/shiyu/plans/catalog', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(value => {
+    refreshing = fetch('/api/shiyu/plans/catalog', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(raw => {
+     const value=window.ShiyuI18n?.catalog(raw)||raw;
       if (!value || catalogReady && JSON.stringify(value) === JSON.stringify(catalog)) return;
       catalog = value; catalogReady = true; window.__shiyuMemberResources = value; queueDecorate(); window.dispatchEvent(new Event('shiyu-member-resources'));
     }).catch(() => {}).finally(() => { refreshing = null; });
