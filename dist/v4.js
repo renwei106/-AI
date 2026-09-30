@@ -174,7 +174,7 @@ function organizationDialog(){let el=$('#organization');if(!el){el=document.crea
 function manageOrganization(kind){const d=organizationDialog();d.innerHTML=`<div class="dialog-heading"><h2>管理${organizationLabels[kind]}</h2><button data-action="close" aria-label="关闭">×</button></div><div class="organization-list">${organizationList(kind).map(x=>`<div><span>${esc(x.name)}</span><button data-rename-kind="${kind}" data-id="${x.id}">重命名</button><button data-delete-kind="${kind}" data-id="${x.id}" aria-label="删除${esc(x.name)}">删除</button></div>`).join('')}</div><button class="quiet-action" data-create="${kind}">＋ 新建${organizationLabels[kind]}</button>`;ensureDoneButtons();if(!d.open)d.showModal()}
 function editOrganization(kind,id){const d=organizationDialog(),item=id?organizationList(kind).find(x=>x.id===id):null;d.innerHTML=`<div class="dialog-heading"><h2>${item?'重命名':'新建'}${organizationLabels[kind]}</h2><button data-action="close" aria-label="关闭">×</button></div><form id="organization-form"><label for="organization-name">名称</label><input id="organization-name" maxlength="24" required value="${esc(item?.name||'')}" placeholder="给它起个名字"><small>最多 24 字</small><button class="primary" type="submit">完成</button></form>`;if(!d.open)d.showModal();$('#organization-name').focus();$('#organization-form').onsubmit=e=>{e.preventDefault();const name=$('#organization-name').value.trim();if(!name)return;const list=organizationList(kind);if(list.some(x=>x.id!==id&&x.name===name)){toast('已有同名'+organizationLabels[kind]);return}if(item)item.name=name;else{const uid=()=>crypto.randomUUID(),group=()=>({id:uid(),name:'未分类',items:[]}),newScene=()=>({id:uid(),name:'日常',description:'',groups:[group()]});const added=kind==='space'?{id:uid(),name,icon:'◈',scenes:[newScene()]}:kind==='scene'?{...newScene(),name}:{...group(),name};list.push(added);if(kind==='space'){spaceId=added.id;sceneId=added.scenes[0].id;view='space'}if(kind==='scene'){sceneId=added.id;filter=''}if(kind==='group')activeGroups[sceneId]=added.id}persist();d.close();render()}}
 function deleteOrganization(kind,id){const list=organizationList(kind),item=list.find(x=>x.id===id);if(list.length===1){toast('至少保留一个'+organizationLabels[kind]);return}const d=organizationDialog();d.innerHTML=`<div class="dialog-heading"><h2>删除${organizationLabels[kind]}</h2><button data-action="close" aria-label="关闭">×</button></div><p>删除「${esc(item.name)}」及其中的所有收藏？此操作无法撤销。</p><div class="organization-confirm"><button id="cancel-delete">取消</button><button class="primary" id="confirm-delete">确认删除</button></div>`;$('#cancel-delete').onclick=()=>manageOrganization(kind);$('#confirm-delete').onclick=()=>{list.splice(list.indexOf(item),1);if(kind==='space'&&spaceId===id){spaceId=data[0].id;sceneId=data[0].scenes[0].id}if(kind==='scene'&&sceneId===id)sceneId=space().scenes[0].id;filter='';persist();render();manageOrganization(kind)}}
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.groupTab){activeGroups[sceneId]=b.dataset.groupTab;renderGroups()}if(b.dataset.organize)authorizeOrganization(()=>manageOrganization(b.dataset.organize));if(b.dataset.create)authorizeOrganization(()=>editOrganization(b.dataset.create));if(b.dataset.renameKind)authorizeOrganization(()=>editOrganization(b.dataset.renameKind,b.dataset.id));if(b.dataset.deleteKind)authorizeOrganization(()=>deleteOrganization(b.dataset.deleteKind,b.dataset.id));});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.groupTab&&!window.ShiyuGroupViews?.anchor(b.dataset.groupTab)){activeGroups[sceneId]=b.dataset.groupTab;renderGroups()}if(b.dataset.organize)authorizeOrganization(()=>manageOrganization(b.dataset.organize));if(b.dataset.create)authorizeOrganization(()=>editOrganization(b.dataset.create));if(b.dataset.renameKind)authorizeOrganization(()=>editOrganization(b.dataset.renameKind,b.dataset.id));if(b.dataset.deleteKind)authorizeOrganization(()=>deleteOrganization(b.dataset.deleteKind,b.dataset.id));});
 $('#login').addEventListener('close',()=>{if(!signed)organizationAfterLogin=null});
 
 const smallIcon=n=>`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">${n==='add'?'<path d="M12 5v14M5 12h14"/>':'<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>'}</svg>`;
@@ -360,7 +360,7 @@ savePending=function(){if(!pending)return;const[sid,cid,gid]=pending.destination
 
 const groupsBeforeCalendarCopy=renderGroups;renderGroups=function(){groupsBeforeCalendarCopy();if(linkMode(styles[currentGroup().id]||'cards')!=='calendar')return;const entries=currentGroup().items.map((item,index)=>({item,index})).filter(x=>x.item.join(' ').toLowerCase().includes(filter.toLowerCase()));document.querySelectorAll('.group:not([hidden]) .bookmark').forEach((el,i)=>{const entry=entries[i],calendar=el.querySelector('.link-calendar');if(!calendar||!entry)return;calendar.querySelector('small').textContent=String(entry.index+1);el.querySelector('.link-name')?.remove();el.querySelector('.link-domain')?.remove();const description=document.createElement('span');description.className='calendar-description';description.textContent=entry.item[2]||'';calendar.append(description)})};
 
-function displayScope(){return prefs.displayScopes?.[spaceId]||'group'}
+function displayScope(){return prefs.displayScopes?.[spaceId]==='space'?'space':'scene'}
 function displayRule(){const scope=displayScope();return scope==='space'?prefs.spaceDisplayRules?.[spaceId]:scope==='scene'?prefs.sceneDisplayRules?.[sceneId]:null}
 const groupsBeforeScope=renderGroups;renderGroups=function(){if(displayScope()==='scene'&&!displayRule()){prefs.sceneDisplayRules??={};prefs.sceneDisplayRules[sceneId]={style:styles[currentGroup().id]||'cards',columns:prefs.groupColumns?.[currentGroup().id]};persist()}const rule=displayRule(),g=currentGroup(),oldStyle=styles[g.id],oldColumns=prefs.groupColumns?.[g.id];if(rule){styles[g.id]=rule.style;prefs.groupColumns??={};if(rule.columns)prefs.groupColumns[g.id]=rule.columns;else delete prefs.groupColumns[g.id]}groupsBeforeScope();if(rule){if(oldStyle===undefined)delete styles[g.id];else styles[g.id]=oldStyle;if(oldColumns===undefined)delete prefs.groupColumns[g.id];else prefs.groupColumns[g.id]=oldColumns}
 const mode=linkMode(rule?.style||styles[g.id]||'cards');const entries=g.items.map((item,index)=>({item,index})).filter(x=>x.item.join(' ').toLowerCase().includes(filter.toLowerCase()));document.querySelectorAll('.group:not([hidden]) .bookmark').forEach((el,i)=>{const n=entries[i]?.index||0;if(mode==='calendar')el.querySelector('.link-calendar').insertAdjacentHTML('beforeend','<span class="calendar-orbit-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="6" width="14" height="14" rx="2"/><path d="M8 3v6m8-6v6M5 11h14"/></svg><i></i></span>');if(mode==='planet'&&!el.querySelector('.link-planet>i'))el.querySelector('.link-planet').insertAdjacentHTML('beforeend','<i></i>');if(mode==='poker'){const rank=['1','2','3','4','5','6','7','8','9','10','J','Q','K'][n%13],suit=['♥','♠','♦','♣'][Math.floor(n/13)%4],corner=el.querySelector('.poker-corner');corner.textContent=rank+' '+suit;corner.classList.toggle('red-suit',suit==='♥'||suit==='♦')}});
@@ -418,7 +418,7 @@ copyPanel=function(){const copy=currentCopy(),custom=prefs.sharedHomeCopy?.mode=
 function saveSharedCopy(e){const key=e.target.dataset.sharedCopyField;if(!key||e.isComposing||e.target.readOnly)return;const value=limitCopy(e.target.value,key);e.target.value=value;prefs.sharedHomeCopy={...currentCopy(),...prefs.sharedHomeCopy,mode:'custom',[key]:value};persist();$('#shared-count-'+key).textContent=`${Array.from(value).length} / ${COPY_LIMITS[key].chars}`;applyHomeCopy()}
 document.addEventListener('input',saveSharedCopy);document.addEventListener('compositionend',saveSharedCopy);
 const settingsBeforeFooter=renderSettings;renderSettings=function(){settingsBeforeFooter();if(settingsTab==='copy')$('#settings-body .scope-note').textContent='默认或自定义文案应用于所有主题。';const d=$('#settings');d.querySelectorAll('.dialog-done').forEach(el=>el.remove());d.insertAdjacentHTML('beforeend','<div class="dialog-done settings-fixed-done"><button data-action="close">完成</button></div>')};
-let spaceSettingsTab='cards';scopeDialog=function(){let d=$('#display-scope-dialog');if(!d){d=document.createElement('dialog');d.id='display-scope-dialog';document.body.append(d)}const key=spaceSettingsTab==='font'?'font':'width',value=effective()[key],locked=unifiedField(key);d.innerHTML=`<div class="dialog-heading"><h2>空间设置</h2><button data-action="close" aria-label="关闭">×</button></div><p class="view-setting-note">${esc(space().name)}</p><div class="settings-tabs" role="tablist">${[['cards','卡片样式'],['font','字体'],['layout','布局']].map(([id,name])=>`<button role="tab" data-space-settings-tab="${id}" aria-selected="${spaceSettingsTab===id}">${name}</button>`).join('')}</div><div class="space-tab-content">${spaceSettingsTab==='cards'?`<p class="view-setting-note">选择统一范围；具体样式与每行数量在空间页面调整。</p><div class="scope-options">${[['space','全空间统一','空间内的场景与分组共用样式'],['scene','按场景统一','每个场景独立设置'],['group','按分组独立','每个分组独立设置']].map(([id,title,desc])=>`<button data-display-scope="${id}" aria-pressed="${displayScope()===id}"><b>${title}</b><small>${desc}</small></button>`).join('')}</div>`:`${locked?'<p class="view-setting-note">自动跟随全局设置</p>':''}${key==='font'?locked?`<div class="inherited-font-preview" style="font-family:${(FONTS[value]||FONTS.sans).family}">收藏每一份灵感<br><small>Make room for ideas.</small><p>${(FONTS[value]||FONTS.sans).name}</p></div>`:fontCards(value,true):layoutCards(value,true,locked)}`}</div><div class="dialog-done"><button data-action="close">完成</button></div>`;if(!d.open)d.showModal()};
+let spaceSettingsTab='cards';scopeDialog=function(){let d=$('#display-scope-dialog');if(!d){d=document.createElement('dialog');d.id='display-scope-dialog';document.body.append(d)}const key=spaceSettingsTab==='font'?'font':'width',value=effective()[key],locked=unifiedField(key);d.innerHTML=`<div class="dialog-heading"><h2>空间设置</h2><button data-action="close" aria-label="关闭">×</button></div><p class="view-setting-note">${esc(space().name)}</p><div class="settings-tabs" role="tablist">${[['cards','卡片样式'],['font','字体'],['layout','布局']].map(([id,name])=>`<button role="tab" data-space-settings-tab="${id}" aria-selected="${spaceSettingsTab===id}">${name}</button>`).join('')}</div><div class="space-tab-content">${spaceSettingsTab==='cards'?`<p class="view-setting-note">选择统一范围；具体样式与每行数量在空间页面调整。</p><div class="scope-options">${[['space','所有场景统一','空间内所有场景共用样式'],['scene','按场景独立设置','同一场景内所有分组共用样式']].map(([id,title,desc])=>`<button data-display-scope="${id}" aria-pressed="${displayScope()===id}"><b>${title}</b><small>${desc}</small></button>`).join('')}</div>`:`${locked?'<p class="view-setting-note">自动跟随全局设置</p>':''}${key==='font'?locked?`<div class="inherited-font-preview" style="font-family:${(FONTS[value]||FONTS.sans).family}">收藏每一份灵感<br><small>Make room for ideas.</small><p>${(FONTS[value]||FONTS.sans).name}</p></div>`:fontCards(value,true):layoutCards(value,true,locked)}`}</div><div class="dialog-done"><button data-action="close">完成</button></div>`;if(!d.open)d.showModal()};
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.spaceSettingsTab){spaceSettingsTab=b.dataset.spaceSettingsTab;scopeDialog()}if(b.dataset.sharedCopyMode){prefs.sharedHomeCopy={...currentCopy(),...prefs.sharedHomeCopy,mode:b.dataset.sharedCopyMode};persist();renderSettings();applyHomeCopy()}});
 render();
 function columnFit(){const g=currentGroup(),rule=displayRule(),mode=linkMode(rule?.style||styles[g.id]||'cards'),width=$('.workspace-tools')?.clientWidth||800,min={cards:155,paper:165,record:110,film:130,planet:110,calendar:130,book:135,note:145,icons:85,poker:130}[mode]||150,max=Math.max(1,Math.min(10,Math.floor((width+20)/(min+20)))),saved=rule?rule.columns:prefs.groupColumns?.[g.id];return{max,count:Math.min(max,saved||max),auto:!saved,mode}}
@@ -781,7 +781,7 @@ memberGate=function(key,context={}){
  themes=(window.__shiyuThemeCatalog||Object.keys(THEMES).filter(id=>!['reading','projection','wallfilm'].includes(id)).map(id=>({id}))).filter(t=>THEMES[t.id]),
  features=[
   ['themes','让首页，有不同的心情','在同一处发现不同主题，选择适合当下的那一款。',(context.themeId&&THEMES[context.themeId]?'你正在了解「'+THEMES[context.themeId].name+'」。':'')+'免费版 '+memberSelectionSummary('themes','free')+'，会员 '+memberSelectionSummary('themes')+'。'],
-  ['personal','让日常，有自己的模样','从首页字体与配色，到常规视图的网址样式，自由搭配。','会员字体 '+memberSelectionSummary('global-fonts')+'、配色 '+memberSelectionSummary('global-colors')+'、布局 '+memberSelectionSummary('global-layouts')+'、网址样式 '+memberSelectionSummary('regular-styles')+'。'+(memberCatalogBenefit('global-custom-color')?.enabled?'还可选择自定义颜色。':'')],
+  ['personal','让日常，有自己的模样','从首页字体与配色，到宫格视图的网址样式，自由搭配。','会员字体 '+memberSelectionSummary('global-fonts')+'、配色 '+memberSelectionSummary('global-colors')+'、布局 '+memberSelectionSummary('global-layouts')+'、网址样式 '+memberSelectionSummary('regular-styles')+'。'+(memberCatalogBenefit('global-custom-color')?.enabled?'还可选择自定义颜色。':'')],
   ['space','给喜欢，多一些空间','工作、生活与灵感，各有自己的归处。','空间数量：'+quotaText('space')+'。空间可独立设置：'+memberEnabledNames([['space-font','字体'],['space-layout','布局'],['space-color','配色'],['space-style-scene','场景样式'],['space-style-group','分组样式']])+'。'],
   ['scene','把日常，分成不同场景','在同一空间，轻松切换工作、阅读与生活。','每个空间的场景数量：'+quotaText('scene')+'。'],
   ['group','让收藏，有条不紊','同一类网址放在一起，让每次寻找更从容。','每个场景的分组数量：'+quotaText('group')+'。'],
@@ -1033,13 +1033,13 @@ const applyBeforeCordTarget=apply;apply=function(){applyBeforeCordTarget();syncC
 // Cover-only accent cord for quick global color switching.
 function colorPaletteIndex(){const current=resolveThemeColor().toLowerCase();return Math.max(0,PALETTES.findIndex(([v])=>v.toLowerCase()===current))}
 function nextPalette(){const i=colorPaletteIndex();return PALETTES[(i+1)%PALETTES.length]}
-function syncColorCordTarget(){const b=document.querySelector('.color-pull-cord');if(!b)return;const [next,name]=nextPalette(),current=resolveThemeColor()||next;b.style.setProperty('--cord-color',current);b.style.setProperty('--next-color',next);b.title='点击或下拉，切换为'+name+'；双击打开配色设置';b.setAttribute('aria-label',b.title)}
+function syncColorCordTarget(){const b=document.querySelector('body>.color-pull-cord');if(!b)return;const [next,name]=nextPalette(),current=resolveThemeColor()||next;b.style.setProperty('--cord-color',current);b.style.setProperty('--next-color',next);b.title='点击或下拉，切换为'+name+'；双击打开配色设置';b.setAttribute('aria-label',b.title)}
 const showBeforeSettingsAuth=show;
 show=function(selector){if(selector==='#settings'&&!signed){if(typeof openLogin==='function')openLogin('登录后才能进入个性化设置。');else showBeforeSettingsAuth('#login');return}return showBeforeSettingsAuth(selector)};
 function openGlobalColorSettings(){scope='global';settingsTab='colors';renderSettings();show('#settings')}
 function mountColorCord(){
- let button=document.querySelector('.color-pull-cord');
- if(view!=='home'||document.body.classList.contains('atlas-active')||new URLSearchParams(location.search).has('page')){button?.remove();return}
+ let button=document.querySelector('body>.color-pull-cord');
+ if(!['home','space'].includes(view)||(new URLSearchParams(location.search).has('page')&&!document.querySelector('#my-corner[open]'))){button?.remove();return}
  if(button){syncColorCordTarget();return}
  button=document.createElement('button');button.className='color-pull-cord';button.type='button';button.innerHTML='<span class="color-cord-line"></span><span class="color-cord-handle"><i></i></span>';document.body.append(button);
  let origin=null,pull=0,busy=false,suppress=false,clickTimer=0;
@@ -1423,7 +1423,7 @@ updateHeader();
  const steps=[
   {title:'从空间开始整理',body:'左上角是当前空间。你可以切换空间，把工作、学习和生活分开管理。',targets:['.sidebar .space-heading-controls','.sidebar .space-select']},
   {title:'用场景和分组分类',body:'左侧选择场景，上方切换分组。空间里可以有多个场景，每个场景再用分组整理网址。',targets:['.sidebar .scene-scroll','.group-tab-bar'],combine:true},
-  {title:'切换视图与样式',body:'右下角的小按钮可以切换常规视图与图谱视图，包括 3D 结构；旁边的椭圆按钮用来选择当前视图的样式。',targets:['.workspace-tools>.group-view-controls']},
+  {title:'切换视图与样式',body:'右下角的小按钮可以切换宫格视图与图谱视图，包括 3D 结构；旁边的椭圆按钮用来选择当前视图的样式。',targets:['.workspace-tools>.group-view-controls']},
   {title:'收藏网址，稍后再整理',body:'点击「收藏网址」手动添加。通过浏览器插件收下的网址会进入「稍后整理」，回来后再归类；插件可以从头像菜单中的「浏览器插件」入口了解和获取。',targets:['.space-top-actions [data-space-inbox]','.space-top-actions [data-action="add"]'],combine:true},
   {title:'连续上滑两次，回到首页',body:'没有网址，或网址列表已经滑到顶部时，鼠标连续向上滑动两次，就可以返回主首页。第一次会出现返回提示。',targets:['.peek-return']}
  ];
@@ -1796,3 +1796,128 @@ if(!window.SHIYU_LOCALE_STATE)document.documentElement.dataset.headerReady="true
  }
 const renderBeforeFullscreenCord=render;render=function(){renderBeforeFullscreenCord();mountFullscreenCord()};
 mountFullscreenCord();
+/* Reveal adjacent cords without replacing their existing action handlers. */
+(()=>{
+ const cord='.mode-pull-cord,.color-pull-cord';let active=null,timer=0;
+ const hostOf=node=>node.closest('dialog')||document.body;
+ function close(){clearTimeout(timer);if(active){active.classList.remove('cords-expanded');active.querySelector(':scope > .cord-hover-shield')?.remove();active=null;}}
+ function open(host){clearTimeout(timer);if(active===host)return;close();active=host;host.classList.add('cords-expanded');const shield=document.createElement('div');shield.className='cord-hover-shield';shield.setAttribute('aria-hidden','true');shield.addEventListener('click',e=>e.stopPropagation());host.append(shield);}
+ function inside(node){return node instanceof Element&&active&&hostOf(node)===active&&!!node.closest(cord+',.cord-hover-shield');}
+ document.addEventListener('pointerover',e=>{const c=e.target.closest(cord);if(c)open(hostOf(c));else if(inside(e.target))clearTimeout(timer);},true);
+ document.addEventListener('pointerout',e=>{if(inside(e.target)&&!inside(e.relatedTarget)){clearTimeout(timer);timer=setTimeout(close,200);}},true);
+ document.addEventListener('focusin',e=>{if(e.target.closest(cord))open(hostOf(e.target));},true);
+ document.addEventListener('focusout',e=>{if(inside(e.target)&&!inside(e.relatedTarget)){clearTimeout(timer);timer=setTimeout(close,200);}},true);
+ document.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&e.target.closest(cord)&&!active){open(hostOf(e.target));e.preventDefault();e.stopImmediatePropagation();}else if(active&&!inside(e.target))close();},true);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')close();},true);
+ document.addEventListener('close',close,true);
+ new MutationObserver(()=>{if(active&&!active.querySelector('.mode-pull-cord:hover,.color-pull-cord:hover,.cord-hover-shield:hover'))close();}).observe(document.body,{attributes:true,attributeFilter:['data-view']});
+})();
+
+/* Compose continuous groups from the existing per-group renderer and retain each data owner. */
+(()=>{
+ const previous=renderGroups;
+ const continuous=()=>prefs.groupBrowseMode!=='tabs';
+ const shown=new Map();let lastFilter='',rendering=false;
+ function markActive(id){
+  if(!scene().groups.some(g=>g.id===id))return;
+  activeGroups[sceneId]=id;
+  document.querySelectorAll('.group-tabs [data-group-tab]').forEach(b=>{
+   if(continuous()){b.removeAttribute('aria-selected');b.setAttribute('aria-current',String(b.dataset.groupTab===id));}
+   else b.setAttribute('aria-selected',String(b.dataset.groupTab===id));
+  });
+  const label=document.querySelector('.workspace-tools .view-settings-trigger>span'),g=currentGroup();
+  if(label&&g){const mode=linkMode(displayRule()?.style||styles[g.id]||'cards');label.textContent=(LINK_VIEWS[mode]?.[0]||'卡片')+'样式';}
+ }
+ function applyColumns(){
+  const host=$('#groups');if(!host?.classList.contains('groups-continuous'))return;
+  const count=columnFit().count;
+  host.querySelectorAll('[data-stream-group] .cards').forEach(c=>c.style.setProperty('--group-columns',count));
+  document.dispatchEvent(new Event('group-stream-expanded'));
+ }
+ let scrollFrame=0;
+ function syncScroll(){cancelAnimationFrame(scrollFrame);scrollFrame=requestAnimationFrame(()=>{
+  if(!continuous()||view!=='space')return;
+  const host=$('#groups'),sections=[...host.querySelectorAll('[data-stream-group]')];if(!sections.length)return;
+  const edge=host.querySelector('.group-tab-bar').getBoundingClientRect().bottom+26;
+  let active=sections[0];for(const section of sections){if(section.getBoundingClientRect().top<=edge)active=section;else break;}
+  markActive(active.dataset.streamGroup);
+  const tab=host.querySelector('[aria-current=true]'),tabs=host.querySelector('.group-tabs');if(tab&&tabs){const r=tab.getBoundingClientRect(),t=tabs.getBoundingClientRect();if(r.left<t.left)tabs.scrollLeft-=t.left-r.left;else if(r.right>t.right)tabs.scrollLeft+=r.right-t.right;}
+ });}
+ window.addEventListener('scroll',syncScroll,{passive:true});
+ function anchor(id){
+  if(!continuous())return false;
+  markActive(id);
+  const section=[...document.querySelectorAll('#groups>[data-stream-group]')].find(e=>e.dataset.streamGroup===id);
+  section?.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+  return true;
+ }
+ window.ShiyuGroupViews={anchor};
+ function addToggle(host){
+  const button=document.createElement('button');button.type='button';button.className='group-layout-toggle';
+  button.dataset.groupLayoutToggle='';button.setAttribute('aria-pressed',String(continuous()));
+  button.title=continuous()?'切换为分组视图':'切换为连续视图';button.setAttribute('aria-label',button.title);
+  button.innerHTML=svgIcon(continuous()?'<path d="M4 5h16M4 12h16M4 19h16"/>':'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v5M15 4v5"/>')+'<span>'+(continuous()?'连续视图':'分组视图')+'</span>';
+  host.querySelector('[data-organize=group]')?.before(button);
+ }
+ renderGroups=function(){
+  if(rendering||view!=='space'||!scene()?.groups.length)return previous();
+  if(!continuous()){previous();const host=$('#groups');host.classList.remove('groups-continuous');addToggle(host);return;}
+  if(lastFilter!==filter){shown.clear();lastFilter=filter;}
+  const groups=[...scene().groups],selected=currentGroup().id,sections=new Map();rendering=true;
+  try{
+   if(displayScope()==='scene'&&!displayRule())previous();
+   // Render the selected group last so existing shared style controls retain their context.
+   for(const g of [...groups.filter(g=>g.id!==selected),groups.find(g=>g.id===selected)]){
+    activeGroups[sceneId]=g.id;previous();
+    const section=$('#groups .group:not([hidden])');if(!section)continue;
+    section.dataset.streamGroup=g.id;
+    const widthControl=section.querySelector('[data-column-settings]');if(g.id===selected&&widthControl)sections.widthControl=widthControl;
+    section.querySelector('#bookmark-pagination')?.remove();
+    const heading=section.querySelector('.group-heading');heading.replaceChildren();
+    const title=document.createElement('h2');title.innerHTML=entityIcon(g.icon||'folder');title.append(document.createTextNode(g.name));heading.append(title);
+    const items=[...section.querySelectorAll('.cards>.bookmark')],limit=shown.get(g.id)||100;
+    items.forEach((item,i)=>item.classList.toggle('page-hidden',i>=limit));
+    const footer=document.createElement('div');footer.className='group-stream-footer';
+    if(items.length>limit){const more=document.createElement('button');more.type='button';more.dataset.groupStreamMore=g.id;more.textContent='显示更多';footer.append(more);}
+    section.append(footer);sections.set(g.id,section);section.remove();
+   }
+   const host=$('#groups');host.querySelectorAll(':scope>.group').forEach(e=>e.remove());
+   groups.forEach(g=>{if(sections.has(g.id))host.append(sections.get(g.id));});
+   host.classList.add('groups-continuous');
+   host.querySelectorAll(':scope>.group-stream-summary').forEach(e=>e.remove());
+   const footer=document.createElement('div');footer.className='group-stream-summary';
+   const total=[...sections.values()].reduce((n,s)=>n+s.querySelectorAll('.cards>.bookmark').length,0);
+   footer.id='bookmark-pagination';footer.className='group-stream-summary';
+   const countLabel=document.createElement('span');countLabel.textContent='共 '+total+' 条';footer.append(countLabel);
+   if(sections.widthControl)footer.append(sections.widthControl);
+   host.append(footer);applyColumns();host.onscroll=syncScroll;
+   const tabs=host.querySelector('.group-tabs');tabs?.setAttribute('role','navigation');
+   tabs?.querySelectorAll('[data-group-tab]').forEach(b=>b.removeAttribute('role'));
+   activeGroups[sceneId]=selected;markActive(selected);addToggle(host);
+  }finally{activeGroups[sceneId]=selected;rendering=false;}
+ };
+ // Resolve context before the existing drag, edit and display-setting handlers run.
+ function context(e){const section=e.target.closest?.('#groups>[data-stream-group]');if(section&&continuous())markActive(section.dataset.streamGroup);}
+ window.addEventListener('pointerdown',context,true);window.addEventListener('click',context,true);window.addEventListener('focusin',context,true);
+ document.addEventListener('click',e=>{
+  if(e.target.closest('[data-group-layout-toggle]')){prefs.groupBrowseMode=continuous()?'tabs':'continuous';persist();renderGroups();return;}
+  const more=e.target.closest('[data-group-stream-more]');if(!more)return;
+  const section=more.closest('[data-stream-group]'),id=section.dataset.streamGroup,limit=(shown.get(id)||100)+100;shown.set(id,limit);
+  const items=[...section.querySelectorAll('.cards>.bookmark')];items.forEach((item,i)=>item.classList.toggle('page-hidden',i>=limit));if(items.length<=limit)more.remove();
+  document.dispatchEvent(new Event('group-stream-expanded'));
+ });
+ window.addEventListener('resize',()=>{
+  if(!continuous()||view!=='space')return;const selected=currentGroup()?.id;
+  document.querySelectorAll('#groups>[data-stream-group]').forEach(section=>{activeGroups[sceneId]=section.dataset.streamGroup;const fit=columnFit();section.querySelector('.cards')?.style.setProperty('--group-columns',fit.count);});
+  if(selected)activeGroups[sceneId]=selected;
+ });
+})();
+/* Anchor the grid style selector to its existing workspace entry. */
+(()=>{
+ const previous=openLinkSettings;
+ function position(){const d=document.querySelector('#link-view-settings.workspace-style-popover'),b=document.querySelector('.workspace [data-link-settings]');if(!d?.open||!b)return;const r=b.getBoundingClientRect();d.style.left=Math.max(12,Math.min(r.right-d.offsetWidth,innerWidth-d.offsetWidth-12))+'px';d.style.top=Math.max(12,r.top-d.offsetHeight-10)+'px';}
+ openLinkSettings=function(){previous();if(view!=='space'||!document.querySelector('.workspace [data-link-settings]'))return;const d=document.querySelector('#link-view-settings');if(d.matches(':modal'))d.close();d.classList.add('workspace-style-popover');if(!d.open)d.show();position();};
+ window.addEventListener('resize',position);
+ document.addEventListener('click',e=>{const d=document.querySelector('#link-view-settings.workspace-style-popover');if(d?.open&&!e.target.closest('#link-view-settings,[data-link-settings],[data-link-view]'))d.close();});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelector('#link-view-settings.workspace-style-popover')?.close();});
+})();

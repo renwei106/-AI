@@ -4952,7 +4952,7 @@
     "text": "Views & Styles"
   },
   "8852d1aba8c864eca599": {
-    "source": "右下角的小按钮可以切换常规视图与图谱视图，包括 3D 结构；旁边的椭圆按钮用来选择当前视图的样式。",
+    "source": "右下角的小按钮可以切换宫格视图与图谱视图，包括 3D 结构；旁边的椭圆按钮用来选择当前视图的样式。",
     "text": "Use the small button at the bottom right for regular or graph views, including 3D. The pill beside it selects a style."
   },
   "1d3df37a561dee9e54de": {
@@ -9036,7 +9036,7 @@
     "text": "Atlas"
   },
   "b3fa5713ccab0d95d92e": {
-    "source": "常规视图",
+    "source": "宫格视图",
     "text": "Standard"
   },
   "346d4859b69f1fb4fa31": {
@@ -10856,7 +10856,7 @@
     "text": "Make every day your own"
   },
   "18fb3a4b3ad8e62939b0": {
-    "source": "从首页字体与配色，到常规视图的网址样式，自由搭配。",
+    "source": "从首页字体与配色，到宫格视图的网址样式，自由搭配。",
     "text": "Mix fonts, colors and link styles to suit you."
   },
   "0cbf8488de4fb9ff43b4": {

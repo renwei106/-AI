@@ -48,6 +48,7 @@ body[data-view=space]>header{display:none}body[data-view=space] .workspace{margi
 .scene-actions .scene-manage{border:0;border-radius:9px;width:100%}.sidebar .scene-button{user-select:none;touch-action:pan-x}.sidebar .scene-button.scene-dragging{opacity:.65;outline:1px dashed var(--accent);cursor:grabbing;background:var(--soft)}
 .organization-list .inline-create{border-color:var(--accent);gap:8px}.inline-create input{min-width:0;flex:1;width:100%;border:0;outline:none;background:transparent;color:var(--ink);font:inherit}.inline-create small{font-size:10px;color:var(--muted);white-space:nowrap}.inline-create input[aria-invalid=true]{color:#bb6655}
 .entity-icon{width:17px;height:17px;flex-shrink:0;vertical-align:middle}.group-tabs button{display:flex;align-items:center;gap:8px}.group-tabs small{margin-left:0}.organization-list .entity-icon-button{width:30px;height:30px;flex:0 0 30px;padding:6px;border-radius:7px;color:var(--ink)}.entity-icon-button:hover{background:var(--soft)}#entity-icon-picker{width:min(380px,calc(100vw - 32px))}.entity-icon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.entity-icon-grid button{display:flex;flex-direction:column;align-items:center;gap:9px;padding:14px 6px;border-radius:10px}.entity-icon-grid button:hover,.entity-icon-grid button[aria-pressed=true]{background:var(--soft);color:var(--accent)}.entity-icon-grid small{font-size:10px}.entity-icon-grid .entity-icon{width:22px;height:22px}
+.drag-visual[data-group-tab]{white-space:nowrap;font-size:14px;padding:14px 0}.drag-visual[data-group-tab] small{margin-left:0;font-size:10px;opacity:.6}
 .group-tabs [data-group-tab]{user-select:none;touch-action:pan-y}.group-tabs .group-dragging{background:var(--soft);outline:1px dashed var(--accent);outline-offset:-2px;border-radius:8px;opacity:.75;cursor:grabbing}.space-dragging,.scene-dragging,.group-dragging{position:relative;z-index:2}
 /* Give lifted artwork room inside the horizontal scroll viewport. */ .space-strip{padding-top:18px;padding-bottom:12px}.space-management{justify-content:center}.space-management button:only-child{flex:0 1 auto;min-width:132px;padding:9px 22px}
 /* Keep long management lists within the viewport. */
@@ -925,7 +926,7 @@ body:not([data-view=home]) > .utility-search{display:none}
 .header-right [data-v5="fullscreen"]{display:none!important}
 body>.color-pull-cord{right:86px;height:84px}
 body>.color-pull-cord .color-cord-line{height:calc(59px + var(--pull,0px))}
-body[data-view=space]>.color-pull-cord,body.atlas-active>.color-pull-cord,body.world-active>.color-pull-cord{display:none!important}
+body.world-active>.color-pull-cord{display:none!important}
 body>.global-fullscreen-cord{right:52px;width:34px;height:112px;--fullscreen-ink:#454545;--fullscreen-surface:#f4f4f4}
 body[data-dark=true]>.global-fullscreen-cord{--fullscreen-ink:#eee;--fullscreen-surface:#292929}
 .global-fullscreen-cord .mode-cord-line{bottom:22px;height:calc(90px + var(--pull,0px));background:var(--fullscreen-ink)}
@@ -952,3 +953,73 @@ body[data-view=space] .space-top-actions :is(.global-search-trigger,.space-share
 #world-page .world-header :is(.shiyu-language-trigger,.account-entry):hover,
 body[data-view=space] .space-top-actions :is(.global-search-trigger,.space-share,.display-scope-button,.account-entry):hover,
 #space-atlas .at-header-actions :is(.global-search-trigger,.space-share,.display-scope-button,.account-entry):hover{background:var(--surface)}
+/* Cord disclosure: keep the day/night cord visible; reserve one hover region. */
+body>.global-fullscreen-cord,body>.color-pull-cord,#my-corner .corner-pull-cord:is([data-corner-cord=fullscreen],[data-corner-cord=color]){height:0!important;overflow:clip;opacity:1!important;visibility:visible;pointer-events:none;transition:height .78s cubic-bezier(.22,.68,.25,1.18)}
+body>.global-fullscreen-cord,#my-corner .corner-pull-cord:is([data-corner-cord=fullscreen],[data-corner-cord=color]){--cord-drop-height:112px}
+body>.color-pull-cord{--cord-drop-height:84px}
+body.cords-expanded>.global-fullscreen-cord,body.cords-expanded>.color-pull-cord,#my-corner.cords-expanded .corner-pull-cord:is([data-corner-cord=fullscreen],[data-corner-cord=color]){height:var(--cord-drop-height)!important;opacity:1!important;visibility:visible;pointer-events:auto}
+body>.global-fullscreen-cord .mode-cord-line,#my-corner .corner-pull-cord:is([data-corner-cord=fullscreen],[data-corner-cord=color]) .mode-cord-line{top:0;bottom:auto;height:max(0px,calc(100% - 22px + var(--pull,0px)))}
+body>.color-pull-cord .color-cord-line{top:0;bottom:auto;height:max(0px,calc(100% - 24px + var(--pull,0px)))}
+@media(max-width:760px){body>.global-fullscreen-cord,#my-corner .corner-pull-cord:is([data-corner-cord=fullscreen],[data-corner-cord=color]){--cord-drop-height:94px}body>.color-pull-cord{--cord-drop-height:66px}}
+body>:is(.mode-pull-cord,.color-pull-cord),#my-corner .corner-pull-cord{z-index:10002!important}
+.cord-hover-shield{position:fixed;top:0;right:0;width:130px;height:174px;z-index:10001;background:transparent;pointer-events:auto}
+body.cords-expanded>header .header-right,body.cords-expanded .space-top-actions,body.cords-expanded #world-page .world-header>:is(.world-home,.shiyu-language-picker,.account-menu-wrap),dialog.cords-expanded .at-header-actions{opacity:.06!important;pointer-events:none!important}
+@media(prefers-reduced-motion:reduce){body>.global-fullscreen-cord,body>.color-pull-cord,#my-corner .corner-pull-cord{transition:none}}
+/* Space keeps its existing theme-color control as the third, shortest cord. */
+body[data-view=space]:not(.world-active)>.color-pull-cord{display:flex!important}
+/* The world host and open corner previously forced hidden source cords back on top. */
+body.world-active[data-view]>.global-fullscreen-cord:not(.corner-pull-cord){visibility:visible!important;pointer-events:none!important;opacity:1!important}
+body.world-active[data-view].cords-expanded>.global-fullscreen-cord:not(.corner-pull-cord){visibility:visible!important;pointer-events:auto!important;opacity:1!important}
+body:has(#my-corner[open])>:is(.mode-pull-cord,.color-pull-cord){display:none!important;visibility:hidden!important;pointer-events:none!important}
+#my-corner[open] button.corner-pull-cord:is([data-corner-cord=fullscreen],[data-corner-cord=color]){visibility:visible;pointer-events:none;opacity:1!important}
+#my-corner[open].cords-expanded button.corner-pull-cord:is([data-corner-cord=fullscreen],[data-corner-cord=color]){visibility:visible;pointer-events:auto;opacity:1!important}
+body[data-view=space]:not(.world-active)>.mode-pull-cord:not(.global-fullscreen-cord){opacity:1!important}
+
+/* Let the cords fall at the same pace above every page, including dialogs. */
+#my-corner[open] button.corner-pull-cord:is([data-corner-cord=fullscreen],[data-corner-cord=color]),body>button.global-fullscreen-cord,body>button.color-pull-cord{transition:height .78s cubic-bezier(.22,.68,.25,1.18)!important}
+body>header .header-right,.space-top-actions,#world-page .world-header>:is(.world-home,.shiyu-language-picker,.account-menu-wrap),#space-atlas .at-header-actions{transition:opacity .8s ease}
+@media(prefers-reduced-motion:reduce){#my-corner[open] button.corner-pull-cord:is([data-corner-cord=fullscreen],[data-corner-cord=color]),body>button.global-fullscreen-cord,body>button.color-pull-cord{transition:none!important}body>header .header-right,.space-top-actions,#world-page .world-header>:is(.world-home,.shiyu-language-picker,.account-menu-wrap),#space-atlas .at-header-actions{transition:none}}
+
+#my-corner .corner-pull-cord[data-corner-cord=color]{--cord-drop-height:84px;display:flex!important}
+#my-corner .corner-pull-cord[data-corner-cord=color] .color-cord-line{top:0;bottom:auto;height:max(0px,calc(100% - 24px + var(--pull,0px)))}
+@media(max-width:760px){#my-corner .corner-pull-cord[data-corner-cord=color]{--cord-drop-height:66px}}
+/* Scene browsing mode; existing bookmark styles remain owned by each group. */
+.group-layout-toggle{display:inline-flex;align-items:center;gap:6px;flex:none;padding:8px 10px;border-radius:9px;background:var(--soft);color:var(--ink);font-size:12px;white-space:nowrap}
+.group-layout-toggle svg{width:16px;height:16px}
+.group-layout-toggle{width:34px;height:34px;padding:0;justify-content:center}
+.group-layout-toggle span{display:none}
+.group-layout-toggle:hover{background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+.groups-continuous>.group{scroll-margin-top:24px;margin-bottom:36px}
+@media(min-width:761px){
+ body[data-view=space]:not(.atlas-active) #groups.groups-continuous{display:block;overflow-y:auto;scrollbar-width:thin;padding-bottom:104px;scroll-padding-top:76px}
+ body[data-view=space]:not(.atlas-active) #groups.groups-continuous>.group:not([hidden]){flex:none;height:auto;max-height:none;overflow:visible;padding-bottom:0;overscroll-behavior:auto}
+ body[data-view=space]:not(.atlas-active) #groups.groups-continuous>.group-tab-bar{position:sticky;top:0;z-index:20;margin-top:0}
+
+}
+.groups-continuous>.group>.group-heading{display:flex;justify-content:flex-start;margin:0 0 16px}
+.groups-continuous>.group>.group-heading h2{display:block;margin:0;font-size:16px;font-weight:500;color:var(--ink)}
+.groups-continuous .group-tabs [aria-current=true]{color:var(--ink);border-color:var(--accent)}
+.group-stream-footer{display:flex;align-items:center;gap:12px;margin-top:18px;color:var(--muted);font-size:12px}
+.group-stream-footer button{padding:6px 10px;border-radius:8px;background:var(--soft);color:var(--ink);font-size:12px}
+@media(max-width:760px){.group-layout-toggle{padding:7px}.group-layout-toggle span{display:none}.groups-continuous>.group{margin-bottom:28px}}
+
+.groups-continuous .group-heading h2{display:flex!important;align-items:center;gap:8px}
+.group-stream-footer:empty{display:none}
+/* Both browsing modes share the same navigation geometry. */
+body[data-view=space]:not(.atlas-active) #groups>.group-tab-bar{margin-top:0;padding-top:8px}
+
+#corner-space-menu .corner-space-row{display:flex;align-items:center;border-radius:9px}
+#corner-space-menu .corner-space-row[data-current=true]{background:var(--soft)}
+#corner-space-menu .corner-space-row>[data-corner-space]{flex:1;min-width:0;background:transparent}
+#corner-space-menu .corner-space-view{flex:none;width:auto;padding:7px 8px;font-size:10px;color:var(--muted);white-space:nowrap;border-radius:7px}
+#corner-space-menu .corner-space-view:hover{background:var(--soft);color:var(--accent)}
+
+#corner-space-menu .corner-space-view{position:relative;width:30px;height:30px;padding:7px;display:grid;place-items:center;overflow:visible}
+.corner-space-view>svg{width:16px;height:16px}
+.corner-view-hint{display:none;position:absolute;left:calc(100% + 12px);top:50%;transform:translateY(-50%);padding:8px 10px;border-radius:8px;background:var(--surface);color:var(--ink);box-shadow:0 4px 18px #0002;white-space:nowrap;pointer-events:none;z-index:2}
+.corner-space-view:is(:hover,:focus-visible) .corner-view-hint{display:block}
+/* One surface treatment for workspace toolbar icon actions. */
+body[data-view=space] .workspace :is(.space-top-actions .global-search-trigger,.space-top-actions .space-share,.space-top-actions .display-scope-button,.space-top-actions .account-entry,.group-tab-bar>.group-layout-toggle,.group-tab-bar>[data-organize=group]){background:color-mix(in srgb,var(--surface) 65%,transparent);border-radius:10px;box-shadow:none}
+body[data-view=space] .workspace :is(.space-top-actions .global-search-trigger,.space-top-actions .space-share,.space-top-actions .display-scope-button,.space-top-actions .account-entry,.group-tab-bar>.group-layout-toggle,.group-tab-bar>[data-organize=group]):is(:hover,:focus-visible){background:var(--surface)}
+#link-view-settings.workspace-style-popover{position:fixed;inset:auto;margin:0;width:min(360px,calc(100vw - 24px));max-height:calc(100dvh - 100px);overflow:auto;padding:20px;z-index:200;box-shadow:0 12px 36px #0002}
+#link-view-settings.workspace-style-popover .link-view-grid{max-height:40vh;margin:16px 0}

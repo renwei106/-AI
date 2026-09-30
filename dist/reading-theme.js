@@ -130,7 +130,7 @@
   function layoutShelves(cards){
     if(!cards||cards.dataset.display!=='shelf')return;
     const books=[...cards.querySelectorAll(':scope>.bookmark:not(.page-hidden)')],add=cards.querySelector(':scope>.shelf-add');
-    const fit=columnFit(),cols=fit.count;
+    const cols=cards.closest('[data-stream-group]')?Number(cards.style.getPropertyValue('--group-columns'))||columnFit().count:columnFit().count;
     cards.style.setProperty('--shelf-columns',cols);
     const count=books.length+(add?1:0),banks=Math.max(1,Math.ceil(count/(cols*4)));
     cards.style.gridTemplateRows=Array.from({length:banks},(_,i)=>{
@@ -146,8 +146,8 @@
     });
     for(let i=0;i<banks;i++){const plank=document.createElement('i');plank.className='shelf-plank';plank.setAttribute('aria-hidden','true');plank.style.gridColumn='1 / -1';plank.style.gridRow=String(i*5+Math.min(4,count-i*cols*4)+1);cards.append(plank);}
   }
-  function dressShelves(){
-    const cards=$('.group:not([hidden]) .cards');if(!cards||cards.dataset.display!=='shelf')return;
+  function dressShelves(cards){
+    if(!cards||cards.dataset.display!=='shelf')return;
     cards.querySelectorAll(':scope>.bookmark').forEach((el,i)=>{
       const a=el.querySelector('a'),head=a?.querySelector('.bookmark-head'),title=head?.querySelector('strong'),logo=head?.querySelector('.site-icon');
       if(!title||!logo)return;
@@ -164,13 +164,15 @@
     layoutShelves(cards);
   }
   const groupsBefore=renderGroups;
-  renderGroups=function(){groupsBefore();dressShelves();};
+  const visibleShelves=()=>document.querySelectorAll('.group:not([hidden]) .cards[data-display="shelf"]');
+  renderGroups=function(){groupsBefore();visibleShelves().forEach(dressShelves);};
   const pagesBefore=paginateBookmarks;
   paginateBookmarks=function(){pagesBefore();layoutShelves($('.group:not([hidden]) .cards'));};
   const refreshBefore=refreshColumnFit;
-  refreshColumnFit=function(){refreshBefore();layoutShelves($('.group:not([hidden]) .cards'));};
+  refreshColumnFit=function(){refreshBefore();visibleShelves().forEach(layoutShelves);};
+  document.addEventListener('group-stream-expanded',()=>visibleShelves().forEach(layoutShelves));
   let resizeFrame=0;
-  window.addEventListener('resize',()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>layoutShelves($('.group:not([hidden]) .cards')));});
+  window.addEventListener('resize',()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>visibleShelves().forEach(layoutShelves));});
   // Keep the existing long-press interaction; only recalculate this style's shelf slots.
   const reorderBefore=animatedReorder;
   animatedReorder=function(parent,el,next){

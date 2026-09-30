@@ -410,7 +410,8 @@
   }
   function syncCornerCords(){
     if(!panel?.open)return;
-    const cords=[['mode','.mode-pull-cord:not(.global-fullscreen-cord)'],['fullscreen','.global-fullscreen-cord']];
+    mountModeCord();mountFullscreenCord();mountColorCord();
+    const cords=[['mode','.mode-pull-cord:not(.global-fullscreen-cord)'],['fullscreen','.global-fullscreen-cord'],['color','.color-pull-cord']];
     for(const [kind,selector] of cords){
       const source=document.querySelector('body>'+selector);if(!source)continue;
       let cord=panel.querySelector('[data-corner-cord="'+kind+'"]');
@@ -427,8 +428,7 @@
         cord.onpointercancel=e=>{e.stopPropagation();start=null;release(false);};
         cord.onclick=e=>{e.preventDefault();e.stopPropagation();if(!suppress)release(true);};
       }
-      const r=source.getBoundingClientRect();cord.style.left=r.left+'px';cord.style.right='auto';cord.style.top=r.top+'px';cord.style.width=r.width+'px';cord.style.height=r.height+'px';
-      if(kind==='fullscreen'){cord.style.left=r.left+'px';cord.style.height=r.height+'px';}
+      const style=getComputedStyle(source),width=parseFloat(style.width),height=parseFloat(style.height),left=innerWidth-parseFloat(style.right)-width;cord.style.left=left+'px';cord.style.right='auto';cord.style.top='0px';cord.style.width=width+'px';cord.style.height=height+'px';
       cord.title=kind==='fullscreen'?(document.fullscreenElement===fullscreenShell?'点击或下拉，退出全屏':'点击或下拉，进入全屏'):kind==='mode'?'点击或下拉，切换日夜模式':'点击或下拉，切换主颜色';cord.setAttribute('aria-label',cord.title);
       if(kind==='color'){cord.style.setProperty('--cord-color',prefs.color||effective().color);cord.style.setProperty('--next-color',nextPalette()[0]);}
       else if(kind==='mode')cord.dataset.nextMode=source.dataset.nextMode;
@@ -847,12 +847,14 @@
     if(switchOrigin===trigger&&switchMenu&&!switchMenu.hidden){closeSwitch();return;}
     closeSwitch();switchOrigin=trigger;
     if(!switchMenu){switchMenu=document.createElement('div');switchMenu.id='corner-space-menu';switchMenu.setAttribute('role','region');switchMenu.setAttribute('aria-label','切换与管理空间');document.body.append(switchMenu);}
-    switchMenu.innerHTML=`<div class="corner-switch-heading"><p>切换空间</p><button data-organize="space">管理空间</button></div><div class="corner-switch-list">${data.map(s=>`<button data-corner-space="${s.id}" aria-current="${s.id===spaceId}"><i>${entityIcon(s.icon)}</i><span>${esc(s.name)}</span>${s.id===spaceId?'<small>✓</small>':''}</button>`).join('')}</div><button class="corner-add-space" data-create="space">${glyph('<path d="M12 5v14M5 12h14"/>')}添加空间</button>`;
+    switchMenu.innerHTML=`<div class="corner-switch-heading"><p>切换空间</p><button data-organize="space">管理空间</button></div><div class="corner-switch-list">${data.map(s=>`<div class="corner-space-row" data-current="${s.id===spaceId}"><button data-corner-space="${s.id}" aria-current="${s.id===spaceId}"><i>${entityIcon(s.icon)}</i><span>${esc(s.name)}</span></button><button class="corner-space-view" data-corner-view="${s.id}" aria-label="${window.ShiyuSpaceViews?.label(s.id)||'宫格视图'}，点击切换视图">${window.ShiyuSpaceViews?.markup(s.id)||entityIcon('grid')}</button></div>`).join('')}</div><button class="corner-add-space" data-create="space">${glyph('<path d="M12 5v14M5 12h14"/>')}添加空间</button>`;
+    switchMenu.querySelectorAll('.corner-space-view').forEach(b=>{const place=()=>{const r=b.getBoundingClientRect(),hint=b.querySelector('.corner-view-hint');if(hint){hint.style.position='fixed';hint.style.left=(r.right+12)+'px';hint.style.top=(r.top+r.height/2)+'px';}};b.onpointerenter=place;b.onfocus=place;});
     switchMenu.hidden=false;const r=trigger.getBoundingClientRect();switchMenu.style.left=Math.max(12,Math.min(r.left,innerWidth-272))+'px';switchMenu.style.top=r.bottom+10+'px';trigger.setAttribute('aria-expanded','true');
   }
   document.addEventListener('click',e=>{
     const button=e.target.closest('button');
     if(button?.hasAttribute('data-corner-switch')){openSwitch(button);return;}
+    if(button?.dataset.cornerView){window.ShiyuSpaceViews?.toggle(button,button.dataset.cornerView);return;}
     if(button?.dataset.cornerSpace){closeSwitch();goSpace(button.dataset.cornerSpace);window.scrollTo({top:0,behavior:'instant'});return;}
     if(button?.closest('#corner-space-menu')&&(button.dataset.organize||button.dataset.create))closeSwitch();
     if(!e.target.closest('#corner-space-menu'))closeSwitch();
@@ -950,7 +952,8 @@
  }
  function attachMenus(){
    document.querySelectorAll('.workspace .bookmark [data-bookmark-edit]').forEach(b=>{
-     const ctx={...context(),item:currentGroup().items[Number(b.dataset.bookmarkEdit)]};if(!ctx.item)return;
+     const g=scene().groups.find(g=>g.id===b.closest('[data-stream-group]')?.dataset.streamGroup)||currentGroup();
+     const ctx={...context(),g,item:g.items[Number(b.dataset.bookmarkEdit)]};if(!ctx.item)return;
      b.removeAttribute('data-bookmark-edit');b.dataset.bookmarkMenu='';b.innerHTML=icons.more;b.title='网址操作';b.setAttribute('aria-label','管理 '+ctx.item[0]);b.setAttribute('aria-haspopup','menu');b.setAttribute('aria-controls','bookmark-action-menu');b.setAttribute('aria-expanded','false');
      b.onpointerenter=()=>openMenu(b,ctx);b.onpointerleave=deferClose;b.onclick=event=>{event.preventDefault();event.stopPropagation();openMenu(b,ctx,event.detail===0)};
      b.onkeydown=event=>{if(event.key==='ArrowDown'){event.preventDefault();openMenu(b,ctx,true)}};

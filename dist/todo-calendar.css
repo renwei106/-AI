@@ -222,3 +222,12 @@ body[data-dark=true] #my-corner[data-corner-module=todo] .tc-root{--tc-toolbar:#
 /* Keep drag gestures from selecting text, without affecting editor fields. */
 #my-corner[data-corner-module=todo] .tc-task-row,#my-corner[data-corner-module=todo] [data-tc-group-head],body.tc-dragging{user-select:none;-webkit-user-select:none}
 #my-corner[data-corner-module=todo] .tc-root button.tc-primary,#my-corner[data-corner-module=todo] .tc-root button.tc-primary:is(:hover,:focus-visible){color:var(--tc-button-ink,#fff)!important}
+
+/* Use the space freed beside the collapsed cords in the desktop todo toolbar. */
+@media(min-width:1051px){
+  #my-corner[data-corner-module=todo] .tc-root .tc-toolbar{padding-right:18px}
+  #my-corner[data-corner-module=todo] .tc-root .tc-view-switch{right:168px}
+  #my-corner[data-corner-module=todo] .tc-root .tc-search{right:32px}
+}
+/* Center both states of the close/home icon within this module's bottom tab. */
+#my-corner[data-corner-module=todo] .corner-close-icon{top:12px}

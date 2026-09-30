@@ -506,3 +506,9 @@ body:is(.atlas-active,.atlas-transitioning) .workspace .space-heading-controls{v
 #space-atlas .at-full-page[data-mode="3d"][data-presentation="spatial"] .at-line.is-muted{opacity:.08}
 #space-atlas .at-full-page[data-mode="3d"][data-presentation="spatial"] .at-line[data-level="2"].is-related{opacity:.4}
 #space-atlas .at-full-page[data-mode="3d"] .at-satellite-track{opacity:.35}
+#space-atlas .at-view-picker>.at-quiet{width:auto;max-width:calc(100vw - 140px);box-sizing:border-box}
+#space-atlas .at-view-picker>.at-quiet>.at-view-current{width:auto;flex:0 1 auto;box-sizing:border-box}
+#space-atlas .at-view-picker>.at-quiet>.at-view-current>b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#space-atlas .at-view-picker>.at-quiet>.at-view-current>svg:last-child{width:12px;height:12px;margin-left:0;flex:none}
+#space-atlas .at-view-picker>.at-quiet{width:max-content}
+#space-atlas .at-view-picker>.at-quiet>.at-view-current{flex:none}

@@ -7,6 +7,8 @@ body[data-theme=flow][data-view=home][data-dark=true] .brand-theme-menu { --ink:
 body[data-theme=flow][data-view=home] .brand,body[data-theme=flow][data-view=home] .header-right>.icon-button,body[data-theme=flow][data-view=home] .account-entry { color:var(--flow-ink,#f5f7ff); }
 body[data-theme=flow][data-view=home] .account-entry { background:color-mix(in srgb,var(--flow-ink,#f5f7ff) 12%,transparent); }
 body[data-theme=flow][data-view=home] .header-right>[data-action=settings] { --bg:transparent; }
+body[data-theme=flow][data-view=home][data-dark=false] .header-right :is(.shiyu-language-trigger,[data-action="settings"]){color:var(--flow-ink,#f5f7ff)}
+body[data-theme=flow][data-view=home][data-dark=false] .header-right :is(.shiyu-language-trigger,[data-action="settings"]):hover{background:color-mix(in srgb,var(--flow-ink,#f5f7ff) 14%,transparent)}
 .home.home-flow { height:calc(100svh - 86px); min-height:0; padding:0; overflow:hidden; }
 .flow-cover { position:fixed; inset:0; z-index:0; overflow:hidden; background:color-mix(in srgb,var(--accent) 88%,#dce5ff); color:var(--flow-ink,#f5f7ff); }
 body[data-dark=false] .flow-cover { background:hsl(from var(--accent) h s 38%); }

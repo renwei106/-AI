@@ -113,7 +113,7 @@
       switcher.querySelector('span').textContent=current.name;switcher.setAttribute('aria-label','切换空间：'+current.name);
       button.querySelector('.space-mode-indicator').innerHTML=atlas?icons.graph:icons.grid;
       button.hidden=!atlas&&!graphAllowed();
-      button.setAttribute('aria-label','切换视图，当前'+(atlas?'图谱视图':'常规视图'));
+      button.setAttribute('aria-label','切换视图，当前'+(atlas?'图谱视图':'宫格视图'));
       const host=atlas?query('.at-view-tools'):document.querySelector('.workspace-tools .group-view-controls');
       if(host)host.insertBefore(button,atlas?host.querySelector('.at-layout-picker'):host.firstChild);
     }
@@ -137,7 +137,7 @@
   function clearCordOverlap(target,gap=14){
     if(!target)return;
     target.style.translate='';const box=target.getBoundingClientRect();let shift=0;
-    for(const cord of document.querySelectorAll('.mode-pull-cord,.color-pull-cord')){if(getComputedStyle(cord).display==='none')continue;const r={left:cord.offsetLeft,top:cord.offsetTop,right:cord.offsetLeft+cord.offsetWidth,bottom:cord.offsetTop+cord.offsetHeight};if(box.top<r.bottom&&box.bottom>r.top&&box.left<r.right+gap&&box.right>r.left-gap)shift=Math.min(shift,r.left-gap-box.right)}
+    for(const cord of document.querySelectorAll('.mode-pull-cord,.color-pull-cord')){if(cord.matches('.global-fullscreen-cord,.color-pull-cord,[data-corner-cord=fullscreen]')||getComputedStyle(cord).display==='none')continue;const r={left:cord.offsetLeft,top:cord.offsetTop,right:cord.offsetLeft+cord.offsetWidth,bottom:cord.offsetTop+cord.offsetHeight};if(box.top<r.bottom&&box.bottom>r.top&&box.left<r.right+gap&&box.right>r.left-gap)shift=Math.min(shift,r.left-gap-box.right)}
     if(shift)target.style.translate=shift+'px 0';
   }
   function syncCordClearance(){
@@ -150,25 +150,27 @@
   function modeButton(name,atlas=false){
     const b=document.createElement('button');b.type='button';b.className='space-mode-entry';
     const s=data.find(s=>s.id===(atlas?state.sid:spaceId)),mark=typeof entityIcon==='function'?entityIcon(s?.icon||'work'):icons.space;
-    b.innerHTML='<i class="space-detail-icon">'+mark+'</i><span class="space-mode-name">'+esc(name)+'</span><i class="space-mode-indicator" title="'+(atlas?'图谱视图':'常规视图')+'">'+(atlas?icons.graph:icons.grid)+'</i>'+icons.down;
-    b.setAttribute('aria-label',name+'，当前'+(atlas?'图谱视图':'常规视图')+'，切换空间展示方式');b.setAttribute('aria-expanded','false');b.setAttribute('aria-haspopup','true');
+    b.innerHTML='<i class="space-detail-icon">'+mark+'</i><span class="space-mode-name">'+esc(name)+'</span><i class="space-mode-indicator" title="'+(atlas?'图谱视图':'宫格视图')+'">'+(atlas?icons.graph:icons.grid)+'</i>'+icons.down;
+    b.setAttribute('aria-label',name+'，当前'+(atlas?'图谱视图':'宫格视图')+'，切换空间展示方式');b.setAttribute('aria-expanded','false');b.setAttribute('aria-haspopup','true');
     b.onpointerenter=()=>showModeMenu(b);b.onclick=()=>{hideModeMenu();if(dialog?.open)closeAtlas('daily');else open(spaceId,b)};b.onpointerleave=()=>{menuTimer=setTimeout(hideModeMenu,240)};
     const controls=document.createElement('div');controls.className='space-heading-controls';
     const switcher=document.createElement('button');switcher.type='button';switcher.className='corner-space-switch';switcher.dataset.cornerSwitch='';switcher.setAttribute('aria-label','切换空间：'+name);switcher.setAttribute('aria-expanded','false');switcher.setAttribute('aria-haspopup','true');
     switcher.innerHTML='<i class="space-detail-icon">'+mark+'</i><span>'+esc(name)+'</span>'+icons.down;
-    b.innerHTML='<i class="space-mode-indicator">'+(atlas?icons.graph:icons.grid)+'</i>';b.title='切换视图';b.setAttribute('aria-label','切换视图，当前'+(atlas?'图谱视图':'常规视图'));
+    b.innerHTML='<i class="space-mode-indicator">'+(atlas?icons.graph:icons.grid)+'</i>';b.title='切换视图';b.setAttribute('aria-label','切换视图，当前'+(atlas?'图谱视图':'宫格视图'));
     sharedModeButton=b;controls.append(switcher);return controls;
   }
+  window.ShiyuSpaceViews={label:sid=>(sid===spaceId?!!dialog?.open:entryPresentation(sid)?.view==='atlas')?'图谱视图':'宫格视图',show:showModeMenu,markup:sid=>{const graph=sid===spaceId?!!dialog?.open:entryPresentation(sid)?.view==='atlas';return (graph?icons.graph:icons.grid)+'<span class="corner-view-hint">当前'+(graph?'图谱视图':'宫格视图')+'，点击切换为'+(graph?'宫格视图':'图谱视图')+'</span>';},toggle:(button,sid)=>{const graph=sid===spaceId?!!dialog?.open:entryPresentation(sid)?.view==='atlas';if(!graph&&(!graphAllowed()||!window.ShiyuEntitlements?.require('atlas-2d',undefined,'atlas')))return;if(graph&&!spaceViews().regular.enabled)return;if(sid===spaceId){if(graph)closeAtlas('daily');else open(sid,button);}else{rememberPresentation(sid,graph?'daily':'atlas');writeSaved();}button.innerHTML=window.ShiyuSpaceViews.markup(sid);button.setAttribute('aria-label',window.ShiyuSpaceViews.label(sid)+'，点击切换视图');}};
   function hideModeMenu(){if(modeMenu)modeMenu.hidden=true;document.querySelectorAll('.space-mode-entry').forEach(b=>b.setAttribute('aria-expanded','false'))}
-  function showModeMenu(button){
+  function showModeMenu(button,sid=spaceId){
     clearTimeout(menuTimer);menuTrigger=button;
     if(!modeMenu){modeMenu=document.createElement('div');modeMenu.id='space-mode-menu';document.body.append(modeMenu);modeMenu.onpointerenter=()=>clearTimeout(menuTimer);modeMenu.onpointerleave=()=>{menuTimer=setTimeout(hideModeMenu,240)};modeMenu.onkeydown=e=>{if(e.key==='Escape'){hideModeMenu();menuTrigger?.focus()}}}
-    const active=!!dialog?.open;
-    modeMenu.innerHTML=`<p>空间展示方式</p>${(!remoteSpaceAccess||window.ShiyuFeatureConfig?.allowed('spaceViews')===false||spaceViews().regular.enabled)?'<button data-space-mode="daily" aria-pressed="'+(!active)+'"><span class="mode-preview mode-preview-daily"><i></i><i></i><i></i></span><span><b>'+esc(remoteNames['spaceViews.regular']||'常规视图')+'</b><small>按场景和分组整齐呈现，适合日常浏览、搜索与管理</small></span></button>':''}${graphAllowed()?'<button data-space-mode="atlas" aria-pressed="'+active+'"><span class="mode-preview mode-preview-atlas">'+icons.graph+'</span><span><b>'+esc(remoteNames['spaceViews.graph']||'图谱视图')+'</b><small>用节点和连线展开层级，适合查看上下级与整体关系</small></span></button>':''}`;
+    const active=sid===spaceId?!!dialog?.open:entryPresentation(sid)?.view==='atlas';
+    modeMenu.innerHTML=`<p>空间展示方式</p>${(!remoteSpaceAccess||window.ShiyuFeatureConfig?.allowed('spaceViews')===false||spaceViews().regular.enabled)?'<button data-space-mode="daily" aria-pressed="'+(!active)+'"><span class="mode-preview mode-preview-daily"><i></i><i></i><i></i></span><span><b>'+esc(remoteNames['spaceViews.regular']||'宫格视图')+'</b><small>按场景和分组整齐呈现，适合日常浏览、搜索与管理</small></span></button>':''}${graphAllowed()?'<button data-space-mode="atlas" aria-pressed="'+active+'"><span class="mode-preview mode-preview-atlas">'+icons.graph+'</span><span><b>'+esc(remoteNames['spaceViews.graph']||'图谱视图')+'</b><small>用节点和连线展开层级，适合查看上下级与整体关系</small></span></button>':''}`;
     const rect=button.getBoundingClientRect();modeMenu.hidden=false;modeMenu.style.left=clamp(rect.right-modeMenu.offsetWidth,12,innerWidth-modeMenu.offsetWidth-12)+'px';modeMenu.style.top=Math.max(12,rect.top-modeMenu.offsetHeight-9)+'px';button.setAttribute('aria-expanded','true');
-    modeMenu.onclick=e=>{const choice=e.target.closest('[data-space-mode]');if(!choice)return;hideModeMenu();if(choice.dataset.spaceMode==='atlas'){if(!dialog?.open)open(spaceId,button)}else if(dialog?.open)closeAtlas('daily')};
+    if(button.matches('.corner-space-view')){const menu=button.closest('#corner-space-menu'),r=menu.getBoundingClientRect();modeMenu.style.left=clamp(r.right+8,12,innerWidth-modeMenu.offsetWidth-12)+'px';modeMenu.style.top=clamp(rect.top,12,innerHeight-modeMenu.offsetHeight-12)+'px';modeMenu.style.zIndex=String((Number(getComputedStyle(menu).zIndex)||100)+1);}else modeMenu.style.zIndex='';
+    modeMenu.onclick=e=>{const choice=e.target.closest('[data-space-mode]');if(!choice)return;hideModeMenu();if(sid!==spaceId){if(choice.dataset.spaceMode==='atlas'&&!window.ShiyuEntitlements?.require('atlas-2d',undefined,'atlas'))return;rememberPresentation(sid,choice.dataset.spaceMode);writeSaved();button.textContent=choice.dataset.spaceMode==='atlas'?'图谱视图':'宫格视图';return;}if(choice.dataset.spaceMode==='atlas'){if(!dialog?.open)open(spaceId,button)}else if(dialog?.open)closeAtlas('daily')};
   }
-  document.addEventListener('click',e=>{if(!e.target.closest('#space-mode-menu,.space-mode-entry'))hideModeMenu()});
+  document.addEventListener('click',e=>{if(!e.target.closest('#space-mode-menu,.space-mode-entry,.corner-space-view'))hideModeMenu()});
   function open(sid,trigger,preset,directEntry=false) {
     if(!graphAllowed())return;
     returnFocus=trigger;state.sid=sid;state.focus='s:'+sid;preferences();resetCamera();
@@ -185,7 +187,7 @@
       dialog.addEventListener('input',input);
       dialog.addEventListener('keydown',keydown);
       dialog.addEventListener('close',resetReturnWheel);
-      dialog.addEventListener('close',()=>{const goHome=leavingForHome;leavingForHome=false;atlasClosing=false;clearTimeout(atlasTransitionTimer);atlasTransitionTimer=0;dialog.classList.remove('atlas-ready','atlas-direct-entry');cancelAnimationFrame(raf);resizeObserver?.disconnect();state.hover=null;state.drag=null;clearTimeout(noticeTimer);clearTimeout(viewMenuTimer);hideModeMenu();document.body.classList.remove('atlas-active','atlas-transitioning');const sharedHomeTab=dialog.querySelector('.space-home-tab');if(sharedHomeTab)document.body.append(sharedHomeTab);if(view==='space'&&spaceId===state.sid){rememberPresentation(spaceId,goHome?'atlas':'daily');writeSaved()}if(goHome)return;render();requestAnimationFrame(()=>document.querySelector('.workspace .space-mode-entry')?.focus({preventScroll:true}))});
+      dialog.addEventListener('close',()=>{const goHome=leavingForHome;leavingForHome=false;atlasClosing=false;clearTimeout(atlasTransitionTimer);atlasTransitionTimer=0;dialog.classList.remove('atlas-ready','atlas-direct-entry');cancelAnimationFrame(raf);resizeObserver?.disconnect();state.hover=null;state.drag=null;clearTimeout(noticeTimer);clearTimeout(viewMenuTimer);hideModeMenu();document.body.classList.remove('atlas-active','atlas-transitioning');const sharedHomeTab=dialog.querySelector('.space-home-tab');if(sharedHomeTab)document.body.append(sharedHomeTab);if(view==='space'&&spaceId===state.sid){rememberPresentation(spaceId,goHome?'atlas':'daily');writeSaved()}if(goHome){if(typeof mountColorCord==='function')mountColorCord();return;}render();requestAnimationFrame(()=>document.querySelector('.workspace .space-mode-entry')?.focus({preventScroll:true}))});
       dialog.addEventListener('cancel',e=>{if(!query('.at-drawer').hidden){e.preventDefault();closeDrawer()}else if(document.querySelector('.workspace .global-search-results:not([hidden])')){e.preventDefault();clearSearch()}});
       dialog.addEventListener('wheel',wheel,{passive:false});
       dialog.addEventListener('pointerdown',pointerDown);

@@ -1,6 +1,10 @@
 /* Reuse the live homepage account component, including its session and actions. */
 (()=>{
  const embedded=new URLSearchParams(location.search).get('tool-account')==='embed'&&parent!==window;
+ // Only the palette embed opts into a legible avatar; other hosts keep their themes.
+ if(embedded&&new URLSearchParams(location.search).get('account-surface')==='palette'){
+  const style=document.createElement('style');style.textContent='html[data-tool-account=embed] body>.account-menu-wrap .account-entry{width:40px;height:40px;box-sizing:border-box;display:grid;place-items:center;padding:8px;border-radius:50%;background:#f6f1e9!important;color:#253b30!important;border:1px solid #ffffff80}html[data-tool-account=embed] body>.account-menu-wrap .account-entry>svg{color:#253b30!important;width:23px;height:23px}html[data-tool-account=embed] body>.account-menu-wrap .account-entry:has(img){padding:0;overflow:hidden}';document.head.append(style);
+ }
  const header=()=>document.querySelector('body>header .header-right');
  function place(){
   let wrap=document.querySelector('.account-menu-wrap');if(!wrap){if(header()){previous();wrap=document.querySelector('.account-menu-wrap')}if(!wrap)return;}
