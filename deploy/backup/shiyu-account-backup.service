@@ -1,0 +1,18 @@
+[Unit]
+Description=Shiyu account history snapshot (same-server only)
+
+[Service]
+Type=oneshot
+ExecStart=/opt/node-v24/bin/node /opt/shiyu-backup/run-backup.cjs /etc/shiyu-backup/config.json
+UMask=0077
+Nice=10
+IOSchedulingClass=idle
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/backups/shiyu
+TimeoutStartSec=300
+StandardOutput=journal
+StandardError=journal
+

@@ -35,7 +35,7 @@ body.paper-reader-active .home-paper{display:block!important;padding:94px 24px 6
 .paper-reader-active .edition-stories .paper-life-story{padding:28px 0;align-items:start;gap:16px}
 .paper-reader-active .edition-stories .paper-life-story h3{font-size:clamp(24px,3vw,44px)}
 .paper-reader-active .edition-stories .paper-life-story p{font-size:17px;line-height:2}
-.edition-daily .paper-editor-note{background:var(--news-ink);color:var(--news-paper);padding:20px 28px;font-size:clamp(20px,2.4vw,36px);white-space:pre-line;margin-top:25px}
+.edition-daily .paper-editor-note{background:transparent;color:var(--news-ink);border-block:1px solid var(--news-line);padding:20px 0;font-size:clamp(20px,2.4vw,36px);white-space:pre-line;margin-top:25px}
 .edition-personal-columns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;padding:24px 0}
 .edition-personal-columns .paper-life-column{border:0;border-right:1px solid var(--news-line);padding:14px 24px 30px 0;min-height:270px}
 .edition-personal-columns .paper-life-column:last-child{border:0}
@@ -143,3 +143,77 @@ body.paper-reader-active .paper-inline-actions,
 body.paper-reader-active .paper-inline-actions *{font-family:var(--chosen-font,var(--font))!important}
 /* Do not paint the legacy newspaper before the edition controller mounts it. */
 .home-paper>.newspaper:not([data-edition-ready]){visibility:hidden}
+
+/* In-place image choices share the newspaper's own paper and ink. */
+.paper-image-picker{position:fixed;inset:auto;margin:0;width:min(420px,calc(100vw - 32px));max-height:calc(100svh - 32px);overflow:auto;box-sizing:border-box;padding:18px;background:var(--news-paper);color:var(--news-ink);border:1px solid var(--news-line);box-shadow:0 8px 28px #0002;font-family:var(--chosen-font,var(--font))}
+.paper-image-picker::backdrop{background:transparent}
+.paper-image-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.paper-image-heading strong{font-size:16px;font-weight:600}
+.paper-image-heading button{font:inherit;font-size:22px;line-height:1;padding:4px;background:transparent;color:inherit}
+.paper-image-picker p,.paper-image-picker small{display:block;font-size:12px;line-height:1.7;color:var(--news-muted)}
+.paper-image-picker p{margin:8px 0 14px}
+.paper-image-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.paper-image-presets button{padding:0 0 6px;background:transparent;color:inherit;font:inherit;min-width:0;border:0;border-bottom:2px solid transparent;cursor:pointer}
+.paper-image-presets img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;filter:sepia(.2) grayscale(.2)}
+.paper-image-presets span{display:block;font-size:12px;margin-top:6px}
+.paper-image-presets button[aria-pressed=true]{border-bottom-color:var(--accent);color:var(--accent)}
+.paper-image-picker .paper-image-upload{display:block;margin:16px 0 5px;padding:0;background:transparent;color:var(--news-ink);font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.paper-image-picker button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.paper-reader-active .paper-visual-upload .paper-upload-cover{background:transparent;color:var(--news-ink);text-shadow:none;align-items:flex-end;justify-content:flex-end;padding:10px;font-size:12px}
+.paper-reader-active .paper-visual-upload .paper-upload-cover::before{content:"";position:absolute;right:5px;bottom:5px;width:165px;height:35px;background:var(--news-paper);opacity:.94;z-index:-1}
+.paper-reader-active .paper-photo-frame .paper-upload-cover>span{position:absolute;right:5px;bottom:5px;width:165px;height:35px;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.paper-reader-active .paper-visual-upload .paper-upload-cover{isolation:isolate}
+.paper-reader-active .paper-visual-upload .paper-upload-cover:hover{background:transparent;text-decoration:underline;text-underline-offset:4px}
+
+/* An open issue is the desktop itself; the existing controls sit in its margins. */
+.paper-reader-active .edition-stage[data-open=true]{inset:0;transform:none;overflow:hidden}
+.paper-reader-active .edition-stage[data-open=true] .newspaper{
+ display:flex!important;flex-direction:column;width:100%!important;height:100%!important;min-height:0!important;
+ padding:var(--edition-header-space,86px) clamp(24px,4vw,64px) 46px!important;
+ border:0;box-shadow:none;overflow:hidden;box-sizing:border-box;
+}
+.paper-reader-active .edition-stage[data-open=true] .newspaper>:not(.edition-content){flex-shrink:0}
+.paper-reader-active .edition-stage[data-open=true] .masthead{padding:6px 0 12px}
+.paper-reader-active .edition-stage[data-open=true] .masthead h1{font-size:clamp(40px,4.6vw,68px)!important;margin-bottom:6px!important}
+.paper-reader-active .edition-stage[data-open=true] .paper-newsline{margin:8px 0}
+.paper-reader-active .edition-content{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--news-line) transparent}
+.paper-reader-active .edition-content>.edition-page{min-height:var(--edition-page-height,100%)!important;box-sizing:border-box}
+.paper-reader-active .edition-content>.paper-columns{padding:12px 0;gap:24px}
+.paper-reader-active .edition-content .paper-lead h2{font-size:clamp(28px,2.8vw,44px)!important;margin:10px 0}
+.paper-reader-active .edition-content .paper-lead>.landscape,.paper-reader-active .edition-content .paper-lead>.paper-cover{height:clamp(130px,20vh,240px)!important;margin:10px 0}
+/* The saved photo and its editing frame occupy exactly the same column space. */
+.paper-reader-active .edition-content .paper-lead>.paper-photo-frame{position:relative;flex:1 1 0%;width:100%;height:0!important;min-height:140px;margin:0!important;padding:0;border:0;overflow:hidden}
+.paper-reader-active .edition-content .paper-photo-frame>.paper-cover{position:absolute;inset:0;width:100%;height:100%;margin:0;object-fit:cover;object-position:center;filter:saturate(.55)}
+@media(max-width:760px){
+ .paper-reader-active .edition-content .paper-lead>.paper-photo-frame{flex:none;height:220px!important}
+}
+.paper-reader-active .edition-content .paper-life-story{padding:9px 0}
+.paper-reader-active .edition-content .paper-life-column{padding-top:12px;padding-bottom:12px}
+.paper-reader-active .edition-content .edition-personal-columns{padding:16px 0;gap:28px}
+.paper-reader-active .edition-content .edition-personal-columns .paper-life-column{min-height:210px}
+.paper-reader-active .edition-content .edition-personal-columns h3{font-size:clamp(32px,3.2vw,48px);margin:10px 24px 12px 0}
+.paper-reader-active .edition-personal>[data-paper-life=quote]{font-size:clamp(22px,2.2vw,32px);line-height:1.6;padding:12px 20px;margin:12px 0 0}
+.paper-reader-active .edition-stage[data-open=true] .paper-bottom{margin-top:8px;padding-top:8px;border-top:1px solid var(--news-line)}
+.paper-reader-active .newspaper>.edition-nav{margin:8px 0 0;padding:8px 0 0;min-height:44px;border-top:3px double var(--news-ink);background:transparent;gap:16px}
+.paper-reader-active .newspaper>.edition-nav button{border:0;padding:8px 0;letter-spacing:1px}
+.paper-reader-active .newspaper>.edition-nav button:hover:not(:disabled){background:transparent;text-decoration:underline;text-underline-offset:5px}
+.paper-reader-active .newspaper>.edition-nav>div{gap:24px}
+.paper-reader-active .newspaper>.edition-nav output{font-size:11px;letter-spacing:1px}
+@media(min-width:761px) and (max-height:850px){
+ .paper-reader-active .edition-stage[data-open=true] .masthead h1{font-size:48px!important}
+ .paper-reader-active .edition-stage[data-open=true] .masthead{padding-bottom:8px}
+ .paper-reader-active .edition-content .edition-personal-columns .paper-life-column{min-height:175px}
+ .paper-reader-active .edition-content .edition-personal-columns h3{font-size:36px}
+ .paper-reader-active .edition-daily .paper-editor-note{padding:12px 20px;font-size:26px;margin-top:14px}
+}
+@media(max-width:760px){
+ .paper-reader-active .edition-stage[data-open=true] .newspaper{padding:var(--edition-header-space,86px) 20px 52px!important}
+ .paper-reader-active .edition-stage[data-open=true] .paper-meta{padding-right:24px}
+ .paper-reader-active .edition-content>.paper-columns{grid-template-columns:1fr!important;gap:20px!important}
+ .paper-reader-active .edition-content .paper-saved,.paper-reader-active .edition-content .paper-index{border-left:0;padding-left:0}
+ .paper-reader-active .edition-content .edition-stories,.paper-reader-active .edition-content .edition-personal-columns{grid-template-columns:1fr}
+ .paper-reader-active .edition-personal-columns .paper-life-column{min-height:0}
+ .paper-reader-active .newspaper>.edition-nav{gap:2px;min-height:76px}
+ .paper-reader-active .newspaper>.edition-nav>div{gap:8px;padding-right:0}
+ .paper-reader-active .newspaper>.edition-nav output{font-size:10px;letter-spacing:0}
+}

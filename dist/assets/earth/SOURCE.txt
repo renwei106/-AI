@@ -1,0 +1,39 @@
+Earth surface imagery: NASA Earth Observatory
+Blue Marble: Next Generation, August 2004, base map with topography.
+Produced by Reto Stockli. Based on MODIS satellite observations.
+
+Collection and credit:
+https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/
+Download listing:
+https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-topography/
+Source JPEG (21600 x 10800):
+https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-topography/august/world.topo.200408.3x21600x10800.jpg
+
+Local derivatives: ../site-icons/earth-blue-marble-200408-{8192,4096}.webp
+8192 x 4096 and 4096 x 2048 WebP, quality 92.
+Only resized and encoded; no generated geography, recoloring, or added features.
+These are historical monthly satellite composites with relief shading,
+not live weather imagery or a single instantaneous photograph.
+
+Separate water masks: ../site-icons/earth-water-mask-{8192,4096}.png
+Natural Earth 1:10m ocean and lakes, public domain:
+https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-ocean/
+https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-lakes/
+https://www.naturalearthdata.com/about/terms-of-use/
+GeoJSON source: https://github.com/nvkelso/natural-earth-vector/tree/master/geojson
+Rasterized in equirectangular projection with checks/build-earth-water-mask.cjs.
+Used by the material to lift dark water to deep blue, preserving brighter
+satellite details. No changes to the source image or land shading.
+
+Night-light layer: NASA Earth Observatory, Black Marble 2016 grayscale,
+Suomi NPP VIIRS composite observations (historical, not live city lighting).
+https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/
+Source JPEG (13500 x 6750):
+https://assets.science.nasa.gov/content/dam/science/esd/eo/images/imagerecords/144000/144897/BlackMarble_2016_3km_gray.jpg
+Local derivatives: ../site-icons/earth-night-lights-2016-{8192,4096}.webp
+Resized and encoded with WebP quality 92. Material applies a warm tint and
+fades lights across the terminator; a gentle ambient fill retains night terrain.
+
+Sun direction: approximate NOAA solar declination and equation of time,
+computed from the device's UTC clock, including leap years and seasonal drift.
+https://gml.noaa.gov/grad/solcalc/solareqns.PDF

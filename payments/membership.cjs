@@ -51,7 +51,7 @@ function createMembershipService(options = {}) {
       planName: plan.name, planVersion: plan.version || 1, entitlements: copy(plan.entitlements || []) };
   }
   function present(user, includeEvents = false, testView = false) {
-    const state = testView ? stateFor(user) : actualStateFor(user), { password, accountData, memberEvents, membership, ...rest } = user;
+    const state = testView ? stateFor(user) : actualStateFor(user), { password, accountData, memberEvents, membership, toolData, toolUsage, ...rest } = user;
     return { ...rest, ...state, membership: { ...state }, memberExpiresAt: state.permanent ? '永久' : state.expiresAt ? new Date(state.expiresAt).toISOString() : null,
       ...(includeEvents ? { memberEvents: copy(memberEvents || []) } : {}) };
   }

@@ -11,7 +11,47 @@
   const swordswomanFrames = Array.from({length:28},(_,frame)=>new URL(`assets/site-icons/pet-swordswoman-frame-${frame}.png`,document.currentScript?.src||location.href).href);
   const isSpriteSkin = skin => skin==='paper'||skin==='swordswoman';
   const spriteFrames = skin => skin==='swordswoman'?swordswomanFrames:paperFrames;
-  let swordswomanPreloaded=false;
+  // Retain decoded images for this page and persist their bytes for later offline visits.
+  const FRAME_CACHE='shiyu-desktop-pet-frames-v1',frameAssets=new Map(),frameJobs=new Map(),frameRetries=new Map(),skinJobs=new Map();
+  let frameCache;
+  const offline=()=>navigator.onLine===false;
+  const openFrameCache=()=>frameCache||=Promise.resolve().then(()=>window.caches?.open(FRAME_CACHE)).catch(()=>null);
+  async function loadFrame(src){
+    if(frameAssets.has(src))return frameAssets.get(src);
+    if(frameJobs.has(src))return frameJobs.get(src);
+    if(Date.now()<(frameRetries.get(src)||0))return null;
+    const job=(async()=>{
+      let objectURL='';
+      try{
+        const cache=await openFrameCache();let response;
+        try{response=await cache?.match(src);}catch{}
+        const fromCache=!!response;
+        if(!response){
+          if(offline())return null;
+          const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10000);
+          try{response=await fetch(src,{signal:controller.signal,cache:'force-cache'});}finally{clearTimeout(timeout);}
+        }
+        if(!response?.ok)throw Error('Frame unavailable');
+        const blob=await response.blob();objectURL=URL.createObjectURL(blob);
+        const image=new Image();image.src=objectURL;await image.decode();
+        const asset={url:objectURL,image};frameAssets.set(src,asset);frameRetries.delete(src);
+        if(cache&&!fromCache)try{await cache.put(src,new Response(blob,{headers:{'Content-Type':blob.type||'image/png'}}));}catch{}
+        return asset;
+      }catch{
+        if(objectURL)URL.revokeObjectURL(objectURL);
+        frameRetries.set(src,Date.now()+30000);return null;
+      }
+    })();
+    frameJobs.set(src,job);
+    try{return await job;}finally{frameJobs.delete(src);}
+  }
+  function preloadSkin(id){
+    if(!isSpriteSkin(id)||skinJobs.has(id))return;
+    const frames=spriteFrames(id);if(frames.every(src=>frameAssets.has(src)))return;
+    const rest=id==='swordswoman'?4:0,queue=[frames[rest],...frames.filter((_,i)=>i!==rest)];
+    const worker=async()=>{while(queue.length)await loadFrame(queue.shift());};
+    skinJobs.set(id,Promise.all([worker(),worker(),worker()]).finally(()=>skinJobs.delete(id)));
+  }
   let artId = 0;
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
@@ -38,7 +78,6 @@
     return `<svg class="pet-art" viewBox="0 0 96 104" fill="none" stroke="var(--pet-outline)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${common}${shapes[skin] || shapes.cat}</svg>`;
   }
   function humanArt(skin) {
-    if(skin==='swordswoman'&&!swordswomanPreloaded){swordswomanPreloaded=true;for(const src of swordswomanFrames){const image=new Image();image.src=src;}}
     if (skin === 'line') return `<svg class="pet-art pet-human pet-human-line" viewBox="0 0 96 104" fill="none" stroke="var(--pet-line-ink)" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <g class="pet-human-balance">
         <path d="m36 63-2 26 9 1 5-20 5 20 9-1-2-27M35 84l9 1m8 0 10-1"/>
@@ -54,7 +93,16 @@
       </g>
       <path class="pet-human-feet" d="m34 89-3 4q-1 3 3 3h10l-1-6m10 0-1 6h12q3-1 0-4l-2-3M32 94h11m10 0h11M36 92h3m17 0h3"/>
     </svg>`;
-    return `<span class="pet-art pet-girl-sprite" aria-hidden="true"><img class="pet-girl-cutout" src="${escape(spriteFrames(skin)[skin==='swordswoman'?4:0])}" alt="" draggable="false"></span>`;
+    const src=spriteFrames(skin)[skin==='swordswoman'?4:0],ready=frameAssets.get(src);
+    if(!ready)void loadFrame(src).then(asset=>{
+      if(!asset)return;
+      for(const wrapper of document.querySelectorAll('[data-pet-frame-src]')){
+        const image=wrapper.querySelector('.pet-girl-cutout');
+        if(wrapper.dataset.petFrameSrc!==src||!image?.hidden)continue;
+        image.src=asset.url;image.hidden=false;wrapper.querySelector('[data-pet-frame-fallback]')?.remove();
+      }
+    });
+    return `<span class="pet-art pet-girl-sprite" data-pet-frame-src="${escape(src)}" aria-hidden="true">${ready?'':'<span data-pet-frame-fallback>'+humanArt('line')+'</span>'}<img class="pet-girl-cutout" ${ready?'src="'+escape(ready.url)+'"':'hidden'} alt="" draggable="false"></span>`;
   }
 
   function normalize(value) {
@@ -123,11 +171,11 @@
     function scheduleRoaming(delay=60000){
       if(roamState||roamTimer)return;
       const ctx=context();
-      if(config.roaming!=='roam'||!isThemePage(ctx)||!config.enabled||root.hidden||root.inert||opened||drag||document.hidden||root.dataset.motion==='off')return;
+      if(offline()||config.roaming!=='roam'||!isThemePage(ctx)||!config.enabled||root.hidden||root.inert||opened||drag||document.hidden||root.dataset.motion==='off')return;
       roamTimer=setTimeout(()=>{roamTimer=0;beginRoaming();},delay);
     }
     function beginRoaming(){
-      if(config.roaming!=='roam'||!isThemePage(context())||root.dataset.motion==='off'||document.hidden)return;
+      if(offline()||config.roaming!=='roam'||!isThemePage(context())||root.dataset.motion==='off'||document.hidden)return;
       if(opened||drag||root.matches(':hover')){scheduleRoaming(5000);return;}
       const bounds=viewportBounds(),candidates=themePerches();
       const fallback={x:bounds.left+size/2+10+Math.random()*Math.max(1,bounds.width-size-20),y:isSpriteSkin(skin)?bounds.bottom-size/2-10:bounds.top+size/2+10+Math.random()*Math.max(1,bounds.height-size-20),surface:null,rect:null};
@@ -269,11 +317,14 @@
       root.dataset.dark=String(ctx.dark??(document.body.dataset.dark==='true'||document.body.classList.contains('dark')));
       if(ctx.accent)root.style.setProperty('--pet-accent',ctx.accent);
       const accountPreferredSkin=accountSkin(adapter.accountKey?.());if(config.skin!==accountPreferredSkin)config=normalize({...config,skin:accountPreferredSkin});
-      const visibleSkin=adapter.skinAllowed?.(config.skin)===false?[...new Set([...(adapter.skinOrder?.()||[]),...Object.keys(skins)])].find(id=>skins[id]&&adapter.skinAllowed?.(id)!==false)||'paper':config.skin;
+      const usable=id=>adapter.skinAllowed?.(id)!==false&&adapter.skinUsable?.(id)!==false;
+      const visibleSkin=usable(config.skin)?config.skin:[...new Set([...(adapter.skinOrder?.()||[]),...Object.keys(skins)])].find(id=>skins[id]&&usable(id));
+      if(!visibleSkin){root.hidden=true;root.inert=true;return;}
       root.dataset.skin=visibleSkin;
       if(skin!==visibleSkin){skin=visibleSkin;core.innerHTML=art(skin);}
+      if(isSpriteSkin(skin)&&!root.hidden)preloadSkin(skin);
       if(!drag?.active)core.setAttribute('aria-label',`${skinName(skin)}，点击展开快捷入口，按住拖动`);
-      root.dataset.roaming=config.roaming==='roam'&&isThemePage(ctx)?'true':'false';
+      root.dataset.roaming=!offline()&&config.roaming==='roam'&&isThemePage(ctx)?'true':'false';
       if(isThemePage(ctx)){root.removeAttribute('data-idle');root.inert=blocked||!available;clearTimeout(idleTimer);}
       else if(lastThemePage){transientPoint=null;stopRoaming();wakePet();}
       lastThemePage=isThemePage(ctx);
@@ -281,7 +332,7 @@
       const next=JSON.stringify([ctx.area,ctx.app,ctx.worldEnabled]);
       if(next!==contextKey){contextKey=next;signature='';if(opened)buildMenu();}
       if(blocked||!config.enabled||!available)close();
-      if(config.roaming==='roam'&&isThemePage(ctx))scheduleRoaming(60000);else stopRoaming(config.roaming!=='roam'||!isThemePage(ctx));
+      if(!offline()&&config.roaming==='roam'&&isThemePage(ctx))scheduleRoaming(60000);else stopRoaming(config.roaming!=='roam'||!isThemePage(ctx));
     }
     function button(action,id,label,icon,nav=false,current=false){return `<button type="button" class="pet-shortcut${nav?' pet-nav':''}" data-pet-action="${action}" data-pet-id="${escape(id)}" aria-label="${escape(label)}"${current?' aria-current="page"':''}><span class="pet-shortcut-icon">${icon||icons.space}</span><span class="pet-shortcut-label">${escape(label)}</span></button>`;}
     function buildMenu(){
@@ -450,6 +501,8 @@
     window.visualViewport?.addEventListener('resize',()=>{if(compactHome()){finish(false);close();schedule();}});
     for(const name of ['popstate','hashchange','shiyu-account-state','shiyu-pet-context'])window.addEventListener(name,()=>{close();schedule();});
     window.addEventListener('shiyu-operations-config',schedule);
+    window.addEventListener('offline',()=>{if(roamState)transientPoint={...point};stopRoaming();refresh();});
+    window.addEventListener('online',()=>{frameRetries.clear();refresh();});
     const sync=()=>{const next=read();if(next.updated!==config.updated){config=next;close();}refresh();};
     window.addEventListener('storage',e=>{if(e.key===KEY||e.key===null)sync();});window.addEventListener('focus',()=>{sync();wakePet();});document.addEventListener('visibilitychange',()=>{if(!document.hidden){sync();wakePet();}});
     matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',schedule);
@@ -473,8 +526,9 @@
     }
     let girlSkin='',girlFrame=-1,girlState='',girlAction=null,girlStep=0,girlAt=0,girlChangeAt=0,girlStateStarted=0,girlRestUntil=0,girlMotion='',girlCycleTempo=null;
     const pose=(frame)=>{
-      if(frame===girlFrame)return;girlFrame=frame;const el=core.querySelector('.pet-girl-cutout');if(!el)return;
-      el.src=spriteFrames(skin)[frame];root.dataset.girlFrame=String(frame);
+      if(frame===girlFrame)return;const el=core.querySelector('.pet-girl-cutout');if(!el)return;
+      const asset=frameAssets.get(spriteFrames(skin)[frame]);if(!asset)return;
+      girlFrame=frame;el.src=asset.url;el.hidden=false;core.querySelector('[data-pet-frame-fallback]')?.remove();root.dataset.girlFrame=String(frame);
       if(skin==='paper')updateGirlDialogue(frame);
     };
     function pickGirlAction(state){
@@ -488,7 +542,7 @@
       if(!speech.hidden)positionSpeech();
       if(!isSpriteSkin(skin)||root.hidden||document.hidden){girlState='';girlAction=null;return;}
       if(girlSkin!==skin){girlSkin=skin;girlFrame=-1;girlState='';girlAction=null;girlRestUntil=0;girlStateStarted=now;}
-      if(root.dataset.motion==='off'){girlState='';girlAction=null;girlMotion='off';root.dataset.petState='sit';root.dataset.girlAction='rest';pose(skin==='swordswoman'?4:0);return;}
+      if(offline()||root.dataset.motion==='off'){girlState='';girlAction=null;girlMotion='off';root.dataset.petState='sit';root.dataset.girlAction='rest';pose(skin==='swordswoman'?4:0);return;}
       if(girlMotion!==root.dataset.temperament){girlMotion=root.dataset.temperament;girlStateStarted=now;}
       const cycleDone=!girlAction||girlStep>=girlAction[1].length&&now>=girlAt;
       const movingAction=['jog','sprint','jump','flight'].includes(girlState);
@@ -592,7 +646,7 @@
     function bindSettings(container){
       container.innerHTML=settingsMarkup();
       container.onclick=async e=>{const b=e.target.closest('[data-pet-pref],[data-pet-reset]');if(!b||b.disabled)return;b.disabled=true;
-        try{if(!await adapter.authorize?.('settings'))return;const key=b.dataset.petPref;if(key)save({[key]:key==='enabled'?b.dataset.value==='true':b.dataset.value});else save({position:null});container.innerHTML=settingsMarkup();}
+        try{if(!await adapter.authorize?.('settings'))return;const key=b.dataset.petPref;if(key==='skin'&&adapter.requireSkin?.(b.dataset.value)===false)return;if(key)save({[key]:key==='enabled'?b.dataset.value==='true':b.dataset.value});else save({position:null});container.innerHTML=settingsMarkup();}
         finally{b.disabled=false;}
       };
     }

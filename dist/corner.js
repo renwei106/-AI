@@ -460,6 +460,14 @@
   }
   function onExternalToolClick(e){const launch=e.target.closest('[data-corner-launch-tool]');if(!launch)return;const target=toolTarget(launch.dataset.cornerLaunchTool);if(!target){cornerNotice('该工具暂未配置跳转地址');return;}const opened=window.open(target,'_blank','noopener,noreferrer');if(!opened)cornerNotice('浏览器拦截了新窗口，请允许打开轻应用');}
   function renderPanel() {
+    const tool={common:'corner',memo:'memo',todo:'todo'}[activeModule];
+    if(tool&&!window.ShiyuToolData.ready(tool)){
+      const current=activeModule,library=collection();
+      const prepare=tool==='todo'&&library.calendarV2?.version!==2?import('./todo-calendar-core.js').then(({initialState})=>{library.calendarV2=initialState(library);}):Promise.resolve();
+      return prepare.then(()=>window.ShiyuToolData.open(tool,library)).then(()=>{if(panel?.open&&activeModule===current)return renderPanel();}).catch(error=>{
+        toast(error.message);if(panel?.open&&activeModule===current){let body=panel.querySelector('.corner-body');if(!body){body=document.createElement('div');body.className='corner-body';appendCornerNode(body);}body.replaceChildren();const retry=document.createElement('button');retry.textContent='重新读取';retry.onclick=()=>renderPanel();body.append(retry);}
+      });
+    }
 
     if(activeModule==='toolbox')return renderToolboxPanel();
     if(isExternalTool(activeModule))return renderExternalToolPanel();
@@ -488,7 +496,7 @@
     const root=document.createElement('div');body.replaceChildren(root);syncCornerThemePresentation();
     return import('./memo-paper.js?paper=20260924').then(({mountMemoPaper})=>{
       if(token!==memoRenderToken||!root.isConnected)return;
-      memoPaperView=mountMemoPaper(root,{library:memoLibrary(),save:persist,isCurrent:()=>signed&&owner()===memoOwner,escape:esc,time:memoTime,toast,playSound:playCardSound,state:memoViewState,title:meta.panelName||meta.name,subtitle:meta.subtitle});
+      memoPaperView=mountMemoPaper(root,{library:memoLibrary(),save:async()=>{const ok=await window.ShiyuToolData.save('memo',memoLibrary());if(ok)persist();return ok;},isCurrent:()=>signed&&owner()===memoOwner,escape:esc,time:memoTime,toast,playSound:playCardSound,state:memoViewState,title:meta.panelName||meta.name,subtitle:meta.subtitle});
     }).catch(()=>{if(token!==memoRenderToken)return;root.className='memo-paper-load-error';root.textContent='小记暂时未能加载，请重试。';const retry=document.createElement('button');retry.textContent='重试';retry.onclick=renderMemoPanel;root.append(retry);});
   }
   function card(g,index,entries) {
@@ -545,11 +553,13 @@
     return import('./todo-calendar.js?v=20260930-view-cycle').then(({mountTodoCalendar})=>{
       if(token!==todoRenderToken||!root.isConnected||activeModule!=='todo')return;
       root.textContent='';
-      todoCalendarView=mountTodoCalendar(root,{library,isCurrent,accent:()=>resolveThemeColor(),readLatest(){try{return JSON.parse(localStorage.getItem('yiyu-prototype-v1')||'{}').prefs?.cornerModules?.[todoOwner]?.todo?.calendarV2||null;}catch{return null;}},save(next,expected){
+      todoCalendarView=mountTodoCalendar(root,{library,isCurrent,accent:()=>resolveThemeColor(),readLatest(){try{return JSON.parse(localStorage.getItem('yiyu-prototype-v1')||'{}').prefs?.cornerModules?.[todoOwner]?.todo?.calendarV2||null;}catch{return null;}},async save(next,expected){
         if(!isCurrent())throw Error('账号已切换，请重新进入待办。');
         const stored=JSON.parse(localStorage.getItem('yiyu-prototype-v1')||'{}');
         const remote=stored.prefs?.cornerModules?.[todoOwner]?.todo?.calendarV2;
         if(remote&&(remote.revision||0)!==expected)throw Error('其他窗口已更新待办，请保留输入后刷新，避免覆盖修改。');
+        if(!await window.ShiyuToolData.save('todo',{...library,calendarV2:next}))throw Error('保存未成功，输入已保留。');
+        if(!isCurrent())throw Error('账号已切换，请重新打开。');
         const previous=library.calendarV2;library.calendarV2=next;
         try{persist();const saved=JSON.parse(localStorage.getItem('yiyu-prototype-v1')||'{}').prefs?.cornerModules?.[todoOwner]?.todo?.calendarV2;
           if(JSON.stringify(saved)!==JSON.stringify(next))throw Error('本机保存失败，请检查浏览器存储空间后重试。');
@@ -600,7 +610,7 @@
     }
     resetFloat();layoutFan(true);const el=panel.querySelector('[data-corner-card="'+id+'"]');(back?el?.querySelector('.corner-card-back'):el?.querySelector('.corner-card-front'))?.focus({preventScroll:true});
   }
-  function onPanelClick(e) {
+  async function onPanelClick(e) {
     if(activeModule==='toolbox'){onToolboxClick(e);return;}
     if(isExternalTool(activeModule)){onExternalToolClick(e);return;}
     if(activeModule==='memo'){onMemoPanelClick(e);return;}
@@ -611,7 +621,7 @@
     if(b?.hasAttribute('data-corner-next-theme')){const ids=orderedModuleIds().filter(id=>id!=='toolbox');void switchCornerModule(ids[(ids.indexOf(activeModule)+1)%ids.length]);return;}
     if(b?.dataset.cornerDone){flipCard(b.dataset.cornerDone,false);return;}
     if(flipped.size&&!el){if(e.target.closest('button'))return;flipCard([...flipped][0],false);return;}
-    if(b?.hasAttribute('data-corner-new')){if(flipped.size)return;const groups=collection().groups;if(!window.ShiyuEntitlements?.requireQuota('corner',customCount()))return;const newGroup={id:uid(),name:'新卡片',iconMode:'default',iconSlot:customCount()%20,refs:[]};groups.push(newGroup);persist();renderPanel();requestAnimationFrame(()=>flipCard(newGroup.id,true));return;}
+    if(b?.hasAttribute('data-corner-new')){if(flipped.size)return;const groups=collection().groups;if(!window.ShiyuEntitlements?.requireQuota('corner',customCount()))return;const newGroup={id:uid(),name:'新卡片',iconMode:'default',iconSlot:customCount()%20,refs:[]};const next=structuredClone(collection());next.groups.push(newGroup);if(!await window.ShiyuToolData.save('corner',next))return;groups.push(newGroup);persist();renderPanel();requestAnimationFrame(()=>flipCard(newGroup.id,true));return;}
     if(b?.dataset.cornerPage){navigate(Number(b.dataset.cornerPage));return;}
     if(!g)return;
     if(flipped.size&&!flipped.has(g.id))return;
@@ -647,6 +657,7 @@
   addEventListener('shiyu-account-state',()=>{if(panel?.open&&(!signed||panel._cornerOwner!==owner()))panel.close();});
   addEventListener('shiyu-corner-guide-synced',()=>{if(panel?.open)syncCornerCloseGuide();});
   addEventListener('storage',event=>{if(!panel?.open||(event.key!==null&&event.key!=='yiyu-prototype-v1'))return;try{const state=JSON.parse(event.newValue||'null');if(!state?.signed||(state.prefs?.accountProfile?.id||'local-account')!==owner())panel.close();}catch{panel.close();}});
+  window.addEventListener('shiyu-tool-rollback',()=>{if(panel?.open&&activeModule==='common')renderPanel();});
   function onPanelInput(e){
     if(activeModule==='memo')return;
     const g=collection().groups.find(g=>g.id===e.target.closest('[data-corner-card]')?.dataset.cornerCard);if(!g||isInbox(g))return;
@@ -904,7 +915,13 @@
       for(const library of Object.values(prefs.cornerCollections||{}))for(const g of library.groups)for(const r of g.refs)if(r.gid===source.gid&&r.url===source.url)r.url=next[1];persist();
     };
   };
-  const renderBeforeSwitchCleanup=render;render=function(){closeSwitch();return renderBeforeSwitchCleanup();};
+  const renderBeforeSwitchCleanup=render;render=function(){
+    const keepSwitch=switchMenu&&!switchMenu.hidden&&switchMenu.dataset.preserveViewRender==='true';
+    if(!keepSwitch)closeSwitch();
+    const result=renderBeforeSwitchCleanup();
+    if(keepSwitch&&!switchMenu.hidden){switchOrigin=document.querySelector('.workspace [data-corner-switch]')||switchOrigin;switchOrigin?.setAttribute('aria-expanded','true');}
+    return result;
+  };
   dock();
   void loadCornerConfig().then(()=>{const route=new URL(location.href).searchParams.get('corner');if(route&&enabledCornerModuleIds().includes(route)&&signed)openCorner(null,null,null,route);else if(route&&!signed){const url=new URL(location.href);url.searchParams.delete('corner');history.replaceState(history.state,'',url);if(enabledCornerModuleIds().includes(route))requireCornerModuleAuth(route);}});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&(document.body.dataset.view==='home'||panel?.open&&activeModule==='toolbox'))void loadCornerConfig()});

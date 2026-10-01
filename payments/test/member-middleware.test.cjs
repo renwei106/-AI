@@ -15,6 +15,7 @@ test('actual user middleware: admin mutations, public privacy, session identity,
     if(name.includes('experience-test/store'))return {get:()=>({enabled:false,values:{}})};
     if(name.includes('theme-access/store'))return fakeSession;
     if(name.includes('payments/membership'))return {createMembershipService:()=>memberships};
+    if(name.includes('payments/tool-quotas'))return require('../tool-quotas.cjs');
     if(name==='node:module')return {createRequire:()=>runtimeRequire};
     if(name==='./platform-access-plugin')return {getPlatformSession:req=>req.headers.authorization==='admin'?{superadmin:true,admin:{name:'测试管理员'},applicationIds:['shiyu']}:null};
     if(name==='./shiyu-invitation-plugin')return {invitationCodeFor:()=>undefined,invitationForCode:()=>undefined,settleInvitations:()=>memberships.settleInvitations()};
@@ -44,4 +45,14 @@ test('actual user middleware: admin mutations, public privacy, session identity,
   const space=id=>({id,scenes:[{id:'s',groups:[]}]});
   result=await request('/api/shiyu/auth/account','PUT',{userId:'u',data:[space('a'),space('b')]});assert.equal(result.status,400);assert.match(result.data.message,/空间数量/);
   result=await request('/api/shiyu/auth/account','PUT',{userId:'u',data:[space('a')]});assert.equal(result.status,200);
+  plans[0].entitlements.push(...['memo-limit','todo-limit','corner-limit','icon-daily-limit','color-daily-limit'].map(key=>({key,kind:'quantity',enabled:true,value:1})));
+  result=await request('/api/shiyu/auth/tools','POST',{userId:'other',tool:'memo',revision:0,data:{notes:[]}});assert.equal(result.status,409);
+  result=await request('/api/shiyu/auth/tools','POST',{userId:'u',tool:'memo',revision:0,data:{notes:[{id:'a'}]}});assert.equal(result.status,200);
+  result=await request('/api/shiyu/auth/tools','POST',{userId:'u',tool:'memo',revision:1,data:{notes:[{id:'a'},{id:'b'}]}});assert.equal(result.status,409);assert.equal(result.data.code,'TOOL_QUOTA_EXCEEDED');
+  result=await request('/api/shiyu/auth/tools');assert.equal(result.data.tools.memo.data.notes.length,1);
+  const usage={userId:'u',tool:'icons',action:'reserve',requestId:'request-qa-1'};
+  const concurrent=await Promise.all([request('/api/shiyu/auth/tool-usage','POST',usage),request('/api/shiyu/auth/tool-usage','POST',{...usage,requestId:'request-qa-2'})]);assert.deepEqual(concurrent.map(r=>r.status).sort(),[200,409]);
+  result=await request('/api/shiyu/auth/session');assert.equal(result.data.user.toolData,undefined);assert.equal(result.data.user.toolUsage,undefined);
+  const anonymous=await fetch(base+'/api/shiyu/auth/tools');assert.equal(anonymous.status,401);
+  const anonymousUsage=await fetch(base+'/api/shiyu/auth/tool-usage');assert.equal(anonymousUsage.status,200);assert.equal((await anonymousUsage.json()).userId,null);
 });

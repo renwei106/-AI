@@ -41,7 +41,9 @@ body[data-theme=reading][data-dark=true] .reading-dock-book { color:#c4c4a5; }
 .shelf-spine { position:relative; display:flex; align-items:center; width:100%; height:100%; gap:15px; padding:8px 35px 8px 19px; color:var(--shelf-print); border-radius:inherit; background:linear-gradient(180deg,#ffffff14,transparent 18% 75%,#00000016),var(--shelf-cover); box-shadow:inset 0 1px #ffffff35,inset 0 -2px #00000017,1px 2px 2px #242b1c13; transition:transform .23s ease,box-shadow .23s; }
 .shelf-spine::before { content:''; position:absolute; inset:5px auto 5px 8px; width:3px; border-left:1px solid currentColor; border-right:1px solid currentColor; opacity:.16; pointer-events:none; }
 .shelf-spine::after { content:''; position:absolute; top:7px; right:8px; bottom:7px; width:1px; background:currentColor; opacity:.18; pointer-events:none; }
-.shelf-title { min-width:0; flex:1; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; font:500 17px/1.4 'Songti SC','SimSun',Georgia,serif; letter-spacing:.06em; }
+.shelf-copy { min-width:0; flex:1; }
+.shelf-title { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:500 15px/1.4 'Songti SC','SimSun',Georgia,serif; letter-spacing:.03em; }
+.shelf-description { display:block; height:17px; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:11px/17px var(--font); color:color-mix(in srgb,var(--shelf-print) 65%,transparent); }
 .shelf-mark { flex:0 0 27px; width:27px; height:27px; display:grid; place-items:center; }
 .workspace .cards[data-display=shelf] .site-icon { width:27px; height:27px; padding:4px; border-radius:5px; background:#fbf8ed; color:#485440; font:15px var(--font); box-shadow:none; border:0; }
 .shelf-domain { display:none; }

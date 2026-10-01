@@ -123,7 +123,7 @@
   dock=function(){dockBefore();if(dockTheme()!=='reading')return;const trigger=$('.dock-trigger');if(!trigger)return;const label=trigger.querySelector('.dock-label')?.outerHTML||'';trigger.innerHTML=`<span class="reading-dock-book" aria-hidden="true">${bookIcon}</span>${label}`;};
 
   const settingsBefore=openLinkSettings;
-  openLinkSettings=function(){settingsBefore();const panel=$('#link-view-settings'),choice=panel?.querySelector('[data-link-view=shelf]'),main=panel?.querySelector('.style-scroll-body>.link-view-grid');if(!choice||!main)return;choice.innerHTML=`<span>${bookIcon}</span>藏书架`;choice.title='书脊朝外，把收藏摞成一架好书';const after=main.querySelector('[data-link-view=poly]')||main.querySelector('[data-link-view=cards]');if(after)after.after(choice);else main.append(choice);};
+  openLinkSettings=function(){settingsBefore();const panel=$('#link-view-settings'),choice=panel?.querySelector('[data-link-view=shelf]'),main=panel?.querySelector('.style-scroll-body>.link-view-grid');if(!choice||!main)return;choice.innerHTML=`<span>${bookIcon}</span>藏书架`;choice.title='书脊朝外，把收藏摞成一架好书';const after=main.querySelector('[data-link-view=poly]')||main.querySelector('[data-link-view=calendar]');if(after)after.after(choice);else main.append(choice);};
   const fitBefore=columnFit;
   columnFit=function(){const fit=fitBefore();if(fit.mode!=='shelf')return fit;const width=$('.group:not([hidden]) .cards')?.clientWidth||$('.workspace-tools')?.clientWidth||800,max=Math.max(1,Math.min(4,Math.floor((width+36)/286))),saved=displayRule()?.columns??prefs.groupColumns?.[currentGroup().id];return{...fit,max,count:Math.min(max,saved||max),auto:!saved};};
 
@@ -134,30 +134,33 @@
     cards.style.setProperty('--shelf-columns',cols);
     const count=books.length+(add?1:0),banks=Math.max(1,Math.ceil(count/(cols*4)));
     cards.style.gridTemplateRows=Array.from({length:banks},(_,i)=>{
-      // A full bank holds four books per stack; a small collection keeps one short stack.
-      const rows=Math.min(4,count-i*cols*4);
-      return `${[66,62,70,64].slice(0,Math.max(1,rows)).map(x=>x+'px').join(' ')} 32px`;
+      // Fill each row from left to right, with up to four rows above a plank.
+      const rows=Math.min(4,Math.ceil((count-i*cols*4)/cols));
+      return `${Array(Math.max(1,rows)).fill('70px').join(' ')} 32px`;
     }).join(' ');
     cards.querySelectorAll(':scope>.shelf-plank').forEach(el=>el.remove());
     [...books,...(add?[add]:[])].forEach((el,i)=>{
-      const bank=Math.floor(i/(cols*4)),within=i%(cols*4),column=Math.floor(within/4),row=within%4;
+      const bank=Math.floor(i/(cols*4)),within=i%(cols*4),column=within%cols,row=Math.floor(within/cols);
       el.style.gridColumn=String(column+1);el.style.gridRow=String(bank*5+row+1);
       el.style.setProperty('--shelf-inset',[0,6,3,9][row]+'px');
     });
-    for(let i=0;i<banks;i++){const plank=document.createElement('i');plank.className='shelf-plank';plank.setAttribute('aria-hidden','true');plank.style.gridColumn='1 / -1';plank.style.gridRow=String(i*5+Math.min(4,count-i*cols*4)+1);cards.append(plank);}
+    for(let i=0;i<banks;i++){const plank=document.createElement('i');plank.className='shelf-plank';plank.setAttribute('aria-hidden','true');plank.style.gridColumn='1 / -1';plank.style.gridRow=String(i*5+Math.min(4,Math.ceil((count-i*cols*4)/cols))+1);cards.append(plank);}
   }
   function dressShelves(cards){
     if(!cards||cards.dataset.display!=='shelf')return;
     cards.querySelectorAll(':scope>.bookmark').forEach((el,i)=>{
       const a=el.querySelector('a'),head=a?.querySelector('.bookmark-head'),title=head?.querySelector('strong'),logo=head?.querySelector('.site-icon');
       if(!title||!logo)return;
-      const name=title.textContent;let host='';try{host=new URL(a.href).hostname.replace(/^www\./,'');}catch{}
+      const name=title.textContent,description=a.querySelector('p')?.textContent||'';let host='';try{host=new URL(a.href).hostname.replace(/^www\./,'');}catch{}
       const hash=bookmarkHash(a.href);el.dataset.shelfTone=String(hash%5);
       const spine=document.createElement('span');spine.className='shelf-spine';
       const mark=document.createElement('span');mark.className='shelf-mark';mark.append(logo);
       const text=document.createElement('span');text.className='shelf-title';text.textContent=name;
+      const copy=document.createElement('span');copy.className='shelf-copy';
+      const summary=document.createElement('small');summary.className='shelf-description';summary.textContent=description;
+      copy.append(text,summary);
       const domain=document.createElement('small');domain.className='shelf-domain';domain.textContent=host;
-      spine.append(mark,text,domain);a.replaceChildren(spine);
+      spine.append(mark,copy,domain);a.replaceChildren(spine);
       a.setAttribute('aria-label',name+'，在新标签页打开');a.title=name+(host?' · '+host:'');
     });
     if(!cards.querySelector('.shelf-add')){const add=document.createElement('button');add.className='shelf-add';add.dataset.action='add';add.innerHTML='<span aria-hidden="true">＋</span><span>收一本新书<small>收藏网址</small></span>';cards.append(add);}

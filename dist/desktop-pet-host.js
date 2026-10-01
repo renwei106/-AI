@@ -42,6 +42,8 @@
     authorize,host:surface,blocked,
     available:()=>window.ShiyuFeatureConfig?.category('pet')!==false,
     skinAllowed:id=>window.ShiyuFeatureConfig?.option('pet',id)!==false,
+    skinUsable:id=>window.ShiyuFeatureConfig?.option('pet',id)!==false && window.ShiyuEntitlements?.allows('desktop-pets',id)===true,
+    requireSkin:id=>window.ShiyuEntitlements?.require('desktop-pets',id,'personal')===true,
     skinOrder:()=>window.ShiyuFeatureConfig?.order('pet')||[],
     skinName:id=>window.ShiyuFeatureConfig?.optionLabel('pet',id,'')||'',
     petActionEnabled:id=>window.ShiyuFeatureConfig?.petAction(id)!==false,
@@ -77,6 +79,7 @@
   });
   window.addEventListener('shiyu-account-state',()=>pet.refresh());
   window.addEventListener('shiyu-session-ready',()=>pet.refresh());
+  for(const event of ['shiyu-user-entitlements','shiyu-member-resources','shiyu-feature-config'])window.addEventListener(event,()=>pet.refresh());
   const originalSettings=renderSettings;
   renderSettings=function(){
     originalSettings();if(scope!=='global')return;

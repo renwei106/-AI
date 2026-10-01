@@ -1,0 +1,7 @@
+{
+  "source": "/opt/shiyu-admin/current/.local/shiyu-users.json",
+  "vault": "/var/backups/shiyu/accounts",
+  "keyFile": "/etc/shiyu-backup/account.key",
+  "logDir": "/var/backups/shiyu/logs",
+  "environment": "production"
+}

@@ -1,0 +1,11 @@
+[Unit]
+Description=Shiyu account snapshot every 15 minutes
+
+[Timer]
+OnCalendar=*-*-* *:00/15:00
+Persistent=true
+AccuracySec=10s
+Unit=shiyu-account-backup.service
+
+[Install]
+WantedBy=timers.target

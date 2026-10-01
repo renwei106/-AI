@@ -3,7 +3,7 @@
  'use strict';
  let plans = [], selectedId = null, loading = true, refreshing = null;
  const expandedBenefits = new Set();
- const resourceKeys = { ['首页主题']: 'themes', ['字体选择']: 'global-fonts', ['配色选择']: 'global-colors', ['页面布局']: 'global-layouts', ['网址展示样式']: 'regular-styles', ['常用卡片']: 'corner-colors' };
+ const resourceKeys = { ['首页主题']: 'themes', ['字体选择']: 'global-fonts', ['全局配色']: 'global-colors', ['页面布局']: 'global-layouts', ['网址展示样式']: 'regular-styles', ['桌面伙伴']: 'desktop-pets' };
  const attr = value => esc(String(value)).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
  const publish = (ready = true) => { window.__shiyuMemberCatalog = { ready, plans }; window.dispatchEvent(new CustomEvent('shiyu-member-catalog', { detail: window.__shiyuMemberCatalog })); };
  const original = openMemberCenter;
@@ -15,20 +15,25 @@
   const count = options.filter(option => values.includes(String(option.id).toLowerCase())).length;
   return count ? (count === options.length ? '全部 ' : '') + count + ' 种' : '—';
  }
- function quantityText(plan, key) { const item = benefit(plan, key); return item?.enabled && Number.isFinite(Number(item.value)) ? item.value + ' ' + (item.unit || '个') : '—'; }
+ function quantityText(plan, key) { const item = benefit(plan, key); return item?.enabled && item.unlimited ? '不限量' : item?.enabled && Number.isFinite(Number(item.value)) ? item.value + ' ' + (item.unit || '个') : '—'; }
  function groupedText(plan, pairs, fallback = '—') { return pairs.filter(([key]) => benefit(plan, key)?.enabled).map(([, label]) => label).join('、') || fallback; }
  const rows = [
   ['主题与个性化', '首页主题', plan => selectedText(plan, 'themes')],
+  ['', '全局配色', plan => selectedText(plan, 'global-colors') + (benefit(plan, 'global-custom-color')?.enabled ? ' · 支持自定义' : '')],
   ['', '字体选择', plan => selectedText(plan, 'global-fonts')],
-  ['', '配色选择', plan => selectedText(plan, 'global-colors') + (benefit(plan, 'global-custom-color')?.enabled ? ' · 支持自定义' : '')],
   ['', '页面布局', plan => selectedText(plan, 'global-layouts')],
+  ['', '桌面伙伴', plan => selectedText(plan, 'desktop-pets')],
   ['', '网址展示样式', plan => selectedText(plan, 'regular-styles')],
   ['收藏与空间', '可拥有空间', plan => quantityText(plan, 'space-limit')],
   ['', '每个空间的场景', plan => quantityText(plan, 'scene-limit')],
   ['', '每个场景的分组', plan => quantityText(plan, 'group-limit')],
-  ['', '常用卡片', plan => quantityText(plan, 'corner-limit') + (benefit(plan, 'corner-colors')?.enabled && benefit(plan, 'corner-colors')?.value?.length > 1 ? ' · 更多配色' : '')],
   ['', '空间独立设置', plan => groupedText(plan, [['space-font', '字体'], ['space-layout', '布局'], ['space-color', '配色']], '跟随全局')],
-  ['', '样式设置范围', plan => groupedText(plan, [['space-style-scene', '按场景'], ['space-style-group', '按分组']], '全空间统一')],
+  ['', '样式设置范围', plan => groupedText(plan, [['space-style-scene', '按场景']], '全空间统一')],
+  ['拾隅工具', '我的小记', plan => quantityText(plan, 'memo-limit')],
+  ['', '未完成待办', plan => quantityText(plan, 'todo-limit')],
+  ['', '常用卡片', plan => quantityText(plan, 'corner-limit')],
+  ['', '图标下载与复制', plan => quantityText(plan, 'icon-daily-limit')],
+  ['', '色号复制', plan => quantityText(plan, 'color-daily-limit')],
   ['浏览与分享', '关系图谱', plan => groupedText(plan, [['atlas-2d', '2D'], ['atlas-3d', '3D']])],
   ['', '分享保护', plan => groupedText(plan, [['share-password', '访问密码'], ['share-expiry', '有效期']], '公开分享')],
  ];
@@ -144,7 +149,7 @@
  paint(); void refresh(); setInterval(() => { if (!document.hidden) void refresh(); }, 15000);
 })();
 
-/* Membership has an administrator-owned palette, independent of personal themes. */
+/* Membership uses the platform palette; the legacy membership color is a loading fallback. */
 (() => {
  const style = document.createElement('style'); style.id='member-admin-palette'; document.head.append(style);
  const rgb = hex => [1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
@@ -170,9 +175,9 @@
   const mapping={accent:'primary','member-accent':'button','member-selected':'button','accent-hover':'buttonHover',bg:'background',surface:'surface',ink:'text',muted:'textMuted',line:'border',soft:'surfaceRaised','accent-soft':'selected','accent-soft-strong':'selected','selection-contrast':'onButton','official-button':'button','official-on-button':'onButton','official-title':'textTitle'};
   const rules=Object.entries(modes).filter(([mode])=>['light','dark'].includes(mode)).map(([mode,tokens])=>{
    if(Object.values(mapping).some(key=>!/^#[0-9a-f]{6}$/i.test(tokens[key]||'')))return '';
-   return `${mode==='dark'?'body[data-dark="true"]':'body'} #member-center{${Object.entries(mapping).map(([variable,key])=>`--${variable}:${tokens[key]}!important`).join(';')}}`;
+   return `${mode==='dark'?'body[data-dark="true"]':'body'} :is(#member-center,#member-gate){${Object.entries(mapping).map(([variable,key])=>`--${variable}:${tokens[key]}!important`).join(';')}}`;
   }).join('');
-  officialStyle.textContent=rules+'body #member-center.member-polished .member-plans>button[data-published-plan][aria-pressed=true]{background:var(--official-button)!important;color:var(--official-on-button)!important}body #member-center.member-polished .member-plans>button[data-published-plan][aria-pressed=true] :is(small,h3,strong,em,del,span){color:var(--official-on-button)!important}body #member-center .member-primary,body #member-center.member-polished .member-title-invite{background:var(--official-button)!important;color:var(--official-on-button)!important}body #member-center h2,body #member-center .activity-banner h3{color:var(--official-title)}';
+  officialStyle.textContent=rules+'body #member-center.member-polished .member-plans>button[data-published-plan][aria-pressed=true]{background:var(--official-button)!important;color:var(--official-on-button)!important}body #member-center.member-polished .member-plans>button[data-published-plan][aria-pressed=true] :is(small,h3,strong,em,del,span){color:var(--official-on-button)!important}body :is(#member-center,#member-gate) .member-primary,body #member-center.member-polished .member-title-invite{background:var(--official-button)!important;color:var(--official-on-button)!important}body :is(#member-center,#member-gate) h2,body #member-center .activity-banner h3{color:var(--official-title)}';
  }
  let pending=false;
  async function refresh(){if(pending)return;pending=true;try{const r=await fetch('/api/shiyu/operations',{cache:'no-store'});if(r.ok){const data=await r.json();apply(data.membershipColor);applyOfficial(data.platformThemeTokens)}}catch{}finally{pending=false}}

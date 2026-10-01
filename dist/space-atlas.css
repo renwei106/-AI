@@ -416,20 +416,22 @@ body.atlas-active[data-dark=true] #space-mode-menu{--ink:#efefea;--muted:#b0b0b8
 .workspace-tools .group-view-controls>.space-mode-entry:hover,#space-atlas .at-view-tools>.space-mode-entry:hover{background:var(--soft);color:var(--accent)}
 #space-atlas .at-focus-scene:hover,#space-atlas .at-focus-scene:focus-visible{background:var(--soft);color:var(--at-accent)}
 #space-atlas .at-view-picker>.at-quiet{padding:0;border-radius:24px;background:var(--surface);gap:0;color:var(--ink)}
-#space-atlas .at-view-picker>.at-quiet>.at-view-dimension{padding:11px 5px 11px 14px;font-size:10px;line-height:18px;color:var(--muted);letter-spacing:.45px;flex:none}
-#space-atlas .at-view-picker>.at-quiet>.at-view-current{padding:11px 14px 11px 5px;display:flex;align-items:center;gap:7px;min-width:0}
+#space-atlas .at-view-current>.at-view-dimension{font-size:10px;line-height:18px;color:var(--muted);letter-spacing:.45px;flex:none}
+#space-atlas .at-view-picker>.at-quiet>.at-view-current{padding:11px 14px;display:flex;align-items:center;gap:7px;min-width:0;border-radius:inherit}
 #space-atlas .at-view-picker>.at-quiet>.at-view-current>svg{width:18px;height:18px;color:var(--at-accent);flex:none}
 #space-atlas .at-view-picker>.at-quiet>.at-view-current>b{font-size:11px;font-weight:500}
 #space-atlas .at-view-picker>.at-quiet>.at-view-current>svg:last-child{transform:rotate(180deg);margin-left:3px;color:var(--ink)}
 #space-atlas .at-view-picker>.at-quiet:has([aria-expanded=true]){background:var(--soft)}
 #space-atlas .at-view-picker .at-layout-menu{top:auto;bottom:calc(100% + 10px);max-height:min(470px,calc(100dvh - 150px));overflow-y:auto;overscroll-behavior:contain;width:min(290px,calc(100vw - 32px))}
-#space-atlas .at-view-tabs{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;margin:1px 1px 8px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent)}
-#space-atlas .at-view-tabs>button{padding:8px 10px;border-radius:8px;color:var(--muted);font-size:11px;letter-spacing:.5px}
-#space-atlas .at-view-tabs>button[aria-selected=true]{background:var(--surface);color:var(--ink);box-shadow:0 2px 8px #0000000a}
-#space-atlas .at-view-panel[hidden]{display:none}
+#space-atlas .at-footer:has(.at-view-picker .at-layout-menu:not([hidden])){z-index:81}
+#space-atlas .at-view-section+ .at-view-section{margin-top:12px}
+#space-atlas .at-view-section>h3{margin:5px 12px 7px;font-size:10px;font-weight:500;letter-spacing:.7px;color:var(--muted)}
+#space-atlas .at-view-panel{display:grid;gap:3px}
 #space-atlas .at-view-panel>button{display:flex;align-items:center;width:100%;padding:10px 12px;gap:10px;border-radius:9px;text-align:left}
 #space-atlas .at-view-panel>button:hover,#space-atlas .at-view-panel>button[aria-pressed=true]{background:var(--soft)}
 #space-atlas .at-view-panel>button>svg{width:36px;height:32px;padding:4px;color:var(--at-accent);flex:none}
+#space-atlas .at-view-panel>button>span:not(.membership-badge){min-width:0;flex:1}
+#space-atlas .at-view-panel>button>.membership-badge{position:static;flex:none;margin-left:auto;align-self:center}
 #space-atlas .at-view-picker .at-layout-menu small{line-height:1.5}
 
 /* The focused node carries the same theme color at every hierarchy level. */

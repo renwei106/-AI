@@ -3,16 +3,23 @@ set -euo pipefail
 release_id="${1:?release id required}"
 front_commit="${2:?frontend commit required}"
 admin_commit="${3:?admin commit required}"
-[[ "$release_id" =~ ^[0-9]{14}$ && "$front_commit" =~ ^[a-f0-9]{40}$ && "$admin_commit" =~ ^[a-f0-9]{40}$ ]]
+tools_commit="${4:?tools commit required}"
+[[ "$release_id" =~ ^[0-9]{14}$ && "$front_commit" =~ ^[a-f0-9]{40}$ && "$admin_commit" =~ ^[a-f0-9]{40}$ && "$tools_commit" =~ ^[a-f0-9]{40}$ ]]
 old_front=$(readlink -f /opt/shiyu/current)
 old_admin=$(readlink -f /opt/shiyu-admin/current)
+old_tools=$(readlink -f /opt/shiyu-tools/current)
 front_release="/opt/shiyu/releases/$release_id"
 admin_release="/opt/shiyu-admin/releases/$release_id"
-test -d "$old_front" && test -d "$old_admin/node_modules"
-test ! -e "$front_release" && test ! -e "$admin_release"
-mkdir -p "$front_release" "$admin_release"
+tools_release="/opt/shiyu-tools/releases/$release_id"
+test -d "$old_front" && test -d "$old_admin/node_modules" && test -d "$old_tools/server/node_modules"
+test ! -e "$front_release" && test ! -e "$admin_release" && test ! -e "$tools_release"
+mkdir -p "$front_release" "$admin_release" "$tools_release"
 tar -xzf "/tmp/shiyu-front-$release_id.tgz" -C "$front_release"
 tar -xzf "/tmp/shiyu-admin-$release_id.tgz" -C "$admin_release"
+tar -xzf "/tmp/shiyu-tools-$release_id.tgz" -C "$tools_release"
+cmp "$old_tools/server/package.json" "$tools_release/server/package.json"
+ln -s "$(readlink -f "$old_tools/server/node_modules")" "$tools_release/server/node_modules"
+ln -s "$(readlink -f "$old_tools/.local")" "$tools_release/.local"
 
 # Retain live data in place; never upload local test accounts or credentials.
 for name in .local .local-shares .local-feedback; do
@@ -29,7 +36,7 @@ if [ -d "$old_admin/mocks" ]; then
   mv "$admin_release/mocks" "$admin_release/mocks.bundled"
   ln -s "$(readlink -f "$old_admin/mocks")" "$admin_release/mocks"
 fi
-for pair in "$old_front|$front_release" "$old_admin|$admin_release" "$old_front/payments|$front_release/payments"; do
+for pair in "$old_front|$front_release" "$old_admin|$admin_release" "$old_front/payments|$front_release/payments" "$old_tools|$tools_release" "$old_tools/server|$tools_release/server"; do
   source_dir=${pair%%|*}; target_dir=${pair#*|}
   for envfile in "$source_dir"/.env "$source_dir"/.env.local "$source_dir"/.env.production; do
     if [ -f "$envfile" ]; then ln -s "$envfile" "$target_dir/$(basename "$envfile")"; fi
@@ -42,7 +49,12 @@ ln -sfn /opt/shiyu/current /opt/shiyu-admin/releases/导航站
 ln -sfn /opt/shiyu-admin/current /opt/shiyu/releases/聚合管理后台
 printf '%s\n' "$front_commit" > "$front_release/RELEASE_COMMIT"
 printf '%s\n' "$admin_commit" > "$admin_release/RELEASE_COMMIT"
-chown -hR shiyu:shiyu "$front_release"
+printf '%s\n' "$tools_commit" > "$tools_release/RELEASE_COMMIT"
+chown -hR shiyu:shiyu "$front_release" "$tools_release"
+/opt/node-v24/bin/node --check "$tools_release/server/generation-server.mjs"
+test -f "$front_release/payments/tool-quotas.cjs"
+test -f "$admin_release/membership/pets.json"
+test -f "$tools_release/dist/tool-usage.js"
 /usr/bin/node --check "$front_release/preview.cjs"
 /usr/bin/node -e 'const fs=require("fs"),path=require("path");const root=process.argv[1];for(const match of fs.readFileSync(path.join(root,"preview.cjs"),"utf8").matchAll(/require\(["\x27](\.[^"\x27]+)["\x27]\)/g)){require.resolve(path.resolve(root,match[1]));}' "$front_release"
 /usr/bin/node --check "$front_release/i18n/frontend-server.cjs"
@@ -54,15 +66,19 @@ analytics_dropin=/etc/systemd/system/shiyu-admin.service.d/analytics.conf
 previous_dropin="$admin_release/analytics.conf.previous"
 if [ -f "$analytics_dropin" ]; then cp -p "$analytics_dropin" "$previous_dropin"; fi
 
+# Check pending jobs, create protected backups, then append the approved release record.
+/opt/node-v24/bin/node /tmp/release-state.mjs prepare "$release_id"
+
 switch_link() { ln -sfn "$1" "$2.next"; mv -Tf "$2.next" "$2"; }
 rollback() {
   trap - ERR
-  echo 'Release failed; restoring both previous versions.' >&2
+  echo 'Release failed; restoring all three previous versions.' >&2
   switch_link "$old_front" /opt/shiyu/current
   switch_link "$old_admin" /opt/shiyu-admin/current
+  switch_link "$old_tools" /opt/shiyu-tools/current
   if [ -f "$previous_dropin" ]; then cp -p "$previous_dropin" "$analytics_dropin"; else rm -f "$analytics_dropin"; fi
   systemctl daemon-reload
-  systemctl restart shiyu-admin.service shiyu-preview.service
+  systemctl restart shiyu-admin.service shiyu-preview.service shiyu-tools.service
   exit 1
 }
 trap rollback ERR
@@ -71,12 +87,16 @@ printf '[Service]\nEnvironment=SHIYU_ANALYTICS_ENV=production\n' > "$analytics_d
 systemctl daemon-reload
 switch_link "$admin_release" /opt/shiyu-admin/current
 switch_link "$front_release" /opt/shiyu/current
-systemctl restart shiyu-admin.service shiyu-preview.service
+switch_link "$tools_release" /opt/shiyu-tools/current
+systemctl restart shiyu-admin.service shiyu-preview.service shiyu-tools.service
 for i in {1..30}; do
-  if curl --max-time 5 -fsS http://127.0.0.1:5175/ >/dev/null 2>&1 && curl --max-time 5 -fsS http://127.0.0.1:4318/ >/dev/null 2>&1; then break; fi
+  if curl --max-time 5 -fsS http://127.0.0.1:5175/ >/dev/null 2>&1 && curl --max-time 5 -fsS http://127.0.0.1:4318/ >/dev/null 2>&1 && curl --max-time 5 -fsS -H 'Host: tool.shiyubox.com' http://127.0.0.1:4180/ >/dev/null 2>&1; then break; fi
   sleep 1
 done
-systemctl is-active --quiet shiyu-admin.service shiyu-preview.service
+systemctl is-active --quiet shiyu-admin.service shiyu-preview.service shiyu-tools.service shiyu-space.service shiyu-time.service
+curl --max-time 15 -fsS -H 'Host: tool.shiyubox.com' http://127.0.0.1:4180/api/platform-theme -o /dev/null
+test "$(curl --max-time 15 -sS -o /dev/null -w '%{http_code}' -H 'Host: tool.shiyubox.com' http://127.0.0.1:4180/api/shiyu/auth/tool-usage)" = '200'
+curl --max-time 15 -fsS -H 'Host: tool.shiyubox.com' http://127.0.0.1:4180/tool-usage.js -o /dev/null
 curl -fsS http://127.0.0.1:5175/src/ShiyuAnalytics.tsx -o /dev/null
 curl -fsS http://127.0.0.1:5175/src/AnalyticsCharts.tsx -o /dev/null
 curl -fsS http://127.0.0.1:4318/analytics.js -o /dev/null
@@ -100,5 +120,8 @@ for locale in $locales; do
   grep -q 'wechat-inline-login' "/tmp/shiyu-$locale-$release_id.js"
 done
 echo "ENABLED_EXTRA_LOCALES=$locales"
+/opt/node-v24/bin/node /tmp/release-state.mjs verify "$release_id"
 trap - ERR
 printf 'ONLINE_RELEASE=%s\nFRONT_COMMIT=%s\nADMIN_COMMIT=%s\nPREVIOUS_FRONT=%s\nPREVIOUS_ADMIN=%s\n' "$release_id" "$front_commit" "$admin_commit" "$old_front" "$old_admin"
+
+printf 'TOOLS_COMMIT=%s\nPREVIOUS_TOOLS=%s\n' "$tools_commit" "$old_tools"

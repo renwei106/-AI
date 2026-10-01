@@ -9,7 +9,7 @@
   const dimensionAllowed=mode=>{const config=spaceViews().graph[mode==='2d'?'twoD':'threeD'];return graphAllowed()&&config?.enabled===true&&(mode==='2d'?['radial','organization','mindmap']:['micro','galaxy']).some(id=>config[id]!==false)};
   const regularAllowed=id=>!remoteSpaceAccess||window.ShiyuFeatureConfig?.allowed('spaceViews')===false?id==='follow':spaceViews().regular.enabled===true&&spaceViews().regular[id]!==false;
   window.ShiyuSpaceViews={get:()=>spaceViews()};
-  function applyRegularViewConfig(){document.querySelectorAll('[data-group-style]').forEach(select=>{const options=[...select.options];for(const option of options){option.hidden=!regularAllowed(option.value);const name=remoteNames['spaceViews.regular.'+option.value];if(name&&option.textContent!==name)option.textContent=name}const ordered=[...options].sort((a,b)=>remoteViewOrder.regular.indexOf(a.value)-remoteViewOrder.regular.indexOf(b.value));if(ordered.some((option,index)=>options[index]!==option))ordered.forEach(option=>select.append(option));if(select.selectedOptions[0]?.hidden){const next=[...select.options].find(option=>!option.hidden);if(next){select.value=next.value;select.dispatchEvent(new Event('change',{bubbles:true}))}}});document.querySelectorAll('[data-link-view]').forEach(button=>{button.hidden=!regularAllowed(button.dataset.linkView||'');const name=remoteNames['spaceViews.regular.'+button.dataset.linkView];if(name){const text=[...button.childNodes].find(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim());if(text&&text.textContent!==name)text.textContent=name}});document.querySelectorAll('.link-view-grid').forEach(grid=>{const buttons=[...grid.querySelectorAll(':scope > [data-link-view]')];const ordered=[...buttons].sort((a,b)=>remoteViewOrder.regular.indexOf(a.dataset.linkView)-remoteViewOrder.regular.indexOf(b.dataset.linkView));if(ordered.some((button,index)=>buttons[index]!==button))ordered.forEach(button=>grid.append(button))})}
+  function applyRegularViewConfig(){document.querySelectorAll('[data-group-style]').forEach(select=>{const options=[...select.options];for(const option of options){option.hidden=!regularAllowed(option.value);const name=remoteNames['spaceViews.regular.'+option.value];if(name&&option.textContent!==name)option.textContent=name}const ordered=[...options].sort((a,b)=>remoteViewOrder.regular.indexOf(a.value)-remoteViewOrder.regular.indexOf(b.value));if(ordered.some((option,index)=>options[index]!==option))ordered.forEach(option=>select.append(option));if(select.selectedOptions[0]?.hidden){const next=[...select.options].find(option=>!option.hidden);if(next){select.value=next.value;select.dispatchEvent(new Event('change',{bubbles:true}))}}});document.querySelectorAll('[data-link-view]').forEach(button=>{button.hidden=!regularAllowed(button.dataset.linkView||'');const name=remoteNames['spaceViews.regular.'+button.dataset.linkView];if(name){const text=[...button.childNodes].find(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim());if(text&&text.textContent!==name)text.textContent=name}});document.querySelectorAll('.link-view-grid').forEach(grid=>{const buttons=[...grid.querySelectorAll(':scope > [data-link-view]')];const order=[...remoteViewOrder.regular];order.splice(order.indexOf('calendar')+1,0,'poly','shelf');const ordered=[...buttons].sort((a,b)=>order.indexOf(a.dataset.linkView)-order.indexOf(b.dataset.linkView));if(ordered.some((button,index)=>buttons[index]!==button))ordered.forEach(button=>grid.append(button))})}
   const classicOrbits = new URLSearchParams(location.search).get('atlas-orbits')==='classic';
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const svg = paths => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
@@ -49,7 +49,7 @@
   let orbits=[], satelliteOrbits=[],cameraReturn=null;
   const orbitPhase=orbit=>state.orbitClock*orbit.speed+(orbit.focusOffset||0);
   let dialog, index=new Map(), root, visible=[], nodeEls=new Map(), edgeEls=[], activeFlow=null, raf=0, lastFrame=0, needsPaint=true, returnFocus, resizeObserver, noticeTimer, compactLayout=false, modeMenu, menuTimer, menuTrigger, viewMenuTimer=0, editorBusy=false, atlasTransitionTimer=0, atlasClosing=false;
-  let leavingForHome=false,sharedHeading,sharedModeButton;
+  let leavingForHome=false,sharedHeading,sharedModeButton,spaceViewToggle=null;
   let returnWheelTop=120,returnWheelLast=0,returnWheelTotal=0,returnWheelHandled=false,returnWheelArmed=0,returnWheelTimer=0;
   const get = key => index.get(key);
   const query = s => dialog.querySelector(s);
@@ -159,7 +159,7 @@
     b.innerHTML='<i class="space-mode-indicator">'+(atlas?icons.graph:icons.grid)+'</i>';b.title='切换视图';b.setAttribute('aria-label','切换视图，当前'+(atlas?'图谱视图':'宫格视图'));
     sharedModeButton=b;controls.append(switcher);return controls;
   }
-  window.ShiyuSpaceViews={label:sid=>(sid===spaceId?!!dialog?.open:entryPresentation(sid)?.view==='atlas')?'图谱视图':'宫格视图',show:showModeMenu,markup:sid=>{const graph=sid===spaceId?!!dialog?.open:entryPresentation(sid)?.view==='atlas';return (graph?icons.graph:icons.grid)+'<span class="corner-view-hint">当前'+(graph?'图谱视图':'宫格视图')+'，点击切换为'+(graph?'宫格视图':'图谱视图')+'</span>';},toggle:(button,sid)=>{const graph=sid===spaceId?!!dialog?.open:entryPresentation(sid)?.view==='atlas';if(!graph&&(!graphAllowed()||!window.ShiyuEntitlements?.require('atlas-2d',undefined,'atlas')))return;if(graph&&!spaceViews().regular.enabled)return;if(sid===spaceId){if(graph)closeAtlas('daily');else open(sid,button);}else{rememberPresentation(sid,graph?'daily':'atlas');writeSaved();}button.innerHTML=window.ShiyuSpaceViews.markup(sid);button.setAttribute('aria-label',window.ShiyuSpaceViews.label(sid)+'，点击切换视图');}};
+  window.ShiyuSpaceViews={label:sid=>(sid===spaceId?!!dialog?.open:entryPresentation(sid)?.view==='atlas')?'图谱视图':'宫格视图',show:showModeMenu,markup:sid=>{const graph=sid===spaceId?!!dialog?.open:entryPresentation(sid)?.view==='atlas';return (graph?icons.graph:icons.grid)+'<span class="corner-view-hint">当前'+(graph?'图谱视图':'宫格视图')+'，点击切换为'+(graph?'宫格视图':'图谱视图')+'</span>';},toggle:(button,sid)=>{const graph=sid===spaceId?!!dialog?.open:entryPresentation(sid)?.view==='atlas';if(!graph&&(!graphAllowed()||!window.ShiyuEntitlements?.require('atlas-2d',undefined,'atlas')))return;if(graph&&!spaceViews().regular.enabled)return;if(sid===spaceId){if(graph)closeAtlas('daily',button);else open(sid,button);}else{rememberPresentation(sid,graph?'daily':'atlas');writeSaved();}button.innerHTML=window.ShiyuSpaceViews.markup(sid);button.setAttribute('aria-label',window.ShiyuSpaceViews.label(sid)+'，点击切换视图');if(button.isConnected)button.focus({preventScroll:true});}};
   function hideModeMenu(){if(modeMenu)modeMenu.hidden=true;document.querySelectorAll('.space-mode-entry').forEach(b=>b.setAttribute('aria-expanded','false'))}
   function showModeMenu(button,sid=spaceId){
     clearTimeout(menuTimer);menuTrigger=button;
@@ -187,7 +187,7 @@
       dialog.addEventListener('input',input);
       dialog.addEventListener('keydown',keydown);
       dialog.addEventListener('close',resetReturnWheel);
-      dialog.addEventListener('close',()=>{const goHome=leavingForHome;leavingForHome=false;atlasClosing=false;clearTimeout(atlasTransitionTimer);atlasTransitionTimer=0;dialog.classList.remove('atlas-ready','atlas-direct-entry');cancelAnimationFrame(raf);resizeObserver?.disconnect();state.hover=null;state.drag=null;clearTimeout(noticeTimer);clearTimeout(viewMenuTimer);hideModeMenu();document.body.classList.remove('atlas-active','atlas-transitioning');const sharedHomeTab=dialog.querySelector('.space-home-tab');if(sharedHomeTab)document.body.append(sharedHomeTab);if(view==='space'&&spaceId===state.sid){rememberPresentation(spaceId,goHome?'atlas':'daily');writeSaved()}if(goHome){if(typeof mountColorCord==='function')mountColorCord();return;}render();requestAnimationFrame(()=>document.querySelector('.workspace .space-mode-entry')?.focus({preventScroll:true}))});
+      dialog.addEventListener('close',()=>{const goHome=leavingForHome;leavingForHome=false;atlasClosing=false;clearTimeout(atlasTransitionTimer);atlasTransitionTimer=0;dialog.classList.remove('atlas-ready','atlas-direct-entry');cancelAnimationFrame(raf);resizeObserver?.disconnect();state.hover=null;state.drag=null;clearTimeout(noticeTimer);clearTimeout(viewMenuTimer);hideModeMenu();document.body.classList.remove('atlas-active','atlas-transitioning');const sharedHomeTab=dialog.querySelector('.space-home-tab');if(sharedHomeTab)document.body.append(sharedHomeTab);if(view==='space'&&spaceId===state.sid){rememberPresentation(spaceId,goHome?'atlas':'daily');writeSaved()}if(goHome){if(typeof mountColorCord==='function')mountColorCord();return;}renderAfterAtlasClose()});
       dialog.addEventListener('cancel',e=>{if(!query('.at-drawer').hidden){e.preventDefault();closeDrawer()}else if(document.querySelector('.workspace .global-search-results:not([hidden])')){e.preventDefault();clearSearch()}});
       dialog.addEventListener('wheel',wheel,{passive:false});
       dialog.addEventListener('pointerdown',pointerDown);
@@ -262,13 +262,12 @@
   const layoutName=id=>esc(remoteNames['spaceViews.graph.'+(id==='spatial'?'threeD.micro':id==='solar'?'threeD.galaxy':'twoD.'+id)]||({radial:'径向环绕',organization:'层级结构',mindmap:'思维脉络',spatial:'微观结构',solar:classicOrbits?'行星轨道':'银河星系',systems:'场景星系'}[id]));
   const viewOptions=mode=>mode==='2d'?remoteViewOrder.twoD:[...remoteViewOrder.threeD.map(id=>id==='micro'?'spatial':'solar'),...(classicOrbits?['systems']:[])];
   const availableViewOptions=mode=>viewOptions(mode).filter(id=>mode==='2d'?spaceViews().graph.twoD[id]!==false:id==='spatial'?spaceViews().graph.threeD.micro:(id==='solar'?spaceViews().graph.threeD.galaxy:true));
+  const allViewOptions=()=>['2d','3d'].filter(dimensionAllowed).flatMap(availableViewOptions);
   function layoutPicker(){
     const current=state.mode==='2d'?state.layout:state.scene3d;
     const descriptions={radial:'从中心向四周逐级展开',organization:'从上到下，清楚呈现层级',mindmap:'从左到右，沿着分支浏览',spatial:'在立体空间中，探索收藏的关系',solar:classicOrbits?'以当前节点为恒星，内容沿多层轨道运行':'空间展开银河旋臂，场景与分组呈现行星圆盘',systems:'场景沿主轨道运行，分组环绕各自场景'};
-    const groups={two:availableViewOptions('2d'),three:availableViewOptions('3d')};
-    const panel=(mode,ids)=>'<div class="at-view-panel" id="at-view-panel-'+mode+'" role="tabpanel" aria-labelledby="at-view-tab-'+mode+'" data-at-view-panel="'+mode+'"'+(state.mode===mode?'':' hidden')+'>'+ids.map(id=>'<button data-at-view="'+id+'" aria-pressed="'+(id===current)+'">'+layoutIcon(id)+'<span><b>'+layoutName(id)+'</b><small>'+descriptions[id]+'</small></span></button>').join('')+'</div>';
-    const tabs=remoteViewOrder.graph.map(group=>{const mode=group==='twoD'?'2d':'3d';return dimensionAllowed(mode)?'<button id="at-view-tab-'+mode+'" role="tab" data-at-dimension="'+mode+'" aria-controls="at-view-panel-'+mode+'" aria-selected="'+(state.mode===mode)+'">'+esc(remoteNames['spaceViews.graph.'+group]||(mode==='2d'?'2D':'3D'))+'</button>':''}).join('');
-    return '<div class="at-layout-picker at-view-picker"><div class="at-quiet" role="group" aria-label="切换图谱视图"><button class="at-view-dimension" data-at="toggle-dimension" aria-label="切换到'+(state.mode==='3d'?'2D':'3D')+'模式" aria-haspopup="dialog" aria-controls="at-view-dialog" aria-expanded="false">'+state.mode.toUpperCase()+'</button><button class="at-view-current" data-at="views" aria-label="切换下一个结构视图" aria-haspopup="dialog" aria-controls="at-view-dialog" aria-expanded="false">'+layoutIcon(current)+'<b>'+layoutName(current)+'</b>'+icons.down+'</button></div><div class="at-layout-menu" id="at-view-dialog" role="dialog" aria-label="图谱展示方式" hidden><div class="at-view-tabs" role="tablist" aria-label="选择二维或三维">'+tabs+'</div>'+panel('2d',groups.two)+panel('3d',groups.three)+'</div></div>';
+    const panels=['2d','3d'].filter(dimensionAllowed).map(mode=>'<section class="at-view-section" aria-labelledby="at-view-heading-'+mode+'"><h3 id="at-view-heading-'+mode+'">'+esc(remoteNames['spaceViews.graph.'+(mode==='2d'?'twoD':'threeD')]||mode.toUpperCase())+'</h3><div class="at-view-panel" data-at-view-panel="'+mode+'">'+availableViewOptions(mode).map(id=>'<button data-at-view="'+id+'" aria-pressed="'+(id===current)+'">'+layoutIcon(id)+'<span><b>'+layoutName(id)+'</b><small>'+descriptions[id]+'</small></span></button>').join('')+'</div></section>').join('');
+    return '<div class="at-layout-picker at-view-picker"><div class="at-quiet"><button class="at-view-current" data-at="views" aria-label="切换下一个结构视图" aria-haspopup="dialog" aria-controls="at-view-dialog" aria-expanded="false"><span class="at-view-dimension">'+state.mode.toUpperCase()+'</span>'+layoutIcon(current)+'<b>'+layoutName(current)+'</b>'+icons.down+'</button></div><div class="at-layout-menu" id="at-view-dialog" role="dialog" aria-label="图谱展示方式" hidden>'+panels+'</div></div>';
   }
   function layoutIcon(id){if(id==='systems')return svg('<circle cx="8" cy="12" r="2.6"/><ellipse cx="8" cy="12" rx="6" ry="3.5"/><circle cx="15.5" cy="8" r="1.8"/><ellipse cx="15.5" cy="8" rx="5.5" ry="2.8" transform="rotate(-18 15.5 8)"/><circle cx="20" cy="7" r="1"/>');if(id==='solar')return svg('<circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="11" ry="6" transform="rotate(-25 12 12)"/><circle cx="21" cy="8" r="2"/>');if(id==='spatial')return icons.space;return id==='radial'?icons.graph:id==='organization'?svg('<rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M5 17v-5h14v5"/>'):svg('<rect x="2" y="9" width="6" height="6" rx="1"/><rect x="17" y="2" width="5" height="5" rx="1"/><rect x="17" y="17" width="5" height="5" rx="1"/><path d="M8 12h5V5h4m-4 7v7h4"/>')}
   function bundle(parent,children,kind) {
@@ -728,14 +727,12 @@
     if(b.hasAttribute('data-at-manage')){manage(b.dataset.atManage,b.dataset.atKey);return}
     if(b.hasAttribute('data-at-delete')){remove(b.dataset.atDelete);return}
     if(b.hasAttribute('data-at-locate')){const n=get(b.dataset.atLocate);if(n){focus(n.parent);requestAnimationFrame(()=>query(`[data-key="${CSS.escape(n.key)}"] a`)?.focus({preventScroll:true}))}return}
-    if(b.hasAttribute('data-at-dimension')){setViewDimension(b.dataset.atDimension,true);return}
     if(b.hasAttribute('data-at-view')){selectGraphView(b.dataset.atView);return}
     if(b.hasAttribute('data-at-space')){state.sid=b.dataset.atSpace;state.focus='s:'+state.sid;preferences();resetCamera();buildIndex();setContext(root);renderAtlas();return}
     const action=b.dataset.at;
     if(action==='daily'){setContext(get(state.focus));closeAtlas('daily');return}
     if(action==='home'){leaveAtlasForHome();return}
-    if(action==='toggle-dimension'){const options=availableViewOptions(state.mode==='3d'?'2d':'3d');if(options.length)selectGraphView(options[0],'toggle-dimension');return}
-    if(action==='views'){const options=availableViewOptions(state.mode),current=state.mode==='2d'?state.layout:state.scene3d;if(options.length)selectGraphView(options[(options.indexOf(current)+1)%options.length]);return}
+    if(action==='views'){const options=allViewOptions().filter(id=>window.ShiyuEntitlements?.allows('atlas-'+(viewOptions('3d').includes(id)?'3d':'2d'))),current=state.mode==='2d'?state.layout:state.scene3d;if(options.length>1)selectGraphView(options[(options.indexOf(current)+1)%options.length]);return}
     if(action==='focus-scene'){closeViewPicker();returnToDefaultView();query('.at-canvas').focus({preventScroll:true});return}
     if(action==='back'){const p=get(state.focus).parent;if(p)focus(p);return}
     if(action==='spaces'){drawer('切换空间',`<div class="at-drawer-list">${data.map(s=>`<button data-at-space="${esc(s.id)}" aria-current="${s.id===state.sid}">${esc(s.name)}<small>${s.scenes.length} 个场景</small></button>`).join('')}</div>`);return}
@@ -743,8 +740,16 @@
     if(action==='close-drawer'){closeDrawer();return}
     if(action==='undo'&&undo){undo();undo=null;repairContext();refresh();notify('已撤销，内容已恢复')}
   }
-  function closeAtlas(destination='daily'){
+  function renderAfterAtlasClose(){
+    const button=spaceViewToggle;spaceViewToggle=null;
+    const menu=button?.closest('#corner-space-menu');
+    if(menu&&!menu.hidden)menu.dataset.preserveViewRender='true';
+    try{render()}finally{if(menu)delete menu.dataset.preserveViewRender;}
+    requestAnimationFrame(()=>{const target=button?.isConnected&&menu&&!menu.hidden?button:document.querySelector('.workspace .space-mode-entry');target?.focus({preventScroll:true})});
+  }
+  function closeAtlas(destination='daily',toggleOrigin=null){
     if(!dialog?.open||atlasClosing||(destination==='home'&&Date.now()<transitionUntil))return;atlasClosing=true;leavingForHome=destination==='home';clearTimeout(atlasTransitionTimer);
+    spaceViewToggle=toggleOrigin;
     resetReturnWheel();
     if(leavingForHome){
       rememberPresentation(state.sid,'atlas');writeSaved();
@@ -755,15 +760,8 @@
     dialog.classList.add('atlas-direct-entry');dialog.close();
   }
   function leaveAtlasForHome(){closeAtlas('home')}
-  function selectGraphView(id,trigger='views'){const mode=viewOptions('3d').includes(id)?'3d':'2d';if(!availableViewOptions(mode).includes(id)||!window.ShiyuEntitlements?.require('atlas-'+mode,undefined,'atlas'))return;state.mode=mode;if(state.mode==='3d')state.scene3d=id;else state.layout=id;state.motion=!reduceMotion.matches;savePreferences();resetCamera();renderAtlas();query('[data-at="'+trigger+'"]').focus({preventScroll:true})}
-  function setViewDimension(mode,focusTab=false){
-    if(!['2d','3d'].includes(mode)||!dimensionAllowed(mode))return;
-    if(!window.ShiyuEntitlements?.require('atlas-'+mode,undefined,'atlas'))return;
-    query('.at-view-tabs')?.querySelectorAll('[data-at-dimension]').forEach(tab=>tab.setAttribute('aria-selected',String(tab.dataset.atDimension===mode)));
-    query('.at-layout-menu')?.querySelectorAll('[data-at-view-panel]').forEach(panel=>panel.hidden=panel.dataset.atViewPanel!==mode);
-    if(focusTab)query('[data-at-dimension="'+mode+'"]')?.focus({preventScroll:true});
-  }
-  function openViewPicker(){clearTimeout(viewMenuTimer);const pop=query('.at-layout-menu');if(!pop)return;pop.hidden=false;query('.at-view-picker')?.querySelectorAll('[aria-haspopup=dialog]').forEach(b=>b.setAttribute('aria-expanded','true'))}
+  function selectGraphView(id){const mode=viewOptions('3d').includes(id)?'3d':'2d';if(!dimensionAllowed(mode)||!availableViewOptions(mode).includes(id)||!window.ShiyuEntitlements?.require('atlas-'+mode,undefined,'atlas'))return;state.mode=mode;if(state.mode==='3d')state.scene3d=id;else state.layout=id;state.motion=!reduceMotion.matches;savePreferences();resetCamera();renderAtlas();query('[data-at="views"]').focus({preventScroll:true})}
+  function openViewPicker(){hideModeMenu();clearTimeout(viewMenuTimer);const pop=query('.at-layout-menu');if(!pop)return;pop.hidden=false;query('.at-view-picker')?.querySelectorAll('[aria-haspopup=dialog]').forEach(b=>b.setAttribute('aria-expanded','true'))}
   function closeViewPicker(){clearTimeout(viewMenuTimer);const pop=query('.at-layout-menu');if(pop)pop.hidden=true;query('.at-view-picker')?.querySelectorAll('[aria-haspopup=dialog]').forEach(b=>b.setAttribute('aria-expanded','false'))}
   function zoomBy(ratio,point){
     cameraReturn=null;
@@ -954,7 +952,7 @@
   }
   function keydown(e){
     if(e.target.matches('input,textarea')){if(e.key==='Escape'){e.preventDefault();clearSearch()}return}
-    if(e.target.matches('[data-at-dimension]')&&['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const tabs=[...query('.at-view-tabs').querySelectorAll('[data-at-dimension]')],at=tabs.indexOf(e.target),next=e.key==='Home'?0:e.key==='End'?tabs.length-1:(at+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;setViewDimension(tabs[next].dataset.atDimension,true);return}
+    if(e.target.closest('.at-view-picker')&&['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();openViewPicker();const options=[...query('.at-layout-menu').querySelectorAll('[data-at-view]')];if(!options.length)return;const at=options.indexOf(e.target),next=e.key==='Home'?0:e.key==='End'?options.length-1:at<0?(e.key==='ArrowUp'?options.length-1:0):(at+(e.key==='ArrowDown'?1:-1)+options.length)%options.length;options[next].focus();return}
     if(e.key==='Escape'&&state.drag){e.preventDefault();pointerUp({type:'pointercancel'});return}
     if(e.key==='Escape'&&!query('.at-layout-menu').hidden){e.preventDefault();closeViewPicker();query('[data-at=views]').focus();return}
     if(e.key==='Backspace'&&get(state.focus).parent){e.preventDefault();focus(get(state.focus).parent)}

@@ -164,8 +164,8 @@ body #member-center.member-polished.membership-page{background:var(--bg)!importa
 #member-center .payment-choice-chevron { display:block; width:6px; height:6px; border-top:1.5px solid currentColor; border-right:1.5px solid currentColor; transform:translateY(2px) rotate(-45deg); flex:0 0 6px; margin-left:2px; }
 
 /* Neutral membership canvas; configured accent remains on actions and selection. */
-body #member-center.member-polished.membership-page{--bg:#fafafa!important;--surface:#ffffff!important;--soft:#f2f2f2!important}
-body[data-dark="true"] #member-center.member-polished.membership-page{--bg:#181818!important;--surface:#222222!important;--soft:#292929!important}
+body :is(#member-center.member-polished.membership-page,#member-gate.grouped-member-gate){--bg:#fafafa!important;--surface:#ffffff!important;--soft:#f2f2f2!important}
+body[data-dark="true"] :is(#member-center.member-polished.membership-page,#member-gate.grouped-member-gate){--bg:#181818!important;--surface:#222222!important;--soft:#292929!important}
 
 /* Agreement selection follows the membership theme. */
 body #member-center.member-polished .checkout-legal input:checked{background:var(--accent);border-color:var(--accent)}

@@ -12,11 +12,11 @@
     linkSettingsBefore();
     const panel=$('#link-view-settings'),choice=panel?.querySelector('[data-link-view=poly]'),main=panel?.querySelector('.style-scroll-body>.link-view-grid');
     if(!choice||!main)return;
-    // Theme companions belong beside cards, not among the member-only extra styles.
+    // Keep theme companions after the standard theme styles.
     choice.innerHTML=`<span>${gem}</span>棱光拾景`;
     choice.title='三角切面的轻量卡片，保留网址图标与名称';
-    const cards=main.querySelector('[data-link-view=cards]');
-    if(cards)cards.after(choice);else main.append(choice);
+    const calendar=main.querySelector('[data-link-view=calendar]');
+    if(calendar)calendar.after(choice);else main.append(choice);
   };
   const svgCache=new Map(); let shapeId=0, custom=null, loadDone=false, menu, upload, job=0, worker=null, rejectWorker=null, busy=false;
   const options=()=>({preset:'mountain',detail:'balanced',tone:'original',...(prefs.polyScene||{})});
