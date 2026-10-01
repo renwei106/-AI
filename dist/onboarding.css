@@ -1,0 +1,103 @@
+/* Scoped welcome letter and guided tour; colors inherit the active platform theme. */
+.sy-welcome,.sy-tour{--guide-accent:var(--accent);--guide-paper:color-mix(in srgb,var(--surface) 95%,var(--guide-accent));--guide-muted:color-mix(in srgb,var(--ink) 60%,var(--surface));color:var(--ink);font-family:var(--font);box-sizing:border-box}
+.sy-welcome *,.sy-tour *{box-sizing:border-box}
+.sy-welcome{position:fixed;inset:0;border:0;padding:0;margin:auto;width:100vw;height:100dvh;max-width:none;max-height:none;background:transparent;overflow:hidden;outline:none}
+.sy-welcome::backdrop{background:rgb(0 0 0 / .56);backdrop-filter:blur(7px);animation:sy-backdrop-in .55s both}
+.sy-welcome.is-closing::backdrop{animation:sy-backdrop-out .65s both}
+.sy-welcome-stage{height:100%;display:grid;place-items:center;perspective:1400px;padding:24px}
+.sy-welcome-close{position:absolute;top:24px;right:28px;border:0;background:var(--surface);color:var(--ink);border-radius:50%;width:40px;height:40px;font-size:24px;cursor:pointer;z-index:12}
+.sy-envelope-scene{width:min(660px,86vw);position:relative;text-align:center;transition:opacity .45s,transform .8s cubic-bezier(.22,1,.36,1);animation:sy-envelope-in 1s cubic-bezier(.22,1,.36,1) both}
+.sy-envelope-kicker{font-size:11px;letter-spacing:.22em;color:var(--guide-accent);margin:0 0 36px}
+.sy-envelope{height:390px;position:relative;isolation:isolate;filter:drop-shadow(0 24px 24px #00000014);perspective:1000px}
+.sy-envelope-back{position:absolute;inset:0;background:color-mix(in srgb,var(--guide-paper) 86%,var(--guide-accent));border-radius:18px}
+.sy-envelope-letter{position:absolute;inset:20px 24px 10px;background:var(--surface);border-radius:3px;padding:35px 15px;transition:transform .85s .3s cubic-bezier(.22,1,.36,1);color:var(--guide-accent);font-size:21px;letter-spacing:.12em}
+.sy-envelope-letter small{display:block;font-size:10px;letter-spacing:.25em;margin-top:12px;opacity:.55}
+.sy-envelope-front{position:absolute;inset:0;background:color-mix(in srgb,var(--guide-paper) 95%,var(--guide-accent));clip-path:polygon(0 0,50% 57%,100% 0,100% 100%,0 100%);z-index:3;border-radius:5px}
+.sy-envelope-front::after{content:'';position:absolute;inset:0;background:var(--guide-paper);clip-path:polygon(0 100%,50% 39%,100% 100%)}
+.sy-envelope-flap{position:absolute;inset:0 0 auto;height:62%;border-radius:18px 18px 0 0;background:color-mix(in srgb,var(--guide-paper) 90%,var(--guide-accent));clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform .85s .16s cubic-bezier(.3,.7,.2,1);z-index:4;filter:drop-shadow(0 2px 1px #00000010);backface-visibility:visible}
+.sy-wax{position:absolute;left:50%;top:46%;width:76px;height:76px;transform:translate(-50%,-5%);z-index:5;border:0;border-radius:46% 52% 44% 51% / 51% 44% 53% 45%;background:radial-gradient(ellipse at 32% 22%,color-mix(in srgb,var(--guide-accent) 70%,white),var(--guide-accent) 60%,color-mix(in srgb,var(--guide-accent) 75%,black));box-shadow:inset 1px 2px 2px #ffffff55,inset -2px -3px 4px #00000045,0 5px 8px #00000025;cursor:pointer;transition:transform .4s,opacity .35s;display:grid;place-items:center;color:color-mix(in srgb,var(--guide-accent) 25%,white)}
+.sy-wax::before{content:'';position:absolute;inset:9px;border:1px solid #ffffff45;border-radius:50%;box-shadow:inset 0 1px 2px #00000040,0 1px 1px #ffffff40}
+.sy-wax svg{width:31px;height:31px;filter:drop-shadow(0 1px 1px #00000055)}
+.sy-wax:hover{transform:translate(-50%,-5%) rotate(-7deg) scale(1.06)}
+.sy-wax:focus-visible,.sy-welcome button:focus-visible,.sy-tour button:focus-visible{outline:3px solid var(--guide-accent);outline-offset:5px}
+.sy-envelope-address{position:absolute;bottom:28px;left:0;right:0;z-index:4;font-size:13px;letter-spacing:.18em;color:var(--guide-muted);pointer-events:none}
+.sy-envelope-hint{margin:35px 0 12px;color:var(--guide-muted);font-size:13px;letter-spacing:.08em}
+.sy-welcome button.sy-text-button{background:none;border:0;color:var(--guide-muted);font:inherit;font-size:12px;cursor:pointer;padding:8px 14px}
+.sy-welcome.is-opening .sy-wax,.sy-welcome.is-open .sy-wax{transform:translate(-50%,10%) rotate(-18deg) scale(1.2);opacity:0;pointer-events:none}
+.sy-welcome.is-opening .sy-envelope-flap,.sy-welcome.is-open .sy-envelope-flap{transform:rotateX(180deg);z-index:1}
+.sy-welcome.is-opening .sy-envelope-letter,.sy-welcome.is-open .sy-envelope-letter{transform:translateY(-100px)}
+.sy-welcome.is-open .sy-envelope-scene{opacity:0;transform:translateY(110px) scale(.88);pointer-events:none}
+.sy-letter{position:absolute;width:min(960px,calc(100vw - 48px));max-height:calc(100dvh - 72px);overflow:auto;overscroll-behavior:contain;background:var(--guide-paper);padding:38px 46px 26px;border-radius:16px;box-shadow:0 22px 80px #00000012;opacity:0;transform:translateY(95px) scale(.9);transition:opacity .55s,transform .85s cubic-bezier(.22,1,.36,1);pointer-events:none;scrollbar-width:thin}
+.sy-welcome.is-open .sy-letter{opacity:1;transform:none;pointer-events:auto}
+.sy-letter-head{display:flex;align-items:center;justify-content:space-between;color:var(--guide-accent);font-size:10px;letter-spacing:.17em;margin-bottom:24px}
+.sy-letter-head span:last-child{letter-spacing:.07em}
+.sy-letter h1{margin:0 0 19px;font-size:29px;font-weight:500;letter-spacing:.08em;line-height:1.5}
+.sy-letter-intro{font-size:14px;line-height:1.95;color:var(--guide-muted);margin:0 0 23px}
+.sy-letter-concepts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:0 0 23px}
+.sy-concept{min-width:0;padding:0 0 12px;background:color-mix(in srgb,var(--surface) 62%,transparent);border-radius:4px}
+.sy-concept-art{display:block;width:100%;height:118px;color:var(--guide-accent)}
+.sy-concept h2{font-size:16px;font-weight:500;margin:2px 14px 8px}
+.sy-concept p{font-size:12px;line-height:1.8;color:var(--guide-muted);margin:0 14px}
+.sy-letter-note{font-size:13px;line-height:1.85;color:var(--guide-muted);margin:0}
+.sy-letter-signature{text-align:right;font-size:15px;letter-spacing:.16em;margin:16px 0 24px;color:var(--guide-accent)}
+.sy-letter-footer{display:flex;align-items:center;justify-content:center;gap:20px;padding-top:18px}
+.sy-letter-footer small{font-size:11px;color:var(--guide-muted);line-height:1.8}
+.sy-letter-footer>div{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sy-guide-primary{background:var(--guide-accent);color:var(--guide-on-accent,#fff);border:0;border-radius:6px;padding:11px 21px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+.sy-welcome.is-closing .sy-letter{opacity:0;transform:translateY(110px) scale(.88);pointer-events:none}
+.sy-welcome.is-closing .sy-envelope-scene{opacity:0;transform:translateY(65px) scale(.94);transition:opacity .55s,transform .65s}
+.sy-tour{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;background:transparent;border:0;padding:0;margin:0;overflow:hidden;z-index:2147483640}
+.sy-tour::backdrop{background:transparent}
+.sy-tour-ring{position:fixed;border:1.5px solid color-mix(in srgb,var(--guide-accent) 72%,white);border-radius:12px;box-shadow:0 0 0 150vmax #00000055;pointer-events:none;transition:left .28s,top .28s,width .28s,height .28s}
+.sy-tour-panel{position:fixed;width:min(348px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;border-radius:12px;background:var(--guide-paper);padding:24px;box-shadow:0 16px 55px #00000018;transition:left .2s,top .2s;animation:sy-panel-in .3s both}
+.sy-tour-progress{font-size:11px;color:var(--guide-accent);letter-spacing:.09em;display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.sy-tour-progress button{font:inherit;color:var(--guide-muted);border:0;background:none;cursor:pointer;padding:3px}
+.sy-tour h2{font-size:20px;font-weight:500;line-height:1.5;margin:0 0 10px}
+.sy-tour p{font-size:13px;line-height:1.9;color:var(--guide-muted);margin:0 0 22px}
+.sy-tour-actions{display:flex;gap:9px;align-items:center;justify-content:flex-end}
+.sy-tour-actions button:not(.sy-guide-primary){font:inherit;font-size:12px;background:none;border:0;color:var(--guide-muted);padding:8px;cursor:pointer}
+.sy-tour-actions button:disabled{opacity:.35;cursor:default}
+.sy-tour-live{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+[data-onboarding-entry]{display:flex;align-items:center;gap:10px}
+[data-onboarding-entry] svg{width:18px;height:18px;flex-shrink:0}
+.sy-tour-active .brand-guide{visibility:hidden}
+@keyframes sy-envelope-in{from{opacity:0;transform:translateY(38px) rotate(-3deg) scale(.94)}to{opacity:1;transform:none}}
+@keyframes sy-panel-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@keyframes sy-backdrop-in{from{opacity:0}to{opacity:1}}
+@keyframes sy-backdrop-out{to{opacity:0}}
+@media(max-width:600px){.sy-envelope{height:230px}.sy-wax{width:66px;height:66px}.sy-letter{padding:25px 22px 20px;max-height:calc(100dvh - 72px)}.sy-letter h1{font-size:23px}.sy-letter-head{margin-bottom:18px}.sy-letter-concepts{gap:8px}.sy-concept-art{height:85px}.sy-concept h2{font-size:14px;margin:0 9px 7px}.sy-concept p{font-size:11px;margin:0 9px}.sy-letter-footer{align-items:stretch;flex-direction:column;gap:12px}.sy-letter-footer>div{justify-content:flex-end}.sy-welcome-close{top:12px;right:12px;width:32px;height:32px}.sy-letter-intro{font-size:13px}.sy-letter-signature{margin:15px 0}}
+@media(prefers-reduced-motion:reduce){.sy-welcome *,.sy-tour *,.sy-welcome::backdrop{animation-duration:.01ms!important;transition-duration:.01ms!important;transition-delay:0ms!important}}
+@media(max-width:600px){.sy-letter-concepts{grid-template-columns:1fr;gap:8px}.sy-concept{display:grid;grid-template-columns:76px 1fr;grid-template-rows:auto 1fr;padding:4px 4px 8px}.sy-concept-art{grid-row:1/3;width:76px;height:80px;align-self:center}.sy-concept h2{margin:8px 8px 4px}.sy-concept p{margin:0 8px;font-size:12px;line-height:1.7}.sy-letter-footer{position:sticky;bottom:-20px;background:var(--guide-paper);padding-bottom:4px}.sy-letter-footer small{display:none}.sy-letter-signature{font-size:13px}.sy-letter-intro{line-height:1.8}.sy-letter-note{font-size:12px}.sy-letter h1{font-size:21px}}
+
+/* Welcome letter revisions: larger envelope, centered invitation, continuous paper motion. */
+.sy-envelope-kicker{display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--ink);margin-bottom:28px}
+.sy-envelope-kicker span{font-size:22px;letter-spacing:.24em}
+.sy-envelope-kicker small{font-size:11px;letter-spacing:.22em;opacity:.7}
+.sy-envelope-hint,.sy-envelope-scene>.sy-text-button{color:var(--ink)}
+.sy-welcome.is-extracting .sy-envelope-letter{visibility:hidden}
+.sy-welcome.is-extracting .sy-letter{z-index:6}
+.sy-letter-footer>div{flex-direction:column-reverse;gap:8px;align-items:center;width:100%}
+.sy-letter-footer .sy-guide-primary{min-height:52px;min-width:240px;padding:15px 34px;font-size:16px;border-radius:10px}
+.sy-welcome.is-departing .sy-welcome-close{opacity:0;pointer-events:none}
+.sy-welcome.is-departing::backdrop{animation:sy-backdrop-out 1.05s .95s both}
+.sy-paper-plane{position:fixed;pointer-events:none;z-index:10;transform-origin:center;filter:drop-shadow(0 10px 10px #0002)}
+.sy-paper-plane svg{display:block;width:100%;height:100%}
+@media(max-width:600px){.sy-envelope{height:clamp(210px,59vw,300px)}.sy-envelope-kicker span{font-size:19px}.sy-envelope-kicker small{font-size:10px}.sy-envelope-address{font-size:11px;letter-spacing:.08em}.sy-letter-footer>div{justify-content:center}.sy-letter-footer .sy-guide-primary{min-width:220px}}
+
+.sy-envelope-front{overflow:hidden}
+.sy-welcome:not(.is-opening) .sy-envelope{clip-path:inset(0 round 18px)}
+.sy-envelope-kicker,.sy-envelope-hint{color:#fff}
+.sy-welcome .sy-envelope-scene>.sy-text-button{color:rgb(255 255 255 / .72)}
+.sy-welcome.is-stowing .sy-welcome-close{opacity:0;pointer-events:none}
+.sy-welcome.is-stowing .sy-envelope-scene>:not(.sy-envelope){opacity:0;transition:opacity .25s}
+.sy-welcome.is-stow-flight::backdrop{animation:sy-backdrop-out 1.15s both}
+/* Folded wings keep depth in both light and dark themes. */
+.sy-paper-plane{--plane-paper:color-mix(in srgb,var(--guide-paper) 40%,#fff);--plane-light:color-mix(in srgb,var(--guide-paper) 18%,#fff);--plane-shadow:color-mix(in srgb,var(--guide-accent) 30%,#8a9690);--plane-fold:color-mix(in srgb,var(--guide-accent) 26%,#c3cdc7);--plane-edge:color-mix(in srgb,var(--guide-accent) 25%,#fff);filter:drop-shadow(0 16px 12px #0004)}
+.sy-welcome.is-departing::backdrop{animation-duration:1.85s}
+.sy-welcome button.sy-letter-later{position:absolute;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:8;color:rgb(255 255 255 / .6);font-size:12px;min-height:40px;padding:10px 20px}
+.sy-welcome .sy-letter-later[hidden],.sy-welcome.is-stowing .sy-letter-later{display:none}
+/* Idle hiding is presentation, not module availability; reveal only while introducing the pet. */
+body.sy-tour-pet #desktop-pet[data-idle="true"]:not([hidden]){opacity:1!important;visibility:visible!important}
+/* Keep the actual first destination measurable while the welcome dialog is open. */
+body[data-view=home]:has(.sy-welcome[open]):not(.world-active):not(.world-entry-disabled)>.world-entry{display:flex;opacity:1;visibility:visible}
+body.sy-tour-active[data-view=home]:not(.world-entry-disabled)>.world-entry{opacity:1;visibility:visible}

@@ -96,7 +96,7 @@ function createMembershipService(options = {}) {
       expires: cancel ? '已取消' : end(after), operator: input.operator || (source === 'admin' ? '管理员' : '系统'),
       orderId: input.orderId, rewardId: input.rewardId, planId: after.planId, planName: after.planName, planVersion: after.planVersion,
       beforeExpiresAt: end(before), afterExpiresAt: end(after), beforePermanent: before.permanent, afterPermanent: after.permanent,
-      remark: input.remark || '', ...(source === 'payment' ? { provider: input.provider } : {}) };
+      remark: input.remark || '', ...(source === 'payment' ? { provider: input.provider, invitationEligible: input.invitationEligible !== false, activityId: input.activityId } : {}) };
     user.membership = after;
     user.member = after.member;
     user.memberExpiresAt = end(after);
@@ -128,13 +128,17 @@ function createMembershipService(options = {}) {
         title: `${reward.campaignName} · ${reward.type}`, occurredAt: timestamp(reward.occurredAt), remark: reward.note });
       changed ||= result.changed;
     }
+    for(const user of users){const reward=user.registrationReward;if(reward?.source!=='registration'||user.invitation||user.blacklisted||!Number.isSafeInteger(reward.days)||reward.days<1)continue;
+      const result=applyToUser(user,{id:'REG:'+user.id,source:'reward',days:reward.days,rewardId:'REG:'+user.id,title:'新用户注册奖励',occurredAt:timestamp(reward.decidedAt),remark:'注册奖励规则版本：'+reward.version});changed ||= result.changed;
+    }
     if (changed) writeUsers(users);
     return store;
   }
-  function applyPayment(order) {
+  function applyPayment(order, activity = {}) {
     const planSnapshot = order.plan_snapshot ? JSON.parse(order.plan_snapshot) : null;
     const result = mutate(order.user_id, { id: `PAY:${order.id}`, source: 'payment', orderId: order.id, planId: order.plan_id,
-      planSnapshot, days: order.days, amount: order.amount / 100, provider: order.provider, occurredAt: order.paid_at });
+      planSnapshot, days: order.days, amount: order.amount / 100, provider: order.provider, occurredAt: order.paid_at,
+      invitationEligible: activity.invitationEligible, activityId: activity.activityId, remark: activity.bonusDays ? `含活动额外赠送 ${activity.bonusDays} 天` : '' });
     settleInvitations();
     return result;
   }

@@ -101,3 +101,12 @@ body.world-active>.world-fullscreen-cord .mode-cord-handle svg{display:block;wid
 /* World navigation and pull cords stay visible, including idle fullscreen. */
 body.world-active #world-page>.world-header,
 body.world-active[data-view]>.mode-pull-cord{opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+/* Official world typography and controls; the separate home-return control keeps user styling. */
+#world-page .world-tool-home,#world-page .world-tool-home *{font-family:var(--font)!important}
+#world-page .world-tool-home .welcome h1{font-family:var(--font)!important}
+#world-page :is(h1,h2,h3){color:var(--world-title,var(--ink))}
+#world-page .world-button{background:var(--world-button,var(--accent));color:var(--world-on-button,#fff)}
+#world-page .world-tool-home{--purple:var(--accent);--tint:var(--soft)}
+/* Neutral editorial surfaces and resource links; primary actions keep the official accent. */
+#world-page :is(.world-hero h1>span,.world-globe,.world-floating svg,.world-module-links button>svg:first-child,.world-text-button,.world-collection-copy>div,.world-site-mark,.world-platform-creator>a>svg){color:var(--ink)}
+#world-page .world-material-discover{--surface:var(--world-neutral-surface);--soft:var(--world-neutral-soft);--ink:var(--world-neutral-ink);--muted:var(--world-neutral-muted)}

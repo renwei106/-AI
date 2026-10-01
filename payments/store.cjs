@@ -8,11 +8,11 @@ class PaymentStore {
   constructor(filename) {
     if (filename !== ':memory:') fs.mkdirSync(path.dirname(filename), { recursive: true });
     this.db = new DatabaseSync(filename);
-    this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA foreign_keys=ON;
+    this.db.exec(`PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;
       CREATE TABLE IF NOT EXISTS orders (
         id TEXT PRIMARY KEY, user_id TEXT NOT NULL, request_id TEXT NOT NULL,
         provider TEXT NOT NULL, plan_id TEXT NOT NULL, plan_name TEXT NOT NULL,
-        quantity INTEGER NOT NULL DEFAULT 1 CHECK(quantity>0), amount INTEGER NOT NULL CHECK(amount>0), days INTEGER NOT NULL CHECK(days>0),
+quantity INTEGER NOT NULL DEFAULT 1 CHECK(quantity>0), amount INTEGER NOT NULL CHECK(amount>=0), days INTEGER NOT NULL CHECK(days>0),
         status TEXT NOT NULL, created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL,
         paid_at INTEGER, transaction_id TEXT, checkout TEXT, last_checked_at INTEGER NOT NULL DEFAULT 0,
         base_expiry INTEGER NOT NULL DEFAULT 0, member_expires_at INTEGER,
@@ -26,6 +26,20 @@ class PaymentStore {
     if (!columns.has('quantity')) this.db.exec('ALTER TABLE orders ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1');
     if (!columns.has('plan_snapshot')) this.db.exec('ALTER TABLE orders ADD COLUMN plan_snapshot TEXT');
     if (!columns.has('fulfillment_state')) this.db.exec("ALTER TABLE orders ADD COLUMN fulfillment_state TEXT NOT NULL DEFAULT 'legacy'");
+    // SQLite cannot alter a CHECK constraint. Preserve all columns, indexes and FK targets.
+    const schema = this.db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='orders'").get().sql;
+    if (/CHECK\s*\(\s*amount\s*>\s*0\s*\)/i.test(schema)) {
+      const indexes = this.db.prepare("SELECT sql FROM sqlite_master WHERE type IN ('index','trigger') AND tbl_name='orders' AND sql IS NOT NULL").all();
+      this.db.exec('PRAGMA foreign_keys=OFF; BEGIN IMMEDIATE');
+      try {
+        this.db.exec(schema.replace(/CREATE TABLE\s+(?:"orders"|orders)/i, 'CREATE TABLE orders_zero_migration').replace(/CHECK\s*\(\s*amount\s*>\s*0\s*\)/i, 'CHECK(amount>=0)'));
+        this.db.exec('INSERT INTO orders_zero_migration SELECT * FROM orders; DROP TABLE orders; ALTER TABLE orders_zero_migration RENAME TO orders;');
+        for (const index of indexes) this.db.exec(index.sql);
+        if (this.db.prepare('PRAGMA foreign_key_check').all().length) throw Error('订单迁移关联校验失败');
+        this.db.exec('COMMIT');
+      } catch (error) { this.db.exec('ROLLBACK'); throw error; }
+      finally { this.db.exec('PRAGMA foreign_keys=ON'); }
+    }
   }
   expirePending(now = Date.now()) { this.db.prepare("UPDATE orders SET status='expired' WHERE status IN ('created','pending','unknown') AND expires_at<=?").run(now); }
   get(id) { return this.db.prepare('SELECT * FROM orders WHERE id=?').get(id); }
@@ -35,10 +49,10 @@ class PaymentStore {
       .get(userId, provider, planId, quantity, now);
   }
   list(userId) { return this.db.prepare("SELECT * FROM orders WHERE user_id=? AND status='paid' ORDER BY paid_at DESC LIMIT 100").all(userId); }
-  create({ userId, requestId, provider, plan, quantity = 1, amount, days = plan.days, baseExpiry = 0 }) {
+  create({ userId, requestId, provider, plan, quantity = 1, amount, days = plan.days, baseExpiry = 0, expiresAt }) {
     const id = 'SY' + crypto.randomBytes(14).toString('hex'), now = Date.now();
     this.db.prepare(`INSERT INTO orders (id,user_id,request_id,provider,plan_id,plan_name,quantity,amount,days,status,created_at,expires_at,base_expiry,plan_snapshot,fulfillment_state) VALUES (?,?,?,?,?,?,?,?,?,'created',?,?,?,?,'pending')`)
-      .run(id, userId, requestId, provider, plan.id, plan.name, quantity, amount, days, now, now + 30 * 60_000, baseExpiry, JSON.stringify(plan));
+      .run(id, userId, requestId, provider, plan.id, plan.name, quantity, amount, days, now, expiresAt ?? now + 30 * 60_000, baseExpiry, JSON.stringify(plan));
     return this.get(id);
   }
   checkout(id, data) { this.db.prepare("UPDATE orders SET checkout=?,status='pending' WHERE id=? AND status IN ('created','unknown','pending')").run(JSON.stringify(data), id); return this.get(id); }
@@ -50,11 +64,11 @@ class PaymentStore {
   fulfilled(id, expiresAt) {
     const order = this.get(id);
     this.db.prepare('UPDATE ledger SET expires_at=? WHERE order_id=?').run(expiresAt || 0, id);
-    this.db.prepare('UPDATE memberships SET expires_at=? WHERE user_id=?').run(expiresAt || 0, order.user_id);
+    this.db.prepare('INSERT INTO memberships(user_id,expires_at) VALUES(?,?) ON CONFLICT(user_id) DO UPDATE SET expires_at=excluded.expires_at').run(order.user_id, expiresAt || 0);
     this.db.prepare("UPDATE orders SET fulfillment_state='complete',member_expires_at=? WHERE id=?").run(expiresAt, id);
     return this.get(id);
   }
-  paid(id, transactionId, paidAt, authoritativeExpiry) {
+  paid(id, transactionId, paidAt, authoritativeExpiry, review = false) {
     this.db.exec('BEGIN IMMEDIATE');
     try {
       const order = this.get(id);
@@ -63,10 +77,10 @@ class PaymentStore {
         if (order.transaction_id !== transactionId) throw Error('订单交易号不一致');
       } else {
         const start = authoritativeExpiry !== undefined ? Math.max(paidAt, authoritativeExpiry || 0) : Math.max(paidAt, order.base_expiry, this.membership(order.user_id));
-        const expires = start + order.days * 86_400_000;
+        const expires = review ? 0 : start + order.days * 86_400_000;
         this.db.prepare('INSERT INTO ledger(order_id,user_id,days,expires_at,created_at) VALUES(?,?,?,?,?)').run(id, order.user_id, order.days, expires, Date.now());
-        this.db.prepare('INSERT INTO memberships(user_id,expires_at) VALUES(?,?) ON CONFLICT(user_id) DO UPDATE SET expires_at=excluded.expires_at').run(order.user_id, expires);
-        this.db.prepare("UPDATE orders SET status='paid',paid_at=?,transaction_id=?,member_expires_at=? WHERE id=?").run(paidAt, transactionId, expires, id);
+        if (!review) this.db.prepare('INSERT INTO memberships(user_id,expires_at) VALUES(?,?) ON CONFLICT(user_id) DO UPDATE SET expires_at=excluded.expires_at').run(order.user_id, expires);
+        this.db.prepare("UPDATE orders SET status='paid',paid_at=?,transaction_id=?,member_expires_at=?,fulfillment_state=CASE WHEN ? THEN 'review' ELSE fulfillment_state END WHERE id=?").run(paidAt, transactionId, review ? null : expires, review ? 1 : 0, id);
       }
       this.db.exec('COMMIT');
       return this.get(id);

@@ -57,6 +57,14 @@ function createPaymentHandler(options = {}) {
     if (options.authenticate) return options.authenticate(req);
     if (config.mode === 'integration') {
       if (!localRequest(req)) throw new PaymentError('联调入口仅限本机访问', 'LOCAL_ONLY', 403);
+      // Reuse the website's server-verified session. A separate test-payment
+      // identity must never override an explicitly signed-in website account.
+      if (/(?:^|;\s*)shiyu_user_session=/.test(req.headers.cookie || '')) {
+        const id = require('../theme-access/store.cjs').session(req);
+        const user = id && memberships.readUsers().find(item => item.id === id);
+        if (!user || user.blacklisted) throw new PaymentError('请登录后再购买', 'UNAUTHENTICATED', 401);
+        return user;
+      }
       const token = (req.headers.cookie || '').split(';').map(v => v.trim()).find(v => v.startsWith('shiyu_payment_session='))?.split('=')[1];
       const session = token && store.session(token);
       if (session) return { id: session.user_id };
@@ -77,7 +85,8 @@ function createPaymentHandler(options = {}) {
     try {
       reloadConfig();
       if (url.pathname === PREFIX + '/status' && req.method === 'GET') { json(res, 200, publicStatus()); return true; }
-      if (!config.enabled) throw new PaymentError('支付服务暂未开放', 'PAYMENTS_DISABLED', 503);
+      // Channel availability only gates new positive-value orders. Queries, callbacks
+      // and authenticated zero-value claims must remain recoverable when disabled.
       const notification = url.pathname.match(/^\/api\/shiyu\/payments\/notify\/(wechat|alipay)$/);
       if (notification) {
         if (req.method !== 'POST') throw new PaymentError('请求方法不支持', 'METHOD_NOT_ALLOWED', 405);
@@ -99,6 +108,9 @@ function createPaymentHandler(options = {}) {
       }
       const user = await authenticate(req);
       if (!user?.id) throw new PaymentError('请登录后再购买', 'UNAUTHENTICATED', 401);
+      if (url.pathname === PREFIX + '/quote' && req.method === 'GET') {
+        json(res, 200, { quote: await service.quote(user, { planId: url.searchParams.get('planId'), quantity: Number(url.searchParams.get('quantity') || 1) }) }); return true;
+      }
       if (url.pathname === PREFIX + '/account' && req.method === 'GET') {
         const current = memberships.readUsers().find(item => item.id === user.id);
         const state = memberships.stateFor(current || null);
@@ -132,7 +144,7 @@ function createPaymentHandler(options = {}) {
     return true;
   }
   store.expirePending();
-  const recovery = setInterval(() => { store.expirePending(); service.retryFulfillment(); }, 30000); recovery.unref();
+  const recovery = setInterval(() => { store.expirePending(); service.retryFulfillment(); void service.reconcileActivities().catch(() => {}); }, 30000); recovery.unref();
   handler.close = () => { clearInterval(recovery); store.close(); };
   handler.service = service;
   return handler;

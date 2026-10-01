@@ -92,7 +92,17 @@
  function paint() {
   syncMemberHeader(); const d = document.querySelector('#member-center'); if (!d?.open) return;
   const rail = d.querySelector('.member-plans'), table = d.querySelector('.member-comparison table'), checkout = d.querySelector('.member-checkout'); if (!rail || !table) return;
-  if (!plans.length) { rail.textContent = loading ? '正在读取会员套餐…' : window.__shiyuMemberCatalog?.ready ? '暂无上架套餐' : '套餐暂时无法加载，请稍后重试。'; table.replaceChildren(); if (checkout) checkout.hidden = true; return; }
+  rail.setAttribute('aria-busy',String(loading&&!plans.length));
+  if (!plans.length) {
+   if(loading){
+    rail.style.gridTemplateColumns='var(--member-label-width, 220px) repeat(4,minmax(140px,1fr))';
+    rail.innerHTML='<div class="plan-label"><strong>可选套餐</strong><small role="status">正在加载会员套餐…</small></div>'+Array.from({length:4},()=>'<div class="member-plan-skeleton" aria-hidden="true"><i></i><i></i><i></i><i></i></div>').join('');
+    table.innerHTML='<tbody>'+Array.from({length:5},()=>'<tr>'+Array.from({length:5},()=>'<td><span class="member-line-skeleton" aria-hidden="true"></span></td>').join('')+'</tr>').join('')+'</tbody>';
+   }else{rail.style.gridTemplateColumns='1fr';rail.innerHTML=window.__shiyuMemberCatalog?.ready?'暂无上架套餐':'<div role="status">套餐暂时无法加载。<button type="button" data-member-load-retry>重新加载</button></div>';rail.querySelector('[data-member-load-retry]')?.addEventListener('click',()=>{loading=true;paint();void refresh();});table.replaceChildren();}
+   if (checkout) checkout.hidden = true; return;
+  }
+  rail.querySelectorAll('.member-plan-skeleton').forEach(el=>el.remove());
+  const loadingLabel=rail.querySelector('.plan-label small[role="status"]');if(loadingLabel){loadingLabel.textContent='选择与你相伴的时光';loadingLabel.removeAttribute('role');}
   const paid = plans.filter(plan => plan.id !== 'free'); if (checkout) checkout.hidden = !paid.length;
   selectedId = paid.some(plan => plan.id === selectedId) ? selectedId : paid.find(plan => plan.isDefault)?.id || paid[0]?.id || null;
   rail.querySelectorAll('button').forEach(button => button.remove());
@@ -118,8 +128,11 @@
   if (refreshing) return refreshing;
   refreshing = (async () => {
    try {
-    const response = await fetch('/api/shiyu/plans', { cache: 'no-store' }); if (!response.ok) throw Error();
-    const raw = await response.json(), data = window.ShiyuI18n?.catalog(raw)||raw, next = (data.items || []).filter(plan => plan.enabled !== false); loading = false;
+    let raw;
+    if(window.__shiyuInitialPlans){const initial=window.__shiyuInitialPlans;delete window.__shiyuInitialPlans;raw=await initial;if(!raw)throw Error('套餐加载超时或失败');}
+    else {const response = await fetch('/api/shiyu/plans', { cache: 'no-store',signal:AbortSignal.timeout(8000) }); if (!response.ok) throw Error();raw=await response.json();}
+    if(!Array.isArray(raw.items))throw Error('套餐数据无效');
+    const data = window.ShiyuI18n?.catalog(raw)||raw, next = data.items.filter(plan => plan.enabled !== false); loading = false;
     if (JSON.stringify(plans) === JSON.stringify(next) && window.__shiyuMemberCatalog?.ready) return;
     plans = next; const paid = plans.filter(plan => plan.id !== 'free'); selectedId = paid.some(plan => plan.id === selectedId) ? selectedId : paid.find(plan => plan.isDefault)?.id || paid[0]?.id || null;
     if (paid.length) { MEMBER_CONFIG.plans = paid.map(plan => ({ ...plan, auto: plan.autoRenew, saving: plan.cycle })); selectedMemberPlan = Math.max(0, paid.findIndex(plan => plan.id === selectedId)); freeMemberSelected = false; }
@@ -151,7 +164,17 @@
   style.textContent=`body .membership-dialog{${palette(color,false).replaceAll(";"," !important;")}}body[data-dark="true"] .membership-dialog{${palette(color,true).replaceAll(";"," !important;")}}body #member-center.member-polished .member-plans>button[data-published-plan][aria-pressed=true]{background:var(--member-selected);color:#fff}`;
  }
  apply('#46634e');
+ const officialStyle=document.createElement('style');officialStyle.id='member-official-theme';document.head.append(officialStyle);
+ function applyOfficial(modes){
+  if(!modes?.light||!modes?.dark)return;
+  const mapping={accent:'primary','member-accent':'button','member-selected':'button','accent-hover':'buttonHover',bg:'background',surface:'surface',ink:'text',muted:'textMuted',line:'border',soft:'surfaceRaised','accent-soft':'selected','accent-soft-strong':'selected','selection-contrast':'onButton','official-button':'button','official-on-button':'onButton','official-title':'textTitle'};
+  const rules=Object.entries(modes).filter(([mode])=>['light','dark'].includes(mode)).map(([mode,tokens])=>{
+   if(Object.values(mapping).some(key=>!/^#[0-9a-f]{6}$/i.test(tokens[key]||'')))return '';
+   return `${mode==='dark'?'body[data-dark="true"]':'body'} #member-center{${Object.entries(mapping).map(([variable,key])=>`--${variable}:${tokens[key]}!important`).join(';')}}`;
+  }).join('');
+  officialStyle.textContent=rules+'body #member-center.member-polished .member-plans>button[data-published-plan][aria-pressed=true]{background:var(--official-button)!important;color:var(--official-on-button)!important}body #member-center.member-polished .member-plans>button[data-published-plan][aria-pressed=true] :is(small,h3,strong,em,del,span){color:var(--official-on-button)!important}body #member-center .member-primary,body #member-center.member-polished .member-title-invite{background:var(--official-button)!important;color:var(--official-on-button)!important}body #member-center h2,body #member-center .activity-banner h3{color:var(--official-title)}';
+ }
  let pending=false;
- async function refresh(){if(pending)return;pending=true;try{const r=await fetch('/api/shiyu/operations',{cache:'no-store'});if(r.ok)apply((await r.json()).membershipColor)}catch{}finally{pending=false}}
+ async function refresh(){if(pending)return;pending=true;try{const r=await fetch('/api/shiyu/operations',{cache:'no-store'});if(r.ok){const data=await r.json();apply(data.membershipColor);applyOfficial(data.platformThemeTokens)}}catch{}finally{pending=false}}
  void refresh();window.addEventListener('focus',refresh);setInterval(()=>{if(!document.hidden)void refresh()},15000);
 })();

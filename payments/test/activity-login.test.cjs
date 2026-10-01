@@ -1,0 +1,34 @@
+const test = require('node:test'), assert = require('node:assert/strict');
+const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), http = require('node:http');
+const { once } = require('node:events');
+const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'activity-login-'));
+process.env.SHIYU_THEME_ACCESS_STORE = path.join(dir, 'sessions.json');
+const sessions = require('../../theme-access/store.cjs');
+const { PaymentStore } = require('../store.cjs');
+const { createPaymentHandler } = require('../server.cjs');
+const { createMembershipService } = require('../membership.cjs');
+const { ActivityEngine } = require('../activities.cjs');
+
+test('website login quotes actual campaigns and claims with same identity; forged and blocked sessions fail', async t => {
+ const plans = [{id:'monthly',name:'月会员',price:10,days:30,enabled:true,entitlements:[]}];
+ const memberships = createMembershipService({usersFile:path.join(dir,'users.json'),invitationsFile:path.join(dir,'invitations.json'),readPlans:()=>plans,readExperience:()=>({enabled:false,values:{}})});
+ const now=Date.now();memberships.writeUsers([{id:'old',registeredAt:new Date(now-86400000).toISOString(),memberEvents:[]},{id:'new',registeredAt:new Date(now-1000).toISOString(),memberEvents:[]},{id:'blocked',blacklisted:true,memberEvents:[]}]);
+ const store = new PaymentStore(':memory:'), engine = new ActivityEngine(store);
+ const rule={action:'activate',name:'全部用户活动',start:now-10000,end:now+3600000,priority:99,audience:'all',priceMode:'fixed',userCap:1,plans:[{planId:'monthly',priceCents:0,bonusDays:7}]};
+ engine.mutate(rule,'测试',plans);engine.mutate({...rule,name:'新用户赠天',priority:100,audience:'new_users',priceMode:'none',plans:[{planId:'monthly',bonusDays:5}]},'测试',plans);
+ const config={mode:'integration',enabled:false,allowedOrigins:[],alipay:{},wechat:{}};
+ const handler=createPaymentHandler({config,store,memberships,providers:{},getPlans:async()=>plans});
+ const server=http.createServer((req,res)=>handler(req,res));server.listen(0,'127.0.0.1');await once(server,'listening');
+ t.after(()=>{server.close();server.closeAllConnections();handler.close();fs.rmSync(dir,{recursive:true,force:true})});
+ const origin='http://127.0.0.1:'+server.address().port;config.allowedOrigins.push(origin);
+ const base=origin+'/api/shiyu/payments';const legacy=store.consumeTicket(store.makeTicket());
+ const cookie=id=>'shiyu_user_session='+sessions.issueSession(id)+'; shiyu_payment_session='+legacy;
+ const oldCookie=cookie('old');const quote=async value=>fetch(base+'/quote?planId=monthly',{headers:{Cookie:value}});
+ assert.equal((await quote('shiyu_user_session=forged')).status,401);
+ assert.equal((await quote(cookie('blocked'))).status,401);assert.equal((await quote(cookie('missing'))).status,401);
+ const old=await (await quote(oldCookie)).json();assert.equal(old.quote.userId,'old');assert.equal(old.quote.amount,0);assert.equal(old.quote.bonusDays,7);
+ const fresh=await (await quote(cookie('new'))).json();assert.equal(fresh.quote.userId,'new');assert.equal(fresh.quote.amount,1000);assert.equal(fresh.quote.bonusDays,5);
+ const response=await fetch(base+'/orders',{method:'POST',headers:{Cookie:oldCookie,Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({planId:'monthly',provider:'wechat',quantity:1,requestId:'website-session-claim',accepted:true,quoteToken:old.quote.token})});
+ assert.equal(response.status,201);const {order}=await response.json();assert.equal(order.status,'paid');assert.equal(store.get(order.id).user_id,'old');assert.equal(memberships.readUsers()[0].memberEvents.length,1);
+ sessions.logout({headers:{cookie:oldCookie}});assert.equal((await quote(oldCookie)).status,401,'stale website cookie must not fall back to a different payment user');
+});

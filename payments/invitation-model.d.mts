@@ -1,6 +1,6 @@
 export type Campaign = {
   id: string; name: string; start: string; end: string; newUserDays: number; purchaseWithinDays: number;
-  inviterDays: number; weeklyCap: number | null; monthlyCap: number | null;
+  registrationInviterDays?: number; inviterDays: number; weeklyCap: number | null; monthlyCap: number | null;
   stoppedAt?: string; createdAt: string; operator: string;
 }
 export type Reward = {
@@ -11,7 +11,7 @@ export type Reward = {
 export type RewardUser = {
   id: string; name: string; registeredAt: string; blacklisted: boolean;
   invitation?: { campaignId: string; inviterId: string };
-  memberEvents: { id?: string; time: string; type: string; amount: number }[];
+  memberEvents: { id?: string; time: string; type: string; amount: number; invitationEligible?: boolean }[];
 }
 export declare const DAY: number;
 export declare function timestamp(value:string):number;

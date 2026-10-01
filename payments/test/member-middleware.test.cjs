@@ -19,6 +19,8 @@ test('actual user middleware: admin mutations, public privacy, session identity,
     if(name==='./platform-access-plugin')return {getPlatformSession:req=>req.headers.authorization==='admin'?{superadmin:true,admin:{name:'测试管理员'},applicationIds:['shiyu']}:null};
     if(name==='./shiyu-invitation-plugin')return {invitationCodeFor:()=>undefined,invitationForCode:()=>undefined,settleInvitations:()=>memberships.settleInvitations()};
     if(name==='./shiyu-library')return {};
+    // Pure dependencies introduced by the current admin middleware; no external IO.
+    if(name==='./shiyu-onboarding'||name==='./analytics/runtime')return require(path.join(adminRoot,name+'.ts'));
     if(name.startsWith('node:'))return require(name);
     throw Error('Unexpected dependency; external services forbidden: '+name);
   };

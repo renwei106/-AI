@@ -1,0 +1,37 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),http=require('node:http'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),vm=require('node:vm');
+const {once}=require('node:events');
+const {PaymentStore}=require('../store.cjs'),{PaymentService}=require('../service.cjs'),{createActivityAdmin}=require('../activity-admin.cjs'),{createMembershipService}=require('../membership.cjs');
+test('admin API enforces permission, Origin, JSON, and records repair actor and reason',async t=>{
+ const store=new PaymentStore(':memory:'),dir=fs.mkdtempSync(path.join(os.tmpdir(),'shiyu-admin-activity-'));
+ const plans=[{id:'month',name:'月会员',price:10,days:30,enabled:true,entitlements:[]}];
+ const memberships=createMembershipService({usersFile:path.join(dir,'users.json'),invitationsFile:path.join(dir,'invites.json'),readPlans:()=>plans,readExperience:()=>({enabled:false,values:{}})});
+ memberships.writeUsers([{id:'u',name:'测试用户',memberEvents:[]}]);
+ const config={enabled:true,wechat:{enabled:true,appId:'wx',mchId:'m'},alipay:{}};
+ const admin=createActivityAdmin({store,memberships,config,providers:{}});
+ const ts=require('../../../聚合管理后台/node_modules/typescript');
+ const source=fs.readFileSync(path.resolve(__dirname,'../../../聚合管理后台/shiyu-activity-plugin.ts'),'utf8').replaceAll('import.meta.url',JSON.stringify('file:///activity-test.ts')).replace('const require =','const requireActivity =').replace("require('../导航站/payments/activity-admin.cjs')","requireActivity('../导航站/payments/activity-admin.cjs')");
+ const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+ const mod={exports:{}};const runtimeRequire=name=>{
+  if(name==='node:module')return {createRequire:()=>()=>({createActivityAdmin:()=>admin})};
+  if(name==='./platform-access-plugin')return {getPlatformSession:req=>req.headers.authorization==='admin'?{superadmin:true,admin:{name:'测试管理员'}}:null};
+  throw Error('Unexpected dependency '+name);
+ };
+ vm.runInNewContext(code,{exports:mod.exports,module:mod,require:runtimeRequire,Error,JSON});let middleware;
+ mod.exports.shiyuActivityPlugin().configureServer({middlewares:{use:fn=>middleware=fn}});
+ const server=http.createServer((req,res)=>middleware(req,res,()=>{res.writeHead(404);res.end()}));server.listen(0,'127.0.0.1');await once(server,'listening');const base='http://127.0.0.1:'+server.address().port;
+ t.after(()=>{server.closeAllConnections();server.close();store.close();fs.rmSync(dir,{recursive:true,force:true})});
+ assert.equal((await fetch(base+'/api/shiyu/activities')).status,403);
+ const request=(body,headers={})=>fetch(base+'/api/shiyu/activities',{method:'POST',headers:{authorization:'admin',origin:base,'content-type':'application/json',...headers},body:JSON.stringify(body)});
+ assert.equal((await request({},{origin:'https://evil.example'})).status,403);assert.equal((await request({},{'content-type':'text/plain'})).status,415);
+ const response=await request({action:'activate',name:'管理员测试活动',start:Date.now()-1000,end:Date.now()+3600000,priority:100,priceMode:'fixed',userCap:1,totalCap:2,allowZero:true,plans:[{planId:'month',priceCents:0,bonusDays:2}]});assert.equal(response.status,200);
+ const payments=new PaymentService({config,store,memberships,getPlans:async()=>plans,providers:{}}),quote=await payments.quote({id:'u'},{planId:'month',quantity:1});
+ const apply=memberships.applyPayment;memberships.applyPayment=()=>{throw Error('temporary')};let orderId;
+ await assert.rejects(()=>payments.create({id:'u'},{planId:'month',quantity:1,provider:'wechat',requestId:'1234567890123456',quoteToken:quote.token,accepted:true}),e=>{orderId=e.orderId;return !!orderId});memberships.applyPayment=apply;
+ assert.equal((await request({action:'retry',orderId,reason:'短'})).status,400);
+ assert.equal((await request({action:'retry',orderId,reason:'已核实零元领取订单，重试到账'})).status,200);
+ assert.equal((await request({action:'retry',orderId,reason:'再次检查幂等性，不能重复到账'})).status,200);
+ assert.equal(memberships.readUsers()[0].memberEvents.length,1);
+ const view=admin.view();assert.equal(view.participations[0].fulfillment_state,'complete');assert(view.audit.some(r=>r.action==='admin_retry'&&r.operator==='测试管理员'));
+ assert.equal((await request({action:'delete',orderId,reason:'不应允许删除原始记录'})).status,400);
+});

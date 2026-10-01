@@ -127,7 +127,7 @@
     if(!homeChromeActive()||!matchMedia('(pointer:fine)').matches)return;
     chromeIdleTimer=setTimeout(()=>{
       if(!homeChromeActive())return;
-      if(document.querySelector('dialog[open],.brand:hover,.header-right:hover,.dock:hover,.dock-trigger[aria-expanded=true],.utility-search:hover,.scroll-invitation:hover,.mode-pull-cord:hover,.color-pull-cord:hover,.world-entry:hover')){resetChromeIdle();return;}
+      if(document.querySelector('dialog[open],.sy-tour,.brand:hover,.header-right:hover,.dock:hover,.dock-trigger[aria-expanded=true],.utility-search:hover,.scroll-invitation:hover,.mode-pull-cord:hover,.color-pull-cord:hover,.world-entry:hover')){resetChromeIdle();return;}
       document.body.classList.add('global-chrome-idle');
     },CHROME_IDLE_AFTER);
   }

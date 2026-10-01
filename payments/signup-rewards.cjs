@@ -1,0 +1,7 @@
+'use strict';
+const crypto=require('node:crypto');
+function encodeInvitation(campaignId,inviterId,secret){const body=Buffer.from(JSON.stringify({campaignId,inviterId})).toString('base64url');return body+'.'+crypto.createHmac('sha256',secret).update(body).digest('base64url');}
+function decodeInvitation(code,secret){if(typeof code!=='string'||code.length>1024)return null;const [body,sig,...rest]=code.split('.');if(!body||!sig||rest.length)return null;const expected=crypto.createHmac('sha256',secret).update(body).digest();const actual=Buffer.from(sig,'base64url');if(actual.length!==expected.length||!crypto.timingSafeEqual(actual,expected))return null;try{const value=JSON.parse(Buffer.from(body,'base64url').toString());return typeof value.campaignId==='string'&&typeof value.inviterId==='string'?value:null}catch{return null}}
+function activeRegistration(config,now=Date.now()){return !!config?.enabled&&Number.isSafeInteger(config.days)&&config.days>0&&Date.parse(config.start)<=now&&now<Date.parse(config.end);}
+function registrationDecision(invitation,config,now=Date.now()){if(invitation)return {source:'invitation',campaignId:invitation.campaignId,decidedAt:new Date(now).toISOString()};if(activeRegistration(config,now))return {source:'registration',version:config.version,days:config.days,decidedAt:new Date(now).toISOString()};return {source:'none',decidedAt:new Date(now).toISOString()};}
+module.exports={encodeInvitation,decodeInvitation,activeRegistration,registrationDecision};

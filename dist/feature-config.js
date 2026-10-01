@@ -73,9 +73,10 @@
  },true);
  async function refresh(){
   if(loading)return loading;
-  loading=fetch('/api/shiyu/operations',{credentials:'include',cache:'no-store'}).then(async response=>{
-   if(!response.ok)throw Error('配置加载失败');const raw=await response.json(),next=window.ShiyuI18n?.operations(raw)||raw;
-   const incoming={access:next.access||{},personalization:next.personalization||{},petActions:next.petActions||{},petTiming:next.petTiming||{},optionNames:next.optionNames||{}};
+  const initial=window.ShiyuThemeColors?.takeInitialRequest();
+  loading=(initial||fetch('/api/shiyu/operations',{credentials:'include',cache:'no-store'}).then(async response=>{if(!response.ok)throw Error('配置加载失败');return response.json()})).then(raw=>{
+   if(!raw)throw Error('配置加载失败');window.ShiyuThemeColors?.update(raw);const next=window.ShiyuI18n?.operations(raw)||raw;
+   const incoming={onboarding:next.onboarding||{enabled:false},world:next.world||{},access:next.access||{},personalization:next.personalization||{},petActions:next.petActions||{},petTiming:next.petTiming||{},optionNames:next.optionNames||{}};
    if(JSON.stringify(config)===JSON.stringify(incoming))return;
    config=incoming;
    applyColorCatalog();
@@ -83,10 +84,10 @@
    window.dispatchEvent(new Event('shiyu-pet-context'));
    if(typeof render==='function')render();
    const settings=document.querySelector('#settings');if(settings?.open)renderSettings();
-  }).catch(()=>{}).finally(()=>{loading=null});
+  }).catch(()=>{if(typeof apply==='function')apply()}).finally(()=>{window.ShiyuThemeColors?.release();loading=null});
   return loading;
  }
- window.ShiyuFeatureConfig=Object.freeze({allowed:access,category,option,label,optionLabel,order,petAction:id=>config?.petActions?.[id]!==false,petTiming:()=>config?.petTiming,refresh});
+ window.ShiyuFeatureConfig=Object.freeze({onboarding:()=>config?.onboarding,worldAvailable:()=>config?.world?.enabled===true&&config?.world?.eligible!==false&&access('world'),allowed:access,category,option,label,optionLabel,order,petAction:id=>config?.petActions?.[id]!==false,petTiming:()=>config?.petTiming,refresh});
  setInterval(()=>{if(!document.hidden)void refresh()},30000);
  window.addEventListener('shiyu-account-state',()=>void refresh());
  window.addEventListener('focus',()=>void refresh());

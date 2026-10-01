@@ -99,3 +99,88 @@ body #member-center.member-polished :is(.quantity-picker-trigger,.quantity-picke
 .agreement-rich-body blockquote,.login-agreement-text blockquote { margin:1em 0; padding-left:1em; border-left:3px solid var(--accent); }
 .agreement-rich-body a,.login-agreement-text a { color:var(--accent); text-decoration:underline; }
 .agreement-rich-body :is(h2,h3,h4),.login-agreement-text :is(h2,h3,h4) { margin:1em 0 .5em; font-family:inherit; }
+
+/* Activity pricing stays within the existing membership surface and palette. */
+#member-center .activity-banner{margin:20px 0 24px;padding:22px 26px;border-radius:14px;background:var(--accent-soft);color:var(--ink)}
+#member-center .activity-banner-row{display:flex;align-items:center;justify-content:space-between;gap:24px}
+#member-center .activity-banner-row+ .activity-banner-row{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+#member-center .activity-eyebrow{font-size:11px;letter-spacing:.08em;color:var(--muted)}
+#member-center .activity-banner h3{margin:6px 0;font-size:21px}#member-center .activity-banner p{margin:0;max-width:760px;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+#member-center .activity-clock{display:grid;gap:7px;text-align:right;flex-shrink:0}#member-center .activity-clock strong{font-size:18px;font-variant-numeric:tabular-nums}#member-center .activity-clock small{font-size:11px;color:var(--muted)}
+#member-center.member-polished .member-plans>button .activity-plan-badge{display:inline-block;align-self:flex-start;background:var(--accent-soft);color:var(--ink);padding:4px 8px;border-radius:6px;font-size:11px;line-height:1.4;margin:0 0 8px}
+#member-center.member-polished .member-plans>button .activity-plan-gift{display:block;font-size:12px;margin-top:8px;line-height:1.5}
+#member-center.member-polished .member-plans>button .activity-plan-limit{display:block;font-size:10px;opacity:.75;margin-top:5px}
+#member-center .checkout-duration{display:inline-flex;flex-direction:column;gap:3px;margin-right:14px;white-space:nowrap}#member-center .checkout-duration strong{font-size:14px}#member-center .checkout-duration small,#member-center .checkout-limit{font-size:10px;color:var(--muted)}
+#member-center .checkout-quantity{flex-wrap:wrap;max-width:160px;height:auto}#member-center .checkout-limit{flex-basis:100%}#member-center .quantity-picker-menu{max-height:240px;overflow:auto}
+@media(min-width:900px){#member-center.member-polished .member-checkout{grid-template-columns:auto minmax(180px,1fr) auto auto auto}#member-center.member-polished .checkout-quantity{grid-column:1}#member-center.member-polished .checkout-legal{grid-column:2}}
+@media(max-width:680px){#member-center .activity-banner{padding:18px}#member-center .activity-banner-row{align-items:flex-start;flex-direction:column;gap:14px}#member-center .activity-clock{text-align:left}#member-center .checkout-duration{margin-right:8px}}
+
+#member-center.member-polished .member-plans>button .activity-plan-badge{align-self:center;letter-spacing:0;max-width:100%;white-space:nowrap}#member-center.member-polished .member-plans>button[aria-pressed=true] .activity-plan-badge{background:rgba(255,255,255,.18)}#member-center.member-polished .checkout-choice{max-width:none}
+
+/* Official-theme activity invitation and split-flap countdown. */
+#member-center .activity-banner{position:relative;overflow:hidden;background:linear-gradient(115deg,var(--accent-soft),var(--surface));border:1px solid var(--line);border-left:4px solid var(--accent);padding:20px 26px}
+#member-center .activity-banner::after{content:'';position:absolute;width:240px;height:240px;border:32px solid var(--accent-soft);border-radius:50%;right:25%;top:-140px;pointer-events:none;opacity:.55}
+#member-center .activity-banner-row{position:relative;z-index:1}#member-center .activity-eyebrow{display:inline-flex;align-items:center;gap:7px;color:var(--accent);font-weight:600;letter-spacing:.04em}
+#member-center .activity-eyebrow i{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 0 4px var(--accent-soft);animation:activity-glow 2.4s ease-in-out infinite}
+#member-center .activity-banner h3{font-size:24px;font-weight:600;margin:8px 0}#member-center .activity-jump{display:inline-flex;align-items:center;gap:18px;margin-top:12px;padding:0;background:none;color:var(--accent);font-size:12px;font-weight:600}
+#member-center .activity-jump:hover{gap:24px}#member-center .activity-countdown-label{font-size:11px;color:var(--muted)}
+#member-center .activity-flip-clock{display:flex;justify-content:flex-end;gap:12px}#member-center .flip-unit{display:flex;align-items:center;gap:5px}#member-center .flip-unit>small{font-size:11px;color:var(--muted)}#member-center .activity-flip-number{display:flex;gap:3px}
+#member-center .flip-digit{position:relative;display:inline-block;width:27px;height:39px;perspective:180px;border-radius:5px;background:var(--official-button,var(--accent));color:var(--official-on-button,var(--selection-contrast));font:600 24px/39px ui-monospace,monospace;text-align:center;box-shadow:0 2px 3px #0001}
+#member-center .flip-digit::after{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:#0003;z-index:4}
+#member-center .flip-digit>span{position:absolute;inset:0;border-radius:5px;background:inherit;color:inherit;backface-visibility:hidden}
+#member-center .flip-top{clip-path:inset(0 0 50% 0);transform-origin:center;visibility:hidden}#member-center .flip-bottom{clip-path:inset(50% 0 0 0);transform-origin:center;visibility:hidden}
+#member-center .is-flipping .flip-top{visibility:visible;animation:member-flip-top .28s ease-in forwards;z-index:3}#member-center .is-flipping .flip-bottom{visibility:visible;animation:member-flip-bottom .28s ease-out .28s both;z-index:2}
+@keyframes member-flip-top{from{transform:rotateX(0)}to{transform:rotateX(-90deg)}}@keyframes member-flip-bottom{from{transform:rotateX(90deg)}to{transform:rotateX(0)}}@keyframes activity-glow{50%{box-shadow:0 0 0 7px transparent}}
+#member-center.member-polished .checkout-choice{display:grid;grid-template-columns:auto auto auto;grid-template-rows:24px 16px;gap:0 8px;align-items:center;justify-content:end;max-width:none}
+#member-center.member-polished .checkout-choice>b{display:none}#member-center .checkout-choice .checkout-duration{grid-column:1;grid-row:1/3;display:flex;gap:2px;margin:0 14px 0 0;text-align:left}#member-center .checkout-duration strong{font-size:13px;line-height:20px}#member-center .checkout-duration small{margin:0;font-size:10px;line-height:16px}
+#member-center.member-polished .checkout-choice .checkout-total-prefix{grid-column:2;grid-row:1;font-size:11px;align-self:center;white-space:nowrap}#member-center.member-polished .checkout-choice .checkout-price{grid-column:3;grid-row:1;font-size:23px;line-height:24px;white-space:nowrap}#member-center .checkout-savings{grid-column:2/4;grid-row:2;text-align:right;font-size:10px!important;line-height:16px;margin:0;white-space:nowrap}
+@media(min-width:900px){
+ #member-center.member-polished.membership-page{padding-bottom:84px}
+ #member-center.member-polished.membership-page .member-checkout{grid-template-columns:145px minmax(240px,1fr) auto auto;grid-template-rows:34px 18px;column-gap:16px;row-gap:3px;min-height:72px;padding:8px max(24px,calc((100vw - 1420px)/2))!important}
+ #member-center.member-polished .checkout-quantity{grid-column:1;grid-row:1/3;max-width:none;flex-wrap:nowrap;align-items:center;gap:8px}
+ #member-center.member-polished .checkout-quantity-label{align-self:center;font-size:11px}
+ #member-center.member-polished .checkout-choice{grid-column:2;grid-row:1/3;margin-right:10px}
+ #member-center.member-polished .checkout-methods{grid-column:3;grid-row:1}
+ #member-center.member-polished .member-checkout>.member-primary{grid-column:4;grid-row:1}
+ #member-center.member-polished .checkout-legal{grid-column:3/5;grid-row:2;justify-content:flex-end;white-space:nowrap;gap:4px}
+ #member-center.member-polished .checkout-legal :is(label,button){font-size:10px!important;line-height:16px!important}
+ #member-center.member-polished :is(.quantity-picker-trigger,.checkout-methods>button,.member-checkout>.member-primary){height:34px;min-height:34px;padding-top:6px;padding-bottom:6px}
+}
+@media(max-width:899px){#member-center.member-polished .member-checkout{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px}#member-center.member-polished .checkout-quantity{grid-column:1;grid-row:1}#member-center.member-polished .checkout-choice{grid-column:2/4;grid-row:1}#member-center.member-polished .checkout-methods{grid-column:1;grid-row:2}#member-center.member-polished .member-checkout>.member-primary{grid-column:3;grid-row:2}#member-center.member-polished .checkout-legal{grid-column:2;grid-row:2;flex-wrap:wrap}#member-center .activity-flip-clock{justify-content:flex-start}}
+@media(prefers-reduced-motion:reduce){#member-center .activity-eyebrow i,#member-center .is-flipping .flip-top,#member-center .is-flipping .flip-bottom{animation:none}#member-center .flip-top,#member-center .flip-bottom{display:none}}
+
+body #member-center.member-polished.membership-page{background:var(--bg)!important}body #member-center.member-polished.membership-page .member-primary,body #member-center.member-polished.membership-page .member-title-invite{background:var(--official-button,var(--member-accent))!important;color:var(--official-on-button,var(--selection-contrast))!important}body #member-center.member-polished.membership-page .member-title-invite :is(b,small,span,svg){color:var(--official-on-button,var(--selection-contrast))!important}
+
+/* Keep consent beside quantity, separate from payment actions. */
+#member-center .checkout-savings del{font:inherit;color:inherit;text-decoration:line-through}
+@media(min-width:900px){#member-center.member-polished.membership-page .member-checkout{grid-template-columns:minmax(180px,1fr) 145px auto auto auto;grid-template-rows:52px}#member-center.member-polished .checkout-quantity{grid-column:2;grid-row:1}#member-center.member-polished .checkout-legal{grid-column:1;grid-row:1;justify-content:flex-start;white-space:normal;flex-wrap:wrap}#member-center.member-polished .checkout-choice{grid-column:3;grid-row:1}#member-center.member-polished .checkout-methods{grid-column:4;grid-row:1}#member-center.member-polished .member-checkout>.member-primary{grid-column:5;grid-row:1}}
+
+/* Loading placeholders preserve the membership layout until authoritative plans arrive. */
+#member-center .member-plan-skeleton{min-height:260px;border-radius:12px;background:var(--soft);padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:26px}#member-center .member-plan-skeleton i,#member-center .member-line-skeleton{display:block;border-radius:5px;background:linear-gradient(100deg,var(--line) 20%,var(--soft) 45%,var(--line) 70%);background-size:240% 100%;animation:member-loading 1.6s linear infinite}#member-center .member-plan-skeleton i{width:65%;height:16px}#member-center .member-plan-skeleton i:nth-child(3){height:38px;width:50%}#member-center .member-line-skeleton{height:14px;width:65%;margin:8px auto}#member-center [data-member-load-retry]{margin-left:12px;color:var(--accent);text-decoration:underline}@keyframes member-loading{to{background-position:-240% 0}}@media(prefers-reduced-motion:reduce){#member-center .member-plan-skeleton i,#member-center .member-line-skeleton{animation:none}}
+#member-center.member-polished .checkout-choice.checkout-without-activity{grid-template-columns:auto auto auto auto;grid-template-rows:40px}#member-center .checkout-without-activity .checkout-duration{grid-row:1;align-self:end}#member-center.member-polished .checkout-without-activity .checkout-total-prefix,#member-center.member-polished .checkout-without-activity .checkout-price{align-self:end}#member-center .checkout-original-total{grid-column:4;grid-row:1;align-self:end;font-size:11px;line-height:20px;color:var(--muted);white-space:nowrap;margin:0}
+@media(min-width:900px){#member-center.member-polished .member-checkout>*{align-self:end}#member-center.member-polished .member-checkout{align-items:end}#member-center.member-polished .checkout-legal{padding-bottom:2px}#member-center.member-polished .checkout-quantity{align-items:flex-end}#member-center.member-polished .checkout-quantity-label{align-self:flex-end;padding-bottom:2px}}
+
+#member-center .payment-choice-trigger { display:inline-flex; align-items:center; gap:6px; }
+#member-center .payment-choice-chevron { display:block; width:6px; height:6px; border-top:1.5px solid currentColor; border-right:1.5px solid currentColor; transform:translateY(2px) rotate(-45deg); flex:0 0 6px; margin-left:2px; }
+
+/* Neutral membership canvas; configured accent remains on actions and selection. */
+body #member-center.member-polished.membership-page{--bg:#fafafa!important;--surface:#ffffff!important;--soft:#f2f2f2!important}
+body[data-dark="true"] #member-center.member-polished.membership-page{--bg:#181818!important;--surface:#222222!important;--soft:#292929!important}
+
+/* Agreement selection follows the membership theme. */
+body #member-center.member-polished .checkout-legal input:checked{background:var(--accent);border-color:var(--accent)}
+body #member-center.member-polished .checkout-legal input:checked::after{color:var(--selection-contrast,#fff)}
+
+#member-invite-dialog .invite-both-reward{display:block;margin-top:12px;line-height:1.6}
+#member-invite-dialog .invite-share-actions{grid-column:1/-1;grid-row:auto}
+#member-invite-dialog .invite-share-actions .member-primary{flex:1}
+#member-invite-dialog .invite-records-entry{display:block;margin:18px 0 0 auto;padding:6px 0;color:var(--accent);background:transparent;font-size:12px}
+#member-invite-records{width:min(680px,calc(100vw - 32px));max-height:85vh;overflow:auto}
+#member-invite-records .invitation-records-block{margin-top:0;padding-top:0;border-top:0}
+
+#signup-member-gift{width:min(440px,calc(100vw - 32px));box-sizing:border-box;padding:38px 30px;text-align:center}
+#signup-member-gift>h2{font-size:26px;margin:4px 0 18px}
+#signup-member-gift .signup-gift-days{margin:24px 0;color:var(--accent);font-size:16px}
+#signup-member-gift .signup-gift-days strong{font-size:60px;font-weight:600;line-height:1;margin-right:6px}
+#signup-member-gift .member-sub{line-height:1.7}
+#signup-member-gift .member-primary{display:block;width:100%;margin-top:24px}

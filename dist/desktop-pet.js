@@ -583,7 +583,7 @@
     }
     requestAnimationFrame(vectorTick);
 
-    instance={refresh,close,notify,root,settingsMarkup,bindSettings};refresh();return instance;
+    instance={refresh,close,notify,root,settingsMarkup,bindSettings,guide(active){if(active){refresh();if(root.hidden)return;wakePet();const inert=root.inert;root.inert=false;open();pinned=true;root.inert=inert;}else close();}};refresh();return instance;
 
     function settingsMarkup(){
       const choices=(key,values)=>'<div class="pet-setting-choices">'+values.map(([id,label])=>`<button type="button" data-pet-pref="${key}" data-value="${id}" aria-pressed="${String(config[key])===id}">${label}</button>`).join('')+'</div>';
@@ -597,5 +597,5 @@
       };
     }
   }
-  window.ShiyuDesktopPet=Object.freeze({mount,art,icons,escape,read:()=>({...config,position:config.position?{...config.position}:null})});
+  window.ShiyuDesktopPet=Object.freeze({guide:active=>instance?.guide(active),mount,art,icons,escape,read:()=>({...config,position:config.position?{...config.position}:null})});
 })();

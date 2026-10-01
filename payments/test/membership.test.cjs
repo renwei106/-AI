@@ -101,3 +101,5 @@ test('legacy migration dry run never writes, uses greatest historical expiry and
   f.service.writeUsers([{...f.user,memberEvents:[{id:'cancel',time:new Date(f.now).toISOString(),title:'管理员取消会员',type:'管理员配置'}]}]);
   migrateMemberships({database,memberships:f.service,apply:true});assert.equal(f.service.stateFor(f.get()).member,false);assert.equal(f.service.records(f.get()).length,2);
 });
+
+test('ordinary signup reward is idempotent and cannot stack with invitation', t=>{const f=fixture(t);f.user.registrationReward={source:'registration',version:'v1',days:7,decidedAt:new Date(f.now).toISOString()};f.service.writeUsers([f.user]);f.service.settleInvitations({campaigns:[],rewards:[]});f.service.settleInvitations({campaigns:[],rewards:[]});assert.equal(f.get().memberEvents.filter(e=>e.id==='REG:u').length,1);assert.equal(f.service.stateFor(f.get()).expiresAt,f.now+7*DAY);const invited={...f.user,id:'invited',invitation:{campaignId:'x',inviterId:'u'},memberEvents:[]};f.service.writeUsers([f.get(),invited]);f.service.settleInvitations({campaigns:[],rewards:[]});assert.equal(f.service.readUsers()[1].memberEvents.length,0)});

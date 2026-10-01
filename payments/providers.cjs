@@ -66,6 +66,9 @@ class WechatProvider {
     const QRCode = require('qrcode');
     return { kind: 'qr', image: await QRCode.toDataURL(data.code_url, { width: 264, margin: 2, errorCorrectionLevel: 'M' }) };
   }
+  async close(order) {
+    await this.request('POST', '/v3/pay/transactions/out-trade-no/' + encodeURIComponent(order.id) + '/close', { mchid: this.config.mchId });
+  }
   normalize(data) {
     return { orderId: data.out_trade_no, transactionId: data.transaction_id, appId: data.appid, merchantId: data.mchid,
       amount: data.amount?.total, currency: data.amount?.currency, status: data.trade_state === 'SUCCESS' ? 'paid' : ['CLOSED', 'REVOKED', 'PAYERROR'].includes(data.trade_state) ? 'closed' : 'pending',
@@ -116,7 +119,7 @@ class AlipayProvider {
     const url = this.sdk.pageExec('alipay.trade.page.pay', 'GET', {
       notifyUrl: base + '/api/shiyu/payments/notify/alipay', returnUrl: base + '/?page=membership&paymentOrder=' + order.id,
       bizContent: { outTradeNo: order.id, totalAmount: (order.amount / 100).toFixed(2), subject: '拾隅 · ' + order.plan_name,
-        productCode: 'FAST_INSTANT_TRADE_PAY', timeoutExpress: '30m', qrPayMode: '4', qrcodeWidth: '264' },
+        productCode: 'FAST_INSTANT_TRADE_PAY', ...(Number.isFinite(order.expires_at) ? { timeExpire: new Date(order.expires_at + 8 * 3600000).toISOString().slice(0,19).replace('T',' ') } : { timeoutExpress: '30m' }), qrPayMode: '4', qrcodeWidth: '264' },
     });
     const parsed = new URL(url);
     if (parsed.protocol !== 'https:' || parsed.hostname !== 'openapi.alipay.com') fail('支付宝收银台地址无效', 'INVALID_RESPONSE', 502);
@@ -132,6 +135,10 @@ class AlipayProvider {
       merchantId: this.config.sellerId, amount: moneyToCents(data.totalAmount), currency: 'CNY',
       status: ['TRADE_SUCCESS', 'TRADE_FINISHED'].includes(data.tradeStatus) ? 'paid' : data.tradeStatus === 'TRADE_CLOSED' ? 'closed' : 'pending',
       paidAt: data.sendPayDate ? parseAlipayDate(data.sendPayDate) : Date.now() };
+  }
+  async close(order) {
+    const data = await this.sdk.exec('alipay.trade.close', { bizContent: { outTradeNo: order.id } }, { validateSign: true });
+    if (data.code !== '10000') throw new PaymentError('支付宝关单尚未确认', 'CLOSE_UNCONFIRMED');
   }
   notification(_headers, raw) {
     const params = new URLSearchParams(raw), data = {};
