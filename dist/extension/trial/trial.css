@@ -17,3 +17,68 @@ body:not([data-auth]) #login,body[data-auth=checking] #login{display:none}
 #login-panel [role=status]{margin-top:16px;font-size:11px}
 /* Success feedback replaces only the quick-save content area. */
 #save-result{display:flex;flex-direction:column;align-items:center;flex:1;min-height:370px;text-align:center;padding:32px 12px 16px}.save-result-art{width:128px;height:128px;color:var(--accent);margin:12px 0 20px}.save-result-art svg{width:100%;height:100%}#save-result h2{font-size:21px;font-weight:500;margin:0 0 14px;outline:none}.save-result-destination{font-size:13px;line-height:1.8;overflow-wrap:anywhere;margin:0;max-width:100%}.save-result-note{font-size:11px;color:var(--muted);line-height:1.8;margin:12px 0 32px}#save-result .primary{margin-top:auto;max-width:240px}body:not([data-auth=signed]) #save-result{display:none!important}
+/* Task scopes lead the module; completion stays below active tasks. */
+.record-panel>.record-tabs{margin:10px 0 16px;gap:3px;flex-wrap:wrap}.record-panel>.record-tabs button{padding:8px 10px}.todo-group-items{display:grid;gap:9px}.todo-status-group h3,.todo-completed summary{font-size:11px;font-weight:500;color:var(--muted);margin:0;padding:9px 2px 12px}.todo-completed summary{cursor:pointer}.todo-completed{margin-top:6px}.todo-completed summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+/* Keep memo search beside its title without changing the compose/list order. */
+.memo-heading-row{display:flex;align-items:center;gap:12px;margin:12px 0 6px}.memo-heading-row h2{flex:none;margin:0}.memo-heading-row .record-search{flex:1;min-width:0;width:auto;margin:0;padding:9px 11px}.memo-heading~.record-list{margin-top:16px}
+/* Module tabs replace duplicate headings, with compact search controls. */
+.module-toolbar{display:flex;align-items:center;gap:12px;margin:12px 0 18px;flex-wrap:wrap}.module-toolbar .record-tabs{display:flex;align-items:center;gap:12px;margin:0;flex:1;min-width:0;overflow-x:auto;flex-wrap:nowrap}.module-toolbar .record-tabs button,.bottom-groups button{flex:none;white-space:nowrap;padding:6px 0;border-radius:0;background:transparent;font-size:12px}.module-toolbar .record-tabs button[aria-pressed=true],.bottom-groups button[aria-pressed=true]{font-size:18px;background:transparent;color:var(--ink);font-weight:500}.module-toolbar .record-search{flex:0 1 124px;width:124px;min-width:90px;margin:0;padding:7px 9px;font-size:11px;border-radius:8px}.record-panel>.record-list{margin-top:16px}#search-panel .common-heading{display:none}#search-panel .bottom-groups{margin:14px 0 4px;padding:0 0 8px;gap:16px;align-items:center;overflow-x:auto;white-space:nowrap}#search-panel .search-box{height:36px;border-radius:9px}#search-panel .search-box input{font-size:12px}@media(max-width:420px){.module-toolbar:has([aria-label="待办范围"]) .record-tabs{flex-basis:100%}.module-toolbar:has([aria-label="待办范围"]) .record-search{margin-left:auto}}
+@media(max-width:420px){.module-toolbar:has([aria-label="待办范围"]) .record-search{order:-1}}
+/* Native side panels follow the browser's resizable viewport. Popup size stays unchanged. */
+html:has(body.side-panel){width:100%;max-width:none}
+body.side-panel{width:100%;max-width:none}
+.side-panel main,.side-panel main>section,.side-panel .intro,.side-panel .view-switch{width:100%;min-width:0}
+.side-panel .module-toolbar,.side-panel .record-list,.side-panel .search-results,.side-panel .record-compose{min-width:0;max-width:100%}
+.side-panel .record-controls{min-width:0}.side-panel .search-box input{min-width:0}
+@media(max-width:320px){.side-panel .view-switch button{gap:3px;padding-left:2px;padding-right:2px}.side-panel .search-box kbd{display:none}.side-panel .module-toolbar{gap:8px}.side-panel .module-toolbar .record-search{flex-basis:104px;width:104px}.side-panel .record-controls .record-primary{max-width:100%}}
+/* Align enlarged active labels with the bottoms of adjacent module tabs. */
+.module-toolbar .record-tabs,#search-panel .bottom-groups{align-items:flex-end}
+.module-toolbar .record-tabs button,#search-panel .bottom-groups button{line-height:1.4}
+/* Reserve the same underline space for every module tab to avoid layout shifts. */
+.module-toolbar .record-tabs button,#search-panel .bottom-groups button{border-bottom:2px solid transparent}
+.module-toolbar .record-tabs button[aria-pressed=true],#search-panel .bottom-groups button[aria-pressed=true]{border-bottom-color:var(--accent)}
+/* A centered rounded indicator keeps the active tab treatment light. */
+.module-toolbar .record-tabs button,#search-panel .bottom-groups button{position:relative}
+.module-toolbar .record-tabs button[aria-pressed=true],#search-panel .bottom-groups button[aria-pressed=true]{border-bottom-color:transparent}
+.module-toolbar .record-tabs button::after,#search-panel .bottom-groups button::after{content:'';position:absolute;left:50%;bottom:-2px;width:16px;height:2px;border-radius:999px;background:var(--accent);transform:translateX(-50%) scaleX(.5);opacity:0;transition:opacity .16s ease,transform .16s ease}
+.module-toolbar .record-tabs button[aria-pressed=true]::after,#search-panel .bottom-groups button[aria-pressed=true]::after{opacity:1;transform:translateX(-50%) scaleX(1)}
+@media(prefers-reduced-motion:reduce){.module-toolbar .record-tabs button::after,#search-panel .bottom-groups button::after{transition:none}}
+/* Keep overflowing tab labels reachable without visible scrollbar controls. */
+.module-toolbar .record-tabs,#search-panel .bottom-groups{scrollbar-width:none;-ms-overflow-style:none}
+.module-toolbar .record-tabs::-webkit-scrollbar,#search-panel .bottom-groups::-webkit-scrollbar{display:none;width:0;height:0}
+/* Quiet bookmark notes and a wider, explicit search action. */
+#bookmark-form #description{font-size:11px;font-weight:400;color:var(--muted);line-height:1.6}
+#bookmark-form #description::placeholder{color:var(--muted);opacity:.75}
+.module-toolbar .module-search{display:flex;align-items:center;flex:0 1 180px;width:180px;min-width:0;margin:0;background:var(--card);border-radius:8px}
+.module-toolbar .module-search .record-search{flex:1;width:0;min-width:0;background:transparent;padding:8px 10px;margin:0;order:0}
+.module-search-button{display:grid;place-items:center;flex:none;width:32px;height:32px;padding:7px;color:var(--muted);border-radius:7px}
+.module-search-button svg{width:17px;height:17px}.module-search-button:hover{color:var(--accent);background:var(--soft)}
+@media(max-width:460px){.module-toolbar:has([aria-label="待办范围"]) .record-tabs{flex-basis:100%}.module-toolbar:has([aria-label="待办范围"]) .module-search{order:-1;margin-left:auto}}
+@media(max-width:320px){.module-toolbar .module-search{flex-basis:145px;width:145px}}
+/* The group action uses the existing theme source; later stays neutral/inverse. */
+#save-group{--accent:var(--theme-color);--on-accent:var(--theme-on-color,#fff);background:var(--accent);color:var(--on-accent)}
+:root:not([data-themed=true]) #save-group{--on-accent:#fff}
+#save-group:is(:hover,:focus-visible):not(:disabled){background:color-mix(in srgb,var(--accent) 84%,#000)}
+.library-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:230px;padding:32px 18px;color:var(--muted);text-align:center}.library-empty svg{width:148px;max-width:70%;height:auto}.library-empty p{font-size:12px;font-weight:400;line-height:1.8;margin:14px 0 0;color:var(--muted);opacity:.7}
+.module-toolbar .module-search{position:relative;flex-basis:140px;width:140px;transition:flex-basis .22s ease,width .22s ease;box-shadow:inset 0 0 0 1px transparent}.module-toolbar .module-search:focus-within{flex-basis:210px;width:210px;box-shadow:inset 0 0 0 1px var(--focus)}.module-toolbar .module-search .record-search{padding-right:34px;width:100%;outline:none}.module-search-button{position:absolute;right:2px;top:50%;transform:translateY(-50%)}
+.memo-inline-editor textarea{width:100%;resize:vertical;border:0;background:transparent;color:var(--ink);font:inherit;line-height:1.8}.memo-inline-editor .record-primary{float:right;background:var(--accent);color:var(--on-accent);padding:7px 16px;border-radius:8px}.memo-inline-editor .record-status{clear:both}
+.schedule-trigger{background:var(--soft);border-radius:8px;padding:8px 10px;font-size:11px}.schedule-dialog{padding:20px;max-height:calc(100dvh - 32px);overflow:auto}.schedule-dialog h2{margin:0 0 16px;font-size:17px}.schedule-modes{display:flex;gap:5px;margin-bottom:16px}.schedule-modes button{flex:1;padding:8px 4px;border-radius:8px;font-size:12px}.schedule-modes button[aria-pressed=true]{background:var(--soft);color:var(--accent)}.schedule-row{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:12px}.schedule-row>span{flex:none}.schedule-row button,.schedule-row input{min-width:0;padding:8px;border:0;border-radius:8px;background:var(--card);font:inherit;color:var(--ink)}.schedule-row button{flex:1}.schedule-row input{width:95px}.schedule-dialog footer{display:flex;justify-content:flex-end;gap:14px;margin-top:18px}.schedule-dialog footer .primary{width:auto;margin:0;padding:9px 22px}.calendar-heading{display:flex;justify-content:space-between;margin:12px 0}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}.calendar-grid button{padding:8px 0;border-radius:7px;font-size:12px}.calendar-grid small{color:var(--muted);font-size:10px}.calendar-grid button[aria-pressed=true]{background:var(--accent);color:var(--on-accent)}.calendar-grid .outside{opacity:.4}.schedule-dialog [role=alert]{color:var(--error);font-size:11px}
+@media(prefers-reduced-motion:reduce){.module-toolbar .module-search{transition:none}}
+.schedule-dialog{position:fixed;box-shadow:0 12px 36px #0002}.schedule-dialog::backdrop{background:transparent}
+.mode-icons .mode-toggle{opacity:.7}
+.mode-icons .mode-toggle:hover{opacity:1}
+.memo-editable-card{cursor:text}
+.memo-inline-editor textarea,.memo-inline-editor textarea:focus,.memo-inline-editor textarea:focus-visible{border:0;outline:none;box-shadow:none;background:transparent;padding:0;resize:none;caret-color:var(--ink)}
+.memo-editable-card:focus-visible{outline:1px solid var(--focus);outline-offset:3px}
+/* New memo input stays borderless while typing, like inline editing. */
+.record-compose>textarea:focus,.record-compose>textarea:focus-visible{border:0;outline:none;box-shadow:none;caret-color:var(--ink)}
+/* Quiet input focus across the trial; retain subtle keyboard cues on controls. */
+.record-compose>input:focus,.record-compose>input:focus-visible,
+#bookmark-form .page-fields input:focus,#bookmark-form .page-fields textarea:focus,
+#search-panel .search-box input:focus,.module-toolbar .record-search:focus,
+.schedule-dialog input:focus{outline:none;box-shadow:none;caret-color:var(--ink)}
+#search-panel .search-box:focus-within,.module-toolbar .module-search:focus-within{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--focus) 22%,transparent)}
+.record-controls select:focus-visible,dialog select:focus-visible,
+button:focus-visible,.todo-completed summary:focus-visible,.memo-editable-card:focus-visible{outline:1px solid color-mix(in srgb,var(--focus) 30%,transparent);outline-offset:2px}
+.result-mark img{display:block;width:22px;height:22px;object-fit:contain}
+.result-copy small,.result-copy em{font-size:10px;font-weight:400;color:var(--muted);font-style:normal;line-height:1.5}

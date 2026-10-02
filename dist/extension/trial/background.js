@@ -59,6 +59,7 @@ async function relay(request) {
 extensionApi.runtime.onMessage.addListener((request, sender, reply) => {
   if (sender.id !== extensionApi.runtime.id || ![extensionApi.runtime.getURL('popup.html'),extensionApi.runtime.getURL('panel.html')].includes(sender.url)) return false;
   (async () => {
+    if(request.type==='tool-records')return toolRecords(request.payload);
     if(request.type==='list'||request.type==='move')return trialRelay(request);
     if (request.type === 'state') return relay({ type: 'state' });
     if (request.type === 'save') return relay({ type: 'save', payload: request.payload });
@@ -90,7 +91,7 @@ async function trialRelay(request){
   try{if(location.origin!==origin)throw Error('站点已变化');const store=window.ShiyuExtensionStore;if(!store)throw Error('请稍后重试');const state=store.snapshot();if(!state.signed||!request.payload?.accountId||state.accountId!==request.payload.accountId)throw Error('登录账号已变化，请刷新后重试');
   if(request.type==='move')return {ok:true,value:store.move(request.payload)};
   const value=JSON.parse(localStorage.getItem(store.KEY)||'{}'),items=[];
-  const add=(item,extra)=>{try{const u=new URL(item[1]);if(!['https:','http:'].includes(u.protocol))return;items.push({title:String(item[0]||u.hostname),url:u.href,description:String(item[2]||''),domain:u.hostname,...extra})}catch{}};
+  const add=(item,extra)=>{try{const u=new URL(item[1]);if(!['https:','http:'].includes(u.protocol))return;items.push({title:String(item[0]||u.hostname),url:u.href,description:String(item[2]||''),icon:String(item[3]||''),domain:u.hostname,...extra})}catch{}};
   for(const s of value.data||[])for(const c of s.scenes||[])for(const g of c.groups||[])for(const item of g.items||[])add(item,{spaceId:s.id,sceneId:c.id,groupId:g.id,path:[s.name,c.name,g.name].join(' / ')});
   for(const row of store.inbox())add(row.item,{id:row.id,inbox:true,path:'稍后整理'});
   return {ok:true,value:{items,accountId:state.accountId}};
@@ -99,3 +100,32 @@ async function trialRelay(request){
 }
 async function applyMode(){const {opening='popup'}=await chrome.storage.local.get('opening');if(!chrome.sidePanel)return;await chrome.action.setPopup({popup:opening==='side'?'':'popup.html'});await chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:opening==='side'});}
 chrome.runtime.onInstalled.addListener(applyMode);chrome.runtime.onStartup.addListener(applyMode);chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes.opening)void applyMode()});
+
+async function toolRecords(payload){
+ if(!['memo','todo'].includes(payload?.tool)||!['read','save'].includes(payload?.action))throw Error('无效的工具操作');
+ const {tab,site}=await siteTab();
+ const results=await extensionApi.scripting.executeScript({target:{tabId:tab.id},world:'MAIN',args:[payload,site.origin],func:async(p,origin)=>{
+  try{
+   const current=()=>window.ShiyuExtensionStore?.snapshot()?.accountId;
+   if(location.origin!==origin||!p.accountId||current()!==p.accountId)throw Error('登录账号已变化，请重新打开插件');
+   const response=await fetch('/api/shiyu/auth/tools',{credentials:'same-origin',cache:'no-store'}),state=await response.json();
+   if(!response.ok||state.userId!==p.accountId||current()!==p.accountId)throw Error(state.message||'无法获取账号数据');
+   const doc=state.tools?.[p.tool];let data=structuredClone(doc?.data|| (p.tool==='memo'?{notes:[],lastNumber:0}:{calendarV2:{version:2,revision:0,groups:[],tasks:[],initialized:true}}));
+   if(p.action==='save'){
+    if((doc?.revision||0)!==p.revision)throw Error('内容已在其他页面更新，请刷新列表后重试');
+    if(p.tool==='todo'&&!data.calendarV2){const {initialState}=await import('/todo-calendar-core.js');data.calendarV2=initialState({...data,tasks:data.tasks||[],inbox:data.inbox||[]})}
+    const items=p.tool==='memo'?(data.notes||=[]):data.calendarV2.tasks;
+    const input=p.item;if(!input||typeof input.id!=='string')throw Error('记录无效');
+    let item=items.find(x=>x.id===input.id);
+    if(item?.deletedAt||item?.archivedAt)throw Error('这条记录已删除或归档，请刷新后重试');
+    if(!item){item={id:input.id,createdAt:Date.now()};if(p.tool==='memo'){data.lastNumber=Math.max(data.lastNumber||0,...items.map(x=>x.number||0))+1;Object.assign(item,{number:data.lastNumber,title:'',icon:'✦',color:'theme'})}else Object.assign(item,{start:null,duration:30,groupId:'',description:'',dateEnd:'',done:false});items.unshift(item)}
+    if(p.tool==='memo'){if(typeof input.content!=='string'||!input.content.trim()||Array.from(input.content).length>300)throw Error('小记内容请填写1–300字');item.content=input.content}
+    else{if(typeof input.title!=='string'||!input.title.trim()||input.title.length>200)throw Error('待办标题请填写1–200字');if(input.date&&!/^\d{4}-\d{2}-\d{2}$/.test(input.date))throw Error('日期无效');if(item.date!==input.date)item.dateEnd=input.date;Object.assign(item,{title:input.title,date:input.date||'',priority:Math.max(0,Math.min(3,Number(input.priority)||0)),done:!!input.done,completedAt:input.done?(item.completedAt||Date.now()):null});data.calendarV2.revision=(data.calendarV2.revision||0)+1}
+    if(p.tool==='todo'&&Object.hasOwn(input,'start')){const start=input.start,duration=Number(input.duration);if(start!==null&&(!Number.isInteger(start)||start<0||start>=1440||!Number.isFinite(duration)||duration<=0||duration>525600||!input.date))throw Error('时间段无效');if(input.dateEnd&&(!/^\d{4}-\d{2}-\d{2}$/.test(input.dateEnd)||input.dateEnd<input.date))throw Error('结束日期无效');Object.assign(item,{start,duration:Number.isFinite(duration)&&duration>0?duration:30,dateEnd:input.date?(input.dateEnd||input.date):''})}item.updatedAt=Date.now();if(current()!==p.accountId)throw Error('账号已切换');
+    const saved=await fetch('/api/shiyu/auth/tools',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:p.accountId,tool:p.tool,data,revision:doc?.revision||0,initialize:false})});
+    const result=await saved.json();if(!saved.ok||result.userId!==p.accountId||current()!==p.accountId)throw Error(result.message||'保存失败，请重试');return {ok:true,value:{data:result.data,revision:result.revision}};
+   }
+   return {ok:true,value:{data,revision:doc?.revision||0}};
+  }catch(e){return {ok:false,error:e.message}}
+ }});const result=results[0]?.result;if(!result?.ok)throw Error(result?.error||'无法连接账号数据');return result.value;
+}

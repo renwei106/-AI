@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "拾隅 · 双模式试用版",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "一键收下当前网页，稍后整理，或归入拾隅的空间、场景和分组。",
   "minimum_chrome_version": "116",
   "permissions": [
