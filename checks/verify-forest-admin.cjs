@@ -1,0 +1,20 @@
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const assert=require('node:assert/strict'),fs=require('node:fs');
+(async()=>{const b=await chromium.launch({channel:'msedge',headless:true});try{
+ const c=await b.newContext({viewport:{width:1440,height:1000}}),origin='http://127.0.0.1:5175';
+ const login=await c.request.post(origin+'/api/platform/login',{data:{account:'admin',password:'123456'}});assert.equal(login.status(),200);
+ const original=await c.request.get(origin+'/api/shiyu/operations').then(r=>r.json());let saved;
+ await c.route('**/api/shiyu/operations',async route=>{if(route.request().method()!=='PUT')return route.continue();saved=route.request().postDataJSON();return route.fulfill({json:{...original,forestContent:saved.forestContent,personalization:{...original.personalization,...saved.personalization}}})});
+ const p=await c.newPage();p.on('pageerror',e=>console.log('PAGE ERROR',e.message));await p.goto(origin+'/apps/shiyu/personalization/themes');await p.waitForTimeout(700);
+ const card=p.locator('[data-resource-id="forestCompanion"]');await card.scrollIntoViewIfNeeded();await card.hover();await card.getByRole('button',{name:/设置/}).click();
+ const drawer=p.getByRole('dialog');await drawer.getByText('内容 · 平台视频').waitFor();assert.equal(await drawer.locator('video').count(),2);
+ await p.screenshot({path:'checks/forest-upload/admin-content.png'});
+ await drawer.getByLabel('视频 2 名称').fill('毛线女孩测试');await drawer.getByRole('button',{name:/前\s*移/}).nth(1).click();
+ await drawer.getByRole('button',{name:'应用到列表'}).click();await p.getByRole('button',{name:'保存并同步前台',exact:true}).click();await p.waitForTimeout(250);
+ assert.equal(saved.forestContent.items[0].name,'毛线女孩测试');assert.equal(saved.forestContent.items[0].id,'yarn-girl');assert.equal(saved.personalization.themes.options.forestCompanion.name,original.personalization.themes.options.forestCompanion.name);
+ await card.hover();await card.getByRole('button',{name:/设置/}).click();await drawer.locator('input[type=file]').setInputFiles('D:/系统文件/下载/新版.mp4');await p.waitForFunction(()=>document.querySelectorAll('.ant-drawer video').length===3);assert.equal(await drawer.locator('video').count(),3);
+ await drawer.getByRole('button',{name:/取\s*消/}).click();
+ const after=await c.request.get(origin+'/api/shiyu/operations').then(r=>r.json());assert.deepEqual(after.forestContent,original.forestContent);
+ assert.equal((await fetch(origin+'/api/shiyu/forest-upload',{method:'POST',body:'{}'})).status,403);
+ console.log('PASS admin drawer, two defaults, rename/reorder draft, authenticated upload, cancel retains published content, unauthorized upload blocked');
+}finally{await b.close()}})().catch(e=>{console.error(e);process.exitCode=1});

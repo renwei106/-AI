@@ -32,6 +32,8 @@ else
   (cd "$admin_release" && PATH=/opt/node-v24/bin:$PATH NODE_OPTIONS=--max-old-space-size=384 CI=1 pnpm install --frozen-lockfile --child-concurrency=1 --network-concurrency=4)
 fi
 if [ -d "$old_admin/.local" ]; then ln -s "$(readlink -f "$old_admin/.local")" "$admin_release/.local"; fi
+# This catalog is edited by the admin outside .local; retain production content.
+if [ -f "$old_admin/platform-creators.json" ]; then cp -p "$old_admin/platform-creators.json" "$admin_release/platform-creators.json"; fi
 if [ -d "$old_admin/mocks" ]; then
   mv "$admin_release/mocks" "$admin_release/mocks.bundled"
   ln -s "$(readlink -f "$old_admin/mocks")" "$admin_release/mocks"

@@ -36,7 +36,7 @@ $toolsCommit = (& git -C $toolsRoot rev-parse HEAD).Trim()
 try {
   & git -C $adminRoot archive --format=tar.gz -o $adminArchive HEAD
   if ($LASTEXITCODE -ne 0) { throw 'Failed to archive admin source.' }
-  & git -C $repoRoot archive --format=tar.gz -o $frontArchive HEAD dist preview.cjs share-server.cjs theme-config-proxy.cjs extension-routes.cjs shiyu-user-proxy.cjs favicon-resolver.cjs feedback-server.cjs theme-access i18n payments config
+  & git -C $repoRoot archive --format=tar.gz -o $frontArchive HEAD dist preview.cjs share-server.cjs theme-config-proxy.cjs extension-routes.cjs shiyu-user-proxy.cjs avatar-catalog-proxy.cjs forest-companion-assets.cjs favicon-resolver.cjs feedback-server.cjs theme-access i18n payments config
   if ($LASTEXITCODE -ne 0) { throw 'Failed to archive frontend source.' }
   & git -C $toolsRoot archive --format=tar.gz -o $toolsArchive HEAD dist server
   if ($LASTEXITCODE -ne 0) { throw 'Failed to archive tools source.' }

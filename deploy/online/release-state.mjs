@@ -34,6 +34,8 @@ if(action==='prepare'){
   fs.mkdirSync(root+'/'+name,{mode:0o700});
   for(const item of fs.readdirSync(dir,{withFileTypes:true}))if(item.isFile()&&item.name.endsWith('.json'))fs.copyFileSync(path.join(dir,item.name),root+'/'+name+'/'+item.name);
  }
+ const creators='/opt/shiyu-admin/current/platform-creators.json';
+ if(fs.existsSync(creators))fs.copyFileSync(creators,root+'/admin/platform-creators.json');
  const sums=Object.fromEntries([...configFiles,cfg.file].filter(fs.existsSync).map(f=>[fs.realpathSync(f),digest(f)]));
  fs.writeFileSync(root+'/preserved-config.json',JSON.stringify(sums),{mode:0o600});
  // Recheck immediately before appending; never replace historical rows with local seed data.

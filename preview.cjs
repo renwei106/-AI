@@ -78,11 +78,15 @@ http.createServer(async(req,res)=>{
   if(await feedbackHandler(req,res))return
   if(await faviconResolver.handler(req,res))return
   if(shiyuUserProxy(req,res))return
+  if(await require('./avatar-catalog-proxy.cjs')(req,res))return
   if(/^\/extension\/(integration|store)\.js\?/.test(req.url)&&await localized(req,res,req.url.split('?')[0].slice(1),root))return
   if(extensionRoutes(req,res))return
   if(await themeConfigProxy(req,res))return
   if(await shareHandler(req,res))return
   const pathname=req.url.split('?')[0]
+  if(require('./forest-companion-assets.cjs')(req,res))return
+  if(pathname==='/forest-companion-theme.js'||pathname==='/forest-companion-theme.css')routes[pathname]=pathname.slice(1)
+  if(pathname==='/avatar-catalog.js'||pathname==='/avatar-catalog.css')routes[pathname]=pathname.slice(1)
   const fontAsset=/^\/assets\/fonts\/shiyu-(?:youfeng|qingya-song|wenrun-kai)\/[A-Za-z0-9._-]+\.woff2$/i.test(pathname)?pathname.slice(1):''
   let file=routes[pathname]||fontAsset||(/^\/assets\/site-icons\/[a-z0-9._-]+\.(?:svg|ico|png|webp)$/i.test(pathname)?pathname.slice(1):'')
   if(/^\/assets\/memoir\/(?:gulls|cruise|sail|alpine)\.webp$/.test(pathname))file=pathname.slice(1)
