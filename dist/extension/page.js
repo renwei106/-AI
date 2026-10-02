@@ -24,7 +24,7 @@ const browsers = [
   { id: 'qq', name: 'QQ 浏览器', short: 'QQ', icon: 'assets/browsers/qq.svg', address: 'chrome://extensions', install: 'crx' },
   { id: 'quark', name: '夸克浏览器', short: '夸克', icon: 'assets/browsers/quark.svg', address: 'chrome://extensions', install: 'crx' },
   { id: 'firefox', name: 'Firefox 火狐', short: 'Firefox', icon: 'assets/browsers/firefox.svg', address: 'about:addons', install: 'xpi' }
-].map(browser => ({ ...browser, download: `downloads/shiyu-extension-${browser.id}-0.2.1.zip` }));
+].map(browser => ({ ...browser, version: ['chrome', 'edge'].includes(browser.id) ? '0.2.2' : '0.2.1', download: ['chrome', 'edge'].includes(browser.id) ? 'downloads/shiyu-extension-0.2.2.zip' : `downloads/shiyu-extension-${browser.id}-0.2.1.zip` }));
 let selectedBrowser = null;
 let firefoxRelease = { ready: false };
 fetch('firefox-release.json', { cache: 'no-store' }).then(response => response.ok ? response.json() : null).then(async release => {
@@ -54,7 +54,7 @@ function selectBrowser(browser) {
     button.setAttribute('aria-checked', String(active)); button.classList.toggle('selected', active);
   });
   const download = document.querySelector('#browser-download');
-  download.disabled = false; download.textContent = `下载 ${browser.short} 版插件`;
+  download.disabled = false; download.textContent = `下载 ${browser.short} 版插件 · V${browser.version}`;
   const firefox = browser.install === 'xpi';
   document.querySelector('.steps article:first-child h3').textContent = firefox ? '下载插件' : '下载并解压';
   document.querySelector('.steps article:first-child p').textContent = firefox ? '下载 Firefox 版安装文件，无需解压。' : '将 ZIP 解压到一个固定文件夹。安装完成后保留该文件夹，不要移动或删除。';
