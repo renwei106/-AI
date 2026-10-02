@@ -1,13 +1,16 @@
 // Firefox uses an event page and Mozilla signing, not a Chromium CRX.
 const fs = require('node:fs'), path = require('node:path'), child = require('node:child_process');
-const root = __dirname, source = path.join(root, 'browser-extension');
+const root = __dirname, source = path.join(root, 'dist/extension/current');
 const destination = path.join(root, '.local/firefox-extension');
 fs.mkdirSync(destination, { recursive: true });
-for (const name of ['background.js', 'config.js', 'popup.html', 'popup.css', 'popup.js', 'icons', 'assets']) {
+for (const name of ['background.js', 'config.js', 'popup.html', 'panel.html', 'popup.css', 'popup.js', 'trial.js', 'trial.css', 'trial-apps.js', 'trial-schedule.js', 'icons', 'assets']) {
   fs.cpSync(path.join(source, name), path.join(destination, name), { recursive: true });
 }
 const manifest = JSON.parse(fs.readFileSync(path.join(source, 'manifest.json'), 'utf8'));
 delete manifest.minimum_chrome_version;
+delete manifest.side_panel;
+manifest.permissions=manifest.permissions.filter(p=>p!=='sidePanel');
+manifest.sidebar_action={default_title:'拾隅',default_panel:'panel.html',default_icon:manifest.icons,open_at_install:false};
 if (process.argv.includes('--production')) {
   manifest.host_permissions = ['https://shiyubox.com/*'];
   fs.writeFileSync(path.join(destination, 'config.js'), "export const SITE_URLS = ['https://shiyubox.com/'];\n");

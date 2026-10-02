@@ -116,8 +116,9 @@ async function trialRelay(request){
   }catch(e){return {ok:false,error:e.message}}
  }});const response=result[0]?.result;if(!response?.ok)throw Error(response?.error||'读取失败，请重试');return response.value;
 }
-async function applyMode(){const {opening='popup'}=await chrome.storage.local.get('opening');if(!chrome.sidePanel)return;await chrome.action.setPopup({popup:opening==='side'?'':'popup.html'});await chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:opening==='side'});}
-chrome.runtime.onInstalled.addListener(applyMode);chrome.runtime.onStartup.addListener(applyMode);chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes.opening)void applyMode()});
+async function applyMode(){const {opening='popup'}=await extensionApi.storage.local.get('opening');const side=opening==='side'&&!!(extensionApi.sidePanel?.open||extensionApi.sidebarAction?.open);await extensionApi.action.setPopup({popup:side?'':'popup.html'});if(extensionApi.sidePanel?.setPanelBehavior)await extensionApi.sidePanel.setPanelBehavior({openPanelOnActionClick:side});}
+if(extensionApi.sidebarAction)extensionApi.action.onClicked.addListener(()=>extensionApi.sidebarAction.open());
+extensionApi.runtime.onInstalled.addListener(applyMode);extensionApi.runtime.onStartup.addListener(applyMode);extensionApi.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&changes.opening)void applyMode()});
 
 async function toolRecords(payload){
  if(!['memo','todo'].includes(payload?.tool)||!['read','save'].includes(payload?.action))throw Error('无效的工具操作');
