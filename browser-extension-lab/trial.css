@@ -126,3 +126,19 @@ body:not(.side-panel){border-radius:18px;background-clip:padding-box}
 body:not(.side-panel) .popup-footer{border-radius:0 0 18px 18px}
 body:not(.side-panel){background:transparent}
 body:not(.side-panel) main{background:var(--bg);border-radius:18px}
+
+/* Guest welcome: brand and quick collection only. */
+#login-panel{text-align:center;padding:16px 0 12px}
+.guest-brand{display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 0 28px}
+.guest-brand .guest-logo{width:60px;height:60px;border-radius:15px}
+.guest-brand>span{font-family:var(--official-font),sans-serif;font-size:30px;line-height:1.3;letter-spacing:4px;color:var(--ink)}
+.guest-brand>small{font-size:11px;letter-spacing:2px;color:var(--muted)}
+#login-panel h2{font-size:16px;line-height:1.8;text-wrap:balance}
+#login-panel>p:not([role=status]){max-width:310px;margin:10px auto 0;line-height:1.9;text-wrap:pretty}
+#login-panel #login{margin-top:24px}
+#login-panel .guest-features{font-size:10px;color:var(--muted);opacity:.8;margin-top:17px}
+#login-panel [role=status]:empty{display:none}
+
+/* Brand surfaces share the existing theme source, including signed-out fallback. */
+#login-panel,.popup-footer .popup-brand{--accent:var(--theme-color);--on-accent:var(--theme-on-color,#fff)}
+.guest-brand>span,.popup-footer .popup-brand{color:var(--accent)}

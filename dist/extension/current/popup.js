@@ -18,7 +18,7 @@ function previewTheme() {
 function applyTheme(theme) {
   activeTheme = theme;
   const root = document.documentElement;
-  if (!theme?.color) { delete root.dataset.themed; delete root.dataset.themeDark; root.style.removeProperty('--theme-color'); return; }
+  if (!theme?.color) { delete root.dataset.themed; delete root.dataset.themeDark; root.style.removeProperty('--theme-color'); root.style.removeProperty('--theme-on-color'); return; }
   const color = /^#[0-9a-f]{6}$/i.test(theme.color) ? theme.color : '#48614c';
   const channels = color.slice(1).match(/../g).map(value => parseInt(value, 16) / 255);
   const luminance = channels.map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4).reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
@@ -50,7 +50,7 @@ async function call(type, extra = {}) {
     if (type === 'search') { const query = String(extra.payload?.query || '').toLocaleLowerCase(); const items = demoSearchItems.filter(item => [item.title, item.url, item.description, item.path].some(value => value.toLocaleLowerCase().includes(query))); return { total: items.length, items }; }
     if(type==='list'){const items=demoSearchItems.map((x,i)=>({...x,id:i===2?'demo-inbox':undefined,inbox:i===2,spaceId:'work',sceneId:'daily',groupId:'tools'}));return {accountId:'preview',items,commonGroups:[{id:'common-tools',name:'效率工具',items:items.slice(0,2)},{id:'common-reading',name:'稍后阅读',items:[]},{id:'common-life',name:'生活灵感',items:[]}]};}
     if(type==='move')return {label:'所选分组'};
-    if (type === 'version') return { current: '0.2.5', latest: '0.2.5', hasUpdate: false, browser: 'chrome' };
+    if (type === 'version') return { current: '0.2.6', latest: '0.2.6', hasUpdate: false, browser: 'chrome' };
     return;
   }
   const response = await extensionApi.runtime.sendMessage({ type, ...extra });
@@ -169,7 +169,7 @@ async function connect() {
   try {
     state = await call('state');
     document.body.classList.toggle('guest', !state.signed); $('#login-panel').hidden = state.signed;
-    applyTheme(state.signed ? state.theme : null);
+    applyTheme(state.theme || null);
     options($('#space'), state.spaces, draft?.spaceId); fillScenes(draft);
     setDestinationLoading(!state.signed || !current?.url);
     status(!state.signed ? '登录后才能收藏。' : !current?.url ? '此页面无法收藏，请打开普通 HTTP / HTTPS 网页。' : '');

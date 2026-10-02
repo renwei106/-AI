@@ -18,7 +18,7 @@ function previewTheme() {
 function applyTheme(theme) {
   activeTheme = theme;
   const root = document.documentElement;
-  if (!theme?.color) { delete root.dataset.themed; delete root.dataset.themeDark; root.style.removeProperty('--theme-color'); return; }
+  if (!theme?.color) { delete root.dataset.themed; delete root.dataset.themeDark; root.style.removeProperty('--theme-color'); root.style.removeProperty('--theme-on-color'); return; }
   const color = /^#[0-9a-f]{6}$/i.test(theme.color) ? theme.color : '#48614c';
   const channels = color.slice(1).match(/../g).map(value => parseInt(value, 16) / 255);
   const luminance = channels.map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4).reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
@@ -169,7 +169,7 @@ async function connect() {
   try {
     state = await call('state');
     document.body.classList.toggle('guest', !state.signed); $('#login-panel').hidden = state.signed;
-    applyTheme(state.signed ? state.theme : null);
+    applyTheme(state.theme || null);
     options($('#space'), state.spaces, draft?.spaceId); fillScenes(draft);
     setDestinationLoading(!state.signed || !current?.url);
     status(!state.signed ? '登录后才能收藏。' : !current?.url ? '此页面无法收藏，请打开普通 HTTP / HTTPS 网页。' : '');
