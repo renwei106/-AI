@@ -1131,3 +1131,19 @@ body.bookmark-sorting #groups{overflow-anchor:none;scroll-behavior:auto}
 #account-security-editor[data-security-kind="phone"] .account-input-row input{flex:1;min-width:0;width:0}
 #account-security-editor[data-security-kind="phone"] .account-input-row button{min-width:88px;padding:8px 0;font-size:12px}
 #account-security-editor[data-security-kind="phone"] [data-security-editor-save]{margin-top:4px}
+
+/* Password recovery: keep the existing security workflow and theme tokens. */
+#account-security .password-reset-form{gap:18px;margin-top:24px}
+#account-security .reset-field{display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;align-items:start}
+#account-security .reset-field>label{display:block;margin:0;padding:13px 0 0;font-size:13px;line-height:20px;color:var(--ink);white-space:nowrap}
+#account-security .password-reset-form input{width:100%;min-width:0;min-height:46px;margin:0;padding:12px 14px;border:1px solid transparent;border-radius:8px;background:var(--soft);color:var(--ink);font:13px var(--font);line-height:20px;outline:none;box-shadow:none}
+#account-security .password-reset-form input::placeholder{color:var(--muted);opacity:.7}
+#account-security .password-reset-form input:focus-visible{border-color:var(--accent)}
+#account-security .password-reset-form .account-input-row{display:flex;gap:10px;align-items:center;min-width:0;margin:0}
+#account-security .password-reset-form .account-input-row input{flex:1;width:0}
+#account-security .password-reset-form [data-reset-send]{flex:none;min-width:84px;min-height:44px;padding:8px 0;color:var(--accent);font:12px var(--font);white-space:nowrap}
+#account-security .password-reset-form [data-reset-send]:disabled{color:var(--muted);opacity:.65;cursor:default}
+#account-security .reset-password-input{min-width:0;display:grid;gap:8px}
+#account-security #reset-password-hint{font-size:11px;line-height:1.7;color:var(--muted)}
+#account-security .password-reset-form [data-reset-submit]{justify-self:stretch;min-height:44px;margin:4px 0 0 78px;border-radius:8px}
+@media(max-width:480px){#account-security .password-reset-form{gap:16px}#account-security .reset-field{grid-template-columns:56px minmax(0,1fr);gap:10px}#account-security .reset-field>label{font-size:12px}#account-security .password-reset-form input{padding:12px 10px}#account-security .password-reset-form .account-input-row{gap:6px}#account-security .password-reset-form [data-reset-send]{min-width:76px;font-size:11px}#account-security .password-reset-form [data-reset-submit]{margin-left:66px}}

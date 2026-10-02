@@ -178,7 +178,7 @@
     await fold.finished.catch(()=>{});if(welcome!==dialog)return;
     const plane=document.createElement('div');plane.className='sy-paper-plane';
     Object.assign(plane.style,{left:box.left+'px',top:box.top+'px',width:box.width+'px',height:box.height+'px',transform:`scale(${scale}) rotate(-8deg)`});
-    plane.innerHTML='<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="sy-wing" x2=".4" y2="1"><stop stop-color="var(--plane-light)"/><stop offset="1" stop-color="var(--plane-paper)"/></linearGradient></defs><path d="M0 0 100 50 12 100 29 53Z" fill="var(--plane-paper)"/><path d="M0 0 100 50 38 43Z" fill="url(#sy-wing)"/><path d="M38 43 100 50 29 53 12 100Z" fill="var(--plane-shadow)"/><path d="M12 100 100 50 45 62Z" fill="var(--plane-light)"/><path d="M29 53 100 50 45 62 34 80Z" fill="var(--plane-fold)"/><path d="M0 0 38 43 100 50M12 100 45 62 100 50M29 53 34 80" fill="none" stroke="var(--plane-edge)" stroke-width=".7" stroke-linejoin="round"/></svg>';
+    plane.innerHTML='<svg viewBox="0 0 240 150" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><path d="M12 16 228 54 79 83Z" fill="var(--plane-paper)"/><path d="M79 83 228 54 98 137Z" fill="var(--plane-shadow)"/><path d="M79 83 98 137 137 104 228 54Z" fill="var(--plane-fold)"/><path d="M24 104 228 54 137 104Z" fill="var(--plane-light)"/><path d="M12 16 228 54 24 104M79 83 228 54M98 137 137 104 228 54" fill="none" stroke="var(--plane-edge)" stroke-width="1.1" stroke-linejoin="round"/></svg>';
     dialog.append(plane);letter.style.visibility='hidden';
     // Measure after the fold so revealed navigation controls have reached their resting position.
     const landing=el?.isConnected?el.getBoundingClientRect():dest;

@@ -48,6 +48,7 @@ const copyAddress = document.querySelector('#copy-address');
 addressCode.textContent = '选择浏览器后显示'; copyAddress.disabled = true;
 function selectBrowser(browser) {
   selectedBrowser = browser;
+  updateShortcutGuide(browser);
   document.querySelectorAll('[data-browser]').forEach(button => {
     const active = button.dataset.browser === browser.id;
     button.setAttribute('aria-checked', String(active)); button.classList.toggle('selected', active);
@@ -87,6 +88,25 @@ function detectBrowser() {
   return browsers[0].id;
 }
 const requestedBrowser = new URLSearchParams(location.search).get('browser');
+function shortcutAddress(browser) {
+  return browser.id === 'firefox' ? 'about:addons' : browser.id === 'edge' ? 'edge://extensions/shortcuts' : 'chrome://extensions/shortcuts';
+}
+function updateShortcutGuide(browser) {
+  const firefox = browser.id === 'firefox', known = ['chrome', 'edge', 'firefox'].includes(browser.id);
+  document.querySelector('#shortcut-address').textContent = shortcutAddress(browser);
+  document.querySelector('#shortcut-instructions').textContent = firefox
+    ? '打开地址后，点击齿轮菜单 →「管理扩展快捷键」，找到「拾隅」，设置打开插件的组合键。'
+    : '打开地址后，找到「拾隅 · 网址收藏」，在「激活扩展程序」处设置组合键，例如 Alt＋Shift＋S；如有冲突，请换一组。';
+  document.querySelector('#shortcut-note').textContent = known
+    ? '当前网页无法直接打开浏览器内部设置。复制地址，粘贴到对应浏览器的地址栏并回车；设置后回到普通网页试一下。'
+    : `${browser.short} 的入口随版本可能不同。复制地址到该浏览器打开；若无法打开，请从「扩展管理」查找「键盘快捷键」。若没有此选项，仍可通过工具栏图标唤醒拾隅。`;
+  document.querySelector('#shortcut-feedback').textContent = '';
+}
+document.querySelector('#copy-shortcut-address').onclick = async () => {
+  const address = shortcutAddress(selectedBrowser), feedback = document.querySelector('#shortcut-feedback');
+  try { await navigator.clipboard.writeText(address); feedback.textContent = '已复制设置地址。粘贴到浏览器地址栏并回车，即可继续设置。'; }
+  catch { feedback.textContent = '未能自动复制，请选中上方地址手动复制，再粘贴到浏览器地址栏。'; }
+};
 selectBrowser(browsers.find(browser => browser.id === requestedBrowser) || browsers.find(browser => browser.id === detectBrowser()) || browsers[0]);
 document.querySelector('#browser-download').onclick = () => {
   if (!selectedBrowser) return;
