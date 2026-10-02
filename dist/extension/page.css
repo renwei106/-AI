@@ -38,12 +38,12 @@
 .hero-preview{padding-bottom:24px}.hero-preview :is(.browser-strip,iframe){margin-inline:auto}.browser-picker img{border-radius:0;clip-path:none;background:transparent}.browser-picker button.selected{border-color:var(--ink);background:var(--soft);color:var(--ink);box-shadow:none}.browser-picker button.selected i{visibility:visible;border-color:var(--ink);background:transparent;box-shadow:none}
 .global-toast{position:fixed;top:24px;left:50%;z-index:100;max-width:calc(100vw - 32px);padding:11px 18px;border:1px solid color-mix(in srgb,var(--ink) 14%,transparent);border-radius:12px;background:var(--ink);color:var(--bg);font-size:12px;line-height:1.5;box-shadow:0 12px 32px #0002;opacity:0;pointer-events:none;transform:translate(-50%,-10px);transition:opacity .2s ease,transform .2s ease}.global-toast.show{opacity:1;transform:translate(-50%,0)}
 /* Final installation step: keyboard activation, using the page action theme. */
-.steps .shortcut-step{grid-column:1/-1;background:color-mix(in srgb,var(--action-color) 8%,var(--bg));border:1px solid color-mix(in srgb,var(--action-color) 35%,transparent);border-radius:16px;padding:26px}
-.shortcut-step h3{font-size:21px;color:var(--ink)}
-.shortcut-step .step{background:var(--action-color);color:var(--on-action)}
+.steps .shortcut-step{grid-column:1/-1;background:var(--card);border:0;border-radius:13px;padding:26px}
+.shortcut-step h3{font-size:14px;color:var(--ink)}
+.shortcut-step .step{background:var(--soft);color:var(--accent)}
 .shortcut-step .address-copy{max-width:640px;flex-wrap:wrap;gap:12px}
 .shortcut-step code{overflow-wrap:anywhere;min-width:0;user-select:all}
-.shortcut-step #copy-shortcut-address{background:var(--action-color);color:var(--on-action);padding:11px 18px;white-space:nowrap;border:0;border-radius:8px;font:inherit;cursor:pointer}
+.shortcut-step #copy-shortcut-address{background:var(--soft);color:var(--ink);padding:5px 8px;white-space:nowrap;border:0;border-radius:8px;font:inherit;cursor:pointer}
 .shortcut-step #shortcut-feedback:empty{display:none}
 .shortcut-step #shortcut-feedback{color:var(--action-color)}
-@media(max-width:600px){.steps .shortcut-step{padding:20px}.shortcut-step h3{font-size:19px}}
+@media(max-width:600px){.steps .shortcut-step{padding:20px}.shortcut-step h3{font-size:14px}}
