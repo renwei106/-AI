@@ -142,3 +142,6 @@ body:not(.side-panel) main{background:var(--bg);border-radius:18px}
 /* Brand surfaces share the existing theme source, including signed-out fallback. */
 #login-panel,.popup-footer .popup-brand{--accent:var(--theme-color);--on-accent:var(--theme-on-color,#fff)}
 .guest-brand>span,.popup-footer .popup-brand{color:var(--accent)}
+
+/* Shortcut help must stay above the sibling update banner. */
+.popup-footer .footer-shortcuts{z-index:2}

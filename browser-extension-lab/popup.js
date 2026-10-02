@@ -6,15 +6,12 @@ const demoState = { signed: true, accountId: 'preview', name: '林间', inboxCou
   { id: 'life', name: '生活空间', scenes: [{ id: 'weekend', name: '周末日常', groups: [{ id: 'ideas', name: '生活灵感' }] }] }
 ] };
 const demoSearchItems = [
-  { title: '拾隅 · 让喜欢，自有归处', url: 'https://shiyubox.com/', domain: 'shiyubox.com', description: '遇见喜欢的，随手收进拾隅。', path: '生活空间 / 日常灵感 / 喜欢的网站' },
-  { title: 'MDN · Web 开发文档', url: 'https://developer.mozilla.org/zh-CN/', domain: 'developer.mozilla.org', description: '前端开发参考资料', path: '工作空间 / 日常工作 / 效率工具' },
-  { title: 'Figma · 设计工具', url: 'https://www.figma.com/', domain: 'figma.com', description: '', path: '稍后整理' }
+  { title: '拾隅 · 主题页', url: 'https://shiyubox.com/', domain: 'shiyubox.com', description: '挑一个喜欢的主题，从自己的角落出发。', path: '拾隅 / 常用' },
+  { title: '拾隅 · 官网', url: 'https://shiyubox.com/official/v3/index.html', domain: 'shiyubox.com', description: '认识拾隅，让喜欢，自有归处。', path: '拾隅 / 常用' }
 ];
 const systemDark = matchMedia('(prefers-color-scheme: dark)');
 let state, current, mode = 'temporary', view = 'bookmark', busy = false, lastSuccess = false, draft, activeTheme, searchTimer, searchSerial = 0;
-function previewTheme() {
-  try { const value = JSON.parse(localStorage.getItem('yiyu-prototype-v1') || '{}'); return value.signed ? { color: value.prefs?.color, mode: value.prefs?.mode || 'system' } : null; } catch { return null; }
-}
+function previewTheme() { return { color: '#48614c', mode: 'system' }; }
 function applyTheme(theme) {
   activeTheme = theme;
   const root = document.documentElement;
@@ -48,7 +45,7 @@ async function call(type, extra = {}) {
     if (type === 'state') return { ...demoState, signed: new URLSearchParams(location.search).get('signed') === '1', theme: previewTheme() };
     if (type === 'save') return { label: mode === 'temporary' ? '稍后整理' : ['#space','#scene','#group'].map(id=>document.querySelector(id).selectedOptions[0]?.textContent).filter(Boolean).join(' / ') };
     if (type === 'search') { const query = String(extra.payload?.query || '').toLocaleLowerCase(); const items = demoSearchItems.filter(item => [item.title, item.url, item.description, item.path].some(value => value.toLocaleLowerCase().includes(query))); return { total: items.length, items }; }
-    if(type==='list'){const items=demoSearchItems.map((x,i)=>({...x,id:i===2?'demo-inbox':undefined,inbox:i===2,spaceId:'work',sceneId:'daily',groupId:'tools'}));return {accountId:'preview',items,commonGroups:[{id:'common-tools',name:'效率工具',items:items.slice(0,2)},{id:'common-reading',name:'稍后阅读',items:[]},{id:'common-life',name:'生活灵感',items:[]}]};}
+    if(type==='list'){const items=demoSearchItems.map((x,i)=>({...x,id:i===2?'demo-inbox':undefined,inbox:i===2,spaceId:'work',sceneId:'daily',groupId:'tools'}));return {accountId:'preview',items,commonGroups:[{id:'common-tools',name:'拾隅',items:items.slice(0,2)},{id:'common-reading',name:'稍后阅读',items:[]},{id:'common-life',name:'生活灵感',items:[]}]};}
     if(type==='move')return {label:'所选分组'};
     if (type === 'version') return { current: '0.3.0', latest: '0.3.0', hasUpdate: false, browser: 'chrome' };
     return;

@@ -2,7 +2,7 @@
 // Historical trial releases and legacy-browser packages remain unchanged.
 const fs = require('node:fs');
 const path = require('node:path');
-const version = '0.2.6';
+const version = '0.2.7';
 const source = path.join(__dirname, 'browser-extension-lab');
 const target = path.join(__dirname, 'dist/extension/current');
 fs.cpSync(source, target, { recursive: true });

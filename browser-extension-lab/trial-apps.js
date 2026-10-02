@@ -1,10 +1,9 @@
 import {scheduleControl} from './trial-schedule.js';
 const host=document.querySelector('#trial-placeholder');
 const preview=location.protocol.startsWith('http'), api=window.trialApi;let revision=0,accountId=null,loadSerial=0;
-const key='shiyu-extension-lab-records-v1';
 const today=()=>new Date().toLocaleDateString('sv-SE');
-let data;if(preview)try{data=JSON.parse(localStorage.getItem(key))}catch{}
-if(!data?.memos||!data?.tasks)data={memos:[{id:'sample-note',content:'遇到喜欢的设计，记下打动自己的细节。\n下次创作时，回来翻一翻。',updated:Date.now()}],tasks:[{id:'sample-task',title:'整理今天收藏的灵感',date:today(),priority:'普通',done:false}]};
+let data;
+if(!data?.memos||!data?.tasks)data={memos:[{id:'sample-note',content:'在拾隅，给喜欢的网址一个归处。\n也给一闪而过的灵感，留一个小小角落。',updated:Date.now()}],tasks:[{id:'sample-task',title:'在拾隅收藏第一个喜欢的网址',date:today(),priority:'普通',done:false}]};
 if(preview)data.groups??=[{id:'work',name:'工作'},{id:'study',name:'学习'},{id:'life',name:'生活'}];
 if(!preview)data={memos:[],tasks:[],groups:[]};
 let app='memo',filter='all',query='',editing=null;
@@ -17,7 +16,7 @@ const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text)n.textCont
 const priorities=['普通','低优先级','中优先级','高优先级'];
 function accept(result,tool){revision=result.revision;const d=result.data;if(tool==='memo')data.memos=(d.notes||[]).filter(x=>!x.deletedAt).map(x=>({...x,updated:x.updatedAt}));else {data.groups=(d.calendarV2?.groups||d.groups||[]).filter(g=>!g.system&&!g.deletedAt).map(g=>({id:g.id,name:g.name}));data.tasks=(d.calendarV2?.tasks||d.tasks||[]).filter(x=>!x.deletedAt).map(x=>({...x,priority:priorities[x.priority]||'普通'}))}}
 async function loadRecords(){const serial=++loadSerial,tool=app;accountId=api.getState()?.accountId;host.replaceChildren(el('p','正在读取账号记录…'));try{const result=await api.call('tool-records',{payload:{tool,action:'read',accountId}});if(serial!==loadSerial||accountId!==api.getState()?.accountId)return;accept(result,tool);render()}catch(e){if(serial!==loadSerial)return;host.replaceChildren(el('p',e.message));const retry=el('button','重新加载','primary');retry.onclick=loadRecords;host.append(retry)}}
-async function save(item){if(preview){localStorage.setItem(key,JSON.stringify(data));status.textContent='已保存在本机试用版';return true}try{if(!accountId||accountId!==api.getState()?.accountId)throw Error('账号已切换，请重新打开');const tool=app,owner=accountId;const result=await api.call('tool-records',{payload:{tool,action:'save',accountId:owner,revision,item:{...item,priority:priorities.indexOf(item.priority)}}});if(owner!==api.getState()?.accountId||tool!==app)return false;accept(result,tool);status.textContent='已同步到账号';return true}catch(e){status.textContent=e.message;return false}}
+async function save(item){if(preview){status.textContent='示例已更新，刷新后恢复，不会同步账号';return true}try{if(!accountId||accountId!==api.getState()?.accountId)throw Error('账号已切换，请重新打开');const tool=app,owner=accountId;const result=await api.call('tool-records',{payload:{tool,action:'save',accountId:owner,revision,item:{...item,priority:priorities.indexOf(item.priority)}}});if(owner!==api.getState()?.accountId||tool!==app)return false;accept(result,tool);status.textContent='已同步到账号';return true}catch(e){status.textContent=e.message;return false}}
 const status=el('p','','record-status');status.setAttribute('role','status');
 function render(){host.replaceChildren();host.className='record-panel';const memo=app==='memo';if(!memo&&filter!=='inbox'&&!data.groups.some(g=>g.id===filter))filter='inbox';
  const form=el('form',null,'record-compose');const input=el(memo?'textarea':'input');input.placeholder=memo?'此刻想记下什么？':'添加一件要做的事';input.setAttribute('aria-label',memo?'小记内容':'待办内容');input.required=true;input.maxLength=memo?300:200;if(memo)input.rows=3;
