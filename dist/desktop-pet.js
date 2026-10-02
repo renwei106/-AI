@@ -485,7 +485,7 @@
     window.addEventListener('pointercancel',e=>{if(drag?.pid===e.pointerId)finish(false);},true);
     core.addEventListener('lostpointercapture',()=>{if(drag)finish(false);});
     window.addEventListener('blur',()=>{finish(false);close();});
-    document.addEventListener('pointerdown',e=>{if(!root.contains(e.target)){close();wakePet();}},true);
+    document.addEventListener('pointerdown',e=>{if(document.body.classList.contains('sy-tour-pet'))return;if(!root.contains(e.target)){close();wakePet();}},true);
     root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finish(false);close();core.focus({preventScroll:true});wakePet();}else if(e.key==='ArrowDown'&&e.target===core){e.preventDefault();open();pinned=true;menu.querySelector('button')?.focus({preventScroll:true});}});
     document.addEventListener('wheel',e=>{
       if(!opened||panelKind||e.ctrlKey||!e.deltaY||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;

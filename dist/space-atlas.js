@@ -91,7 +91,9 @@
   function rememberPresentation(sid,viewName){
     const p=saved[sid]??={};p.entry??={};p.entry.last={view:viewName,theme:effective().theme,...(viewName==='atlas'?{mode:state.mode,layout:state.layout,scene3d:state.scene3d,motion:state.motion}:{})};
   }
-  function entryPresentation(sid){return prefs.spaceThemePolicy==='default'?{view:'daily',theme:'base'}:saved[sid]?.entry?.last}
+  function entryPresentation(sid){return saved[sid]?.entry?.last}
+  function entryPolicy(){return prefs.spaceEntryPolicy||(prefs.spaceThemePolicy==='default'?'first':'last')}
+  function lastSpaceKey(){return KEY+':last-space:'+(prefs.accountProfile?.id||'guest')}
   function buildIndex() {
     index=new Map();
     const s=data.find(s=>s.id===state.sid);if(!s)return false;
@@ -966,11 +968,20 @@
   renderSettings=function(){settingsBeforeEntry();if(scope!=='global')return;const tabs=document.querySelector('#settings .settings-tabs');if(!tabs)return;tabs.insertAdjacentHTML('beforeend','<button role="tab" data-settings-tab="space-entry" aria-selected="'+(settingsTab==='space-entry')+'">空间</button>');if(settingsTab==='space-entry')document.querySelector('#settings .settings-panel').innerHTML=entryPanel()};
   function entryPanel(){
     const gestureNote=prefs.homeEntryGesture==='double'?'从首页连续向下滑动两次，或点击底部入口进入我的空间。':'点击首页底部入口进入我的空间。';
-    const themeNote=prefs.spaceThemePolicy==='default'?'每次进入空间时，从默认主题开始':'再次进入空间时，接着上次离开时的主题';
-    return '<section class="space-entry-settings"><h3>进入空间的方式</h3><div class="space-entry-row"><div><i>'+icons.down+'</i><b>首页进入空间</b></div>'+choices('homeEntryGesture',[['double','连续滑动＋点击'],['click','仅点击进入']],prefs)+'<small>'+gestureNote+'</small></div><h3>空间打开样式</h3><div class="space-entry-row"><div><i>'+icons.grid+'</i><b>进入时显示</b></div>'+choices('spaceThemePolicy',[['default','默认样式'],['last','上次切换的样式']],prefs)+'<small>'+themeNote+'</small></div></section>';
+    const entryNote=entryPolicy()==='first'?'进入空间时，打开列表中的第一个空间。':'进入空间时，回到上次离开的空间。';
+    return '<section class="space-entry-settings"><h3>进入空间的方式</h3><div class="space-entry-row"><div><i>'+icons.down+'</i><b>首页进入空间</b></div>'+choices('homeEntryGesture',[['double','连续滑动＋点击'],['click','仅点击进入']],prefs)+'<small>'+gestureNote+'</small></div><h3>默认打开的空间</h3><div class="space-entry-row"><div><i>'+icons.space+'</i><b>进入时显示</b></div>'+choices('spaceEntryPolicy',[['first','第一个空间'],['last','上次离开的空间']],{...prefs,spaceEntryPolicy:entryPolicy()})+'<small>'+entryNote+'</small></div></section>';
   }
-  const originalRender=render;let lastView=view,lastSid=spaceId;
-  render=function(){const entering=view==='space'&&(lastView!=='space'||lastSid!==spaceId),preferred=entering?entryPresentation(spaceId):null,active=dialog?.open;
+  const originalRender=render;let lastView=null,lastSid=spaceId,explicitSpace=null;
+  const goSpaceBeforeEntry=goSpace;
+  goSpace=function(id){explicitSpace=id;return goSpaceBeforeEntry(id)};
+  render=function(){
+    if(view==='space'&&lastView!=='space'&&!explicitSpace&&spaceId===lastSid){
+      let remembered;try{remembered=localStorage.getItem(lastSpaceKey())}catch{}
+      const target=(entryPolicy()==='last'&&data.find(s=>s.id===remembered))||data[0];
+      if(target&&target.id!==spaceId){spaceId=target.id;sceneId=target.scenes[0]?.id;filter=''}
+    }
+    if(view==='space'){explicitSpace=null;try{localStorage.setItem(lastSpaceKey(),spaceId)}catch{}}
+    const entering=view==='space'&&(lastView!=='space'||lastSid!==spaceId),preferred=entering?entryPresentation(spaceId):null,active=dialog?.open;
     if(entering){if(preferred?.theme&&THEMES[preferred.theme])sessionThemes.set(spaceId,preferred.theme);else sessionThemes.delete(spaceId)}lastView=view;lastSid=spaceId;
     originalRender();mountEntry();
     if(active&&!editorBusy){if(view!=='space'){dialog.close();document.body.classList.remove('atlas-active','atlas-transitioning');return}if(entering&&preferred?.view==='daily'){dialog.close();return}if(state.sid!==spaceId){state.sid=spaceId;state.focus='s:'+spaceId;preferences();if(preferred?.view==='atlas')for(const field of ['mode','layout','scene3d'])if(preferred[field]!==undefined)state[field]=preferred[field];resetCamera()}if(!window.ShiyuEntitlements?.allows('atlas-'+state.mode)){if(window.ShiyuEntitlements?.allows('atlas-2d'))state.mode='2d';else{dialog.close();return}}if(buildIndex())renderAtlas();else dialog.close()}

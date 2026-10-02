@@ -17,7 +17,7 @@ async function handlePayment(req,res){
   }
 }
 const routes={
-  '/onboarding.js':'onboarding.js','/onboarding.css':'onboarding.css','/onboarding-input.js':'onboarding-input.js',
+  '/onboarding.js':'onboarding.js','/onboarding.css':'onboarding.css','/onboarding-input.js':'onboarding-input.js','/account-security.js':'account-security.js',
   '/todo-calendar.js':'todo-calendar.js','/todo-calendar-core.js':'todo-calendar-core.js','/todo-calendar.css':'todo-calendar.css',
   '/home-responsive.css':'home-responsive.css','/home-responsive.js':'home-responsive.js',
   '/analytics.js':'analytics.js','/tool-auth-bridge.js':'tool-auth-bridge.js','/bookmark-logo.js':'bookmark-logo.js',

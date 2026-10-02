@@ -347,11 +347,27 @@
     }
   }, true);
 
+  // Both the avatar menu and profile page use this one confirmation flow.
+  function confirmSignout() {
+    let d = document.querySelector('#account-signout-confirm');
+    if (d?.open || logoutRequest) return;
+    if (!d) { d = document.createElement('dialog'); d.id = 'account-signout-confirm'; document.body.append(d); }
+    d.setAttribute('aria-labelledby', 'account-signout-title');
+    d.innerHTML = '<div class="dialog-heading"><h2 id="account-signout-title">确认退出登录？</h2><button data-signout-cancel aria-label="关闭退出确认">×</button></div><p class="account-note">退出后，再次使用个人内容需要重新登录。</p><div class="organization-confirm"><button data-signout-cancel autofocus>取消</button><button class="primary" data-signout-confirm>确认退出</button></div>';
+    const owner = localIdentity();
+    d.querySelectorAll('[data-signout-cancel]').forEach(button => { button.onclick = () => d.close(); });
+    d.querySelector('[data-signout-confirm]').onclick = () => {
+      d.close();
+      if (owner !== localIdentity() || !signed) return;
+      void window.ShiyuAccountSession.logout();
+    };
+    d.showModal();
+  }
   // Complete server sign-out before publishing the signed-out browser state.
   window.addEventListener('click', event => {
     if (event.target.closest?.('[data-account-signout]')) {
       event.preventDefault(); event.stopImmediatePropagation();
-      void window.ShiyuAccountSession.logout();
+      confirmSignout();
     }
   }, true);
 

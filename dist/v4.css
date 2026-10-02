@@ -1112,3 +1112,22 @@ body.bookmark-sorting,body.bookmark-sorting *{cursor:grabbing!important;user-sel
 .workspace .bookmark-drag-hover{background:color-mix(in srgb,var(--accent) 18%,var(--surface))!important;color:var(--accent)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent);transition:background .18s,box-shadow .18s}
 body.bookmark-sorting .bookmark-drag-ghost{opacity:.92!important}
 body.bookmark-sorting #groups{overflow-anchor:none;scroll-behavior:auto}
+
+/* Personal-profile credential labels retain the active theme. */
+#account-security-editor .security-field{display:grid;gap:7px;font-size:12px;color:var(--ink)}
+#account-security-editor .security-field>span{font-weight:500}
+#account-security-editor .security-password-hint{margin:0;font-size:11px}
+#account-security-editor select{width:100%;min-height:44px;border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--soft);color:var(--ink);font:inherit}
+#account-security-editor .account-input-row button{white-space:nowrap;min-width:96px}
+#account-security-editor button:disabled{cursor:default;opacity:.55}
+#account-security-editor .security-wechat-qr{display:grid;place-items:center;margin:18px 0}
+#account-security-editor [data-security-switch],#account-security-editor [data-wechat-refresh]{color:var(--accent);font-size:12px}
+
+/* Compact phone binding form: labels precede fields, resend stays trailing. */
+#account-security-editor[data-security-kind="phone"] .security-form{gap:14px;margin-top:20px}
+#account-security-editor[data-security-kind="phone"] .security-field{grid-template-columns:52px minmax(0,1fr);align-items:center;gap:12px;margin:0;padding:0}
+#account-security-editor[data-security-kind="phone"] .security-field>span{white-space:nowrap}
+#account-security-editor[data-security-kind="phone"] .account-input-row{min-width:0;margin:0;gap:8px;align-items:center}
+#account-security-editor[data-security-kind="phone"] .account-input-row input{flex:1;min-width:0;width:0}
+#account-security-editor[data-security-kind="phone"] .account-input-row button{min-width:88px;padding:8px 0;font-size:12px}
+#account-security-editor[data-security-kind="phone"] [data-security-editor-save]{margin-top:4px}
