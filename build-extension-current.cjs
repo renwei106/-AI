@@ -2,8 +2,8 @@
 // Historical trial releases and legacy-browser packages remain unchanged.
 const fs = require('node:fs');
 const path = require('node:path');
-const version = '0.2.2';
-const source = path.join(__dirname, 'dist/extension/trial');
+const version = '0.2.3';
+const source = path.join(__dirname, 'browser-extension-lab');
 const target = path.join(__dirname, 'dist/extension/current');
 fs.cpSync(source, target, { recursive: true });
 const manifest = JSON.parse(fs.readFileSync(path.join(target, 'manifest.json'), 'utf8'));

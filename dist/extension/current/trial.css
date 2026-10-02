@@ -82,3 +82,37 @@ body.side-panel{width:100%;max-width:none}
 button:focus-visible,.todo-completed summary:focus-visible,.memo-editable-card:focus-visible{outline:1px solid color-mix(in srgb,var(--focus) 30%,transparent);outline-offset:2px}
 .result-mark img{display:block;width:22px;height:22px;object-fit:contain}
 .result-copy small,.result-copy em{font-size:10px;font-weight:400;color:var(--muted);font-style:normal;line-height:1.5}
+/* Let the bookmark popup fit its form; browsing modules retain their taller layout. */
+html:has(body:not(.side-panel) #bookmark-form:not([hidden])),
+body:not(.side-panel):has(#bookmark-form:not([hidden])){min-height:0}
+body:not(.side-panel):has(#bookmark-form:not([hidden])) main{min-height:0}
+body:not(.side-panel) #bookmark-form{margin-bottom:8px}
+#bookmark-form .current-page{background:var(--theme-color);--ink:var(--theme-on-color,#fff);--muted:color-mix(in srgb,var(--theme-on-color,#fff) 76%,transparent);--accent:var(--theme-on-color,#fff);--soft:color-mix(in srgb,var(--theme-on-color,#fff) 12%,transparent);color:var(--ink)}
+#bookmark-form .current-page input{color:var(--ink)}
+/* Todo search gets its own fluid row; group tabs scroll beside the sort control. */
+.record-controls .schedule-trigger{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.popup-footer{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:8px}
+.popup-footer .mode-icons{position:static;grid-column:1;grid-row:1}
+.footer-identity{grid-column:2;grid-row:1;display:flex;align-items:center;justify-content:center;gap:5px;min-width:0}
+.footer-identity .popup-brand{gap:4px;flex:none}.footer-identity .popup-brand svg{width:12px;height:12px}.footer-identity .popup-brand small{font-size:11px}
+.footer-identity .version-status{position:static;padding:0;font-size:8px;white-space:nowrap;flex:none}
+.footer-shortcuts{position:relative;grid-column:3;grid-row:1}
+.shortcut-open{font-size:10px;color:var(--muted);opacity:.6;padding:7px 0;white-space:nowrap}.shortcut-open:hover,.shortcut-open:focus-visible{opacity:1;color:var(--ink)}
+.shortcut-help{display:none;position:absolute;bottom:100%;right:0;width:250px;max-width:calc(100vw - 32px);padding:13px;background:var(--card);border:1px solid var(--soft);border-radius:10px;color:var(--muted);box-shadow:0 5px 20px #0002;font-size:11px;text-align:left}
+.footer-shortcuts:hover .shortcut-help,.footer-shortcuts:focus-within .shortcut-help,.footer-shortcuts.show-help .shortcut-help{display:block}
+.shortcut-help p{margin:0 0 8px;line-height:1.6}.shortcut-copy{display:block;max-width:100%;padding:5px 0;color:var(--ink);font-size:11px;overflow-wrap:anywhere;user-select:text;text-align:left}.shortcut-help span{display:block;font-size:10px;margin-top:5px}
+.popup-footer:not(:has(.footer-shortcuts)){grid-template-columns:32px minmax(0,1fr) 32px}
+.todo-sort svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.shortcut-address-row{display:flex;align-items:center;gap:8px;min-width:0}
+.shortcut-help .shortcut-address{display:block;flex:1;min-width:0;font:inherit;color:var(--ink);overflow-wrap:anywhere;user-select:text}
+.shortcut-help .shortcut-copy{display:grid;place-items:center;flex:none;width:26px;height:26px;padding:5px;border-radius:5px;color:var(--muted)}
+.shortcut-copy svg{display:block;width:16px;height:16px}.shortcut-copy:hover{color:var(--ink);background:var(--soft)}
+.shortcut-help [role=status]:empty{display:none}
+
+.module-toolbar.todo-toolbar{display:flex;flex-wrap:nowrap;gap:12px;width:100%;min-width:0}
+.module-toolbar.todo-toolbar .record-tabs{flex:1 1 0;min-width:0;padding-bottom:5px}
+.module-toolbar.todo-toolbar .module-search{order:0;flex:0 1 140px;width:140px;max-width:calc(100% - 76px);margin:0}
+.module-toolbar.todo-toolbar .module-search:focus-within{flex-basis:210px;width:210px}
+.todo-status-heading{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.todo-status-heading .todo-sort{display:flex;align-items:center;gap:6px;flex:none;white-space:nowrap;background:transparent;border:0;padding:8px 0;font-size:11px;color:var(--muted);cursor:pointer}
+.todo-status-heading .todo-sort:hover{color:var(--ink)}

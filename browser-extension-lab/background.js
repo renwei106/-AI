@@ -59,6 +59,12 @@ async function relay(request) {
 extensionApi.runtime.onMessage.addListener((request, sender, reply) => {
   if (sender.id !== extensionApi.runtime.id || ![extensionApi.runtime.getURL('popup.html'),extensionApi.runtime.getURL('panel.html')].includes(sender.url)) return false;
   (async () => {
+    if(request.type==='open-shortcuts'){
+      const browser=detectBrowser();
+      const url={chrome:'chrome://extensions/shortcuts',edge:'edge://extensions/shortcuts'}[browser];
+      if(!url)throw new Error('当前浏览器不支持此快捷键设置入口');
+      await extensionApi.tabs.create({url});return true;
+    }
     if(request.type==='tool-records')return toolRecords(request.payload);
     if(request.type==='list'||request.type==='move')return trialRelay(request);
     if (request.type === 'state') return relay({ type: 'state' });
@@ -94,7 +100,19 @@ async function trialRelay(request){
   const add=(item,extra)=>{try{const u=new URL(item[1]);if(!['https:','http:'].includes(u.protocol))return;items.push({title:String(item[0]||u.hostname),url:u.href,description:String(item[2]||''),icon:String(item[3]||''),domain:u.hostname,...extra})}catch{}};
   for(const s of value.data||[])for(const c of s.scenes||[])for(const g of c.groups||[])for(const item of g.items||[])add(item,{spaceId:s.id,sceneId:c.id,groupId:g.id,path:[s.name,c.name,g.name].join(' / ')});
   for(const row of store.inbox())add(row.item,{id:row.id,inbox:true,path:'稍后整理'});
-  return {ok:true,value:{items,accountId:state.accountId}};
+  const library=value.prefs?.cornerCollections?.[state.accountId];
+  const commonGroups=(library?.groups||[]).filter(g=>g.system!=='inbox').map(g=>{
+   const refs=[...(g.refs||[])];
+   if(g.sort==='frequency')refs.sort((a,b)=>(library.usage?.[b.url]||0)-(library.usage?.[a.url]||0));
+   const commonItems=refs.flatMap(ref=>{
+    let url;try{url=new URL(ref.url).href}catch{return []}
+    if(ref.own){const before=items.length;add(ref.own,{path:'我的常用'});return items.length>before?[items[items.length-1]]:[]}
+    const item=items.find(x=>!x.inbox&&x.groupId===ref.gid&&x.url===url)||items.find(x=>!x.inbox&&x.url===url);
+    return item?[item]:[];
+   });
+   return {id:g.id,name:g.name,items:commonItems};
+  });
+  return {ok:true,value:{items,commonGroups,accountId:state.accountId}};
   }catch(e){return {ok:false,error:e.message}}
  }});const response=result[0]?.result;if(!response?.ok)throw Error(response?.error||'读取失败，请重试');return response.value;
 }
@@ -121,6 +139,7 @@ async function toolRecords(payload){
     if(!item){item={id:input.id,createdAt:Date.now()};if(p.tool==='memo'){data.lastNumber=Math.max(data.lastNumber||0,...items.map(x=>x.number||0))+1;Object.assign(item,{number:data.lastNumber,title:'',icon:'✦',color:'theme'})}else Object.assign(item,{start:null,duration:30,groupId:'',description:'',dateEnd:'',done:false});items.unshift(item)}
     if(p.tool==='memo'){if(typeof input.content!=='string'||!input.content.trim()||Array.from(input.content).length>300)throw Error('小记内容请填写1–300字');item.content=input.content}
     else{if(typeof input.title!=='string'||!input.title.trim()||input.title.length>200)throw Error('待办标题请填写1–200字');if(input.date&&!/^\d{4}-\d{2}-\d{2}$/.test(input.date))throw Error('日期无效');if(item.date!==input.date)item.dateEnd=input.date;Object.assign(item,{title:input.title,date:input.date||'',priority:Math.max(0,Math.min(3,Number(input.priority)||0)),done:!!input.done,completedAt:input.done?(item.completedAt||Date.now()):null});data.calendarV2.revision=(data.calendarV2.revision||0)+1}
+    if(p.tool==='todo'&&Object.hasOwn(input,'groupId')){if(input.groupId&&!data.calendarV2.groups.some(g=>g.id===input.groupId))throw Error('分组已变化，请刷新后重试');item.groupId=input.groupId||''}
     if(p.tool==='todo'&&Object.hasOwn(input,'start')){const start=input.start,duration=Number(input.duration);if(start!==null&&(!Number.isInteger(start)||start<0||start>=1440||!Number.isFinite(duration)||duration<=0||duration>525600||!input.date))throw Error('时间段无效');if(input.dateEnd&&(!/^\d{4}-\d{2}-\d{2}$/.test(input.dateEnd)||input.dateEnd<input.date))throw Error('结束日期无效');Object.assign(item,{start,duration:Number.isFinite(duration)&&duration>0?duration:30,dateEnd:input.date?(input.dateEnd||input.date):''})}item.updatedAt=Date.now();if(current()!==p.accountId)throw Error('账号已切换');
     const saved=await fetch('/api/shiyu/auth/tools',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:p.accountId,tool:p.tool,data,revision:doc?.revision||0,initialize:false})});
     const result=await saved.json();if(!saved.ok||result.userId!==p.accountId||current()!==p.accountId)throw Error(result.message||'保存失败，请重试');return {ok:true,value:{data:result.data,revision:result.revision}};

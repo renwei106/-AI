@@ -48,7 +48,7 @@ async function call(type, extra = {}) {
     if (type === 'state') return { ...demoState, signed: new URLSearchParams(location.search).get('signed') === '1', theme: previewTheme() };
     if (type === 'save') return { label: mode === 'temporary' ? '稍后整理' : ['#space','#scene','#group'].map(id=>document.querySelector(id).selectedOptions[0]?.textContent).filter(Boolean).join(' / ') };
     if (type === 'search') { const query = String(extra.payload?.query || '').toLocaleLowerCase(); const items = demoSearchItems.filter(item => [item.title, item.url, item.description, item.path].some(value => value.toLocaleLowerCase().includes(query))); return { total: items.length, items }; }
-    if(type==='list')return {accountId:'preview',items:demoSearchItems.map((x,i)=>({...x,id:i===2?'demo-inbox':undefined,inbox:i===2,spaceId:'work',sceneId:'daily',groupId:'tools'}))};
+    if(type==='list'){const items=demoSearchItems.map((x,i)=>({...x,id:i===2?'demo-inbox':undefined,inbox:i===2,spaceId:'work',sceneId:'daily',groupId:'tools'}));return {accountId:'preview',items,commonGroups:[{id:'common-tools',name:'效率工具',items:items.slice(0,2)},{id:'common-reading',name:'稍后阅读',items:[]},{id:'common-life',name:'生活灵感',items:[]}]};}
     if(type==='move')return {label:'所选分组'};
     if (type === 'version') return { current: '0.3.0', latest: '0.3.0', hasUpdate: false, browser: 'chrome' };
     return;
