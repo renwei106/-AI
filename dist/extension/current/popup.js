@@ -50,7 +50,7 @@ async function call(type, extra = {}) {
     if (type === 'search') { const query = String(extra.payload?.query || '').toLocaleLowerCase(); const items = demoSearchItems.filter(item => [item.title, item.url, item.description, item.path].some(value => value.toLocaleLowerCase().includes(query))); return { total: items.length, items }; }
     if(type==='list'){const items=demoSearchItems.map((x,i)=>({...x,id:i===2?'demo-inbox':undefined,inbox:i===2,spaceId:'work',sceneId:'daily',groupId:'tools'}));return {accountId:'preview',items,commonGroups:[{id:'common-tools',name:'效率工具',items:items.slice(0,2)},{id:'common-reading',name:'稍后阅读',items:[]},{id:'common-life',name:'生活灵感',items:[]}]};}
     if(type==='move')return {label:'所选分组'};
-    if (type === 'version') return { current: '0.2.4', latest: '0.2.4', hasUpdate: false, browser: 'chrome' };
+    if (type === 'version') return { current: '0.2.5', latest: '0.2.5', hasUpdate: false, browser: 'chrome' };
     return;
   }
   const response = await extensionApi.runtime.sendMessage({ type, ...extra });
