@@ -116,3 +116,7 @@ body:not(.side-panel) #bookmark-form{margin-bottom:8px}
 .todo-status-heading{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .todo-status-heading .todo-sort{display:flex;align-items:center;gap:6px;flex:none;white-space:nowrap;background:transparent;border:0;padding:8px 0;font-size:11px;color:var(--muted);cursor:pointer}
 .todo-status-heading .todo-sort:hover{color:var(--ink)}
+.extension-update-notice{position:absolute;bottom:calc(100% + 6px);left:20px;right:20px;padding:10px 12px;border-radius:10px;background:var(--card);color:var(--ink);box-shadow:0 3px 14px #0002;font-size:11px;text-align:center;z-index:1}
+.extension-update-notice[hidden]{display:none}.footer-identity.has-update .popup-brand{opacity:1}.footer-identity.has-update .version-status{background:transparent;color:var(--accent);opacity:1;cursor:pointer;padding:0;border-radius:0}
+.shortcut-open{max-width:145px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+body:has(.extension-update-notice:not([hidden])) main{padding-bottom:104px}

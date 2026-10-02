@@ -98,8 +98,11 @@ async function checkVersion() {
     button.classList.toggle('has-update', release.hasUpdate);
     button.dataset.update = String(release.hasUpdate);
     button.setAttribute('aria-label', release.hasUpdate ? `发现新版本 V${release.latest}，点击前往更新` : `当前插件版本 V${release.current}`);
+    window.trialRelease = release;
+    document.dispatchEvent(new CustomEvent('trial-version-change', { detail: release }));
   } catch { /* Version status must never interrupt saving or search. */ }
 }
+window.addEventListener('focus', () => { if (!preview) void checkVersion(); });
 function closePickers(except) {
   document.querySelectorAll('.select-shell').forEach(shell => {
     if (shell === except) return;
