@@ -13,3 +13,6 @@ payments/keys/
 preview-4318.*.log
 memo-paper/node_modules/
 WXCertUtil/
+
+# Independent landscape prototype lives outside this repository.
+/prototypes/emergence/

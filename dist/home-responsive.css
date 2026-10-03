@@ -147,3 +147,17 @@
   body[data-view=home]:not(.world-active).global-chrome-idle .utility-search,
   body[data-view=home]:not(.world-active).global-chrome-idle .scroll-invitation { opacity:1; }
 }
+/* Theme-home chrome shares one idle clock; only the brand remains faint. */
+@media (pointer:fine) {
+  body[data-view=home]:not(.world-active)>header { opacity:1!important; }
+  body[data-view=home]:not(.world-active)>header>:is(.brand-discovery,.brand,.header-right),
+  body[data-view=home]:not(.world-active) :is(.utility-search,.scroll-invitation,.dock-trigger,.mode-pull-cord,.color-pull-cord),
+  body[data-view=home]:not(.world-active)>.world-entry { transition:opacity .9s cubic-bezier(.22,.7,.25,1); }
+  body[data-view=home]:not(.world-active):not(.global-chrome-idle)>header>:is(.brand-discovery,.brand,.header-right),
+  body[data-view=home]:not(.world-active):not(.global-chrome-idle) :is(.utility-search,.scroll-invitation,.dock-trigger,.mode-pull-cord,.color-pull-cord),
+  body[data-view=home]:not(.world-active):not(.global-chrome-idle)>.world-entry { opacity:1; }
+  body[data-view=home]:not(.world-active).global-chrome-idle>header>:is(.brand-discovery,.brand) { opacity:.03; }
+  body[data-view=home]:not(.world-active).global-chrome-idle>header>.header-right,
+  body[data-view=home]:not(.world-active).global-chrome-idle :is(.utility-search,.scroll-invitation,.dock-trigger,.mode-pull-cord,.color-pull-cord),
+  body[data-view=home]:not(.world-active).global-chrome-idle>.world-entry { opacity:0;pointer-events:none; }
+}

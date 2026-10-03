@@ -1,4 +1,4 @@
-/* 森间绒伴: a paused video controlled by pointer position. Availability is owned
+/* 幻境奇遇: a paused video controlled by pointer position. Availability is owned
  * by the existing backend theme catalog and theme-access policy. */
 (() => {
   'use strict';
@@ -48,9 +48,9 @@
   }
   const EPSILON = 1 / 60;
   let dispose = null, pointerX = null;
-  THEMES[ID] = { ...THEMES.base, name: '森间绒伴', en: 'FOREST COMPANION',
+  THEMES[ID] = { ...THEMES.base, name: '幻境奇遇', en: 'FOREST COMPANION',
     desc: '轻移鼠标，和林间的小伙伴对上目光。', mini: '森' };
-  THEME_IDENTITIES[ID] = ['森间绒伴', 'lib-Sparkles'];
+  THEME_IDENTITIES[ID] = ['幻境奇遇', 'lib-Sparkles'];
   COPY_DEFAULTS[ID] = { ...COPY_DEFAULTS.base };
   const previousArtwork = themeArtwork;
   themeArtwork = function(id) {

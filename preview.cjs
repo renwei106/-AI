@@ -85,6 +85,7 @@ http.createServer(async(req,res)=>{
   if(await shareHandler(req,res))return
   const pathname=req.url.split('?')[0]
   if(require('./forest-companion-assets.cjs')(req,res))return
+  if(/^\/emergence-theme\.(js|css)$/.test(pathname)||/^\/assets\/emergence\/(engine|scenes|shell)\.js$/.test(pathname)||pathname==='/assets/emergence/cover.svg')routes[pathname]=pathname.slice(1)
   if(pathname==='/forest-companion-theme.js'||pathname==='/forest-companion-theme.css')routes[pathname]=pathname.slice(1)
   if(pathname==='/avatar-catalog.js'||pathname==='/avatar-catalog.css')routes[pathname]=pathname.slice(1)
   const fontAsset=/^\/assets\/fonts\/shiyu-(?:youfeng|qingya-song|wenrun-kai)\/[A-Za-z0-9._-]+\.woff2$/i.test(pathname)?pathname.slice(1):''
