@@ -1147,3 +1147,18 @@ body.bookmark-sorting #groups{overflow-anchor:none;scroll-behavior:auto}
 #account-security #reset-password-hint{font-size:11px;line-height:1.7;color:var(--muted)}
 #account-security .password-reset-form [data-reset-submit]{justify-self:stretch;min-height:44px;margin:4px 0 0 78px;border-radius:8px}
 @media(max-width:480px){#account-security .password-reset-form{gap:16px}#account-security .reset-field{grid-template-columns:56px minmax(0,1fr);gap:10px}#account-security .reset-field>label{font-size:12px}#account-security .password-reset-form input{padding:12px 10px}#account-security .password-reset-form .account-input-row{gap:6px}#account-security .password-reset-form [data-reset-send]{min-width:76px;font-size:11px}#account-security .password-reset-form [data-reset-submit]{margin-left:66px}}
+
+/* 星际漫游 surface maps only. Solar System Scope / INOVE, CC BY 4.0.
+   https://www.solarsystemscope.com/textures/ — resized to 1024px WebP.
+   Orbital geometry, axial transforms, timing and interaction remain unchanged. */
+.home-cosmos .orbit-body[data-solar=mercury]{--cosmos-surface:url("assets/site-icons/cosmos-texture-mercury.webp")}
+.home-cosmos .orbit-body[data-solar=venus]{--cosmos-surface:url("assets/site-icons/cosmos-texture-venus.webp")}
+.home-cosmos .orbit-body[data-solar=earth]{--cosmos-surface:url("assets/site-icons/cosmos-texture-earth.webp")}
+.home-cosmos .orbit-body[data-solar=mars]{--cosmos-surface:url("assets/site-icons/cosmos-texture-mars.webp")}
+.home-cosmos .orbit-body[data-solar=jupiter]{--cosmos-surface:url("assets/site-icons/cosmos-texture-jupiter.webp")}
+.home-cosmos .orbit-body[data-solar=saturn]{--cosmos-surface:url("assets/site-icons/cosmos-texture-saturn.webp")}
+.home-cosmos .orbit-body[data-solar=uranus]{--cosmos-surface:url("assets/site-icons/cosmos-texture-uranus.webp")}
+.home-cosmos .orbit-body[data-solar=neptune]{--cosmos-surface:url("assets/site-icons/cosmos-texture-neptune.webp")}
+.home-cosmos .orbit-system .orbit-body[data-solar]:not([data-solar=sun]) .planet-surface::after{inset:0;background-image:var(--cosmos-surface);background-size:200% 100%;background-position:var(--longitude,0%) center;background-repeat:repeat-x;opacity:1;filter:saturate(.9);z-index:0}
+.home-cosmos .orbit-system .orbit-body[data-solar]:not([data-solar=sun]) .planet-surface::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 32% 26%,#ffffff20,transparent 32%,#00000018 56%,#000000a8 100%);z-index:1;pointer-events:none}
+.home-cosmos .orbit-system>.earth-moon::before{background-image:radial-gradient(circle at 30% 25%,transparent 25%,#0009 100%),url("assets/site-icons/cosmos-texture-moon.webp");background-size:100% 100%,200% 100%;background-position:center}
