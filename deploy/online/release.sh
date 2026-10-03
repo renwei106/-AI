@@ -63,6 +63,10 @@ test -f "$tools_release/dist/tool-usage.js"
 /opt/node-v22/bin/node --check "$admin_release/shiyu-i18n/service.cjs"
 cd "$admin_release"
 /opt/node-v22/bin/node -e 'require.resolve("@ant-design/plots"); const {DatabaseSync}=require("node:sqlite");const db=new DatabaseSync(":memory:");db.close()'
+initialize_english=$(/opt/node-v24/bin/node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).initializeEnglish===true?"true":"false")' "/tmp/shiyu-release-$release_id.json")
+if [ "$initialize_english" = true ]; then
+  /opt/node-v22/bin/node "$admin_release/shiyu-i18n/initialize-english.cjs" --root "$front_release/dist" --store "$admin_release/.local/shiyu-i18n.json"
+fi
 
 analytics_dropin=/etc/systemd/system/shiyu-admin.service.d/analytics.conf
 previous_dropin="$admin_release/analytics.conf.previous"
@@ -75,6 +79,7 @@ switch_link() { ln -sfn "$1" "$2.next"; mv -Tf "$2.next" "$2"; }
 rollback() {
   trap - ERR
   echo 'Release failed; restoring all three previous versions.' >&2
+  /opt/node-v24/bin/node /tmp/release-state.mjs restore-language "$release_id"
   switch_link "$old_front" /opt/shiyu/current
   switch_link "$old_admin" /opt/shiyu-admin/current
   switch_link "$old_tools" /opt/shiyu-tools/current
@@ -84,6 +89,9 @@ rollback() {
   exit 1
 }
 trap rollback ERR
+if [ "$initialize_english" = true ]; then
+  /opt/node-v22/bin/node "$admin_release/shiyu-i18n/initialize-english.cjs" --root "$front_release/dist" --store "$admin_release/.local/shiyu-i18n.json" --apply
+fi
 mkdir -p "$(dirname "$analytics_dropin")"
 printf '[Service]\nEnvironment=SHIYU_ANALYTICS_ENV=production\n' > "$analytics_dropin"
 systemctl daemon-reload

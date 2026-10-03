@@ -43,9 +43,28 @@ if(action==='prepare'){
  state.items.push(record);fs.writeFileSync(history+'.release.tmp',JSON.stringify(state,null,2)+'\n');fs.renameSync(history+'.release.tmp',history);
  if(JSON.stringify(json(history).items.slice(0,-1))!==JSON.stringify(json(root+'/admin/shiyu-release-history.json').items))throw Error('Previous release history changed');
  console.log('BACKUP='+root+'\nAPPENDED_RELEASE='+record.version);
+}else if(action==='restore-language'){
+ const record=json('/tmp/shiyu-release-'+id+'.json');
+ if(record.initializeEnglish===true){
+  const target='/opt/shiyu-admin/current/.local/shiyu-i18n.json',saved=root+'/admin/shiyu-i18n.json';
+  if(fs.existsSync(saved)){fs.copyFileSync(saved,target+'.restore.tmp');fs.renameSync(target+'.restore.tmp',target)}
+  else if(fs.existsSync(target))fs.unlinkSync(target);
+  console.log('RESTORED previous language configuration');
+ }
 }else if(action==='verify'){
  const sums=json(root+'/preserved-config.json');for(const [file,hash] of Object.entries(sums))if(digest(file)!==hash)throw Error('Production configuration changed: '+path.basename(file));
  const before=json(root+'/admin/shiyu-release-history.json'),current=json(history),record=json('/tmp/shiyu-release-'+id+'.json');
  if(JSON.stringify(current.items.slice(0,-1))!==JSON.stringify(before.items)||current.items.at(-1).id!==record.id)throw Error('Release history verification failed');
+ if(record.initializeEnglish===true){
+  const language=json('/opt/shiyu-admin/current/.local/shiyu-i18n.json');
+  if(!language.settings.languages.some(l=>l.code==='en'&&l.enabled)||!Object.keys(language.releases.en?.dictionary||{}).length)throw Error('English initialization verification failed');
+  const previous=root+'/admin/shiyu-i18n.json';
+  if(fs.existsSync(previous)){
+   const old=json(previous),same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+   if(!same(old.notices,language.notices)||old.settings.fallback!==language.settings.fallback||!same(old.settings.languages.filter(l=>l.code!=='en'),language.settings.languages.filter(l=>l.code!=='en')))throw Error('Unrelated language settings changed');
+   for(const [locale,release] of Object.entries(old.releases))if(locale!=='en'&&!same(release,language.releases[locale]))throw Error('Another language release changed');
+  }
+  console.log('PASS English enabled and unrelated language configuration preserved');
+ }
  console.log('PASS preserved production configuration and append-only release history');
 }else throw Error('Unknown action');
