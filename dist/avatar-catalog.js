@@ -30,7 +30,8 @@
   avatarMarkup=function(value){const id=String(value||'').replace(/^catalog:/,''),item=find(id);if(item)return imageMarkup(item);if(String(value||'').startsWith('data:')||String(value||'').startsWith('catalog:'))return entityIcon(ACCOUNT_AVATARS[0]);return originalMarkup(value)};
   function paintAccount(){
     const d=document.querySelector('#account-center');if(!d||!signed)return;
-    const grid=d.querySelector('.people-avatars');if(grid){grid.classList.add('avatar-catalog-entry');grid.innerHTML=`<button type="button" data-open-avatar-catalog>${avatarMarkup(accountProfile().avatar)}<span>选择头像</span></button>`}
+    const grid=d.querySelector('.people-avatars');if(grid){const label=grid.previousElementSibling;if(label?.tagName==='LABEL'&&label.textContent.trim()==='选择一个喜欢的自己')label.remove();grid.remove()}
+    const avatar=d.querySelector('.account-summary .account-avatar');if(avatar){avatar.setAttribute('role','button');avatar.tabIndex=0;avatar.setAttribute('aria-label','修改头像');avatar.setAttribute('aria-haspopup','dialog');avatar.dataset.openAvatarCatalog='';avatar.style.cursor='pointer';avatar.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();void openPicker()}}}
     d.querySelectorAll('.account-avatar,[data-profile-edit="avatar"]>span').forEach(node=>node.innerHTML=avatarMarkup(accountProfile().avatar));
     d.querySelector('#profile-upload')?.closest('label')?.remove();
   }
