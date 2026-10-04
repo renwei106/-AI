@@ -22,7 +22,7 @@ if(action==='prepare'){
  const record=json('/tmp/shiyu-release-'+id+'.json'),state=json(history),last=state.items.filter(x=>x.target==='website').at(-1);
  if(!record.id||record.target!=='website'||!/^V\d+\.\d+\.\d+$/.test(record.version)||!['feature','fix','change'].includes(record.changeType)||!record.summary||record.summary.length>500||!Number.isFinite(Date.parse(record.releasedAt)))throw Error('Invalid release record');
  const parts=last.version.slice(1).split('.').map(Number);parts[2]++;
- const approvedMinor=record.previousVersion==='V1.0.14'&&last.version==='V1.0.14'&&record.version==='V1.1.0';
+ const approvedMinor=(record.previousVersion==='V1.0.14'&&last.version==='V1.0.14'&&record.version==='V1.1.0')||(record.previousVersion==='V1.1.2'&&last.version==='V1.1.2'&&record.version==='V1.2.0');
  if((record.version!=='V'+parts.join('.')&&!approvedMinor)||state.items.some(x=>x.id===record.id||x.target==='website'&&x.version===record.version))throw Error('Release version conflicts with current history');
  fs.mkdirSync(root,{mode:0o700});
  const require=createRequire(import.meta.url),cfg=require('/opt/shiyu/current/payments/config.cjs').loadConfig();

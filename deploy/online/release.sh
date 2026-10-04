@@ -50,6 +50,7 @@ done
 ln -sfn /opt/shiyu/current /opt/shiyu-admin/releases/导航站
 ln -sfn /opt/shiyu-admin/current /opt/shiyu/releases/聚合管理后台
 printf '%s\n' "$front_commit" > "$front_release/RELEASE_COMMIT"
+basename "$old_front" > "$front_release/PREVIOUS_RELEASE"
 printf '%s\n' "$admin_commit" > "$admin_release/RELEASE_COMMIT"
 printf '%s\n' "$tools_commit" > "$tools_release/RELEASE_COMMIT"
 chown -hR shiyu:shiyu "$front_release" "$tools_release"

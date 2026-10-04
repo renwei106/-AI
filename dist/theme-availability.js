@@ -1,5 +1,5 @@
 (function(){
- const retired=new Set(['reading','projection','wallfilm']),disabledByDefault=new Set(['avatarGirl','avatarVideo','avatarScrub','forestCompanion','emergence']),DAILY_MS=10*60*1000,PRESENCE_INTERVAL=5000;
+ const retired=new Set(['reading','projection','wallfilm']),disabledByDefault=new Set(['avatarGirl','avatarVideo','avatarScrub','forestCompanion','emergence','threeBody']),DAILY_MS=10*60*1000,PRESENCE_INTERVAL=5000;
  const COPY={expiredTitle:'体验已结束',expiredBody:'开通会员后，可继续使用当前会员主题。'};
  let order=Object.keys(THEMES).filter(id=>!retired.has(id)),enabled=new Set(order.filter(id=>!disabledByDefault.has(id))),free=new Set(['base']),entitled=new Set(),member=false,memberExpired=false,ready=false,installed=false,defaultTheme='base',trial={mode:'daily',value:10},selection=0,refreshing=null,expiryTimer=null,noticeTimer=null,presenceTimer=null;
  let previews={},deadlines={},notice=null,lockedVisual=false,lockedTheme='',activeTheme='',expiredNoticeKey='',presenceQueue=Promise.resolve();

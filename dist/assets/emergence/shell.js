@@ -30,7 +30,7 @@ export function mountEmergence(root, {color, predatorColor = () => undefined, ow
   root.append(interactionStatus);
   const shortcuts=document.createElement('div');shortcuts.className='emergence-shortcuts';shortcuts.setAttribute('aria-label','场景快捷操作');
   const mouseKey='<svg class="emergence-mouse-key" viewBox="0 0 18 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M9 2a6 6 0 0 0-6 6v3h6Z" fill="currentColor" fill-opacity=".4" stroke="none"/><rect x="3" y="2" width="12" height="20" rx="6"/><path d="M9 2v9H3m6 0h6"/></svg>';
-  shortcuts.innerHTML=`<button type="button" data-shortcut="pause" aria-label="双击鼠标左键或按空格，暂停或播放">${mouseKey}<span>双击 /</span><kbd aria-label="空格键">␣</kbd><span>暂停或播放</span></button><button type="button" data-shortcut="magnifier" aria-pressed="false"><kbd>I</kbd><span>唤起放大镜</span></button><span class="emergence-shortcut-item" title="点击个体，自动放大并聚焦跟随">${mouseKey}<span>点击个体 · 聚焦跟随</span></span><span class="emergence-shortcut-item" title="长按鼠标左键加速，松开恢复">${mouseKey}<span>长按加速</span></span>`;
+  shortcuts.innerHTML=`<button type="button" data-shortcut="pause" aria-label="双击鼠标左键或按空格，暂停或播放">${mouseKey}<span>双击 /</span><kbd aria-label="空格键">␣</kbd><span>暂停</span></button><button type="button" data-shortcut="magnifier" aria-pressed="false"><kbd>I</kbd><span>唤起放大镜</span></button><span class="emergence-shortcut-item" title="点击个体，自动放大并聚焦跟随">${mouseKey}<span>点击个体 · 聚焦跟随</span></span><span class="emergence-shortcut-item" title="长按鼠标左键加速，松开恢复">${mouseKey}<span>长按加速</span></span>`;
   root.append(shortcuts);
   on(canvas,'emergence-magnifier-change',event=>{
     const active=event.detail.active,button=shortcuts.querySelector('[data-shortcut="magnifier"]');
@@ -55,7 +55,7 @@ export function mountEmergence(root, {color, predatorColor = () => undefined, ow
   panel.setAttribute('popover','manual');panel.tabIndex=-1;
   panel.querySelector('.emergence-panel-head strong').innerHTML='<span></span><small>简单规则，自由生长</small>';
   function themeName() {
-    const name=window.ShiyuFeatureConfig?.optionLabel('themes','emergence','万象涌现')||'万象涌现';
+    const name=window.ShiyuFeatureConfig?.optionLabel('themes','emergence','万相涌现')||'万相涌现';
     panel.querySelector('.emergence-panel-head strong span').textContent=name;
     panel.setAttribute('aria-label',name+'场景设置');opener.setAttribute('aria-label',name+'场景设置');
     canvas.setAttribute('aria-label',name+'动态场景');

@@ -939,7 +939,7 @@ body[data-dark=false]{--space-page-bg:color-mix(in srgb,var(--bg) 93%,#000)}
 body[data-dark=true]{--space-page-bg:color-mix(in srgb,var(--bg) 91%,#fff)}
 body[data-view=space][data-dark]:not(.world-active){background-color:var(--space-page-bg)}
 body[data-view=space][data-dark] #space-atlas{background-color:var(--space-page-bg)}
-body[data-view=space][data-dark] .group-tab-bar{background-color:var(--space-page-bg)}
+body[data-view=space][data-dark] .group-tab-bar{background-color:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 body[data-view=space][data-theme=globe][data-dark]{background-image:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--accent) 16%,var(--space-page-bg)),var(--space-page-bg) 58%)}
 body[data-view=space][data-theme=globe][data-dark=false]{background-image:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--accent) 10%,var(--space-page-bg)),var(--space-page-bg) 62%)}
 
@@ -1162,3 +1162,8 @@ body.bookmark-sorting #groups{overflow-anchor:none;scroll-behavior:auto}
 .home-cosmos .orbit-system .orbit-body[data-solar]:not([data-solar=sun]) .planet-surface::after{inset:0;background-image:var(--cosmos-surface);background-size:200% 100%;background-position:var(--longitude,0%) center;background-repeat:repeat-x;opacity:1;filter:saturate(.9);z-index:0}
 .home-cosmos .orbit-system .orbit-body[data-solar]:not([data-solar=sun]) .planet-surface::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 32% 26%,#ffffff20,transparent 32%,#00000018 56%,#000000a8 100%);z-index:1;pointer-events:none}
 .home-cosmos .orbit-system>.earth-moon::before{background-image:radial-gradient(circle at 30% 25%,transparent 25%,#0009 100%),url("assets/site-icons/cosmos-texture-moon.webp");background-size:100% 100%,200% 100%;background-position:center}
+.named-colors .palette-group-title{grid-column:1/-1;font:11px/1.6 system-ui;color:var(--muted);margin:12px 0 0;text-align:left;}
+#settings .settings-tabs,#display-scope-dialog .settings-tabs{position:sticky;top:0;z-index:6;background:var(--surface);padding-top:8px;padding-bottom:4px;}
+
+/* Expanded cord handles retain their complete circle and shadow. */
+body.cords-expanded>:is(.global-fullscreen-cord,.color-pull-cord),#my-corner.cords-expanded .corner-pull-cord:is([data-corner-cord=fullscreen],[data-corner-cord=color]){overflow:visible}

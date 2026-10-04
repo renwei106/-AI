@@ -1,0 +1,13 @@
+(function(root){
+ const field=(key,label,value,min,max,step=.1)=>({key,label,value,min,max,step});
+ const catalog=[
+ {id:'binarySystem',name:'双星系统',en:'BINARY STARS',title:'两颗星，\n共赴一场旋转。',intro:'围绕共同的中心，也能因一次轻推走向新的轨道。',hint:'拖动任一恒星，松手给它一个轻推。质量越大，绕共同质心的半径越小。',icon:'lib-Orbit',tools:[['nudge','拨动恒星']],action:'轻推一下',fields:[field('mass0','α 星 · 质量',1,.2,3),field('mass1','β 星 · 质量',1,.2,3),field('gravity','引力强度',1,.2,2),field('speed','时间速度',1,.2,2)]},
+ {id:'particleLife',name:'粒子生命',en:'PARTICLE LIFE',title:'微小之间，\n生长万千。',intro:'相吸，相斥。让一片微光自己找到秩序。',hint:'点击添加一团粒子，按住拖动拨动粒子。',icon:'lib-Sparkles',tools:[['stir','拨动'],['add','添加一团']],action:'换一种规则',fields:[field('count','粒子数量',360,120,600,30),field('attraction','吸引强度',1,.2,2),field('speed','运动速度',1,.3,2),{...field('wrap','穿透屏幕',1,0,1,1),toggle:true}]},
+ {id:'ecoGarden',name:'生态沙盘',en:'LIVING GARDEN',title:'一隅草木，\n自成天地。',intro:'撒下一点生机，看小世界慢慢生长。',hint:'点击投放动物。兔、羊吃草；狐吃兔；狼吃兔、羊；虎吃兔、羊、狐。食谱为简化模拟。',icon:'lib-Sprout',tools:[['plant','撒种子'],['water','加水'],['rabbit','兔'],['sheep','羊'],['fox','狐'],['wolf','狼'],['tiger','虎']],action:'下一场雨',fields:[field('growth','草木生长',1,.2,2),field('herbivores','食草动物',24,0,70,1),field('predators','捕食者',3,0,12,1)]},
+ {id:'elementSandbox',name:'元素沙盒',en:'ELEMENT PLAY',title:'指尖落下，\n万物相遇。',intro:'堆一座山，引一条河，点亮一簇火。',hint:'选一种元素，按住画面自由涂画。',icon:'lib-Flame',tools:[['sand','沙'],['water','水'],['fire','火'],['seed','种子'],['wall','墙'],['erase','擦除']],action:'清空画面',fields:[field('brush','画笔大小',3,1,8,1),field('speed','演化速度',1,.3,2)]},
+ {id:'softFabric',name:'弹性织物',en:'SOFT FABRIC',title:'轻轻牵动，\n柔软回应。',intro:'让风穿过织物，把一瞬间留在指尖。',hint:'左键拖动布料，右键按住剪开；点击固定点松开钉子。',icon:'lib-Waves',tools:[['pull','拉扯'],['cut','剪开'],['pin','固定']],action:'松开固定点',fields:[field('elasticity','柔软程度',.65,.2,1),field('wind','风力',.7,0,2)]},
+ {id:'magnetGarden',name:'磁力花园',en:'MAGNET GARDEN',title:'看不见的力，\n留下形状。',intro:'移动一枚磁铁，让细碎微光重新排列。',hint:'移动：拖动磁铁。旋转：按住磁铁，拖向想要的方向。',icon:'lib-Magnet',tools:[['move','移动'],['rotate','旋转'],['add','添加磁铁'],['flip','反转磁极']],action:'反转磁极',fields:[field('strength','磁力强度',1,.2,2),field('count','铁屑数量',480,120,900,60)]},
+ {id:'digitalLife',name:'数字生命',en:'DIGITAL LIFE',title:'一点养分，\n一种新生。',intro:'照料一片柔软的生命，看它长出自己的形状。',hint:'投放生命、补充养分，或画一道屏障。',icon:'lib-Flower2',tools:[['seed','投放生命'],['food','补充养分'],['wall','屏障'],['erase','擦除']],action:'播下新生命',fields:[field('nutrition','养分浓度',.6,.1,1.2),field('vitality','生命活力',.6,.1,1.2),field('speed','生长速度',1,.3,2),{...field('wrap','穿透屏幕',1,0,1,1),toggle:true}]}
+ ];
+ root.ShiyuPlaygroundCatalog=catalog;if(typeof module!=='undefined')module.exports=catalog;
+})(typeof window==='undefined'?globalThis:window);

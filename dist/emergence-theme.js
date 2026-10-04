@@ -2,11 +2,11 @@
 (() => {
   'use strict';
   const ID = 'emergence';
-  THEMES[ID] = {...THEMES.base, name:'万象涌现', en:'EMERGENCE', desc:'从简单的规则，生长出自然的秩序。', mini:'涌'};
-  THEME_IDENTITIES[ID] = ['万象涌现', 'lib-Sparkles'];
+  THEMES[ID] = {...THEMES.base, name:'万相涌现', en:'EMERGENCE', desc:'从简单的规则，生长出自然的秩序。', mini:'涌'};
+  THEME_IDENTITIES[ID] = ['万相涌现', 'lib-Sparkles'];
   COPY_DEFAULTS[ID] = {...COPY_DEFAULTS.base, title:'聚散之间，\n自有默契。', intro:'简单的规则，让微小的个体一起生长。'};
   const artwork = themeArtwork;
-  themeArtwork = id => id === ID ? '<img src="assets/emergence/cover.svg" alt="万象涌现" style="width:100%;height:100%;object-fit:cover">' : artwork(id);
+  themeArtwork = id => id === ID ? '<img src="assets/emergence/cover.svg" alt="万相涌现" style="width:100%;height:100%;object-fit:cover">' : artwork(id);
   let dispose, activeOwner, activeRoot, sceneCopy;
   function paintCopy() {
     const copy=currentCopy(ID),title=document.querySelector('.emergence-copy h1'),intro=document.querySelector('.emergence-copy .intro');

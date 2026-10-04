@@ -103,7 +103,7 @@
   }
 
   const MODE_KEYS=['water','form','snow','chaos'];
-  const STYLE_NAMES={chaos:'混沌漫游',form:'万象成形',snow:'灵感落雪',tide:'潮汐涌动',water:'流光涌浪'};
+  const STYLE_NAMES={chaos:'混沌漫游',form:'万相成形',snow:'灵感落雪',tide:'潮汐涌动',water:'流光涌浪'};
   const FLOW_DOCK_ICON='<span class="flow-dock-gateway" aria-hidden="true"><svg viewBox="0 0 52 42" fill="none"><path class="flow-dock-gate" d="M26 2.5 44 12.7v16.6L26 39.5 8 29.3V12.7Z" stroke="currentColor" stroke-width="1.35"/><g class="flow-dock-enter" fill="currentColor"><circle cx="20.5" cy="16.5" r="2.5"/><rect x="27.5" y="14" width="5" height="5" rx="1"/><path d="m21 23.5 3.4 5.7h-6.8Z"/><path d="M28.9 22.7h2.2v2.2h2.2v2.2h-2.2v2.2h-2.2v-2.2h-2.2v-2.2h2.2Z"/></g></svg></span>';
   const FLOW_SPACE_SHAPES=[
     '<circle cx="12" cy="12" r="7"/>','<rect x="5" y="5" width="14" height="14" rx="2"/>','<path d="m12 4 8 15H4Z"/>','<path d="m12 3.5 8.5 8.5-8.5 8.5L3.5 12Z"/>',
@@ -113,7 +113,7 @@
   const MODE_COPY={
     water:{title:'让灵感\n逐浪而行',intro:'轻轻划过，掀起一片波光'},
     chaos:{title:'让灵感\n自在流动',intro:'散落其间，也自有方向'},
-    form:{title:'万象缓缓成形',intro:'拨动一次，等待下一种相遇'},
+    form:{title:'万相缓缓成形',intro:'拨动一次，等待下一种相遇'},
     snow:{title:'让灵感\n缓缓落下',intro:'落下，积聚，等一场清扫'},
     tide:{title:'让灵感\n随潮涌动',intro:'每一次经过，都会掀起新的流向'}
   };
@@ -310,7 +310,7 @@
     let ripples=[],lastRipple=0,lastRipplePoint=null,traces=[],lastTracePoint=null,lastTrace=0;
     const firefly={x:0,y:0,time:0,hold:0,attack:0,target:null,ready:false};
     const cell=24,pixel=document.createElement('canvas');pixel.width=pixel.height=1;const pixelContext=pixel.getContext('2d',{willReadFrequently:true});
-    const touchHints={chaos:'轻触或滑动，让粒子在空间里漫游',form:'轻触或滑动，打乱后等待万象成形',snow:'轻触或滑动，拨开一场落雪',tide:'轻触或滑动，掀起一阵潮汐',water:'轻触或滑动，拨动水面'};
+    const touchHints={chaos:'轻触或滑动，让粒子在空间里漫游',form:'轻触或滑动，打乱后等待万相成形',snow:'轻触或滑动，拨开一场落雪',tide:'轻触或滑动，掀起一阵潮汐',water:'轻触或滑动，拨动水面'};
     function updateModeUI(){
       const copy=modeCopy(activeMode),switcher=cover.querySelector('.inspiration-style-switch'),label=switcher?.querySelector('.inspiration-style-label>span:first-child');
       cover.dataset.particleMode=activeMode;cover.dataset.flowState=activeMode;canvas.dataset.mode=activeMode;document.body.dataset.flowStyle=activeMode;

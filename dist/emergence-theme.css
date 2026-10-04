@@ -149,3 +149,9 @@ body.global-chrome-idle .home-emergence .emergence-open{opacity:0;pointer-events
 .home-emergence .emergence-caption{transition:opacity .9s cubic-bezier(.22,.7,.25,1);}
 body.global-chrome-idle .home-emergence .emergence-caption{opacity:0;pointer-events:none;}
 @media(max-width:600px){.home-emergence .emergence-shortcuts{left:20px;max-width:calc(100vw - 100px);gap:4px 12px;font-size:10px;}}
+
+.home-emergence .emergence-shortcuts,.home-threeBody .three-body-actions{font:9px/1.6 system-ui;opacity:.45;}
+.emergence-shortcuts kbd,.three-body-actions kbd{display:inline-flex;align-items:center;justify-content:center;min-width:14px;height:12px;padding:0 2px;border:1px solid currentColor;border-radius:3px;font:9px/1 system-ui;box-sizing:border-box;}
+.emergence-shortcuts .emergence-mouse-key,.three-body-actions .emergence-mouse-key{width:9px;height:12px;flex:none;}
+.three-body-actions [data-three-pause]{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+body.global-chrome-idle .home-emergence .emergence-shortcuts,body.global-chrome-idle .home-threeBody .three-body-actions{opacity:0;pointer-events:none;}

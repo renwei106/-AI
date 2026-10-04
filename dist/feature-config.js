@@ -1,4 +1,14 @@
 /* Published feature availability for the existing global settings and desktop companion. */
+// Preserve the established palette controls while grouping color types.
+(()=>{
+ const beforeColors=colorChoices;
+ colorChoices=function(value,local=false){const holder=document.createElement('div');holder.innerHTML=beforeColors(value,local);const list=holder.querySelector('.named-colors');if(!list)return holder.innerHTML;const tiles=[...list.children],custom=list.querySelector('.custom-color'),rainbow='conic-gradient(from 30deg,#b28bbf,#8098be,#78a993,#c2b97e,#c18b79,#b28bbf)';
+  if(custom){const sample=custom.querySelector('.color-sample'),badge=custom.querySelector('.custom-palette-badge');sample.style.background=rainbow;sample.querySelector('i').style.removeProperty('color');const saved=local?prefs.spacePreferences?.[spaceId]?.customColor:prefs.customColor;const chosen=!PALETTES.some(([v])=>v===value)?value:saved;if(badge){badge.style.background=chosen||rainbow;badge.setAttribute('aria-label',chosen?'已选自定义颜色':'自定义色板');}}
+  list.replaceChildren();for(const [name,gradient] of [['纯色',false],['渐变',true]]){const group=tiles.filter(tile=>!tile.classList.contains('custom-color')&&tile.style.getPropertyValue('--swatch').trim().startsWith('linear-gradient(')===gradient);if(!group.length&&(gradient||!custom))continue;const heading=document.createElement('small');heading.className='palette-group-title';heading.textContent=name;list.append(heading,...group);if(!gradient&&custom)list.append(custom);}return holder.innerHTML;
+ };
+ const beforeSettings=renderSettings;
+ renderSettings=function(){const dialogs=[...document.querySelectorAll('#settings[open],#display-scope-dialog[open]')].map(d=>[d,d.scrollTop]);beforeSettings();for(const [d,top] of dialogs)d.scrollTop=top;};
+})();
 (()=>{
  'use strict';
  let config=null,loading=null;
@@ -46,7 +56,7 @@
   });
   reorder([...root.querySelectorAll('[data-v2-theme],[data-brand-theme]')],order('themes'),node=>node.dataset.v2Theme||node.dataset.brandTheme);
   reorder([...root.querySelectorAll('[data-pref="font"],[data-space-font]')],order('fonts'),node=>node.dataset.value||node.dataset.spaceFont);
-  reorder([...root.querySelectorAll('[data-pref="color"],[data-space-color],[data-custom-color]')],order('colors'),node=>node.hasAttribute('data-custom-color')?'custom':colorKey(node.dataset.value||node.dataset.spaceColor));
+  const colorNodes=[...root.querySelectorAll('[data-pref="color"],[data-space-color]')];for(const gradient of [false,true])reorder(colorNodes.filter(node=>(node.dataset.value||node.dataset.spaceColor||'').startsWith('linear-gradient(')===gradient),order('colors'),node=>colorKey(node.dataset.value||node.dataset.spaceColor));
  }
  const oldSettings=renderSettings;
  renderSettings=function(){
@@ -93,4 +103,21 @@
  window.addEventListener('focus',()=>void refresh());
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh()});
  void refresh();
+})();
+
+// Shared music control; reuse the existing original ambient tracks and audio engine.
+(() => {
+ const icon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/></svg>';
+ window.ShiyuMusicIcon=icon;
+ const active=musicThemeActive;musicThemeActive=function(){return active()||(view==='home'&&effective().theme==='threeBody');};
+ let owner=view==='home'?effective().theme:null;
+ const previousApply=apply;apply=function(){const next=view==='home'?effective().theme:null;if(next!==owner){stopThemeMusic();owner=next;}return previousApply();};
+ function paint(){
+  const copy=document.querySelector('.home-threeBody .three-body-copy');
+  if(copy&&!copy.querySelector('[data-theme-music]')){const row=document.createElement('div');row.className='theme-music-control';row.dataset.themeMusic='';row.innerHTML='<button type="button" data-theme-music-toggle>'+icon+'</button><button type="button" data-theme-music-track></button>';row.querySelector('[data-theme-music-toggle]').onclick=async()=>{await toggleMusic();paint();};row.querySelector('[data-theme-music-track]').onclick=()=>{chooseTrack((trackIndex+1)%TRACKS.length);paint();};copy.append(row);}
+  document.querySelectorAll('[data-theme-music]').forEach(row=>{const b=row.querySelector('[data-theme-music-toggle]'),text=row.querySelector('[data-theme-music-track]'),label=playing?'暂停音乐':'播放音乐';b.setAttribute('aria-label',label);b.setAttribute('aria-pressed',String(playing));b.title=label;text.setAttribute('aria-label','切换下一首音乐：'+TRACKS[trackIndex].name);text.title='切换下一首音乐';if(text.textContent!==TRACKS[trackIndex].name)text.textContent=TRACKS[trackIndex].name;});
+  document.querySelectorAll('[data-v3="audio-play"],[data-memoir-music]').forEach(b=>{if(b.innerHTML!==icon)b.innerHTML=icon;b.setAttribute('aria-pressed',String(playing));});
+ }
+ const previousSync=syncMusicUI;syncMusicUI=function(){previousSync();paint();};
+ const observer=new MutationObserver(paint);observer.observe(document.querySelector('#main'),{childList:true,subtree:true});paint();
 })();
