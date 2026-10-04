@@ -578,6 +578,9 @@ dialog button.dialog-close-control>[data-dialog-close-icon]{display:block!import
 #search-form .search-engine-group>button{min-width:0;gap:5px;padding:9px;font-size:11px}
 .brand-discovery .brand-theme-menu{top:calc(100% + 12px)}
 .brand-discovery .brand-theme-menu:before{content:'';position:absolute;left:0;right:0;top:-13px;height:13px}
+.brand-discovery>.brand{position:relative;z-index:1}
+.brand-discovery::after{content:'';display:none;position:absolute;top:calc(100% - 20px);left:0;width:220px;height:34px}
+.brand-discovery:hover::after,.brand-discovery:focus-within::after{display:block}
 .brand-theme-menu>button+button{position:relative;margin-top:7px}
 .brand-theme-menu>button+button:before{content:'';position:absolute;left:9px;right:9px;top:-4px;border-top:1px solid var(--line);pointer-events:none}
 body[data-view=space] :is(#space-mode-menu,#link-view-settings,#space-atlas .at-layout-menu){background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
