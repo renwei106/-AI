@@ -116,7 +116,7 @@
   const copy=document.querySelector('.home-threeBody .three-body-copy');
   if(copy&&!copy.querySelector('[data-theme-music]')){const row=document.createElement('div');row.className='theme-music-control';row.dataset.themeMusic='';row.innerHTML='<button type="button" data-theme-music-toggle>'+icon+'</button><button type="button" data-theme-music-track></button>';row.querySelector('[data-theme-music-toggle]').onclick=async()=>{await toggleMusic();paint();};row.querySelector('[data-theme-music-track]').onclick=()=>{chooseTrack((trackIndex+1)%TRACKS.length);paint();};copy.append(row);}
   document.querySelectorAll('[data-theme-music]').forEach(row=>{const b=row.querySelector('[data-theme-music-toggle]'),text=row.querySelector('[data-theme-music-track]'),label=playing?'暂停音乐':'播放音乐';b.setAttribute('aria-label',label);b.setAttribute('aria-pressed',String(playing));b.title=label;text.setAttribute('aria-label','切换下一首音乐：'+TRACKS[trackIndex].name);text.title='切换下一首音乐';if(text.textContent!==TRACKS[trackIndex].name)text.textContent=TRACKS[trackIndex].name;});
-  document.querySelectorAll('[data-v3="audio-play"],[data-memoir-music]').forEach(b=>{if(b.innerHTML!==icon)b.innerHTML=icon;b.setAttribute('aria-pressed',String(playing));});
+  document.querySelectorAll('[data-v3="audio-play"],[data-memoir-music]').forEach(b=>{if(!b.firstElementChild?.matches('svg'))b.innerHTML=icon;b.setAttribute('aria-pressed',String(playing));});
  }
  const previousSync=syncMusicUI;syncMusicUI=function(){previousSync();paint();};
  const observer=new MutationObserver(paint);observer.observe(document.querySelector('#main'),{childList:true,subtree:true});paint();
