@@ -32,7 +32,7 @@ function createMembershipService(options = {}) {
     const legacyPermanent = !!user?.member && user.memberExpiresAt === '永久';
     const permanent = value ? value.permanent === true : legacyPermanent;
     const expiresAt = permanent ? null : value ? timestamp(value.expiresAt, true) : timestamp(user?.memberExpiresAt, true);
-    const member = !!user && !user.blacklisted && (value ? value.member === true : user.member === true) && (permanent || expiresAt > now());
+    const member = !!user && !user.blacklisted && !user.canceledAt && (value ? value.member === true : user.member === true) && (permanent || expiresAt > now());
     const plan = member ? value?.planId ? plans().find(p => p.id === value.planId) || retainedPlan(value.planId) : paidPlan() : freePlan();
     return { member, permanent: member && permanent, expiresAt: !permanent && expiresAt > 0 ? expiresAt : null,
       planId: member ? value?.planId || plan?.id || null : plan?.id || 'free',
@@ -42,7 +42,7 @@ function createMembershipService(options = {}) {
   }
   function stateFor(user) {
     const actual = actualStateFor(user);
-    if (!user || user.blacklisted) return actual;
+    if (!user || user.blacklisted || user.canceledAt) return actual;
     const test = testState(user);
     if (!test?.enabled || !['member', 'free'].includes(test.values?.membership)) return actual;
     const member = test.values.membership === 'member', plan = member ? paidPlan() : freePlan();
@@ -56,6 +56,7 @@ function createMembershipService(options = {}) {
       ...(includeEvents ? { memberEvents: copy(memberEvents || []) } : {}) };
   }
   function applyToUser(user, input) {
+    if (user.canceledAt) throw Error('该账号已注销，不能再发放会员权益');
     user.memberEvents ||= [];
     const id = input.id || `ME:${crypto.randomUUID()}`;
     const prior = user.memberEvents.find(event => event.id === id);

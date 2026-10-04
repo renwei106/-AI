@@ -7,6 +7,7 @@ function cookie(req,name){return (req.headers.cookie||'').split(';').map(s=>s.tr
 function issueSession(userId){const data=read(true),token=crypto.randomBytes(32).toString('hex'),now=Date.now();for(const [id,s]of Object.entries(data.sessions))if(s.expiresAt<=now)delete data.sessions[id];data.sessions[token]={userId,expiresAt:now+7*86400000};write(data,true);return token}
 function session(req){const data=read(true),s=data.sessions[cookie(req,'shiyu_user_session')];return s&&s.expiresAt>Date.now()?s.userId:null}
 function logout(req){const data=read(true);delete data.sessions[cookie(req,'shiyu_user_session')];write(data,true)}
+function revokeUserSessions(userId){const data=read(true);for(const [token,session] of Object.entries(data.sessions))if(session.userId===userId)delete data.sessions[token];write(data,true)}
 function visitor(req,res){const data=read();let token=cookie(req,'shiyu_theme_visitor'),record=data.visitors[token];if(!record||record.expiresAt<=Date.now()){token=crypto.randomBytes(24).toString('hex');record={expiresAt:Date.now()+7*86400000,previews:{},daily:null};for(const [id,v]of Object.entries(data.visitors))if(v.expiresAt<=Date.now())delete data.visitors[id];data.visitors[token]=record;write(data);res.setHeader('Set-Cookie',`shiyu_theme_visitor=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800`)}return token}
 const DAILY_MS=10*60*1000;
 const PRESENCE_LEASE_MS=30*1000;
@@ -42,4 +43,4 @@ function startPreview(token,theme,now=Date.now(),trial){
 function pausePreview(token,theme,now=Date.now()){return updatePresence(token,theme,false,now)}
 // Kept as a compatibility helper for callers that only need the current theme state.
 function daily(token,now=Date.now()){return preview(token,'__daily__',now)}
-module.exports={issueSession,session,logout,visitor,dayKey,daily,preview,previews,startPreview,pausePreview,updatePresence,DAILY_MS,PRESENCE_LEASE_MS};
+module.exports={issueSession,session,logout,revokeUserSessions,visitor,dayKey,daily,preview,previews,startPreview,pausePreview,updatePresence,DAILY_MS,PRESENCE_LEASE_MS};

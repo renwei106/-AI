@@ -9,8 +9,9 @@ body[data-theme=forestCompanion][data-view=home] .home-forestCompanion {
 .forest-poster,.forest-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:61% center; pointer-events:none; }
 .forest-video { opacity:0; }
 .forest-video.is-ready { opacity:1; }
-.home-forestCompanion .forest-picker { position:fixed; left:50%; bottom:34px; transform:translateX(-50%); z-index:5; display:flex; align-items:center; gap:4px; color:var(--text,#30383b); }
-.forest-dots { display:flex; flex-wrap:wrap; justify-content:center; gap:2px; max-width:calc(100vw - 116px); }
+.home-forestCompanion .forest-picker { position:fixed; right:24px; top:50%; transform:translateY(-50%); z-index:5; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--text,#30383b); transition:opacity .25s ease; }
+.home-forestCompanion .forest-picker.is-idle:not(:focus-within) { opacity:0; pointer-events:none; }
+.forest-dots { display:flex; flex-direction:column; align-items:center; gap:2px; }
 .forest-picker button { display:grid; place-items:center; width:30px; height:32px; padding:0; border:0; border-radius:16px; background:transparent; color:inherit; opacity:.55; cursor:pointer; }
 .forest-picker button:hover,.forest-picker button:focus-visible { opacity:1; background:color-mix(in srgb,var(--accent) 12%,transparent); }
 .forest-picker button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
@@ -20,8 +21,8 @@ body[data-theme=forestCompanion][data-view=home] .home-forestCompanion {
 .forest-picker .forest-dot[aria-pressed=true] { opacity:1; color:var(--accent); }
 .forest-dot[aria-pressed=true] span { box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 15%,transparent); }
 .forest-upload svg { width:17px; height:17px; }
-.forest-picker .forest-status { position:absolute; bottom:38px; left:50%; transform:translateX(-50%); width:max-content; max-width:80vw; font-size:12px; text-align:center; opacity:.7; pointer-events:none; }
-@media(max-width:760px) { .home-forestCompanion .forest-picker { bottom:84px; } .forest-picker button { width:36px; height:36px; } }
+.forest-picker .forest-status { position:absolute; right:40px; top:50%; transform:translateY(-50%); width:max-content; max-width:80vw; font-size:12px; text-align:center; opacity:.7; pointer-events:none; }
+@media(max-width:760px) { .home-forestCompanion .forest-picker { right:12px; } .forest-picker button { width:36px; height:36px; } }
 .forest-shade { position:absolute; inset:0; background:linear-gradient(90deg,#fbfbf8eb 0%,#fbfbf8c2 25%,#fbfbf800 57%),linear-gradient(180deg,#fbfbf8cf 0%,#fbfbf800 18%,#fbfbf800 78%,#fbfbf8c7 100%); }
 body[data-dark=true] .forest-shade { background:linear-gradient(90deg,#14171be8 0%,#14171bb0 25%,#14171b00 57%),linear-gradient(180deg,#14171ba6 0%,#14171b00 18%,#14171b00 78%,#14171bd1 100%); }
 .home-forestCompanion .forest-copy { position:relative; width:min(440px,37vw); margin:0; z-index:1; text-align:left; }

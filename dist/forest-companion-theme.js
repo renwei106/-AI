@@ -104,9 +104,13 @@
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
     const desktop = matchMedia('(hover: hover) and (pointer: fine) and (min-width: 761px)');
     let dead = false, failed = false, visible = false, initialized = false;
-    let pending = false, raf = 0, watchdog = 0, target = 0;
+    let pending = false, raf = 0, watchdog = 0, target = 0, pickerIdleTimer = 0;
     const listeners = [];
     const on = (node, event, fn) => { node.addEventListener(event, fn, { passive: true }); listeners.push(() => node.removeEventListener(event, fn)); };
+    const revealPicker = () => { picker.classList.remove('is-idle'); clearTimeout(pickerIdleTimer); pickerIdleTimer = setTimeout(() => picker.classList.add('is-idle'), 10000); };
+    on(window, 'pointermove', revealPicker);
+    on(window, 'keydown', revealPicker);
+    revealPicker();
     const eligible = () => mine() && !!active && !failed && !motion.matches && desktop.matches;
     const available = () => eligible() && visible && !document.hidden && root.isConnected;
     const bounded = time => Math.max(0, Math.min(time, video.duration - 1 / 30));
@@ -193,7 +197,7 @@
     removal.observe(document.querySelector('#main'), { childList: true });
     function cleanup() {
       if (dead) return;
-      dead = true; aborter.abort(); cancelAnimationFrame(raf); clearTimeout(watchdog);
+      dead = true; aborter.abort(); cancelAnimationFrame(raf); clearTimeout(watchdog); clearTimeout(pickerIdleTimer);
       observer.disconnect(); removal.disconnect(); listeners.forEach(remove => remove());
       video.pause(); video.removeAttribute('src'); video.load();
       urls.forEach(url => URL.revokeObjectURL(url)); urls.clear();

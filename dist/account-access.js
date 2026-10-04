@@ -47,7 +47,7 @@
     } catch { /* profile caching is optional when browser storage is unavailable */ }
   }
   function closeAccountDialogs() {
-    document.querySelectorAll('#account-center[open],#account-security[open],#profile-item-editor[open],#account-security-editor[open],#birthday-dialog[open]').forEach(dialog => dialog.close());
+    document.querySelectorAll('#account-center[open],#account-security[open],#profile-item-editor[open],#account-security-editor[open],#account-cancellation[open],#birthday-dialog[open]').forEach(dialog => dialog.close());
   }
   const requestTicket = () => ({ epoch: accountEpoch, identity: sharedIdentity() });
   const currentTicket = ticket => !authBusy && ticket.epoch === accountEpoch && ticket.identity === sharedIdentity();
@@ -82,8 +82,8 @@
     syncMembershipFromUser(user);
     return changed;
   }
-  function clearAccount() {
-    rememberProfile();
+  function clearAccount(preserveProfile = true) {
+    if (preserveProfile) rememberProfile();
     invalidateAccount(); signed = false; verifiedUserId = '';
     prefs.accountProfile = {}; prefs.accountDataUserId = ''; prefs.membership = null; prefs.membershipDemo = null; prefs.demoMemberOrders = [];
     data = clone(seed); normalizeSelection(); view = location.hostname === 'space.shiyubox.com' ? 'space' : 'home'; pending = null;
@@ -107,6 +107,17 @@
   }
   window.ShiyuAccountSession = {
     applyLogin,
+    cancelled() {
+      const id = accountId();
+      syncEnabled = false; clearTimeout(syncTimer);
+      if (id) { try { localStorage.removeItem(profileKey(id)); } catch {} }
+      for (const key of ['cornerCollections', 'cornerModules', 'cornerPinnedModulesV1', 'cornerShelfOrderV1', 'cornerCloseGuideAcknowledgedV1']) {
+        if (id && prefs[key]) delete prefs[key][id];
+      }
+      clearAccount(false);
+      syncEnabled = true;
+      markAccountReady();
+    },
     // New private entry points must verify the server session, not cached `signed` alone.
     verify: () => refreshMembership(),
     login(payload) {
@@ -397,4 +408,143 @@
   // snapshot has been checked. This prevents a stale badge from flashing on
   // refresh before the server-owned entitlement is applied.
   void hydrateAccountData(markAccountReady).finally(markAccountReady);
+})();
+
+/* Account cancellation stays separate from sign-out and never runs without server-side identity proof. */
+(() => {
+  const esc = value => String(value || '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+  const loadAgreement = async () => {
+    const response = await fetch('/api/shiyu/agreements', { credentials: 'same-origin', cache: 'no-store' });
+    const result = await response.json();
+    if (!response.ok) throw Error(result.message || '注销协议暂时无法加载');
+    const agreement = result.agreements?.find(item => item.key === 'account-cancellation');
+    if (!agreement || agreement.version === 'draft') throw Error('注销协议暂时无法加载');
+    return agreement;
+  };
+  const api = async (path, body) => {
+    const response = await fetch('/api/shiyu/auth/' + path, { method: body ? 'POST' : 'GET', credentials: 'same-origin', cache: 'no-store', ...(body ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {}) });
+    const value = await response.json();
+    if (!response.ok) throw Error(value.message || '操作失败，请重试');
+    return value;
+  };
+  const earlier = openAccountCenter;
+  openAccountCenter = function () {
+    earlier();
+    const center = document.querySelector('#account-center');
+    // The existing profile flow renders a separate setup dialog before the full account center.
+    if (!signed || !center?.querySelector('[data-security-item="phone"]') || !center.querySelector('[data-security-item="email"]') || center.querySelector('[data-account-cancel]')) return;
+    const entry = document.createElement('button');
+    entry.type = 'button'; entry.className = 'account-cancel-entry'; entry.dataset.accountCancel = '';
+    entry.textContent = '注销账号';
+    const signout = center.querySelector('[data-account-signout]');
+    if (signout) signout.after(entry); else center.append(entry);
+    entry.addEventListener('click', () => { center.close(); void openCancellation(); });
+  };
+
+  async function openCancellation() {
+    let session, agreement;
+    try {
+      [session, agreement] = await Promise.all([api('session'), loadAgreement()]);
+      if (!session.authenticated || session.user?.id !== accountProfile().id) throw Error('登录状态已变化，请重新登录');
+    } catch (error) { toast(error.message); return; }
+    const user = session.user, hasEmail = !!user.email, hasPhone = !!user.phone;
+    const channel = hasEmail ? 'email' : hasPhone ? 'phone' : user.wechatBound ? 'wechat' : '';
+    const dialog = document.createElement('dialog');
+    dialog.id = 'account-cancellation';
+    dialog.innerHTML = `<div class="dialog-heading"><h2>注销账号</h2><button type="button" data-cancel-close aria-label="关闭">×</button></div>
+      <div class="account-cancel-warning"><p>注销后需要确认的事项</p><ol><li>此账号将无法再次登录。</li><li>所有网址数据将被清空。</li><li>小计、待办、个人收藏、常用等数据将被清除。</li><li>已开通的会员权益立即终止并清除。</li></ol></div>
+      <div class="account-cancel-verification"></div>
+      <label class="account-cancel-agree"><input type="checkbox" data-cancel-agree><span>我已阅读并同意<button type="button" data-cancel-terms-link>《${esc(agreement.title)}》</button></span></label>
+      <div class="account-cancel-actions"><button type="button" data-cancel-back>返回</button><button type="button" class="primary" data-cancel-confirm disabled>确认并注销（10）</button></div>`;
+    document.body.append(dialog);
+    let termsDialog = null;
+    dialog.querySelector('[data-cancel-terms-link]').onclick = () => {
+      if (termsDialog?.open) return;
+      termsDialog = document.createElement('dialog');
+      termsDialog.id = 'account-cancel-terms';
+      termsDialog.innerHTML = `<div class="dialog-heading"><h2>${esc(agreement.title)}</h2><button type="button" data-terms-close aria-label="关闭协议">×</button></div><article class="account-cancel-agreement"></article>`;
+      termsDialog.querySelector('article').innerHTML = agreement.body;
+      const current = termsDialog;
+      current.querySelector('[data-terms-close]').onclick = () => current.close();
+      current.addEventListener('close', () => { current.remove(); if (termsDialog === current) termsDialog = null; }, { once: true });
+      document.body.append(current);
+      current.showModal();
+    };
+    const body = dialog.querySelector('.account-cancel-verification'), confirm = dialog.querySelector('[data-cancel-confirm]');
+    let seconds = 10, ready = false, codeSent = false, busy = false, scene = '', polling = 0, timer = 0, stopped = false, finalDialog = null;
+    const currentChannel = () => dialog.querySelector('[data-cancel-channel]')?.value || channel;
+    const sync = () => { const agreed = dialog.querySelector('[data-cancel-agree]').checked; confirm.disabled = busy || seconds > 0 || !agreed || !ready; confirm.classList.toggle('is-ready', !confirm.disabled); confirm.textContent = seconds > 0 ? `确认并注销（${seconds}）` : '确认并注销'; const send = body.querySelector('[data-cancel-send], [data-cancel-refresh]'); if (send) send.disabled = busy || !agreed; };
+    const close = () => { if (dialog.open) dialog.close(); };
+    const cleanup = () => { stopped = true; clearInterval(timer); clearTimeout(polling); if (termsDialog?.open) termsDialog.close(); if (finalDialog?.open) finalDialog.close(); dialog.remove(); };
+    dialog.addEventListener('close', cleanup, { once: true });
+    dialog.querySelector('[data-cancel-close]').onclick = close;
+    dialog.querySelector('[data-cancel-back]').onclick = close;
+    dialog.querySelector('[data-cancel-agree]').onchange = sync;
+    if (hasEmail || hasPhone) {
+      const options = [...(hasEmail ? [['email', user.email]] : []), ...(hasPhone ? [['phone', user.phone]] : [])];
+      body.innerHTML = `<label>当前账号 ${options.length > 1 ? `<select data-cancel-channel aria-label="选择验证账号">${options.map(([id, label]) => `<option value="${id}">${esc(label)}</option>`).join('')}</select>` : `<span>${esc(options[0][1])}</span>`}</label><label>验证码 <span class="account-input-row"><input data-cancel-code inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="请输入验证码"><button type="button" data-cancel-send>获取验证码</button></span></label>`;
+      const code = body.querySelector('[data-cancel-code]'), send = body.querySelector('[data-cancel-send]');
+      code.addEventListener('input', () => { ready = codeSent && /^\d{4,8}$/.test(code.value.trim()); sync(); });
+      body.querySelector('[data-cancel-channel]')?.addEventListener('change', () => { code.value = ''; ready = false; codeSent = false; sync(); });
+      send.onclick = async () => {
+        if (!dialog.querySelector('[data-cancel-agree]').checked) return;
+        send.disabled = true;
+        const selected = currentChannel(), contact = selected === 'email' ? user.email : user.phone;
+        try { await api(selected === 'email' ? 'email/send' : 'send-code', { [selected]: contact, purpose: 'account-cancel' }); codeSent = true; ready = /^\d{4,8}$/.test(code.value.trim()); toast('验证码已发送'); }
+        catch (error) { toast(error.message); }
+        finally { sync(); }
+      };
+    } else if (channel === 'wechat') {
+      body.innerHTML = '<p>请用当前账号绑定的微信扫码验证。</p><div data-cancel-qr></div><button type="button" data-cancel-refresh>获取微信验证二维码</button>';
+      const start = async () => {
+        clearTimeout(polling); ready = false; scene = ''; sync();
+        const qr = body.querySelector('[data-cancel-qr]'); qr.replaceChildren();
+        try {
+          const result = await api('wechat/qr?purpose=account-cancel');
+          if (stopped) return;
+          scene = result.scene;
+          const image = document.createElement('img'); image.src = result.qrUrl; image.alt = '微信扫码验证注销'; qr.append(image);
+          toast('请使用当前账号绑定的微信扫码');
+          polling = setTimeout(poll, 1500);
+        } catch (error) { if (!stopped) toast(error.message); }
+      };
+      const poll = async () => {
+        if (stopped || !scene) return;
+        try {
+          const result = await api('wechat/status?scene=' + encodeURIComponent(scene));
+          if (stopped) return;
+          if (result.status === 'ready-to-cancel') { ready = true; toast('微信验证成功'); sync(); return; }
+          polling = setTimeout(poll, 1500);
+        } catch (error) { if (!stopped) toast(error.message); }
+      };
+      body.querySelector('[data-cancel-refresh]').onclick = () => { if (dialog.querySelector('[data-cancel-agree]').checked) void start(); };
+    } else {
+      body.textContent = '当前账号没有可用的身份验证方式，请联系管理员核验后处理。';
+    }
+    const submit = async () => {
+      if (confirm.disabled) return;
+      busy = true; sync();
+      try {
+        await api('cancel', { userId: user.id, agreed: true, agreementVersion: agreement.version, channel: currentChannel(), code: body.querySelector('[data-cancel-code]')?.value.trim(), scene });
+        close();
+        window.ShiyuAccountSession.cancelled();
+        toast('账号已注销');
+      } catch (error) { toast(error.message); busy = false; sync(); }
+    };
+    confirm.onclick = () => {
+      if (confirm.disabled || finalDialog?.open) return;
+      finalDialog = document.createElement('dialog');
+      finalDialog.id = 'account-cancel-final';
+      finalDialog.innerHTML = '<div class="dialog-heading"><h2>确定注销账号？</h2></div><p>注销后无法恢复账号与个人数据。</p><div class="account-cancel-actions"><button type="button" data-cancel-think>再想一想</button><button type="button" data-cancel-final>确定注销</button></div>';
+      document.body.append(finalDialog);
+      const secondary = finalDialog;
+      secondary.addEventListener('close', () => { secondary.remove(); if (finalDialog === secondary) finalDialog = null; }, { once: true });
+      const dismiss = () => secondary.close();
+      finalDialog.querySelector('[data-cancel-think]').onclick = dismiss;
+      finalDialog.querySelector('[data-cancel-final]').onclick = () => { dismiss(); void submit(); };
+      finalDialog.showModal();
+    };
+    timer = setInterval(() => { seconds = Math.max(0, seconds - 1); sync(); if (!seconds) clearInterval(timer); }, 1000);
+    dialog.showModal(); sync();
+  }
 })();

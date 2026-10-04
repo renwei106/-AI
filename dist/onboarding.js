@@ -210,7 +210,7 @@
     if(document.body.classList.contains('sy-tour-pet'))window.ShiyuDesktopPet?.guide(false);tour?.remove();tour=null;signature='';tourStepIds=null;
     for(const [el,value] of inertNodes)if(el.isConnected)el.inert=value;inertNodes=[];
     for(const [el,name] of exposed)el.classList.remove(name);exposed=[];
-    document.body.classList.remove('sy-tour-active','sy-tour-pet');
+    document.body.classList.remove('sy-tour-active','sy-tour-pet','sy-tour-theme');
     if(previousFocus?.isConnected)previousFocus.focus({preventScroll:true});
   }
   function startTour() {
@@ -234,6 +234,7 @@
       signature=nextSignature;const last=index===list.length-1;
       if(step.id==='pet'||document.body.classList.contains('sy-tour-pet'))window.ShiyuDesktopPet?.guide(step.id==='pet');
       document.body.classList.toggle('sy-tour-pet',step.id==='pet');
+      document.body.classList.toggle('sy-tour-theme',step.id==='theme');
       const panel=tour.querySelector('.sy-tour-panel');panel.innerHTML='<div class="sy-tour-progress"><span>'+(name==='home'?'首页':'空间')+' · '+(index+1)+' / '+list.length+'</span><button data-tour-skip>跳过引导</button></div><h2 id="sy-tour-title">'+step.title+'</h2><p>'+step.body+'</p><div class="sy-tour-actions"><button data-tour-prev '+(index===0?'disabled':'')+'>上一步</button>'+'<button class="sy-guide-primary" data-tour-next>'+(last?(name==='home'?'开始体验':'完成引导'):'下一步')+'</button></div>';
       panel.querySelector('[data-tour-skip]').onclick=async()=>{if(busy)return;busy=true;if(await action('skip')){cleanTour();releaseGift();}busy=false;};
       panel.querySelector('[data-tour-prev]').onclick=()=>move(-1);
@@ -254,6 +255,7 @@
     const nodes=step.combine?step.targets.map(selector=>$q(selector)).filter(visible):[el];
     if(step.id==='scenes'){nodes.length=0;nodes.push(...document.querySelectorAll('.sidebar .scene-scroll .scene-button'));}
     if(step.id==='pet')nodes.push(...document.querySelectorAll('#desktop-pet .pet-menu button'));
+    if(step.id==='theme'){const menu=$q('body>header .brand-theme-menu');if(menu)nodes.push(menu);}
     const boxes=nodes.filter(visible).map(node=>node.getBoundingClientRect());
     const r={left:Math.min(...boxes.map(b=>b.left)),top:Math.min(...boxes.map(b=>b.top)),right:Math.max(...boxes.map(b=>b.right)),bottom:Math.max(...boxes.map(b=>b.bottom))},w=document.documentElement.clientWidth,h=visualViewport?.height||innerHeight;
     const left=Math.max(5,r.left-7),top=Math.max(5,r.top-7),right=Math.min(w-5,r.right+7),bottom=Math.min(h-5,r.bottom+7);

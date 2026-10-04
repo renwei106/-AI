@@ -61,6 +61,7 @@
 [data-onboarding-entry]{display:flex;align-items:center;gap:10px}
 [data-onboarding-entry] svg{width:18px;height:18px;flex-shrink:0}
 .sy-tour-active .brand-guide{visibility:hidden}
+.sy-tour-active.sy-tour-theme .brand-theme-menu{display:block;max-height:calc(100dvh - 90px);overflow:auto}
 @keyframes sy-envelope-in{from{opacity:0;transform:translateY(38px) rotate(-3deg) scale(.94)}to{opacity:1;transform:none}}
 @keyframes sy-panel-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @keyframes sy-backdrop-in{from{opacity:0}to{opacity:1}}
