@@ -577,7 +577,7 @@ dialog button.dialog-close-control>[data-dialog-close-icon]{display:block!import
 #search-form .search-engine-heading{grid-column:1/-1;padding:5px 9px;font-size:10px;color:var(--muted)}
 #search-form .search-engine-group>button{min-width:0;gap:5px;padding:9px;font-size:11px;justify-content:flex-start}
 #search-form .search-engine-group>button>span{display:none}
-#search-form .search-engine-group>button[aria-selected=true]{background:color-mix(in srgb,var(--accent) 12%,var(--surface));outline:1px solid var(--accent);outline-offset:-1px}
+#search-form .search-engine-group>button[aria-selected=true]{background:var(--soft);color:var(--ink);outline:0}
 #quick-search:has(#search-form .select-options:not([hidden])){overflow:visible}
 #quick-search #search-form .select-options{z-index:100;overscroll-behavior:contain}
 #search-form .select-options button:is([data-value="google"],[data-value="google-images"]),#search-form .select-wrap:has(> #engine option:is([value="google"],[value="google-images"]):checked)>.select-trigger{--engine-logo:url('/assets/site-icons/search-google.svg')}
