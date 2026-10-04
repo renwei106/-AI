@@ -25,11 +25,11 @@ body[data-theme=globe]>header,body[data-theme=globe] #dock,body[data-theme=globe
 body[data-theme=globe] #dock{position:fixed}
 @media(max-width:760px){.home-globe{min-height:calc(100svh - 76px);height:calc(100svh - 76px)}}
 @media(prefers-reduced-motion:reduce){.globe-loading{transition:none}}
-/* This theme's sky stays dark; the user's day/night setting still applies elsewhere. */
-body[data-theme=globe][data-view=home]:not(.world-active){background:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--accent) 16%,#121a21),color-mix(in srgb,var(--accent) 5%,#10161d) 62%)}
-body[data-theme=globe][data-view=home]:not(.world-active) :is(.globe-copy,.globe-loading,.globe-caption){--ink:#eef2f5;--muted:#aebdc9;color:var(--ink)}
-body[data-theme=globe][data-view=home]:not(.world-active) :is(.brand,.brand-mark,.header-right>.icon-button,.header-right>.account-menu-wrap>.account-entry,.shiyu-language-trigger){color:#eef2f5}
-body[data-theme=globe][data-view=home]:not(.world-active) :is(.header-right>.icon-button,.account-menu-wrap>.account-entry,.shiyu-language-trigger){--soft:color-mix(in srgb,var(--accent) 18%,#192a36)}
-body[data-theme=globe][data-view=home]:not(.world-active)>:is(.world-entry,.utility-search,.scroll-invitation,.home-foot){--ink:#eef2f5;--muted:#aebdc9;color:var(--muted)}
-body[data-theme=globe][data-view=home]:not(.world-active) :is(.account-menu-wrap>.account-entry,.world-entry){--surface:#1b2832;--line:#ffffff24}
-body[data-theme=globe][data-view=home]:not(.world-active) .home-globe .scroll-invitation{--muted:#aebdc9;color:var(--muted)}
+/* Keep the dark sky and pale controls only when night mode is active. */
+body[data-theme=globe][data-dark=true][data-view=home]:not(.world-active){background:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--accent) 16%,#121a21),color-mix(in srgb,var(--accent) 5%,#10161d) 62%)}
+body[data-theme=globe][data-dark=true][data-view=home]:not(.world-active) :is(.globe-copy,.globe-loading,.globe-caption){--ink:#eef2f5;--muted:#aebdc9;color:var(--ink)}
+body[data-theme=globe][data-dark=true][data-view=home]:not(.world-active) :is(.brand,.brand-mark,.header-right>.icon-button,.header-right>.account-menu-wrap>.account-entry,.shiyu-language-trigger){color:#eef2f5}
+body[data-theme=globe][data-dark=true][data-view=home]:not(.world-active) :is(.header-right>.icon-button,.account-menu-wrap>.account-entry,.shiyu-language-trigger){--soft:color-mix(in srgb,var(--accent) 18%,#192a36)}
+body[data-theme=globe][data-dark=true][data-view=home]:not(.world-active)>:is(.world-entry,.utility-search,.scroll-invitation,.home-foot){--ink:#eef2f5;--muted:#aebdc9;color:var(--muted)}
+body[data-theme=globe][data-dark=true][data-view=home]:not(.world-active) :is(.account-menu-wrap>.account-entry,.world-entry){--surface:#1b2832;--line:#ffffff24}
+body[data-theme=globe][data-dark=true][data-view=home]:not(.world-active) .home-globe .scroll-invitation{--muted:#aebdc9;color:var(--muted)}
