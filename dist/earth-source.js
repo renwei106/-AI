@@ -78,7 +78,7 @@ export class Earth {
     };
     this.mesh=new THREE.Mesh(geometry,material);this.mesh.rotation.y=-Math.PI/2;this.mesh.visible=false;this.atmosphere.mesh.visible=false;
   }
-  addToScene(scene){if(this.mesh)scene.add(this.mesh);this.atmosphere?.addToScene(scene)}
+  addToScene(scene){if(this.mesh)scene.add(this.mesh)}
   dispose(){this.disposed=true;this.mesh?.geometry?.dispose();this.mesh?.material?.map?.dispose();this.waterMask?.dispose();this.nightLights?.dispose();this.mesh?.material?.dispose();this.atmosphere?.dispose()}
 }
 
