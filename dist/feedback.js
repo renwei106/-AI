@@ -352,7 +352,6 @@
     if (!sending && TYPES[selectedType]?.category) loadCategories();
   }
   function addEntry() {
-    if (view !== 'home') return;
     const menu = document.querySelector('.account-menu');
     if (!menu || menu.querySelector('[data-menu-feedback]')) return;
     const button = document.createElement('button'); button.type = 'button'; button.dataset.menuFeedback = '';

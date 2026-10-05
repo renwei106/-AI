@@ -783,6 +783,7 @@
   // level so the entire top strip, including its blank areas, uses one gesture.
   window.addEventListener('wheel',e=>{
     if(!dialog?.open||view!=='space'||atlasClosing)return;
+    if(prefs.homeEntryGesture!=='double'){resetReturnWheel();return}
     if(e.clientY>returnWheelTop||state.drag||e.ctrlKey||Math.abs(e.deltaX)>Math.abs(e.deltaY)||document.querySelector('dialog[open]:not(#space-atlas)')||e.target.closest('input,textarea,select,[contenteditable=true],.global-search-results,#corner-space-menu,#space-mode-menu,.at-drawer,.at-layout-menu,.corner-panel')){resetReturnWheel();return}
     e.preventDefault();e.stopImmediatePropagation();
     if(e.deltaY>=0||Date.now()<transitionUntil||Date.now()<spaceScrollLockUntil){resetReturnWheel();return}
@@ -972,6 +973,7 @@
     return '<section class="space-entry-settings"><h3>进入空间的方式</h3><div class="space-entry-row"><div><i>'+icons.down+'</i><b>首页进入空间</b></div>'+choices('homeEntryGesture',[['double','连续滑动＋点击'],['click','仅点击进入']],prefs)+'<small>'+gestureNote+'</small></div><h3>默认打开的空间</h3><div class="space-entry-row"><div><i>'+icons.space+'</i><b>进入时显示</b></div>'+choices('spaceEntryPolicy',[['first','第一个空间'],['last','上次离开的空间']],{...prefs,spaceEntryPolicy:entryPolicy()})+'<small>'+entryNote+'</small></div></section>';
   }
   const originalRender=render;let lastView=null,lastSid=spaceId,explicitSpace=null;
+  window.ShiyuRestoreSpaceSelection=function(selection){const chosen=data.find(item=>item.id===selection?.spaceId);if(!chosen)return false;spaceId=chosen.id;sceneId=chosen.scenes.find(item=>item.id===selection.sceneId)?.id||chosen.scenes[0]?.id||null;explicitSpace=spaceId;return true};
   const goSpaceBeforeEntry=goSpace;
   goSpace=function(id){explicitSpace=id;return goSpaceBeforeEntry(id)};
   render=function(){

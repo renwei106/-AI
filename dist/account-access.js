@@ -15,7 +15,15 @@
   };
   let accountEpoch = 0, verifiedUserId = null, authBusy = false, authQueue = Promise.resolve(), logoutRequest = null;
   let accountDataRefreshPending = true;
-  if (location.hostname === 'space.shiyubox.com') {
+  const localPreview = ['127.0.0.1', 'localhost'].includes(location.hostname);
+  const previewViewKey = 'shiyu-preview-view';
+  const spaceContextKey = 'shiyu-space-context';
+  const rememberPreviewView = next => { if (localPreview) try { sessionStorage.setItem(previewViewKey, next); } catch {} };
+  const rememberSpaceContext = () => { try { sessionStorage.setItem(spaceContextKey, JSON.stringify({ accountId: accountId(), spaceId, sceneId })); } catch {} };
+  const savedSpaceContext = () => { try { const saved = JSON.parse(sessionStorage.getItem(spaceContextKey) || 'null'); return saved?.accountId === accountId() ? saved : null; } catch { return null; } };
+  let handoffSelection = null;
+  let directSpacePending = location.hostname === 'space.shiyubox.com' || localPreview && (() => { try { return sessionStorage.getItem(previewViewKey) === 'space'; } catch { return false; } })();
+  if (directSpacePending) {
     const guard = document.createElement('style');
     guard.textContent = 'html:not(.shiyu-account-ready) #main{visibility:hidden}';
     document.head.append(guard);
@@ -238,6 +246,14 @@
 
   function normalizeSelection() {
     if (!data.length) return;
+    const handoff = window.__shiyuNavigationHandoff;
+    if (handoff?.spaceId && data.some(spaceItem => spaceItem.id === handoff.spaceId)) {
+      spaceId = handoff.spaceId;
+      const requestedSpace = data.find(spaceItem => spaceItem.id === spaceId);
+      if (requestedSpace.scenes.some(sceneItem => sceneItem.id === handoff.sceneId)) sceneId = handoff.sceneId;
+      handoffSelection = { spaceId, sceneId };
+      delete window.__shiyuNavigationHandoff;
+    }
     if (!data.some(spaceItem => spaceItem.id === spaceId)) spaceId = data[0].id;
     const selectedSpace = data.find(spaceItem => spaceItem.id === spaceId);
     if (!selectedSpace.scenes.some(sceneItem => sceneItem.id === sceneId)) sceneId = selectedSpace.scenes[0]?.id || null;
@@ -273,16 +289,54 @@
     else { if (!signed) { prefs.membership = null; publishMembership(null); } void refreshMembership(); }
   });
 
+  const homeHost = ['shiyubox.com', 'www.shiyubox.com'].includes(location.hostname);
+  const spaceHost = location.hostname === 'space.shiyubox.com';
+  let domainNavigationPending = false;
+  function navigateAfterCover(host) {
+    const allowed = ['theme','mode','color','font','explicitFont','explicitColor','layout','width','flowStyle','homeEntryGesture','worldEntryGesture','spaceThemePolicy'];
+    const appearance = Object.fromEntries(allowed.filter(name => typeof prefs[name] === 'boolean' || typeof prefs[name] === 'string' && prefs[name].length <= 120).map(name => [name, prefs[name]]));
+    const handoff = { to: host, at: Date.now(), prefs: appearance, spaceId, sceneId };
+    document.cookie = 'shiyu_nav_handoff=' + encodeURIComponent(JSON.stringify(handoff)) + '; Domain=.shiyubox.com; Path=/; Max-Age=30; SameSite=Lax; Secure';
+    const target = 'https://' + host + '/';
+    const animation = homeCoverTransition?.animation;
+    if (animation) Promise.race([animation.finished.catch(() => {}), new Promise(resolve => setTimeout(resolve, 1800))]).then(() => location.assign(target));
+    else requestAnimationFrame(() => location.assign(target));
+  }
   const originalChangeView = changeView;
   changeView = function accountChangeView(next, ...args) {
     if (next === 'space' && !signed) { openLogin(); return; }
-    return originalChangeView(next, ...args);
+    const host = next === 'space' && homeHost ? 'space.shiyubox.com' : next === 'home' && spaceHost ? 'shiyubox.com' : '';
+    if (!host) { const result = originalChangeView(next, ...args); if (view === next) rememberPreviewView(next); return result; }
+    if (domainNavigationPending || view === next || Date.now() < transitionUntil) return;
+    domainNavigationPending = true;
+    const result = originalChangeView(next, ...args);
+    if (view === next) navigateAfterCover(host); else domainNavigationPending = false;
+    return result;
   };
   const originalGoSpace = goSpace;
   goSpace = function accountGoSpace(...args) {
     if (!signed) { openLogin(); return; }
-    return originalGoSpace(...args);
+    if (!homeHost) { const result = originalGoSpace(...args); if (view === 'space') rememberPreviewView('space'); return result; }
+    if (domainNavigationPending) return;
+    domainNavigationPending = true;
+    const result = originalGoSpace(...args);
+    if (view === 'space') navigateAfterCover('space.shiyubox.com'); else domainNavigationPending = false;
+    return result;
   };
+  const originalRender = render;
+  render = function accountRender(...args) {
+    const result = originalRender(...args);
+    if (view === 'space' && signed && verifiedUserId === accountId() && !directSpacePending) rememberSpaceContext();
+    if (homeHost && view === 'space' && signed && !domainNavigationPending) {
+      domainNavigationPending = true;
+      navigateAfterCover('space.shiyubox.com');
+    }
+    return result;
+  };
+  window.addEventListener('click', event => {
+    if (!homeHost || !signed || !event.target.closest?.('button[data-action="space"]')) return;
+    event.preventDefault(); event.stopImmediatePropagation(); changeView('space');
+  }, true);
   const originalNavigationGesture = navigationGesture;
   navigationGesture = function accountNavigationGesture(delta, ...args) {
     if (view === 'home' && delta > 0 && !signed) { if (prefs.homeEntryGesture === 'click') return; const now = Date.now(); if (downArmedAt && now - downArmedAt < 2400) { downArmedAt = 0; openLogin('再向下滚动一次即可进入你的空间。登录后即可继续进入。'); return; } downArmedAt = now; toast('再向下滚动一次，进入你的空间。','bottom'); return; }
@@ -290,7 +344,7 @@
   };
   const originalWorkspace = workspace;
   workspace = function accountWorkspace(...args) {
-    if (!signed || (location.hostname === 'space.shiyubox.com' && verifiedUserId !== accountId())) { view = 'home'; openLogin(); render(); return; }
+    if (!signed || (location.hostname === 'space.shiyubox.com' && verifiedUserId !== accountId())) { view = 'home'; if (!directSpacePending) openLogin(); render(); return; }
     return originalWorkspace(...args);
   };
 
@@ -397,11 +451,11 @@
   document.addEventListener('visibilitychange', () => { if (!document.hidden) void refreshMembership(); });
 
   // Direct private URLs must wait for server verification and retain their destination.
-  let directSpacePending = location.hostname === 'space.shiyubox.com';
   window.addEventListener('shiyu-session-ready', event => {
     if (!directSpacePending) return;
-    if (!event.detail.authenticated) { view = 'home'; render(); openLogin(); return; }
-    directSpacePending = false; view = 'space'; render();
+    if (!event.detail.authenticated) { rememberPreviewView('home'); directSpacePending = false; view = 'home'; render(); openLogin(); return; }
+    window.ShiyuRestoreSpaceSelection?.(handoffSelection || savedSpaceContext());
+    handoffSelection = null; directSpacePending = false; document.querySelector('#login[open]')?.close(); view = 'space'; render();
   });
 
   // Keep the account slot reserved but invisible until the first membership

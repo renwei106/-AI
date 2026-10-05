@@ -23,6 +23,11 @@
       groupHost.addEventListener('wheel',e=>{
         if(view!=='space'||innerWidth<=760||e.ctrlKey||Math.abs(e.deltaX)>Math.abs(e.deltaY)||e.target.closest('.group-tab-bar,input,select,textarea')||document.querySelector('dialog[open]'))return;
         const continuous=groupHost.classList.contains('groups-continuous'),group=continuous?groupHost:e.target.closest('.group');if(!group)return;
+        if(prefs.homeEntryGesture==='click'){
+          last=0;total=0;handled=false;stage=0;stageAt=0;
+          clearTimeout(peekTimer);document.querySelector('.peek-return')?.classList.remove('revealed');
+          return;
+        }
         e.stopPropagation();gestureTotal=0;wheelBurstHandled=false;lastWheelAt=Date.now();coverReturnArmed=0;
         const now=Date.now(),key=sceneId+':'+continuous+':'+(continuous?'':currentGroup().id);
         if(key!==context||now-stageAt>4000){stage=0;context=key;}
