@@ -28,6 +28,7 @@ async function versionStatus() {
   return { current, latest: current, hasUpdate: false, browser: detectBrowser() };
 }
 let bridgeTabPromise;
+const ACCOUNT_STATE_CACHE = 'shiyuAccountState';
 async function siteTab() {
   for (const site of sites) {
     const tabs = await extensionApi.tabs.query({ url: site.origin + '/*' });
@@ -37,10 +38,10 @@ async function siteTab() {
   const site = sites[0];
   return { tab: await extensionApi.tabs.create({ url: site.href + '?extension=bridge', active: false }), site };
 }
-async function relay(request) {
+async function relay(request, attempts = 24) {
   bridgeTabPromise ||= siteTab().finally(() => { bridgeTabPromise = null; });
   const { tab, site } = await bridgeTabPromise;
-  for (let attempt = 0; attempt < 24; attempt++) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
     let result;
     try {
       const results = await extensionApi.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN',
@@ -56,6 +57,19 @@ async function relay(request) {
   }
   throw new Error('暂时连不上拾隅。请刷新拾隅网页后重试，已填内容会保留。');
 }
+async function freshAccountState() {
+  const value = await relay({ type: 'state' }, 8);
+  await extensionApi.storage.local.set({ [ACCOUNT_STATE_CACHE]: value });
+  return value;
+}
+async function accountState() {
+  const cached = (await extensionApi.storage.local.get(ACCOUNT_STATE_CACHE))[ACCOUNT_STATE_CACHE];
+  if (cached && typeof cached.signed === 'boolean') {
+    void freshAccountState().catch(() => {});
+    return cached;
+  }
+  return freshAccountState();
+}
 extensionApi.runtime.onMessage.addListener((request, sender, reply) => {
   if (sender.id !== extensionApi.runtime.id || ![extensionApi.runtime.getURL('popup.html'),extensionApi.runtime.getURL('panel.html')].includes(sender.url)) return false;
   (async () => {
@@ -67,7 +81,7 @@ extensionApi.runtime.onMessage.addListener((request, sender, reply) => {
     }
     if(request.type==='tool-records')return toolRecords(request.payload);
     if(request.type==='list'||request.type==='move')return trialRelay(request);
-    if (request.type === 'state') return relay({ type: 'state' });
+    if (request.type === 'state') return accountState();
     if (request.type === 'save') return relay({ type: 'save', payload: request.payload });
     if (request.type === 'search') return relay({ type: 'search', payload: request.payload });
     if (request.type === 'version') return versionStatus();

@@ -47,13 +47,13 @@ async function call(type, extra = {}) {
     if (type === 'search') { const query = String(extra.payload?.query || '').toLocaleLowerCase(); const items = demoSearchItems.filter(item => [item.title, item.url, item.description, item.path].some(value => value.toLocaleLowerCase().includes(query))); return { total: items.length, items }; }
     if(type==='list'){const items=demoSearchItems.map((x,i)=>({...x,id:i===2?'demo-inbox':undefined,inbox:i===2,spaceId:'work',sceneId:'daily',groupId:'tools'}));return {accountId:'preview',items,commonGroups:[{id:'common-tools',name:'拾隅',items:items.slice(0,2)},{id:'common-reading',name:'稍后阅读',items:[]},{id:'common-life',name:'生活灵感',items:[]}]};}
     if(type==='move')return {label:'所选分组'};
-    if (type === 'version') return { current: '0.2.11', latest: '0.2.11', hasUpdate: false, browser: 'chrome' };
+    if (type === 'version') return { current: '1.0.0', latest: '1.0.0', hasUpdate: false, browser: 'chrome' };
     return;
   }
   let timer;
   const request = extensionApi.runtime.sendMessage({ type, ...extra });
   const response = type === 'state' ? await Promise.race([request, new Promise((_, reject) => {
-    timer = setTimeout(() => reject(new Error('读取超时，请重试连接拾隅。')), 10000);
+    timer = setTimeout(() => reject(new Error('读取超时，请重试连接拾隅。')), 3000);
   })]).finally(() => clearTimeout(timer)) : await request;
   if (!response?.ok) throw new Error(response?.error || '连接中断，请重试。');
   return response.value;

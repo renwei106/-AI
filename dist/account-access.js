@@ -298,6 +298,7 @@
 
   const homeHost = ['shiyubox.com', 'www.shiyubox.com'].includes(location.hostname);
   const spaceHost = location.hostname === 'space.shiyubox.com';
+  const installedApp = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
   let domainNavigationPending = false;
   function navigateAfterCover(host) {
     const allowed = ['theme','mode','color','font','explicitFont','explicitColor','layout','width','flowStyle','homeEntryGesture','worldEntryGesture','spaceThemePolicy'];
@@ -317,7 +318,7 @@
   const originalChangeView = changeView;
   changeView = function accountChangeView(next, ...args) {
     if (next === 'space' && !signed) { openLogin(); return; }
-    const host = next === 'space' && homeHost ? 'space.shiyubox.com' : next === 'home' && spaceHost ? 'shiyubox.com' : '';
+    const host = next === 'space' && homeHost && !installedApp ? 'space.shiyubox.com' : next === 'home' && spaceHost ? 'shiyubox.com' : '';
     if (!host) { const result = originalChangeView(next, ...args); if (view === next) rememberPreviewView(next); return result; }
     if (domainNavigationPending || view === next || Date.now() < transitionUntil) return;
     domainNavigationPending = true;
@@ -328,7 +329,7 @@
   const originalGoSpace = goSpace;
   goSpace = function accountGoSpace(...args) {
     if (!signed) { openLogin(); return; }
-    if (!homeHost) { const result = originalGoSpace(...args); if (view === 'space') rememberPreviewView('space'); return result; }
+    if (!homeHost || installedApp) { const result = originalGoSpace(...args); if (view === 'space') rememberPreviewView('space'); return result; }
     if (domainNavigationPending) return;
     domainNavigationPending = true;
     const result = originalGoSpace(...args);
@@ -339,7 +340,7 @@
   render = function accountRender(...args) {
     const result = originalRender(...args);
     if (view === 'space' && signed && verifiedUserId === accountId() && !directSpacePending) rememberSpaceContext();
-    if (homeHost && view === 'space' && signed && !domainNavigationPending) {
+    if (homeHost && !installedApp && view === 'space' && signed && !domainNavigationPending) {
       domainNavigationPending = true;
       navigateAfterCover('space.shiyubox.com');
     }

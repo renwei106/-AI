@@ -53,7 +53,7 @@ async function call(type, extra = {}) {
   let timer;
   const request = extensionApi.runtime.sendMessage({ type, ...extra });
   const response = type === 'state' ? await Promise.race([request, new Promise((_, reject) => {
-    timer = setTimeout(() => reject(new Error('读取超时，请重试连接拾隅。')), 10000);
+    timer = setTimeout(() => reject(new Error('读取超时，请重试连接拾隅。')), 3000);
   })]).finally(() => clearTimeout(timer)) : await request;
   if (!response?.ok) throw new Error(response?.error || '连接中断，请重试。');
   return response.value;
