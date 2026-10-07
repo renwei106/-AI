@@ -1,0 +1,61 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs'), os = require('node:os'), path = require('node:path');
+const { createLimitedFreeStore, merge } = require('../../聚合管理后台/membership/limited-free-store.cjs');
+const { createMembershipService } = require('../payments/membership.cjs');
+const { policy } = require('../theme-access/server.cjs');
+const { checkShareEntitlements } = require('../share-entitlements.cjs');
+const { saveTool } = require('../payments/tool-quotas.cjs');
+const flag = { key:'share-password', kind:'text', enabled:false, value:'✓' };
+const quantity = { key:'memo-limit',kind:'quantity',enabled:true,value:2 };
+const themes = { key:'themes',kind:'selection',enabled:true,value:['base'],options:[{id:'base'},{id:'music'},{id:'disabled',enabled:false}] };
+const catalog = () => ({ items:[flag,quantity,themes] });
+const rule = (key, kind, value, extras = {}) => ({id:key,key,kind,value,enabled:true,startsAt:1000,endsAt:2000,...extras});
+function fixture(t) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(),'shiyu-limited-free-'));
+  t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+  return {dir,store:createLimitedFreeStore({file:path.join(dir,'limited-free.json'),catalog,now:()=>1500})};
+}
+test('persisted rules validate resources, overlap, revision and time boundaries', t => {
+  const {store,dir}=fixture(t);
+  store.save({revision:0,items:[rule('themes','selection',['music'])]},'QA');
+  assert.equal(createLimitedFreeStore({file:path.join(dir,'limited-free.json')}).read().items.length,1);
+  assert.throws(()=>store.save({revision:0,items:[]},'QA'),e=>e.status===409);
+  assert.throws(()=>store.save({revision:1,items:[rule('themes','selection',['disabled'])]},'QA'),/已上架/);
+  assert.throws(()=>store.save({revision:1,items:[rule('themes','selection',['music']),rule('themes','selection',['music'],{id:'other'})]},'QA'),/重叠/);
+  assert.throws(()=>store.save({revision:1,items:[rule('memo-limit','quantity',-1)]},'QA'),/额度/);
+  assert.throws(()=>store.save({revision:1,items:[rule('share-password','text','✓',{endsAt:1000})]},'QA'),/结束时间/);
+  const rules=store.publicState().items;
+  assert.deepEqual(merge([themes],rules,999)[0].value,['base']);
+  assert.deepEqual(merge([themes],rules,1000)[0].value,['base','music']);
+  assert.deepEqual(merge([themes],rules,2000)[0].value,['base']);
+});
+test('free users gain rights; members retain higher quotas; expiry and stop restore baseline without writes', async t => {
+  const {dir}=fixture(t); let now=1500;
+  const rules=[rule('share-password','text','✓'),rule('memo-limit','quantity',5),rule('themes','selection',['music'])];
+  const plans=[{id:'free',entitlements:[flag,quantity,themes]},{id:'paid',name:'会员',entitlements:[{...quantity,value:20},themes]}];
+  const service=createMembershipService({usersFile:path.join(dir,'users.json'),readPlans:()=>plans,readLimitedFree:()=>rules,readExperience:()=>({enabled:false}),now:()=>now});
+  const user={id:'qa',member:false};
+  service.writeUsers([user]); const before=fs.readFileSync(path.join(dir,'users.json'),'utf8');
+  const rights=()=>service.stateFor(user).entitlements;
+  assert.equal(service.stateFor(user).member,false);
+  assert.equal(rights().find(item=>item.key==='memo-limit').value,5);
+  assert.equal(service.stateFor({...user,member:true,memberExpiresAt:'永久',membership:{member:true,permanent:true,planId:'paid'}}).entitlements.find(item=>item.key==='memo-limit').value,20);
+  await checkShareEntitlements({headers:{}},{access:'password'},async()=>({entitlements:rights()}));
+  const note=i=>({id:String(i),title:'测试',content:''});
+  saveTool(user,rights(),{tool:'memo',revision:0,data:{notes:[note(1),note(2),note(3)]}});
+  now=2000;
+  assert.deepEqual(rights(),plans[0].entitlements);
+  await assert.rejects(checkShareEntitlements({headers:{}},{access:'password'},async()=>({entitlements:rights()})),e=>e.status===403);
+  assert.throws(()=>saveTool(user,rights(),{tool:'memo',revision:1,data:{notes:[note(1),note(2),note(3),note(4)]}}),/上限|额度/);
+  saveTool(user,rights(),{tool:'memo',revision:1,data:{notes:[note(1),note(2),note(3)]}});
+  now=1500; rules.forEach(item=>item.enabled=false); assert.deepEqual(rights(),plans[0].entitlements);
+  assert.equal(fs.readFileSync(path.join(dir,'users.json'),'utf8'),before);
+});
+test('theme limits grant only selected enabled themes and keep original premium identity',()=>{
+  const plans=[{id:'free',entitlements:[themes]}], resources=[{id:'base',enabled:true},{id:'music',enabled:true},{id:'disabled',enabled:false}];
+  const rules=[rule('themes','selection',['music','disabled'])];
+  const music=now=>policy(resources,plans,[themes],false,rules,now).items.find(item=>item.id==='music');
+  assert.equal(music(999).allowed,false); assert.equal(music(1000).allowed,true); assert.equal(music(1000).memberOnly,true); assert.equal(music(2000).allowed,false);
+  assert.equal(policy(resources,plans,[themes],false,rules,1500).items.find(item=>item.id==='disabled').allowed,false);
+});

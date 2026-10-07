@@ -9,7 +9,7 @@
     if (!menu || menu.querySelector('[data-menu-extension]')) return;
     const button = document.createElement('button');
     button.dataset.menuExtension = ''; button.setAttribute('role', 'menuitem');
-    button.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v6a3 3 0 1 1 0 6v4h6a3 3 0 1 1 6 0h4v-6a3 3 0 1 0 0-6V4h-5a3 3 0 1 0-6 0Z"/></svg>浏览器插件';
+    button.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H4v6a3 3 0 1 1 0 6v4h6a3 3 0 1 1 6 0h4v-6a3 3 0 1 0 0-6V4h-5a3 3 0 1 0-6 0Z"/></svg>便捷工具';
     button.onclick = () => window.open('/extension/', '_blank', 'noopener,noreferrer');
     const exit = menu.querySelector('[data-account-signout]');
     if (exit) exit.before(button); else menu.append(button);

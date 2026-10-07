@@ -1029,6 +1029,42 @@ if(view==='home'&&effective().theme==='music')home();
 
 const BRAND_STYLE_SYMBOLS={"base":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\"/><path d=\"M3 9h18\"/><path d=\"M9 21V9\"/></svg>","paper":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 18h-5\"/><path d=\"M18 14h-8\"/><path d=\"M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2\"/><rect width=\"8\" height=\"4\" x=\"10\" y=\"6\" rx=\"1\"/></svg>","music":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M6 12c0-1.7.7-3.2 1.8-4.2\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/><path d=\"M18 12c0 1.7-.7 3.2-1.8 4.2\"/></svg>","cinema":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12.296 3.464 3.02 3.956\"/><path d=\"M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z\"/><path d=\"M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/><path d=\"m6.18 5.276 3.1 3.899\"/></svg>","cosmos":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20.341 6.484A10 10 0 0 1 10.266 21.85\"/><path d=\"M3.659 17.516A10 10 0 0 1 13.74 2.152\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/><circle cx=\"19\" cy=\"5\" r=\"2\"/><circle cx=\"5\" cy=\"19\" r=\"2\"/></svg>","flip":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 6v6l4 2\"/></svg>","rain":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242\"/><path d=\"M16 14v6\"/><path d=\"M8 14v6\"/><path d=\"M12 16v6\"/></svg>","projection":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 7 3 5\"/><path d=\"M9 6V3\"/><path d=\"m13 7 2-2\"/><circle cx=\"9\" cy=\"13\" r=\"3\"/><path d=\"M11.83 12H20a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h2.17\"/><path d=\"M16 16h2\"/></svg>","wallfilm":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 7 3 5\"/><path d=\"M9 6V3\"/><path d=\"m13 7 2-2\"/><circle cx=\"9\" cy=\"13\" r=\"3\"/><path d=\"M11.83 12H20a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h2.17\"/><path d=\"M16 16h2\"/></svg>"};
 const discoveryBeforeMatchingIcons=addBrandDiscovery;addBrandDiscovery=function(){discoveryBeforeMatchingIcons();document.querySelectorAll(".brand-theme-menu [data-brand-theme]").forEach(button=>{const svg=button.querySelector("svg"),art=BRAND_STYLE_SYMBOLS[button.dataset.brandTheme];if(svg&&art)svg.outerHTML=art})};
+const BRAND_MODE_PREVIEW_IDS=new Set(["base","poly","music","cosmos","flow","flip","rain","cinema","paper","globe","forestCompanion","emergence","threeBody"]);
+function brandModePreview(id){return BRAND_MODE_PREVIEW_IDS.has(id)?"/official/v3/assets/theme-picker/"+id+"-"+(document.body.dataset.dark==="true"?"dark":"light")+".webp":null}
+const BRAND_THEME_COVERS={
+ base:'/official/v3/assets/current/theme-base.webp',paper:'/official/v3/assets/current/theme-paper.webp',
+ music:'/official/v3/assets/current/theme-music.webp',cosmos:'/official/v3/assets/current/theme-cosmos.webp',
+ flow:'/official/v3/assets/current/theme-flow.webp',globe:'/official/v3/assets/current/theme-globe.webp',
+ flip:'/official/v3/assets/flip.webp',cinema:'/assets/memoir/gulls.webp',
+ forestCompanion:'/assets/forest-companion/poster.webp',emergence:'/assets/emergence/cover.svg',
+ threeBody:'/assets/three-body/cover.svg'
+};
+const discoveryBeforeImageCards=addBrandDiscovery;addBrandDiscovery=function(){
+ const previousTop=$('.brand-theme-list')?.scrollTop||0;
+ const previousSelected=$('.brand-theme-list [aria-pressed=true]')?.dataset.brandTheme;
+ discoveryBeforeImageCards();
+ if(view!=='home')return;
+ const menu=document.querySelector('body>header .brand-theme-menu');if(!menu)return;
+ const list=document.createElement('div');list.className='brand-theme-list';
+ menu.querySelectorAll('[data-brand-theme]').forEach(button=>{
+  const label=document.createElement('span');label.className='brand-theme-caption';
+  label.append(...button.childNodes);
+  const preview=document.createElement('span');preview.className='brand-theme-cover';preview.setAttribute('aria-hidden','true');
+  const source=brandModePreview(button.dataset.brandTheme)||BRAND_THEME_COVERS[button.dataset.brandTheme];
+  if(source){const img=document.createElement('img');img.src=source;img.alt='';img.loading='lazy';img.decoding='async';img.width=280;img.height=158;preview.append(img)}
+  else preview.innerHTML=themeArtwork(button.dataset.brandTheme)||'';
+  button.append(preview,label);list.append(button);
+ });
+ menu.prepend(list);list.scrollTop=previousTop;
+ const centerSelected=()=>{const selected=list.querySelector('[aria-pressed=true]');if(!selected||!list.clientHeight)return;const itemRect=selected.getBoundingClientRect(),listRect=list.getBoundingClientRect();list.scrollTo({top:list.scrollTop+itemRect.top-listRect.top-(list.clientHeight-itemRect.height)/2,behavior:'smooth'})};
+ const positionMenu=()=>{const rect=menu.parentElement.querySelector(".brand").getBoundingClientRect(),center=rect.left+rect.width/2;menu.style.setProperty('--brand-menu-width',Math.min(292,2*Math.min(center-16,innerWidth-center-16))+'px');menu.style.setProperty('--brand-menu-height',Math.max(0,innerHeight-rect.bottom-12-16)+'px');centerSelected()};
+ positionMenu();menu.parentElement.onmouseenter=positionMenu;
+ if(previousSelected!==list.querySelector('[aria-pressed=true]')?.dataset.brandTheme)requestAnimationFrame(centerSelected);
+ if(!window.__brandMenuResizeBound){window.__brandMenuResizeBound=true;window.addEventListener('resize',()=>document.querySelector('body>header .brand-discovery')?.onmouseenter?.())}
+ menu.addEventListener('wheel',event=>event.stopPropagation(),{passive:true});
+ menu.addEventListener('touchstart',event=>event.stopPropagation(),{passive:true});
+ menu.addEventListener('keydown',event=>{if(['PageDown','PageUp','Home','End'].includes(event.key))event.stopPropagation()});
+};
 addBrandDiscovery();
 const PLANET_POETRY={sun:'太阳 · 把漫长岁月燃成光，照亮每一次出发。',mercury:'水星 · 离光最近的旅人，在寂静里走过晨昏。',venus:'金星 · 披着云的面纱，把温柔留给遥望的人。',earth:'地球 · 在无垠的黑暗里，这一抹蓝，叫作家。',mars:'火星 · 风吹过赤色旷野，等待下一双远行的脚步。',jupiter:'木星 · 将风暴藏进纹理，在辽阔里守候岁月。',saturn:'土星 · 把星尘围成一枚指环，寄给漫长的时光。',uranus:'天王星 · 侧身走过幽蓝长夜，自有安静的方向。',neptune:'海王星 · 在遥远的蓝色深处，风替星空写信。'};
 const syncBeforePlanetPoetry=syncPlanetView;syncPlanetView=function(){
@@ -1588,7 +1624,7 @@ updateHeader();
   {title:'从空间开始整理',body:'左上角是当前空间。你可以切换空间，把工作、学习和生活分开管理。',targets:['.sidebar .space-heading-controls','.sidebar .space-select']},
   {title:'用场景和分组分类',body:'左侧选择场景，上方切换分组。空间里可以有多个场景，每个场景再用分组整理网址。',targets:['.sidebar .scene-scroll','.group-tab-bar'],combine:true},
   {title:'切换视图与样式',body:'右下角的小按钮可以切换宫格视图与图谱视图，包括 3D 结构；旁边的椭圆按钮用来选择当前视图的样式。',targets:['.workspace-tools>.group-view-controls']},
-  {title:'收藏网址，稍后再整理',body:'点击「收藏网址」手动添加。通过浏览器插件收下的网址会进入「稍后整理」，回来后再归类；插件可以从头像菜单中的「浏览器插件」入口了解和获取。',targets:['.space-top-actions [data-space-inbox]','.space-top-actions [data-action="add"]'],combine:true},
+  {title:'收藏网址，稍后再整理',body:'点击「收藏网址」手动添加。通过浏览器插件收下的网址会进入「稍后整理」，回来后再归类；插件可以从头像菜单中的「便捷工具」入口了解和获取。',targets:['.space-top-actions [data-space-inbox]','.space-top-actions [data-action="add"]'],combine:true},
   {title:'连续上滑两次，回到首页',body:'没有网址，或网址列表已经滑到顶部时，鼠标连续向上滑动两次，就可以返回主首页。第一次会出现返回提示。',targets:['.peek-return']}
  ];
  let overlay,panel,ring,index=0,frame=0,startTimer=0,restoreFocus,returnWasVisible=false,inertState=[];
@@ -1661,7 +1697,7 @@ updateHeader();
  let loading=false;
  async function refreshBadge(){
   if(loading)return;loading=true;
-  try{const response=await fetch('/api/shiyu/member-visual',{cache:'no-store'});if(!response.ok)return;const config=await response.json(),badge=safeBadge(config?.badgeSvg);if(!badge||badge===MEMBER_VISUAL_CONFIG.badge)return;MEMBER_VISUAL_CONFIG.badge=badge;document.querySelectorAll('.membership-badge,.header-membership-badge,.membership-avatar-badge,.corner-member-badge,.theme-member-badge').forEach(node=>{node.innerHTML=badge});decorateMemberMarkers?.();markMemberEntries?.();markPaidStyleOptions?.();updateHeader?.()}catch{}finally{loading=false}
+  try{const response=await fetch('/api/shiyu/member-visual',{cache:'no-store'});if(!response.ok)return;const config=await response.json(),badge=safeBadge(config?.badgeSvg);if(!badge||badge===MEMBER_VISUAL_CONFIG.badge)return;MEMBER_VISUAL_CONFIG.badge=badge;document.querySelectorAll('.membership-badge,.header-membership-badge,.membership-avatar-badge,.corner-member-badge,.theme-member-badge').forEach(node=>{if(!node.classList.contains('limited-free-badge'))node.innerHTML=badge});decorateMemberMarkers?.();markMemberEntries?.();markPaidStyleOptions?.();updateHeader?.()}catch{}finally{loading=false}
  }
  refreshBadge();window.addEventListener('focus',refreshBadge);setInterval(()=>{if(!document.hidden)refreshBadge()},15000);
 })();
@@ -2128,3 +2164,9 @@ mountFullscreenCord();
   setTimeout(()=>{if(view==='space'&&document.querySelector('.workspace [data-link-settings]'))openLinkSettings()},0);
  },true);
 })();
+
+new MutationObserver(()=>{document.querySelectorAll("body>header .brand-theme-cover>img").forEach(img=>{const id=img.closest("[data-brand-theme]")?.dataset.brandTheme,source=brandModePreview(id);if(source&&img.getAttribute("src")!==source)img.src=source})}).observe(document.body,{attributes:true,attributeFilter:["data-dark"]});
+
+function syncSettingsThemePreviews(){document.querySelectorAll('#settings [data-v2-theme] .theme-preview').forEach(preview=>{const source=brandModePreview(preview.closest('[data-v2-theme]').dataset.v2Theme);if(!source)return;let img=preview.querySelector('img[data-theme-mode-preview]');if(!img){img=document.createElement('img');img.dataset.themeModePreview='';img.alt='';img.style.cssText='display:block;width:100%;height:100%;object-fit:cover';preview.replaceChildren(img)}if(img.getAttribute('src')!==source)img.src=source})}
+const settingsBeforeModePreviews=renderSettings;renderSettings=function(){settingsBeforeModePreviews();syncSettingsThemePreviews()};
+new MutationObserver(syncSettingsThemePreviews).observe(document.body,{attributes:true,attributeFilter:['data-dark']});

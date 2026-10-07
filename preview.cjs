@@ -17,6 +17,9 @@ async function handlePayment(req,res){
   }
 }
 const routes={
+  '/install/':'install/index.html','/install/index.html':'install/index.html','/install/install.js':'install/install.js',
+  '/install/manifest.webmanifest':'install/manifest.webmanifest','/install/icon.svg':'install/icon.svg','/install/icon-192.png':'install/icon-192.png','/install/icon-512.png':'install/icon-512.png',
+  '/install/shiyu-shortcut.zip':'install/shiyu-shortcut.zip',
   '/onboarding.js':'onboarding.js','/onboarding.css':'onboarding.css','/onboarding-input.js':'onboarding-input.js','/account-security.js':'account-security.js',
   '/todo-calendar.js':'todo-calendar.js','/todo-calendar-core.js':'todo-calendar-core.js','/todo-calendar.css':'todo-calendar.css',
   '/home-responsive.css':'home-responsive.css','/home-responsive.js':'home-responsive.js',
@@ -84,6 +87,7 @@ http.createServer(async(req,res)=>{
   if(await themeConfigProxy(req,res))return
   if(await shareHandler(req,res))return
   const pathname=req.url.split('?')[0]
+  if(pathname==='/install'){res.writeHead(302,{Location:'/install/'+req.url.slice(pathname.length)});res.end();return}
   if(require('./forest-companion-assets.cjs')(req,res))return
   if(/^\/emergence-theme\.(js|css)$/.test(pathname)||/^\/assets\/emergence\/(engine|scenes|shell)\.js$/.test(pathname)||pathname==='/assets/emergence/cover.svg')routes[pathname]=pathname.slice(1)
   if(/^\/assets\/playgrounds\/(catalog|models|stage)\.js$/.test(pathname))routes[pathname]=pathname.slice(1)
@@ -107,8 +111,9 @@ http.createServer(async(req,res)=>{
   // The desktop preview serves files directly from dist while the app stays
   // open for long sessions. Never let a previous UI bundle survive a refresh.
   res.setHeader('Cache-Control','no-store, max-age=0')
+  if(file==='install/shiyu-shortcut.zip'){res.setHeader('Content-Type','application/zip');res.setHeader('Content-Disposition',"attachment; filename=\"Shiyu-shortcut.zip\"; filename*=UTF-8''%E6%8B%BE%E9%9A%85%E6%A1%8C%E9%9D%A2%E5%BF%AB%E6%8D%B7%E6%96%B9%E5%BC%8F.zip");fs.createReadStream(fullPath).pipe(res);return}
   if(/\.(?:fbx|exr)$/.test(file)){res.setHeader('Content-Type','application/octet-stream');fs.createReadStream(fullPath).pipe(res);return}
-  res.setHeader('Content-Type',file.endsWith('.svg')?'image/svg+xml':file.endsWith('.xml')?'application/xml; charset=utf-8':file.endsWith('.txt')?'text/plain; charset=utf-8':file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webp')?'image/webp':file.endsWith('.webm')?'video/webm':file.endsWith('.woff2')?'font/woff2':file.endsWith('.css')?'text/css; charset=utf-8':file.endsWith('.js')?'text/javascript; charset=utf-8':'text/html; charset=utf-8')
+  res.setHeader('Content-Type',file.endsWith('.webmanifest')?'application/manifest+json; charset=utf-8':file.endsWith('.svg')?'image/svg+xml':file.endsWith('.xml')?'application/xml; charset=utf-8':file.endsWith('.txt')?'text/plain; charset=utf-8':file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webp')?'image/webp':file.endsWith('.webm')?'video/webm':file.endsWith('.woff2')?'font/woff2':file.endsWith('.css')?'text/css; charset=utf-8':file.endsWith('.js')?'text/javascript; charset=utf-8':'text/html; charset=utf-8')
   const stream=fs.createReadStream(fullPath)
   stream.on('error',()=>{if(!res.headersSent)res.writeHead(404);res.end('Not found')})
   stream.pipe(res)

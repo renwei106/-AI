@@ -1293,3 +1293,52 @@ body[data-view=space] .workspace .space-top-actions .account-entry>.shiyu-avatar
 #world-page .world-header .account-menu{border:0}
 
 body[data-view=space] .workspace-top .space-top-actions{position:relative;top:-6px}
+
+/* Image cards belong only to the homepage's existing theme hover picker. */
+body[data-view=home]:not(.world-active) header .brand-theme-menu{box-sizing:border-box;left:50%;transform:translateX(-50%);width:var(--brand-menu-width,292px);max-width:calc(100vw - 32px);max-height:var(--brand-menu-height,calc(100dvh - 88px));padding:2px;overflow:hidden}
+body[data-view=home]:not(.world-active) header .brand-discovery::after{width:292px;max-width:calc(100vw - 32px)}
+body[data-view=home]:not(.world-active) header .brand-theme-list{display:flex;flex-direction:column;gap:8px;max-height:calc(var(--brand-menu-height,100dvh - 88px) - 76px);min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--muted) 12%,transparent) transparent;scroll-padding:4px;padding:0}
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme]{position:relative;overflow:hidden;display:block;flex:none;width:100%;min-height:0;padding:0;border:1px solid var(--line);border-radius:9px;background:transparent;text-align:left}
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme]:hover{background:var(--soft)}
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme][aria-pressed=true]{border-color:var(--accent);background:var(--soft)}
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme]:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+body[data-view=home]:not(.world-active) header .brand-theme-cover{display:block;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:8px;background:var(--soft)}
+body[data-view=home]:not(.world-active) header .brand-theme-cover>:is(img,svg){display:block;width:100%;height:100%;object-fit:cover}
+body[data-view=home]:not(.world-active) header .brand-theme-caption{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:7px;min-height:30px;padding:12px 8px 5px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.72));text-shadow:0 1px 2px #0008}
+body[data-view=home]:not(.world-active) header .brand-theme-caption>svg{display:none}
+body[data-view=home]:not(.world-active) header .brand-theme-caption>b{flex:1;font-size:12px;font-weight:400}
+body[data-view=home]:not(.world-active) header .brand-theme-caption>span:empty{flex:none;width:13px;text-align:center}
+body[data-view=home]:not(.world-active) header [data-brand-theme][aria-pressed=true]>.brand-theme-caption>span:empty::after{content:'✓';color:var(--accent)}
+body[data-view=home]:not(.world-active) header .brand-theme-menu>.brand-origin-link{margin-top:8px}
+
+body[data-view=home]:not(.world-active) header .brand-theme-list::-webkit-scrollbar{width:1px}
+body[data-view=home]:not(.world-active) header .brand-theme-list::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--muted) 12%,transparent);border-radius:1px}
+body[data-view=home]:not(.world-active) header .brand-theme-list::-webkit-scrollbar-track{background:transparent}
+body[data-view=home]:not(.world-active) header .brand-theme-caption .limited-free-badge{background:color-mix(in srgb,var(--accent) 18%,var(--surface));text-shadow:none}
+
+@supports selector(::-webkit-scrollbar){body[data-view=home]:not(.world-active) header .brand-theme-list{scrollbar-width:auto;scrollbar-color:auto}}
+
+body[data-view=home]:not(.world-active) header .brand-theme-list{counter-reset:brand-theme-order}
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme]{counter-increment:brand-theme-order}
+body[data-view=home]:not(.world-active) header .brand-theme-caption::before{content:counter(brand-theme-order) ".";flex:none;font-size:12px;font-variant-numeric:tabular-nums}
+
+body[data-view=home]:not(.world-active) header .brand-theme-caption .theme-member-badge{opacity:1!important;position:relative;z-index:1;text-shadow:none}
+body[data-view=home]:not(.world-active) header .brand-theme-caption .theme-member-badge:not(.limited-free-badge){width:12px!important;height:12px!important}
+body[data-view=home]:not(.world-active) header .brand-theme-caption .theme-member-badge>svg{display:block;width:12px!important;height:12px!important}
+body[data-view=home]:not(.world-active) header .brand-theme-caption .limited-free-badge{background:var(--surface);color:var(--ink);font-family:system-ui,sans-serif;font-size:10px!important;font-weight:600;line-height:18px!important}
+
+/* Selection changes only the homepage theme picker previews. */
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme]{border-color:transparent}
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme][aria-pressed=true]{border-color:transparent;background:transparent}
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme]:not([aria-pressed=true]) .brand-theme-cover{opacity:.55}
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme]:not([aria-pressed=true]):hover .brand-theme-cover{opacity:.8}
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme][aria-pressed=true] .brand-theme-cover{opacity:1}
+body[data-view=home]:not(.world-active) header [data-brand-theme][aria-pressed=true]>.brand-theme-caption>span:empty{width:auto;flex:none}
+body[data-view=home]:not(.world-active) header [data-brand-theme][aria-pressed=true]>.brand-theme-caption>span:empty::after{content:'当前';display:inline-block;padding:1px 4px;border-radius:3px;background:var(--accent);color:var(--surface);font:10px/16px system-ui,sans-serif;text-shadow:none}
+
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme]:not([aria-pressed=true]) .brand-theme-cover{opacity:1;filter:grayscale(1)}
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme]:not([aria-pressed=true]):hover .brand-theme-cover{opacity:1;filter:none}
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme][aria-pressed=true] .brand-theme-cover{opacity:1;filter:none}
+
+body[data-view=home]:not(.world-active) header [data-brand-theme][aria-pressed=true]>.brand-theme-caption>span:empty::after{content:none}
+body[data-view=home]:not(.world-active) header .brand-theme-list>[data-brand-theme][aria-pressed=true]::after{content:'当前';position:absolute;top:6px;right:6px;z-index:2;padding:2px 6px;border-radius:4px;background:#f07816;color:#fff;font:600 10px/16px system-ui,sans-serif;text-shadow:none;box-shadow:0 1px 4px #0003;pointer-events:none}

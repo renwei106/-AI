@@ -40,7 +40,7 @@ function createMembershipService(options = {}) {
       planVersion: member ? plan?.version || value?.planVersion || 1 : plan?.version || 1,
       entitlements: copy(plan?.entitlements || (member && Array.isArray(value?.entitlements) ? value.entitlements : [])) };
   }
-  function stateFor(user) {
+  function baseStateFor(user) {
     const actual = actualStateFor(user);
     if (!user || user.blacklisted || user.canceledAt) return actual;
     const test = testState(user);
@@ -50,8 +50,14 @@ function createMembershipService(options = {}) {
     return { member, permanent: member, expiresAt: null, planId: plan.id,
       planName: plan.name, planVersion: plan.version || 1, entitlements: copy(plan.entitlements || []) };
   }
+  function withLimitedFree(state, user) {
+    const store = require(path.join(DEFAULT_ADMIN, 'membership/limited-free-store.cjs'));
+    const rules = user?.blacklisted || user?.canceledAt ? [] : options.readLimitedFree ? options.readLimitedFree() : options.readPlans ? [] : store.publicState().items;
+    return { ...state, baseEntitlements: copy(state.entitlements), limitedFree: rules, entitlements: store.merge(state.entitlements, rules, now()) };
+  }
+  function stateFor(user) { return withLimitedFree(baseStateFor(user), user); }
   function present(user, includeEvents = false, testView = false) {
-    const state = testView ? stateFor(user) : actualStateFor(user), { password, accountData, memberEvents, membership, toolData, toolUsage, ...rest } = user;
+    const state = testView ? stateFor(user) : withLimitedFree(actualStateFor(user), user), { password, accountData, memberEvents, membership, toolData, toolUsage, ...rest } = user;
     return { ...rest, ...state, membership: { ...state }, memberExpiresAt: state.permanent ? '永久' : state.expiresAt ? new Date(state.expiresAt).toISOString() : null,
       ...(includeEvents ? { memberEvents: copy(memberEvents || []) } : {}) };
   }

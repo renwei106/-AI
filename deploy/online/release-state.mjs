@@ -21,9 +21,12 @@ if(action==='prepare'){
  checkJobs();
  const record=json('/tmp/shiyu-release-'+id+'.json'),state=json(history),last=state.items.filter(x=>x.target==='website').at(-1);
  if(!record.id||record.target!=='website'||!/^V\d+\.\d+\.\d+$/.test(record.version)||!['feature','fix','change'].includes(record.changeType)||!record.summary||record.summary.length>500||!Number.isFinite(Date.parse(record.releasedAt)))throw Error('Invalid release record');
+ const extension=record.extensionRecord;
+ if(extension&&(!extension.id||extension.target!=='extension'||!/^V\d+\.\d+\.\d+$/.test(extension.version)||!['feature','fix','change'].includes(extension.changeType)||!extension.summary||extension.summary.length>500||!Number.isFinite(Date.parse(extension.releasedAt))))throw Error('Invalid extension release record');
  const parts=last.version.slice(1).split('.').map(Number);parts[2]++;
  const approvedMinor=(record.previousVersion==='V1.0.14'&&last.version==='V1.0.14'&&record.version==='V1.1.0')||(record.previousVersion==='V1.1.2'&&last.version==='V1.1.2'&&record.version==='V1.2.0');
- if((record.version!=='V'+parts.join('.')&&!approvedMinor)||state.items.some(x=>x.id===record.id||x.target==='website'&&x.version===record.version))throw Error('Release version conflicts with current history');
+ const requestedJump=record.confirmedVersionJump===true&&record.previousVersion===last.version&&(()=>{const next=record.version.slice(1).split('.').map(Number),previous=last.version.slice(1).split('.').map(Number);return next[0]===previous[0]&&next[1]===previous[1]&&next[2]===previous[2]+2})();
+ if((record.version!=='V'+parts.join('.')&&!approvedMinor&&!requestedJump)||state.items.some(x=>x.id===record.id||x.target==='website'&&x.version===record.version)||extension&&state.items.some(x=>x.id===extension.id||x.target==='extension'&&x.version===extension.version))throw Error('Release version conflicts with current history');
  fs.mkdirSync(root,{mode:0o700});
  const require=createRequire(import.meta.url),cfg=require('/opt/shiyu/current/payments/config.cjs').loadConfig();
  if(!fs.existsSync(cfg.file))throw Error('Missing production payment configuration');
@@ -41,9 +44,9 @@ if(action==='prepare'){
  fs.writeFileSync(root+'/preserved-config.json',JSON.stringify(sums),{mode:0o600});
  // Recheck immediately before appending; never replace historical rows with local seed data.
  if(JSON.stringify(json(history))!==JSON.stringify(state))throw Error('Release history changed during preflight');
- state.items.push(record);fs.writeFileSync(history+'.release.tmp',JSON.stringify(state,null,2)+'\n');fs.renameSync(history+'.release.tmp',history);
- if(JSON.stringify(json(history).items.slice(0,-1))!==JSON.stringify(json(root+'/admin/shiyu-release-history.json').items))throw Error('Previous release history changed');
- console.log('BACKUP='+root+'\nAPPENDED_RELEASE='+record.version);
+ const appended=extension?[extension,record]:[record];state.items.push(...appended);fs.writeFileSync(history+'.release.tmp',JSON.stringify(state,null,2)+'\n');fs.renameSync(history+'.release.tmp',history);
+ if(JSON.stringify(json(history).items.slice(0,-appended.length))!==JSON.stringify(json(root+'/admin/shiyu-release-history.json').items))throw Error('Previous release history changed');
+ console.log('BACKUP='+root+'\nAPPENDED_RELEASE='+appended.map(item=>item.version).join(','));
 }else if(action==='restore-language'){
  const record=json('/tmp/shiyu-release-'+id+'.json');
  if(record.initializeEnglish===true){
@@ -54,8 +57,8 @@ if(action==='prepare'){
  }
 }else if(action==='verify'){
  const sums=json(root+'/preserved-config.json');for(const [file,hash] of Object.entries(sums))if(digest(file)!==hash)throw Error('Production configuration changed: '+path.basename(file));
- const before=json(root+'/admin/shiyu-release-history.json'),current=json(history),record=json('/tmp/shiyu-release-'+id+'.json');
- if(JSON.stringify(current.items.slice(0,-1))!==JSON.stringify(before.items)||current.items.at(-1).id!==record.id)throw Error('Release history verification failed');
+ const before=json(root+'/admin/shiyu-release-history.json'),current=json(history),record=json('/tmp/shiyu-release-'+id+'.json'),appended=record.extensionRecord?[record.extensionRecord,record]:[record];
+ if(JSON.stringify(current.items.slice(0,-appended.length))!==JSON.stringify(before.items)||JSON.stringify(current.items.slice(-appended.length).map(item=>item.id))!==JSON.stringify(appended.map(item=>item.id)))throw Error('Release history verification failed');
  if(record.initializeEnglish===true){
   const language=json('/opt/shiyu-admin/current/.local/shiyu-i18n.json');
   if(!language.settings.languages.some(l=>l.code==='en'&&l.enabled)||!Object.keys(language.releases.en?.dictionary||{}).length)throw Error('English initialization verification failed');

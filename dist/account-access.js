@@ -109,6 +109,13 @@
     invalidateAccount();
     const previousOwner = prefs.accountDataUserId;
     adoptUser(result.user, result.accountData);
+    // Only a newly registered account starts with the default layout; ordinary
+    // logins keep the user's saved choice, including independent space layouts.
+    if (result.isNewUser === true) {
+      prefs.width = defaults.width;
+      prefs.spacePreferenceModes = { ...prefs.spacePreferenceModes, width: 'global' };
+      prefs.registrationLayoutPendingUserId = result.user.id;
+    }
     if (!Array.isArray(result.accountData) && previousOwner !== result.user.id) { data = clone(seed); prefs.accountDataUserId = result.user.id; normalizeSelection(); }
     rawPersist(); appliedLogins.add(result);
     window.dispatchEvent(new CustomEvent('shiyu-account-state', { detail: result }));
@@ -158,8 +165,8 @@
     const active = signed && source.member === true && (source.permanent === true || Number(source.expiresAt) > Date.now());
     const free = (window.__shiyuMemberCatalog?.plans || []).find(plan => plan.id === 'free');
     const snapshot = { ready, member: active, permanent: active && source.permanent === true,
-      expiresAt: source.expiresAt || null, planId: source.planId || 'free', planName: source.planName || '免费版', entitlements: Array.isArray(source.entitlements) ? source.entitlements : [] };
-    if (!active && source.member === true) { snapshot.planId = 'free'; snapshot.planName = free?.name || '免费版'; snapshot.entitlements = free?.entitlements || []; }
+      expiresAt: source.expiresAt || null, planId: source.planId || 'free', planName: source.planName || '免费版', baseEntitlements: Array.isArray(source.baseEntitlements) ? source.baseEntitlements : undefined, limitedFree: source.limitedFree || [], entitlements: Array.isArray(source.entitlements) ? source.entitlements : [] };
+    if (!active && source.member === true) { snapshot.planId = 'free'; snapshot.planName = free?.name || '免费版'; snapshot.entitlements = free?.entitlements || []; snapshot.baseEntitlements = snapshot.entitlements; }
     clearTimeout(membershipExpiryTimer);
     if (active && !snapshot.permanent) membershipExpiryTimer = setTimeout(() => {
       if (snapshot.expiresAt <= Date.now()) {
@@ -212,7 +219,7 @@
       if (requestId !== membershipRequest || !currentTicket(ticket)) return;
       if (result.authenticated !== true || !result.user?.id) {
         if (signed || sharedIdentity()) clearAccount();
-        else { verifiedUserId = ''; publishMembership({ member: false, entitlements: result.entitlements || [] }); }
+        else { verifiedUserId = ''; publishMembership({ ...result, member: false, entitlements: result.entitlements || [] }); }
         return false;
       }
       const previousMembership = JSON.stringify(prefs.membership || null), previousProfile = JSON.stringify(prefs.accountProfile || {});
@@ -296,6 +303,11 @@
     const allowed = ['theme','mode','color','font','explicitFont','explicitColor','layout','width','flowStyle','homeEntryGesture','worldEntryGesture','spaceThemePolicy'];
     const appearance = Object.fromEntries(allowed.filter(name => typeof prefs[name] === 'boolean' || typeof prefs[name] === 'string' && prefs[name].length <= 120).map(name => [name, prefs[name]]));
     const handoff = { to: host, at: Date.now(), prefs: appearance, spaceId, sceneId };
+    if (host === 'space.shiyubox.com' && prefs.registrationLayoutPendingUserId === accountId()) {
+      handoff.widthMode = unifiedField('width') ? 'global' : 'space';
+      delete prefs.registrationLayoutPendingUserId;
+      rawPersist();
+    }
     document.cookie = 'shiyu_nav_handoff=' + encodeURIComponent(JSON.stringify(handoff)) + '; Domain=.shiyubox.com; Path=/; Max-Age=30; SameSite=Lax; Secure';
     const target = 'https://' + host + '/';
     const animation = homeCoverTransition?.animation;

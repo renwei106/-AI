@@ -47,10 +47,14 @@ async function call(type, extra = {}) {
     if (type === 'search') { const query = String(extra.payload?.query || '').toLocaleLowerCase(); const items = demoSearchItems.filter(item => [item.title, item.url, item.description, item.path].some(value => value.toLocaleLowerCase().includes(query))); return { total: items.length, items }; }
     if(type==='list'){const items=demoSearchItems.map((x,i)=>({...x,id:i===2?'demo-inbox':undefined,inbox:i===2,spaceId:'work',sceneId:'daily',groupId:'tools'}));return {accountId:'preview',items,commonGroups:[{id:'common-tools',name:'拾隅',items:items.slice(0,2)},{id:'common-reading',name:'稍后阅读',items:[]},{id:'common-life',name:'生活灵感',items:[]}]};}
     if(type==='move')return {label:'所选分组'};
-    if (type === 'version') return { current: '0.2.8', latest: '0.2.8', hasUpdate: false, browser: 'chrome' };
+    if (type === 'version') return { current: '0.2.11', latest: '0.2.11', hasUpdate: false, browser: 'chrome' };
     return;
   }
-  const response = await extensionApi.runtime.sendMessage({ type, ...extra });
+  let timer;
+  const request = extensionApi.runtime.sendMessage({ type, ...extra });
+  const response = type === 'state' ? await Promise.race([request, new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error('读取超时，请重试连接拾隅。')), 10000);
+  })]).finally(() => clearTimeout(timer)) : await request;
   if (!response?.ok) throw new Error(response?.error || '连接中断，请重试。');
   return response.value;
 }
@@ -143,10 +147,10 @@ function updateSave() {
   $('#save-temporary').querySelector('.save-label').textContent = busy && mode === 'temporary' ? '正在保存…' : '稍后整理';
   $('#save-group').querySelector('.save-label').textContent = busy && mode === 'group' ? '正在保存…' : '收藏至所选分组';
 }
-function setDestinationLoading(loading) {
+function setDestinationLoading(loading, label = '正在读取…') {
   document.querySelectorAll('.place-trigger').forEach(trigger => {
     trigger.disabled = loading;
-    if (loading) trigger.querySelector('[data-picker-value]').textContent = '正在读取…';
+    if (loading) trigger.querySelector('[data-picker-value]').textContent = label;
   });
 }
 function selectMode(value) {
@@ -168,10 +172,11 @@ async function connect() {
     document.body.classList.toggle('guest', !state.signed); $('#login-panel').hidden = state.signed;
     applyTheme(state.theme || null);
     options($('#space'), state.spaces, draft?.spaceId); fillScenes(draft);
-    setDestinationLoading(!state.signed || !current?.url);
+    setDestinationLoading(!state.signed, '请先登录');
+    $('#editor').disabled = !state.signed || !current?.url;
     status(!state.signed ? '登录后才能收藏。' : !current?.url ? '此页面无法收藏，请打开普通 HTTP / HTTPS 网页。' : '');
     updateSave();
-  } catch (error) { state = null; setDestinationLoading(true); updateSave(); status(error.message, 'error'); $('#retry').hidden = false; }
+  } catch (error) { state = null; setDestinationLoading(true, '读取失败'); $('#editor').disabled = true; updateSave(); status(error.message, 'error'); $('#retry').hidden = false; }
   finally { document.body.dataset.auth = state?.signed ? 'signed' : state ? 'guest' : 'error'; document.dispatchEvent(new Event('trial-auth-change')); }
 }
 document.querySelectorAll('.place-trigger').forEach(trigger => trigger.onclick = () => {
@@ -200,7 +205,7 @@ $('#bookmark-form').onsubmit = async event => {
     status(preview ? '演示完成 · 实际使用时将保存到' + result.label : result.duplicate ? '已在「' + result.label + '」中，无需重复收藏。' : '已收藏到「' + result.label + '」。', 'success');
     if (!preview) { try { await extensionApi.storage.local.remove('draft'); } catch { /* Save is already confirmed. */ } }
   } catch (error) { status(error.message, 'error'); $('#retry').hidden = false; }
-  finally { busy = false; $('#editor').disabled = !state?.signed || !current?.url; updateSave(); }
+  finally { busy = false; $('#editor').disabled = !state?.signed || !current?.url; updateSave(); if (!preview && location.pathname.endsWith('/panel.html')) queueCurrentPageRefresh(); }
 };
 $('#retry').onclick = connect;
 $('#version-status').onclick = event => { if (event.currentTarget.dataset.update !== 'true') return; call('open-update').catch(error => status(error.message, 'error')); };
@@ -208,11 +213,50 @@ for (const [id, page] of [['login', 'login']]) $( '#' + id).onclick = () => {
   if (preview) { window.open((location.hostname === '127.0.0.1' ? 'http://127.0.0.1:4318/' : 'https://shiyubox.com/') + '?extension=login', '_blank', 'noopener'); return; }
   call('open', { page }).catch(error => status(error.message, 'error'));
 };
+let currentTabId, pageRefreshSerial = 0, pageRefreshTimer;
+function pageFromTab(tab) {
+  const url = tab?.pendingUrl || tab?.url;
+  return url && /^https?:\/\//i.test(url) ? { url, title: (tab.title || new URL(url).hostname).slice(0, 100), icon: tab.favIconUrl || '' } : null;
+}
+async function refreshCurrentPage() {
+  if (preview || busy) return;
+  const serial = ++pageRefreshSerial;
+  const [tab] = await extensionApi.tabs.query({ active: true, currentWindow: true });
+  if (serial !== pageRefreshSerial) return;
+  const next = pageFromTab(tab);
+  currentTabId = tab?.id;
+  if (next?.url !== current?.url) {
+    await saveDraft();
+    if (serial !== pageRefreshSerial) return;
+    current = next; draft = null; lastSuccess = false;
+    $('#title').value = current?.title || ''; $('#description').value = '';
+    document.querySelector('#save-result')?.setAttribute('hidden', '');
+    setView(view);
+  } else {
+    if ($('#title').value === current?.title) $('#title').value = next?.title || '';
+    current = next;
+  }
+  $('#page-domain').textContent = current ? new URL(current.url).hostname : '浏览器设置页、新标签页等无法收藏';
+  setSiteIdentity(); $('#editor').disabled = !state?.signed || !current?.url; updateSave();
+  if (state?.signed) status(current?.url ? '' : '此页面无法收藏，请打开普通 HTTP / HTTPS 网页。');
+}
+function queueCurrentPageRefresh() {
+  clearTimeout(pageRefreshTimer);
+  pageRefreshTimer = setTimeout(() => refreshCurrentPage().catch(error => status(error.message, 'error')), 80);
+}
+if (!preview && location.pathname.endsWith('/panel.html')) {
+  extensionApi.tabs.onActivated.addListener(queueCurrentPageRefresh);
+  extensionApi.tabs.onUpdated.addListener((tabId, change) => {
+    if (tabId === currentTabId && (change.url || change.status === 'complete' || change.title)) queueCurrentPageRefresh();
+  });
+  window.addEventListener('focus', queueCurrentPageRefresh);
+}
 async function start() {
   if (preview) { document.body.classList.add('preview'); current = { title: '拾隅 · 让喜欢，自有归处', url: 'https://shiyubox.com/', description: '遇见喜欢的，随手收进拾隅。', icon: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="7" fill="#48614c"/><g transform="translate(4 4)" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M3 14h7a4 4 0 0 0 4-4V3M14 14l7 7"/></g></svg>') }; }
   else {
     const [tab] = await extensionApi.tabs.query({ active: true, currentWindow: true });
-    if (tab?.url && /^https?:\/\//i.test(tab.url)) current = { url: tab.url, title: (tab.title || new URL(tab.url).hostname).slice(0, 100), icon: tab.favIconUrl || '' };
+    currentTabId = tab?.id;
+    current = pageFromTab(tab);
     try { draft = (await extensionApi.storage.local.get('draft')).draft; if (draft?.url !== current?.url) draft = null; } catch {}
   }
   $('#page-domain').textContent = current ? new URL(current.url).hostname : '浏览器设置页、新标签页等无法收藏';

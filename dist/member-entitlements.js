@@ -32,7 +32,30 @@
     const selected = Array.isArray(benefit.value) ? benefit.value : [benefit.value];
     return selected.some(id => normalize(id) === normalize(value));
   }
-  function allows(key, value) { return snapshot().ready === true && grants(snapshot().entitlements, key, value); }
+  let limitedRules = [], limitedTimer = null, limitedClock = {serverTime:Date.now(),clientTime:performance.now()};
+  const limitedNow = () => limitedClock.serverTime + performance.now() - limitedClock.clientTime;
+  const activeLimited = () => limitedRules.filter(item => item.enabled === true && item.startsAt <= limitedNow() && limitedNow() < item.endsAt);
+  function limited(key, value) {
+    if (key === 'corner-colors') { if (['default','theme'].includes(value)) return false; if (activeLimited().some(item => item.key === key && item.kind === 'selection' && item.value.includes(value)) && available(key,value)) return true; const color = options(key).find(item => item.id === value)?.preview?.color || value; const needed = colorRequirement(color); return limited(...needed); }
+    return available(key, value) && activeLimited().some(item => item.key === key && (item.kind !== 'selection' ? value === undefined : value !== undefined && item.value.some(id => normalize(id) === normalize(value))));
+  }
+  function effectiveEntitlements() {
+    const state = snapshot(); state.baseEntitlements ||= structuredClone(state.entitlements || []); const result = structuredClone(state.baseEntitlements);
+    for (const rule of activeLimited()) {
+      let item = find(result, rule.key);
+      if (!item) { item = {key:rule.key,kind:rule.kind,enabled:false,value:[]}; result.push(item); }
+      if (rule.kind === 'selection') item.value = [...new Set([...(item.enabled && Array.isArray(item.value) ? item.value : []), ...rule.value])];
+      else if (rule.kind === 'quantity') { item.value = Math.max(item.enabled ? Number(item.value)||0 : 0, rule.value); item.unlimited = item.enabled && item.unlimited === true || rule.unlimited === true; }
+      item.enabled = true;
+    }
+    return result;
+  }
+  function scheduleLimited() {
+    clearTimeout(limitedTimer);
+    const now = limitedNow(), next = limitedRules.flatMap(item => [item.startsAt,item.endsAt]).filter(time => time > now).sort((a,b) => a-b)[0];
+    if (next) limitedTimer = setTimeout(() => { queueDecorate(); snapshot().entitlements = effectiveEntitlements(); window.dispatchEvent(new Event('shiyu-user-entitlements')); window.dispatchEvent(new Event('shiyu-limited-free-change')); scheduleLimited(); }, Math.min(next-now+5,2147483647));
+  }
+  function allows(key, value) { return snapshot().ready === true && (grants(effectiveEntitlements(), key, value) || limited(key, value)); }
   function premium(key, value) { return !!window.__shiyuMemberCatalog?.ready && !grants(freePlan()?.entitlements, key, value) && paidPlans().some(plan => grants(plan.entitlements, key, value)); }
   function requireFeature(key, value, section = category(key), context = {}) {
     if (allows(key, value)) return true;
@@ -47,7 +70,7 @@
     if (!item?.enabled || item.kind !== 'quantity' || item.value === '' || !Number.isFinite(Number(item.value)) || Number(item.value) < 0) return null;
     return Math.floor(Number(item.value));
   }
-  function limit(kind) { return snapshot().ready === true ? quantity(snapshot().entitlements, kind + '-limit') : null; }
+  function limit(kind) { return snapshot().ready === true ? quantity(effectiveEntitlements(), kind + '-limit') : null; }
   function requireQuota(kind, count, addition = 1) {
     const maximum = limit(kind);
     if (maximum !== null && Number(count) + addition <= maximum) return true;
@@ -86,32 +109,33 @@
   }
   const selector = '[data-pref="font"],[data-pref="width"],[data-pref="color"],[data-preference-mode],[data-space-font],[data-space-width],[data-space-color],[data-custom-color],[data-link-view],[data-display-scope],[data-corner-color],[data-corner-custom],[data-pet-pref="skin"]';
   function badgeMarkup() { try { return MEMBER_VISUAL_CONFIG.badge; } catch { return ''; } }
-  function mark(button, paid, badgeClass = 'membership-badge') {
+  function mark(button, paid, badgeClass = 'membership-badge', isLimited = false) {
     let badge = button.querySelector('[data-entitlement-badge]');
     if (!paid) { badge?.remove(); return; }
-    const markup = badgeMarkup(); if (!markup) return;
+    const markup = isLimited ? '限免' : badgeMarkup(); if (!markup) return;
     if (!badge) { badge = document.createElement('span'); badge.className = badgeClass; badge.dataset.entitlementBadge = ''; badge.title = '会员权益'; badge.setAttribute('aria-label', '会员权益'); button.append(badge); }
+    badge.classList.toggle('limited-free-badge', isLimited); badge.title = isLimited ? '限时免费' : '会员权益'; badge.setAttribute('aria-label', badge.title);
     if (badge.dataset.entitlementSvg !== markup) { badge.innerHTML = markup; badge.dataset.entitlementSvg = markup; }
   }
   function decorate() {
     document.querySelectorAll(selector).forEach(button => {
       button.querySelectorAll('.membership-badge:not([data-entitlement-badge]),.corner-member-badge:not([data-entitlement-badge])').forEach(old => old.remove());
-      mark(button, button.dataset.petPref !== 'skin' && requirements(button).some(([key, value]) => premium(key, value)), button.matches('[data-corner-color],[data-corner-custom]') ? 'corner-member-badge' : 'membership-badge');
+      mark(button, button.dataset.petPref !== 'skin' && requirements(button).some(([key, value]) => premium(key, value)), button.matches('[data-corner-color],[data-corner-custom]') ? 'corner-member-badge' : 'membership-badge', requirements(button).some(([key, value]) => premium(key, value) && limited(key, value)));
     });
     document.querySelectorAll('#display-scope-dialog [data-space-settings-tab]').forEach(button => {
       const field = { font: 'font', layout: 'width', colors: 'color' }[button.dataset.spaceSettingsTab];
       button.querySelector('[data-member-space-appearance]')?.remove();
-      mark(button, !!field && !unifiedField(field) && premium('space-' + ({ font: 'font', width: 'layout', color: 'color' }[field])));
+      mark(button, !!field && !unifiedField(field) && premium('space-' + ({ font: 'font', width: 'layout', color: 'color' }[field])), 'membership-badge', !!field && !unifiedField(field) && limited('space-' + ({ font: 'font', width: 'layout', color: 'color' }[field])));
     });
     document.querySelectorAll('.at-layout-menu [data-at-view]').forEach(button => {
       const mode = ['spatial', 'solar', 'systems'].includes(button.dataset.atView) ? '3d' : '2d';
-      mark(button, premium('atlas-' + mode));
+      mark(button, premium('atlas-' + mode), 'membership-badge', limited('atlas-' + mode));
     });
-    document.querySelectorAll('[data-space-mode="atlas"]').forEach(button => mark(button, premium('atlas-2d')));
-    document.querySelectorAll('[data-entitlement-key]').forEach(button => mark(button, premium(button.dataset.entitlementKey)));
+    document.querySelectorAll('[data-space-mode="atlas"]').forEach(button => mark(button, premium('atlas-2d'), 'membership-badge', limited('atlas-2d')));
+    document.querySelectorAll('[data-entitlement-key]').forEach(button => mark(button, premium(button.dataset.entitlementKey), 'membership-badge', limited(button.dataset.entitlementKey)));
   }
   function queueDecorate() { if (decorateQueued) return; decorateQueued = true; queueMicrotask(() => { decorateQueued = false; decorate(); }); }
-  window.ShiyuEntitlements = { snapshot, allows, require: requireFeature, premium, grants, options, plans, freePlan, paidPlans, quantity, limit, requireQuota, toolExceeded, requirements, decorate, mark, category };
+  window.ShiyuEntitlements = { snapshot, limited, effectiveEntitlements, allows, require: requireFeature, premium, grants, options, plans, freePlan, paidPlans, quantity, limit, requireQuota, toolExceeded, requirements, decorate, mark, category };
   window.addEventListener('click', event => {
     const button = event.target.closest?.(selector); if (!button) return;
     const needed = requirements(button), section = needed.some(([key]) => key.startsWith('space-')) ? 'space' : undefined;
@@ -119,6 +143,7 @@
   }, true);
   for (const event of ['shiyu-user-entitlements', 'shiyu-member-catalog']) window.addEventListener(event, queueDecorate);
   function start() {
+    const style = document.createElement('style'); style.textContent = '.limited-free-badge{display:inline-flex!important;align-items:center;justify-content:center;width:auto!important;min-width:28px;height:18px!important;padding:0 4px;border-radius:4px;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);font-size:10px!important;line-height:18px;font-weight:600;white-space:nowrap;flex:none}'; document.head.append(style);
     new MutationObserver(queueDecorate).observe(document.body, { childList: true, subtree: true });
     queueDecorate();
   }
@@ -128,7 +153,8 @@
     refreshing = fetch('/api/shiyu/plans/catalog', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(raw => {
      const value=window.ShiyuI18n?.catalog(raw)||raw;
       if (!value || catalogReady && JSON.stringify(value) === JSON.stringify(catalog)) return;
-      catalog = value; catalogReady = true; window.__shiyuMemberResources = value; queueDecorate(); window.dispatchEvent(new Event('shiyu-member-resources'));
+      limitedClock = {serverTime:Number(value.limitedFree?.serverTime)||Date.now(),clientTime:performance.now()}; limitedRules = value.limitedFree?.items || []; scheduleLimited();
+      catalog = value; catalogReady = true; snapshot().entitlements = effectiveEntitlements(); window.dispatchEvent(new Event('shiyu-user-entitlements')); window.__shiyuMemberResources = value; queueDecorate(); window.dispatchEvent(new Event('shiyu-member-resources'));
     }).catch(() => {}).finally(() => { refreshing = null; });
     return refreshing;
   }

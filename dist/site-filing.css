@@ -38,3 +38,5 @@ body.atlas-active>.site-filing{display:none}
 body.world-active .world-footer>.site-filing{display:flex;position:static;transform:none;width:auto;flex:1;min-width:0;margin:0;padding:0 16px;align-items:center;justify-content:center;text-align:center;opacity:1}
 /* Registration belongs only to the base theme, across its existing surfaces. */
 body[data-theme]:not([data-theme="base"]) .site-filing{display:none!important}
+/* Hide the home footer while preserving registration on the other surfaces. */
+body[data-view=home]:not(.world-active)>.site-filing{display:none}

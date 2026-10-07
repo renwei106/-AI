@@ -69,7 +69,7 @@
   body[data-view=home]:not(.world-active)>header [data-v5=fullscreen] { position:absolute;left:var(--home-gutter);top:calc(60px + var(--home-safe-top)); }
   body[data-view=home]:not(.world-active)>header .icon-button { width:44px;height:44px;flex:none; }
   body[data-view=home]:not(.world-active)>header .brand { min-height:44px; }
-  body[data-view=home]:not(.world-active)>header .brand-theme-menu { position:fixed;top:calc(74px + var(--home-safe-top));left:16px;width:220px; }
+  body[data-view=home]:not(.world-active)>header .brand-theme-menu { position:fixed;top:calc(74px + var(--home-safe-top));left:16px;width:220px;transform:none; }
   body[data-view=home]:not(.world-active)>.world-entry { top:calc(70px + var(--home-safe-top));min-height:32px;max-width:calc(100% - 100px); }
   body[data-view=home]:not(.world-active)>.utility-search {
     right:max(16px,var(--home-safe-right))!important;bottom:calc(12px + var(--home-safe-bottom))!important;

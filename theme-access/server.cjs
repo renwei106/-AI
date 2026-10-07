@@ -14,11 +14,12 @@ function membershipState(identity,now=Date.now()){
   const end=expiryTime(snapshot?.expiresAt??user?.memberExpiresAt);
   return {member:active&&user?.member===true&&(permanent||end>now),memberExpired:active&&!permanent&&Number.isFinite(end)&&end<=now};
 }
-function policy(themes,plans,entitlements,member=false){
+function policy(themes,plans,entitlements,member=false,limitedFree=[],now=Date.now()){
   const free=plans.find(plan=>plan.id==='free');
   const granted=id=>themeGranted(free?.entitlements,id);
   const actual=Array.isArray(entitlements)?entitlements:free?.entitlements;
-  const items=themes.filter(theme=>!retired.has(theme.id)).map(theme=>({id:theme.id,enabled:theme.enabled===true,memberOnly:!granted(theme.id),allowed:theme.enabled===true&&(member||themeGranted(actual,theme.id))}));
+  const limited = id => limitedFree.some(rule => rule.enabled && rule.key === 'themes' && rule.startsAt <= now && now < rule.endsAt && rule.value.includes(id));
+  const items=themes.filter(theme=>!retired.has(theme.id)).map(theme=>({id:theme.id,enabled:theme.enabled===true,memberOnly:!granted(theme.id),limitedFree:limited(theme.id),allowed:theme.enabled===true&&(member||themeGranted(actual,theme.id)||limited(theme.id))}));
   return {items,fallback:items.find(theme=>theme.enabled&&theme.allowed)?.id||items.find(theme=>theme.enabled&&!theme.memberOnly)?.id||'base'};
 }
 async function upstream(path,req){const r=await fetch(new URL(path,process.env.SHIYU_ADMIN_ORIGIN||'http://127.0.0.1:5175'),{headers:{cookie:req.headers.cookie||'',accept:'application/json'},signal:AbortSignal.timeout(4000)});if(!r.ok)throw Error('主题权限暂时无法校验');return r.json()}
@@ -42,8 +43,9 @@ async function handler(req,res){
     const [themes,plans,identity]=await Promise.all([upstream('/api/shiyu/themes',req),upstream('/api/shiyu/plans',req),upstream('/api/shiyu/auth/session',req)]);
     const now=Date.now(),{member,memberExpired}=membershipState(identity,now);
     const entitlementData=identity.entitlements||identity.user?.entitlements||identity.user?.membership?.entitlements;
-    const result=policy(themes.items,plans.items,member?entitlementData:undefined,member),trial=themes.trial||{mode:'daily',value:10};
+    const result=policy(themes.items,plans.items,entitlementData,member,plans.limitedFree?.items||[],now),trial=themes.trial||{mode:'daily',value:10};
     const token=store.visitor(req,res);let preview=null,presence=null,payload={};
+    result.limitedFree = plans.limitedFree || {items:[]};
     if(req.method==='POST'){
       if(req.headers.origin&&!allowedOrigins(req).has(req.headers.origin)){send(403,{message:'请求来源无效'});return true}
       let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>1024)throw Error('请求内容过大')}payload=JSON.parse(raw||'{}');

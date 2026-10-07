@@ -1,8 +1,16 @@
 'use strict';
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+const resetPageScroll = () => requestAnimationFrame(() => scrollTo({ top: 0, left: 0, behavior: 'auto' }));
+addEventListener('pageshow', resetPageScroll);
+addEventListener('load', resetPageScroll, { once: true });
 const themeMedia = matchMedia('(prefers-color-scheme: dark)');
 const officialFonts = { 'youfeng': '"Shiyu Youfeng"', 'qingya-song': '"Shiyu Qingya Song"', 'wenrun-kai': '"Shiyu Wenrun Kai"' };
 async function applyOfficialFont() {
-  try { const response = await fetch('/api/shiyu/operations', { cache: 'no-store' }); if (!response.ok) return; const { officialFont } = await response.json(); document.documentElement.style.setProperty('--official-font', officialFonts[officialFont] || officialFonts.youfeng); } catch {}
+  let font = officialFonts.youfeng;
+  try { const response = await fetch('/api/shiyu/operations', { cache: 'no-store' }); if (response.ok) { const { officialFont } = await response.json(); font = officialFonts[officialFont] || font; } } catch {}
+  document.documentElement.style.setProperty('--official-font', font);
+  try { await Promise.race([document.fonts.load(`16px ${font}`), new Promise(resolve => setTimeout(resolve, 1800))]); } catch {}
+  document.documentElement.classList.remove('font-pending');
 }
 function applyPageMode() {
   let mode = 'system', color = '#48614c';
@@ -24,7 +32,7 @@ const browsers = [
   { id: 'qq', name: 'QQ 浏览器', short: 'QQ', icon: 'assets/browsers/qq.svg', address: 'chrome://extensions', install: 'crx' },
   { id: 'quark', name: '夸克浏览器', short: '夸克', icon: 'assets/browsers/quark.svg', address: 'chrome://extensions', install: 'crx' },
   { id: 'firefox', name: 'Firefox 火狐', short: 'Firefox', icon: 'assets/browsers/firefox.svg', address: 'about:addons', install: 'xpi' }
-].map(browser => ({ ...browser, version: '0.2.8', download: ['chrome', 'edge'].includes(browser.id) ? 'downloads/shiyu-extension-0.2.8.zip' : `downloads/shiyu-extension-${browser.id}-0.2.8.zip` }));
+].map(browser => ({ ...browser, version: '0.2.11', download: ['chrome', 'edge'].includes(browser.id) ? 'downloads/shiyu-extension-0.2.11.zip' : `downloads/shiyu-extension-${browser.id}-0.2.11.zip` }));
 let selectedBrowser = null;
 let firefoxRelease = { ready: false };
 fetch('firefox-release.json', { cache: 'no-store' }).then(response => response.ok ? response.json() : null).then(async release => {
@@ -134,3 +142,38 @@ addEventListener('message', event => {
   const height = Math.min(800, Math.max(300, Math.ceil(Number(event.data.height) || 460)));
   frame.height = height; document.querySelector('.hero-preview').style.setProperty('--preview-height', height + 'px');
 });
+const previewStage = document.querySelector('#preview-stage');
+const computerExtension = document.querySelector('#computer-extension');
+if (previewStage && computerExtension) {
+  const computer = previewStage.querySelector('.computer-context');
+  const pluginThumbnailToggle = previewStage.querySelector('.plugin-thumbnail-toggle');
+  const computerPopup = previewStage.querySelector('.computer-popup');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const focusPlugin = () => {
+    window.clearTimeout(window.shiyuPreviewFocusTimer);
+    previewStage.classList.remove('show-computer');
+    previewStage.classList.add('show-plugin');
+  };
+  const focusComputer = () => {
+    window.clearTimeout(window.shiyuPreviewFocusTimer);
+    previewStage.classList.remove('show-plugin');
+    previewStage.classList.add('show-computer');
+  };
+  computer.addEventListener('click', focusComputer);
+  computer.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); focusComputer(); }
+  });
+  computerExtension.addEventListener('click', event => { event.stopPropagation(); focusPlugin(); });
+  pluginThumbnailToggle?.addEventListener('click', focusPlugin);
+  computerPopup?.addEventListener('click', event => { event.stopPropagation(); focusPlugin(); });
+  if (reduceMotion) focusPlugin();
+  else {
+    previewStage.classList.add('is-intro');
+    focusComputer();
+    window.shiyuPreviewFocusTimer = window.setTimeout(() => {
+      previewStage.classList.remove('is-intro');
+      void previewStage.offsetWidth;
+      focusPlugin();
+    }, 1600);
+  }
+}
