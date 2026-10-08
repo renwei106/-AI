@@ -43,7 +43,7 @@ async function siteTab() {
   return { tab: await extensionApi.tabs.create({ url: site.href + '?extension=bridge', active: false }), site };
 }
 async function directAccountState(tab, site) {
-    const results = await extensionApi.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN',
+    const results = await extensionApi.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN', injectImmediately: true,
       func: async expectedOrigin => {
         if (location.origin !== expectedOrigin) return;
         const key = 'yiyu-prototype-v1', before = localStorage.getItem(key);
@@ -89,17 +89,17 @@ async function readySiteTab() {
   const connection = await connectedSiteTab();
   for (let attempt = 0; attempt < 8; attempt++) {
     try {
-      const result = await extensionApi.scripting.executeScript({ target: { tabId: connection.tab.id }, world: 'MAIN',
+      const result = await extensionApi.scripting.executeScript({ target: { tabId: connection.tab.id }, world: 'MAIN', injectImmediately: true,
         func: origin => location.origin === origin ? !!window.ShiyuExtensionStore : undefined, args: [connection.site.origin] });
       if (result[0]?.result === undefined) { await delay(150); continue; }
-      if (!result[0].result) await extensionApi.scripting.executeScript({ target: { tabId: connection.tab.id }, world: 'MAIN', files: ['account-store.js'] });
+      if (!result[0].result) await extensionApi.scripting.executeScript({ target: { tabId: connection.tab.id }, world: 'MAIN', injectImmediately: true, files: ['account-store.js'] });
       return connection;
     } catch { await delay(150); }
   }
   throw Error('暂时连不上拾隅，请重试。');
 }
 async function verifyAccount(connection, payload) {
-  const results = await extensionApi.scripting.executeScript({ target: { tabId: connection.tab.id }, world: 'MAIN',
+  const results = await extensionApi.scripting.executeScript({ target: { tabId: connection.tab.id }, world: 'MAIN', injectImmediately: true,
     args: [connection.site.origin, payload?.accountId], func: async (origin, accountId) => {
       try {
         const current = () => window.ShiyuExtensionStore?.snapshot()?.accountId;
@@ -124,7 +124,7 @@ async function relay(request, attempts = 24) {
   for (let attempt = 0; attempt < attempts; attempt++) {
     let result;
     try {
-      const results = await extensionApi.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN',
+      const results = await extensionApi.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN', injectImmediately: true,
         func: async (message, expectedOrigin) => {
           if (location.origin !== expectedOrigin) return;
           try {
@@ -197,7 +197,7 @@ extensionApi.runtime.onMessage.addListener((request, sender, reply) => {
 
 async function trialRelay(request){
  const connection=await readySiteTab(),{tab,site}=connection;await verifyAccount(connection,request.payload);
- const result=await extensionApi.scripting.executeScript({target:{tabId:tab.id},world:'MAIN',args:[request,site.origin],func:(request,origin)=>{
+ const result=await extensionApi.scripting.executeScript({target:{tabId:tab.id},world:'MAIN',injectImmediately:true,args:[request,site.origin],func:(request,origin)=>{
   try{if(location.origin!==origin)throw Error('站点已变化');const store=window.ShiyuExtensionStore;if(!store)throw Error('请稍后重试');const state=store.snapshot();if(!state.signed||!request.payload?.accountId||state.accountId!==request.payload.accountId)throw Error('登录账号已变化，请刷新后重试');
   if(request.type==='move')return {ok:true,value:store.move(request.payload)};
   const value=JSON.parse(localStorage.getItem(store.KEY)||'{}'),items=[];
@@ -227,7 +227,7 @@ extensionApi.runtime.onInstalled.addListener(applyMode);extensionApi.runtime.onS
 async function toolRecords(payload){
  if(!['memo','todo'].includes(payload?.tool)||!['read','save'].includes(payload?.action))throw Error('无效的工具操作');
  const {tab,site}=await readySiteTab();
- const results=await extensionApi.scripting.executeScript({target:{tabId:tab.id},world:'MAIN',args:[payload,site.origin],func:async(p,origin)=>{
+ const results=await extensionApi.scripting.executeScript({target:{tabId:tab.id},world:'MAIN',injectImmediately:true,args:[payload,site.origin],func:async(p,origin)=>{
   try{
    const current=()=>window.ShiyuExtensionStore?.snapshot()?.accountId;
    if(location.origin!==origin||!p.accountId||current()!==p.accountId)throw Error('登录账号已变化，请重新打开插件');

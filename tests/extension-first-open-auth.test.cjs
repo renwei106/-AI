@@ -55,7 +55,8 @@ function fixture({ pageState = stateFor('account-a'), cached, noTabs = false, lo
     getURL: file => 'chrome-extension://test-extension/' + file, onMessage: { addListener: value => { listener = value; } },
     onInstalled: { addListener() {} }, onStartup: { addListener() {} } },
     tabs: { query: async () => clone(tabs), create: async input => { const tab = { id: ++nextTab, url: input.url }; tabs.push(tab); f.created.push(input); return tab; } },
-    scripting: { executeScript: async ({ target, func, args, files }) => {
+    scripting: { executeScript: async ({ target, func, args, files, injectImmediately }) => {
+      assert.equal(injectImmediately, true, 'Trusted MAIN injection must not wait for document_idle.');
       assert(tabs.some(tab => tab.id === target.tabId));
       if (failures-- > 0) throw Error('The newly created tab is still loading.');
       if (files) { for (const file of files) {
