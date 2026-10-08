@@ -29,23 +29,115 @@ async function versionStatus() {
 }
 let bridgeTabPromise;
 const ACCOUNT_STATE_CACHE = 'shiyuAccountState';
+function connectedSiteTab() {
+  bridgeTabPromise ||= siteTab().finally(() => { bridgeTabPromise = null; });
+  return bridgeTabPromise;
+}
 async function siteTab() {
   for (const site of sites) {
     const tabs = await extensionApi.tabs.query({ url: site.origin + '/*' });
-    const tab = tabs.find(tab => { const url = new URL(tab.url); return url.origin === site.origin && ['/', '/index.html'].includes(url.pathname); });
+    const tab = tabs.find(tab => { try { return new URL(tab.url).origin === site.origin; } catch { return false; } });
     if (tab) return { tab, site };
   }
   const site = sites[0];
   return { tab: await extensionApi.tabs.create({ url: site.href + '?extension=bridge', active: false }), site };
 }
+async function directAccountState(tab, site) {
+    const results = await extensionApi.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN',
+      func: async expectedOrigin => {
+        if (location.origin !== expectedOrigin) return;
+        const key = 'yiyu-prototype-v1', before = localStorage.getItem(key);
+        let value; try { value = JSON.parse(before || 'null'); } catch { value = null; }
+        const localPreview = ['127.0.0.1', 'localhost'].includes(location.hostname);
+        // A website account already saved on this origin is available before its UI scripts.
+        // Do not turn a prototype's `signed` flag without an account id into a production login.
+        if (!value?.signed || !value.prefs?.accountProfile?.id && !localPreview) {
+          if (!localPreview) {
+            const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 1800);
+            try {
+              const sessionResponse = await fetch('/api/shiyu/auth/session', { credentials: 'same-origin', cache: 'no-store', signal: controller.signal });
+              if (!sessionResponse.ok) throw Error('无法读取拾隅登录状态，请重试。');
+              const session = await sessionResponse.json();
+              if (session.authenticated === true && session.user?.id) {
+                const accountResponse = await fetch('/api/shiyu/auth/account', { credentials: 'same-origin', cache: 'no-store', signal: controller.signal });
+                const account = await accountResponse.json();
+                if (!accountResponse.ok || account.userId !== session.user.id) throw Error('登录账号已变化，请重新打开插件。');
+                if (location.origin !== expectedOrigin || localStorage.getItem(key) !== before) throw Error('登录账号已变化，请重新打开插件。');
+                const sameOwner = value?.prefs?.accountProfile?.id === session.user.id;
+                value = { ...(value || {}), signed: true, data: Array.isArray(account.data) ? account.data : sameOwner && Array.isArray(value?.data) ? value.data : [],
+                  prefs: { ...(value?.prefs || {}), ...(!sameOwner ? { membership: null, membershipDemo: null, demoMemberOrders: [] } : {}),
+                    accountProfile: { ...session.user, ...(sameOwner ? value?.prefs?.accountProfile : {}), id: session.user.id }, accountDataUserId: session.user.id,
+                    extensionInbox: sameOwner ? value?.prefs?.extensionInbox || [] : [] } };
+                localStorage.setItem(key, JSON.stringify(value));
+                try { localStorage.setItem('shiyu-extension-change', crypto.randomUUID()); } catch { /* The account data is already committed. */ }
+                window.dispatchEvent(new CustomEvent('shiyu-extension-change'));
+              } else return { signed: false, accountId: null, name: '', theme: null, inboxCount: 0, spaces: [] };
+            } finally { clearTimeout(timer); }
+          }
+        }
+        if (!value || typeof value.signed !== 'boolean') return;
+        // Keep the loaded page's effective theme (including scene overrides).
+        const bridge = window.shiyuExtensionBridge;
+        if (bridge) { const response = await bridge.dispatch({ type: 'state' }); if (response?.ok) return response.value; }
+        const store = window.ShiyuExtensionStore;
+        return store?.snapshot();
+      },
+      args: [site.origin] });
+    return results[0]?.result;
+}
+async function readySiteTab() {
+  const connection = await connectedSiteTab();
+  for (let attempt = 0; attempt < 8; attempt++) {
+    try {
+      const result = await extensionApi.scripting.executeScript({ target: { tabId: connection.tab.id }, world: 'MAIN',
+        func: origin => location.origin === origin ? !!window.ShiyuExtensionStore : undefined, args: [connection.site.origin] });
+      if (result[0]?.result === undefined) { await delay(150); continue; }
+      if (!result[0].result) await extensionApi.scripting.executeScript({ target: { tabId: connection.tab.id }, world: 'MAIN', files: ['account-store.js'] });
+      return connection;
+    } catch { await delay(150); }
+  }
+  throw Error('暂时连不上拾隅，请重试。');
+}
+async function verifyAccount(connection, payload) {
+  const results = await extensionApi.scripting.executeScript({ target: { tabId: connection.tab.id }, world: 'MAIN',
+    args: [connection.site.origin, payload?.accountId], func: async (origin, accountId) => {
+      try {
+        const current = () => window.ShiyuExtensionStore?.snapshot()?.accountId;
+        if (location.origin !== origin || !accountId || current() !== accountId) throw Error('登录账号已变化，请重新打开插件。');
+        if (!['127.0.0.1', 'localhost'].includes(location.hostname)) {
+          const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 1800);
+          try {
+            const response = await fetch('/api/shiyu/auth/session', { credentials: 'same-origin', cache: 'no-store', signal: controller.signal });
+            if (!response.ok) throw Error('无法读取拾隅登录状态，请重试。');
+            const session = await response.json();
+            if (session.authenticated !== true || session.user?.id !== accountId || location.origin !== origin || current() !== accountId) throw Error('登录账号已变化，请重新打开插件。');
+          } finally { clearTimeout(timer); }
+        }
+        return { ok: true };
+      } catch (error) { return { ok: false, error: error.name === 'AbortError' ? '读取超时，请重试连接拾隅。' : error.message }; }
+    } });
+  if (!results[0]?.result?.ok) throw Error(results[0]?.result?.error || '无法确认拾隅登录状态，请重试。');
+}
 async function relay(request, attempts = 24) {
-  bridgeTabPromise ||= siteTab().finally(() => { bridgeTabPromise = null; });
-  const { tab, site } = await bridgeTabPromise;
+  const connection = await readySiteTab(), { tab, site } = connection;
+  if (request.type !== 'state') await verifyAccount(connection, request.payload);
   for (let attempt = 0; attempt < attempts; attempt++) {
     let result;
     try {
       const results = await extensionApi.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN',
-        func: (message, expectedOrigin) => location.origin === expectedOrigin ? window.shiyuExtensionBridge?.dispatch(message) : undefined,
+        func: async (message, expectedOrigin) => {
+          if (location.origin !== expectedOrigin) return;
+          try {
+            const store = window.ShiyuExtensionStore;
+            const state = store?.snapshot();
+            if (!state) return;
+            if (message.type !== 'state' && (!state.signed || !message.payload?.accountId || state.accountId !== message.payload.accountId)) throw Error('登录账号已变化，请刷新后重试。');
+            if (window.shiyuExtensionBridge) return window.shiyuExtensionBridge.dispatch(message);
+            const method = { state: 'snapshot', save: 'save', search: 'search' }[message.type];
+            if (!method) throw Error('不支持的插件操作。');
+            return { ok: true, value: store[method](message.payload) };
+          } catch (error) { return { ok: false, error: error.message }; }
+        },
         args: [request, site.origin] });
       result = results[0]?.result;
     } catch { /* The tab may still be loading; never fall back to a different site. */ }
@@ -58,16 +150,14 @@ async function relay(request, attempts = 24) {
   throw new Error('暂时连不上拾隅。请刷新拾隅网页后重试，已填内容会保留。');
 }
 async function freshAccountState() {
-  const value = await relay({ type: 'state' }, 8);
+  const { tab, site } = await readySiteTab();
+  const value = await directAccountState(tab, site) || await relay({ type: 'state' }, 8);
   await extensionApi.storage.local.set({ [ACCOUNT_STATE_CACHE]: value });
   return value;
 }
 async function accountState() {
-  const cached = (await extensionApi.storage.local.get(ACCOUNT_STATE_CACHE))[ACCOUNT_STATE_CACHE];
-  if (cached && typeof cached.signed === 'boolean') {
-    void freshAccountState().catch(() => {});
-    return cached;
-  }
+  // Reading the current origin is cheap; an extension cache can belong to a logged-out
+  // or different account and must never be returned ahead of this read.
   return freshAccountState();
 }
 extensionApi.runtime.onMessage.addListener((request, sender, reply) => {
@@ -106,7 +196,7 @@ extensionApi.runtime.onMessage.addListener((request, sender, reply) => {
 });
 
 async function trialRelay(request){
- const {tab,site}=await siteTab();
+ const connection=await readySiteTab(),{tab,site}=connection;await verifyAccount(connection,request.payload);
  const result=await extensionApi.scripting.executeScript({target:{tabId:tab.id},world:'MAIN',args:[request,site.origin],func:(request,origin)=>{
   try{if(location.origin!==origin)throw Error('站点已变化');const store=window.ShiyuExtensionStore;if(!store)throw Error('请稍后重试');const state=store.snapshot();if(!state.signed||!request.payload?.accountId||state.accountId!==request.payload.accountId)throw Error('登录账号已变化，请刷新后重试');
   if(request.type==='move')return {ok:true,value:store.move(request.payload)};
@@ -136,7 +226,7 @@ extensionApi.runtime.onInstalled.addListener(applyMode);extensionApi.runtime.onS
 
 async function toolRecords(payload){
  if(!['memo','todo'].includes(payload?.tool)||!['read','save'].includes(payload?.action))throw Error('无效的工具操作');
- const {tab,site}=await siteTab();
+ const {tab,site}=await readySiteTab();
  const results=await extensionApi.scripting.executeScript({target:{tabId:tab.id},world:'MAIN',args:[payload,site.origin],func:async(p,origin)=>{
   try{
    const current=()=>window.ShiyuExtensionStore?.snapshot()?.accountId;

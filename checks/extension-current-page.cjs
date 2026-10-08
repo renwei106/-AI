@@ -1,0 +1,36 @@
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+(async()=>{
+ const browser=await chromium.launch({channel:'msedge',headless:true});
+ const page=await browser.newPage({viewport:{width:446,height:1180}});
+ await page.route('https://extension.test/**',route=>{const file=path.join(process.cwd(),'browser-extension-lab',new URL(route.request().url()).pathname);if(!fs.existsSync(file))return route.abort();route.fulfill({body:fs.readFileSync(file),contentType:file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':file.endsWith('.html')?'text/html':'image/png'})});
+ await page.addInitScript(()=>{
+  window.tab={id:1,url:'https://example.com/first',title:'第一个网页'};
+  window.listeners={};window.hang=false;
+  const state={signed:true,accountId:'test',spaces:[{id:'s',name:'测试空间',scenes:[{id:'c',name:'测试场景',groups:[{id:'g',name:'测试分组'}]}]}]};
+  window.chrome={windows:{getCurrent:async()=>({id:1})},tabs:{query:async()=>[window.tab],onActivated:{addListener:fn=>window.listeners.activate=fn},onUpdated:{addListener:fn=>window.listeners.update=fn}},storage:{local:{get:async()=>({}),set:async()=>{},remove:async()=>{}},onChanged:{addListener:()=>{}}},runtime:{sendMessage:async r=>r.type==='state'?(window.hang?new Promise(()=>{}):{ok:true,value:state}):r.type==='version'?{ok:true,value:{current:'0.2.8'}}:{ok:true,value:{items:[],commonGroups:[]}}}};
+ });
+ await page.goto('https://extension.test/panel.html');
+ await page.waitForFunction(()=>document.body.dataset.ready==='true');
+ assert.equal(await page.locator('#title').inputValue(),'第一个网页');
+ assert.equal(await page.locator('#save-group').isDisabled(),false);
+ await page.screenshot({path:'checks/extension-current-page-initial.png'});
+ await page.evaluate(()=>{window.tab={id:2,url:'https://example.org/second',title:'第二个网页'};window.listeners.activate({tabId:2})});
+ await page.waitForFunction(()=>document.querySelector('#title').value==='第二个网页');
+ assert.equal(await page.locator('#save-group').isDisabled(),false);
+ await page.evaluate(()=>{window.tab={id:3,url:'chrome://settings',title:'设置'};window.listeners.activate({tabId:3})});
+ await page.waitForFunction(()=>document.querySelector('#save-group').disabled);
+ assert.equal(await page.locator('[data-picker-value]').first().textContent(),'测试空间');
+ await page.evaluate(()=>{window.tab={id:2,url:'https://example.org/second',title:'第二个网页'};window.listeners.activate({tabId:2})});
+ await page.waitForFunction(()=>!document.querySelector('#save-group').disabled);
+ await page.screenshot({path:'checks/extension-current-page-switched.png'});
+ await page.evaluate(()=>{window.hang=true;void window.trialApi.connect()});
+ await page.waitForFunction(()=>document.body.dataset.auth==='error',{},{timeout:13000});
+ assert.equal(await page.locator('[data-picker-value]').first().textContent(),'读取失败');
+ assert.equal(await page.getByRole('button',{name:'重新校验登录状态'}).isVisible(),true);
+ await page.evaluate(()=>{window.hang=false;void window.trialApi.connect()});
+ await page.waitForFunction(()=>document.body.dataset.auth==='signed');
+ assert.equal(await page.locator('#save-group').isDisabled(),false);
+ console.log('PASS: initial page, tab switch, restricted page, recovery, connection timeout, retry');
+ await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});

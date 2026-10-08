@@ -3,7 +3,7 @@ const fs = require('node:fs'), path = require('node:path'), child = require('nod
 const root = __dirname, source = path.join(root, 'dist/extension/current');
 const destination = path.join(root, '.local/firefox-extension');
 fs.mkdirSync(destination, { recursive: true });
-for (const name of ['background.js', 'config.js', 'popup.html', 'panel.html', 'popup.css', 'popup.js', 'trial.js', 'trial.css', 'trial-apps.js', 'trial-schedule.js', 'icons', 'assets']) {
+for (const name of ['background.js', 'config.js', 'account-store.js', 'popup.html', 'panel.html', 'popup.css', 'popup.js', 'trial.js', 'trial.css', 'trial-apps.js', 'trial-schedule.js', 'icons', 'assets']) {
   fs.cpSync(path.join(source, name), path.join(destination, name), { recursive: true });
 }
 const manifest = JSON.parse(fs.readFileSync(path.join(source, 'manifest.json'), 'utf8'));

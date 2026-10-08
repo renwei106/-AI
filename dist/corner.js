@@ -122,6 +122,7 @@
     }else for(const name of ['--accent','--bg','--surface','--soft','--line','--ink','--muted'])panel.style.removeProperty(name);
     const skin=cornerThemeSkin();panel.dataset.cornerTheme=cornerPresentationTheme();panel.dataset.cornerDepth=skin.depth;panel.dataset.cornerObject=skin.object;
     const art=panel.querySelector('.corner-theme-art');if(art)art.innerHTML='<svg viewBox="0 0 64 50" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+cornerThemeArt()+'</svg>';
+    if(panel.open)syncWindowThemeColor(panel);
   }
   const cardLimit=()=>window.ShiyuEntitlements?.limit('corner')??null;
   const isInbox=g=>g?.system==='inbox';
@@ -304,6 +305,7 @@
     if(!panel){
       panel=dialog('my-corner',meta.panelName||meta.name);fullscreenShell=document.createElement('div');fullscreenShell.className='corner-fullscreen-shell';while(panel.firstChild)fullscreenShell.append(panel.firstChild);panel.append(fullscreenShell);
       mountModuleClose();bindModuleHeader();
+      panel.addEventListener('close',()=>syncWindowThemeColor());
       panel.addEventListener('close',()=>{destroyTodoCalendar();const routeUrl=new URL(location.href);if(routeUrl.searchParams.has('corner')){routeUrl.searchParams.delete('corner');history.replaceState(history.state,'',routeUrl);}if(document.fullscreenElement===fullscreenShell&&document.exitFullscreen)void document.exitFullscreen().catch(()=>{});cornerRevealAnimation?.cancel();cornerRevealAnimation=null;cornerClosing=false;panel.style.clipPath='';panel.style.removeProperty('--corner-backdrop-from');panel.classList.remove('corner-reveal-opening','corner-reveal-closing','memo-editor-mode');finishDrag(true);queueMicrotask(()=>requestAnimationFrame(()=>origin?.isConnected&&origin.focus({preventScroll:true})));flipped.clear();coverOpen.clear();memoRenderToken++;memoPaperView?.destroy();memoPaperView=null;memoViewState={view:'notes',page:0};cancelAnimationFrame(motionFrame);cancelAnimationFrame(fanMotion.frame);clearTimeout(edgeBounceTimer);fanMotion.frame=0;panel.classList.remove('corner-animating');wheelConsumed=false;swipe=null;});
       panel.addEventListener('pointerdown',startDrag);
 
@@ -336,7 +338,7 @@
     const shape=cornerRevealGeometry(point),animateReveal=!reduced()&&typeof panel.animate==='function';
     if(animateReveal){panel.style.clipPath=shape.closed;panel.classList.add('corner-reveal-opening');}
     const routeUrl=new URL(location.href);routeUrl.searchParams.set('corner',activeModule);history.pushState({corner:true},'',routeUrl);
-    panel._cornerOwner=owner();panel.showModal();syncCornerCloseGuide();
+    panel._cornerOwner=owner();panel.showModal();syncWindowThemeColor(panel);syncCornerCloseGuide();
     if(animateReveal){
       const animation=panel.animate([
         {clipPath:shape.closed,offset:0},

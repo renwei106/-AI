@@ -341,7 +341,8 @@
       const nav=[...(ctx.worldEnabled===false?[]:[['world',adapter.navigationName?.('world')||'世界',icons.world]]),['home',ctx.area==='home'&&!ctx.app?'首页':'回首页',icons.home],['space','我的空间',icons.space]];
       const modeLabel=config.roaming==='roam'?'切换到固定模式':'切换到漫游模式',modeIcon=config.roaming==='roam'?icons.fixed:icons.roam;
       const html=visible.map(app=>button(app.id==='__more'?'more':'app',app.id,app.label,app.icon,false,ctx.app===app.id)).join('')+nav.map(([id,label,icon])=>button('navigate',id,label,icon,true,ctx.area===id&&!ctx.app)).join('')+'<button type="button" class="pet-mode-entry" data-pet-action="toggle-roaming" aria-label="'+modeLabel+'" title="'+modeLabel+'">'+modeIcon+'</button><button type="button" class="pet-settings-entry" data-pet-action="settings" aria-label="桌面伙伴设置" title="桌面伙伴设置">'+icons.settings+'</button>';
-      if(signature!==html){menu.innerHTML=html;signature=html;}
+      const shortcutEntry=adapter.openShortcuts?'<button type="button" class="pet-keyboard-entry" data-pet-action="shortcuts" aria-label="设置快捷键" title="设置快捷键"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M6 9h1m3 0h1m3 0h1m3 0h1M6 12h1m3 0h1m3 0h1m3 0h1M7 15h10"/></svg></button>':'';
+      if(signature!==html+shortcutEntry){menu.innerHTML=html+shortcutEntry;signature=html+shortcutEntry;}
       layout();
       const items=[...menu.querySelectorAll('.pet-shortcut')],current=items.findIndex(item=>item.hasAttribute('aria-current')),currentPath=current>=0?shortcutPath.indexOf(items[current]):-1;
       selectShortcut(currentPath>=0?currentPath:Math.min(selectedShortcutIndex,shortcutPath.length-1));
@@ -365,7 +366,7 @@
       root.dataset.compact='false';corridor=[];
       const bounds=new Map(items.map(el=>[el,{width:el.offsetWidth,height:el.offsetHeight}]));
       const settings=menu.querySelector('.pet-settings-entry'),mode=menu.querySelector('.pet-mode-entry');
-      const obstacles=[{x:0,y:0,width:size,height:size},...[settings,mode].map(el=>({x:el.offsetLeft+el.offsetWidth/2-size/2,y:el.offsetTop+el.offsetHeight/2-size/2,width:el.offsetWidth,height:el.offsetHeight}))];
+      const obstacles=[{x:0,y:0,width:size,height:size},...[settings,mode,menu.querySelector('.pet-keyboard-entry')].filter(Boolean).map(el=>({x:el.offsetLeft+el.offsetWidth/2-size/2,y:el.offsetTop+el.offsetHeight/2-size/2,width:el.offsetWidth,height:el.offsetHeight}))];
       const positions=(group,angle,spread,r)=>group.map((el,i)=>{
         const a=angle+(i-(group.length-1)/2)*spread/Math.max(1,group.length-1);
         return {el,r,x:Math.cos(a)*r,y:Math.sin(a)*r,...bounds.get(el)};
@@ -441,7 +442,8 @@
       try{
         if(!(action==='navigate'&&id==='home')&&!await adapter.authorize?.(action==='navigate'?id:action))return;
         close();
-        if(action==='settings')await adapter.openSettings?.();
+        if(action==='shortcuts')await adapter.openShortcuts?.();
+        else if(action==='settings')await adapter.openSettings?.();
         else await adapter.navigate?.(action,id,core);
       }catch{notify('暂时无法打开，请稍后重试。');}
       finally{busy=false;root.removeAttribute('aria-busy');refresh();}

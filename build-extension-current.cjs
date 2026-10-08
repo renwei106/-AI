@@ -2,10 +2,13 @@
 // Historical trial releases and legacy-browser packages remain unchanged.
 const fs = require('node:fs');
 const path = require('node:path');
-const version = '1.0.0';
+const version = '1.0.1';
 const source = path.join(__dirname, 'browser-extension-lab');
 const target = path.join(__dirname, 'dist/extension/current');
 fs.cpSync(source, target, { recursive: true });
+// The trusted site adapter lets cold-start extension actions avoid full-page initialization.
+const accountStore = fs.readFileSync(path.join(__dirname, 'dist/extension/store.js'), 'utf8');
+fs.writeFileSync(path.join(target, 'account-store.js'), "// Generated from the website account store.\n(function () {\n  if (location.origin !== 'https://shiyubox.com' || globalThis.ShiyuExtensionStore) return;\n" + accountStore + '\n})();\n');
 const manifest = JSON.parse(fs.readFileSync(path.join(target, 'manifest.json'), 'utf8'));
 manifest.name = '拾隅 · 网址收藏';
 manifest.version = version;

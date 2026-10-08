@@ -5,7 +5,11 @@
   "description": "一键收下当前网页，稍后整理，或归入拾隅的空间、场景和分组。",
   "minimum_chrome_version": "116",
   "commands": {
-    "_execute_action": {}
+    "_execute_action": {
+      "suggested_key": {
+        "windows": "Ctrl+Q"
+      }
+    }
   },
   "permissions": [
     "activeTab",

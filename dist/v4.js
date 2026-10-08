@@ -716,7 +716,12 @@ function scheduleHomeCopyFit(){if(homeCopyFitFrame)return;homeCopyFitFrame=reque
 new MutationObserver(records=>{if(view!=='home')return;const matches=node=>node.nodeType===1&&(node.matches(HOME_COPY_SELECTOR)||node.querySelector(HOME_COPY_SELECTOR));if(records.some(r=>r.target.parentElement?.closest(HOME_COPY_SELECTOR)||r.target.nodeType===1&&r.target.matches(HOME_COPY_SELECTOR)||[...r.addedNodes].some(matches)))scheduleHomeCopyFit();}).observe(document.querySelector('#main'),{childList:true,subtree:true,characterData:true});
 document.addEventListener('fullscreenchange',scheduleHomeCopyFit);document.fonts.addEventListener('loadingdone',scheduleHomeCopyFit);
 
-const copyBeforeFit=applyHomeCopy;applyHomeCopy=function(){copyBeforeFit();fitHomeText();requestAnimationFrame(fitHomeText)};
+COPY_DEFAULTS.globe={title:'世界很大，\n沿着喜欢，慢慢抵达。',intro:'愿每一次凝望，都离喜欢更近一点。'};
+const copyBeforeFit=applyHomeCopy;applyHomeCopy=function(){copyBeforeFit();if(view==='home'&&effective().theme==='globe'){
+ const copy=currentCopy('globe'),title=$('.globe-copy h1'),intro=$('.globe-copy>p');
+ if(title){title.replaceChildren(...copy.title.split('\n').map(line=>{const span=document.createElement('span');span.textContent=line;return span;}));}
+ if(intro){intro.textContent=copy.intro;if(prefs.sharedHomeCopy?.mode==='custom')intro.style.whiteSpace='pre-line';else intro.style.removeProperty('white-space');}
+}fitHomeText();requestAnimationFrame(fitHomeText)};
 const homeBeforeFit=home;home=function(){homeBeforeFit();fitHomeText();requestAnimationFrame(fitHomeText)};
 window.addEventListener('resize',fitHomeText);document.fonts.ready.then(fitHomeText);
 const discoveryBeforeShortHint=addBrandDiscovery;addBrandDiscovery=function(){discoveryBeforeShortHint();const hint=$('.theme-switch-hint');if(hint){const officialURL='https://www.shiyubox.com/';hint.outerHTML=`<a class="brand-origin-link" href="${officialURL}" aria-label="访问拾隅官网"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M3 14h7a4 4 0 0 0 4-4V3M14 14l7 7"/></svg><span><b>拾隅官网</b><small>从这里，再看见世界</small></span></a>`}if(view==='home'&&!prefs.brandGuideDismissed&&!$('.brand-guide'))$('.brand-discovery')?.insertAdjacentHTML('beforeend','<div class="brand-guide"><button data-dismiss-guide aria-label="关闭主题指引">×</button><b>从这里，换一种日常</b><p>点击左上角「拾隅」，即可切换主题。</p></div>')};
@@ -2170,3 +2175,16 @@ new MutationObserver(()=>{document.querySelectorAll("body>header .brand-theme-co
 function syncSettingsThemePreviews(){document.querySelectorAll('#settings [data-v2-theme] .theme-preview').forEach(preview=>{const source=brandModePreview(preview.closest('[data-v2-theme]').dataset.v2Theme);if(!source)return;let img=preview.querySelector('img[data-theme-mode-preview]');if(!img){img=document.createElement('img');img.dataset.themeModePreview='';img.alt='';img.style.cssText='display:block;width:100%;height:100%;object-fit:cover';preview.replaceChildren(img)}if(img.getAttribute('src')!==source)img.src=source})}
 const settingsBeforeModePreviews=renderSettings;renderSettings=function(){settingsBeforeModePreviews();syncSettingsThemePreviews()};
 new MutationObserver(syncSettingsThemePreviews).observe(document.body,{attributes:true,attributeFilter:['data-dark']});
+
+const memberCenterBeforeWindowTheme=openMemberCenter;
+openMemberCenter=function(){
+ memberCenterBeforeWindowTheme();
+ const center=$('#member-center');
+ if(!center?.open)return;
+ syncWindowThemeColor(center);
+ if(center.dataset.windowThemeBound)return;
+ center.dataset.windowThemeBound='true';
+ center.addEventListener('close',()=>syncWindowThemeColor(document.body.classList.contains('world-active')?$('#world-page'):document.body));
+};
+const activeMemberCenter=$('#member-center');
+if(activeMemberCenter?.open)syncWindowThemeColor(activeMemberCenter);

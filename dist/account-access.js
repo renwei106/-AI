@@ -28,13 +28,82 @@
     guard.textContent = 'html:not(.shiyu-account-ready) #main{visibility:hidden}';
     document.head.append(guard);
   }
-  const rawPersist = persist;
+  const basePersist = persist;
+  let extensionMutationEpoch = 0, accountSaveBusy = false, accountSaveQueued = false;
+  const attemptedExtensionIds = new Set();
+  const observedExtensionIds = new Set();
+  const inboxKey = userId => 'shiyu-extension-inbox:' + userId;
+  function rememberAccountInbox(userId) {
+    if (!userId) return;
+    try { localStorage.setItem(inboxKey(userId), JSON.stringify(prefs.extensionInbox || [])); } catch { /* The primary state/journal still retain these rows. */ }
+  }
+  function restoredAccountInbox(userId) {
+    try { const rows = JSON.parse(localStorage.getItem(inboxKey(userId)) || '[]'); return Array.isArray(rows) ? rows : []; } catch { return []; }
+  }
+  function extensionEntries(userId) { return userId ? window.ShiyuExtensionStore?.pending?.(userId) || [] : []; }
+  function hasExtensionItem(graph, entry) {
+    const group = graph?.find(space => space.id === entry.spaceId)?.scenes?.find(scene => scene.id === entry.sceneId)?.groups?.find(group => group.id === entry.groupId);
+    return group?.items?.some(item => item?.[1] === entry.item?.[1]) === true;
+  }
+  function observeExtensionEntries(graph, userId) {
+    for (const entry of extensionEntries(userId)) if (entry.kind !== 'inbox' && hasExtensionItem(graph, entry)) observedExtensionIds.add(entry.id);
+  }
+  function discardRemovedExtensionEntries() {
+    const userId = localIdentity();
+    if (authBusy || !userId || verifiedUserId !== userId || sharedIdentity() !== userId) return;
+    let saved; try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch { return; }
+    const ids = extensionEntries(userId).filter(entry => entry.kind !== 'inbox' && observedExtensionIds.has(entry.id)
+      && hasExtensionItem(saved.data, entry) && !hasExtensionItem(data, entry)).map(entry => entry.id);
+    // Only a user persist cancels an item this tab previously saw. A stale tab or
+    // a server response lacking the destination must not discard a cold save.
+    if (ids.length) {
+      try { window.ShiyuExtensionStore?.ackPending?.(userId, ids); extensionMutationEpoch++; } catch { /* Retain pending operations when storage is unavailable. */ }
+    }
+  }
+  function mergeExtensionEntries(nextData, userId, before = []) {
+    const entries = [...new Map([...before, ...extensionEntries(userId)].map(entry => [entry.id, entry])).values()];
+    const next = { signed: true, data: clone(nextData), prefs: { accountProfile: { id: userId } } };
+    window.ShiyuExtensionStore?.applyPending?.(next, entries, { inbox: false });
+    observeExtensionEntries(next.data, userId);
+    return next.data;
+  }
+  function rawPersist() {
+    const userId = localIdentity(), entries = extensionEntries(userId), value = { signed, data, prefs };
+    observeExtensionEntries(data, userId);
+    const applied = window.ShiyuExtensionStore?.applyPending?.(value, entries, { groups: false }) || [];
+    basePersist();
+    // Inbox remains local. Only acknowledge rows after the application's own prefs
+    // have persisted them, so an old initialization cannot replace a cold save.
+    if (userId && sharedIdentity() === userId) {
+      rememberAccountInbox(userId);
+      let saved; try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch { saved = {}; }
+      const inboxIds = entries.filter(entry => entry.kind === 'inbox' && applied.includes(entry.id)
+        && saved.prefs?.extensionInbox?.some(row => row.id === entry.entry?.id || row.item?.[1] === entry.entry?.item?.[1])).map(entry => entry.id);
+      try { window.ShiyuExtensionStore?.ackPending?.(userId, inboxIds); } catch { /* Keep the journal for the next persistence. */ }
+    }
+  }
+  function queueExtensionSync() {
+    const userId = accountId();
+    if (authBusy || !signed || verifiedUserId !== userId || sharedIdentity() !== userId || prefs.accountDataUserId !== userId) return;
+    const entries = extensionEntries(userId);
+    const applicable = window.ShiyuExtensionStore?.applyPending?.({ signed, data: clone(data), prefs: { accountProfile: { id: userId } } }, entries, { inbox: false }) || [];
+    // A failed or no-longer-valid destination stays journaled; it must not turn
+    // account-ready events into an endless 350ms network retry loop.
+    if (!applicable.some(id => !attemptedExtensionIds.has(id))) return;
+    clearTimeout(syncTimer); syncTimer = setTimeout(() => { void saveAccountData(); }, 350);
+  }
+  window.syncShiyuExtensionChanges = () => {
+    extensionMutationEpoch++;
+    if (!authBusy && signed && verifiedUserId === accountId() && localIdentity() === sharedIdentity()) originalPersist();
+    queueExtensionSync();
+  };
   const appliedLogins = new WeakSet();
   function invalidateAccount() { accountEpoch++; membershipRequest++; verifiedUserId = null; accountDataRefreshPending = true; clearTimeout(syncTimer); clearTimeout(membershipExpiryTimer); document.documentElement.classList.remove('shiyu-account-ready'); }
   function markAccountReady() {
     const ready = !authBusy && verifiedUserId !== null && verifiedUserId === localIdentity();
     document.documentElement.classList.toggle('shiyu-account-ready', ready);
     if (ready) window.dispatchEvent(new CustomEvent('shiyu-session-ready', {detail:{authenticated:!!signed}}));
+    if (ready) queueExtensionSync();
   }
   const profileKey = id => 'shiyu-account-profile:' + id;
   const profileFields = ['name', 'avatar', 'realName', 'gender', 'birthday', 'profileCompleted'];
@@ -70,12 +139,14 @@
     const previousId = accountId(), changed = !signed || previousId !== user.id;
     if (changed) {
       rememberProfile();
+      if (signed && previousId) rememberAccountInbox(previousId);
       invalidateAccount();
       data = clone(seed);
       prefs.accountDataUserId = '';
       prefs.membershipDemo = null;
       prefs.demoMemberOrders = [];
       prefs.accountProfile = savedProfile(user.id);
+      prefs.extensionInbox = restoredAccountInbox(user.id);
       closeAccountDialogs();
     }
     signed = true;
@@ -86,14 +157,15 @@
       prefs.cornerCloseGuideAcknowledgedV1[user.id] = true;
       window.dispatchEvent(new Event('shiyu-corner-guide-synced'));
     }
-    if (Array.isArray(accountData)) { data = clone(accountData); prefs.accountDataUserId = user.id; accountDataRefreshPending = false; normalizeSelection(); }
+    if (Array.isArray(accountData)) { data = mergeExtensionEntries(accountData, user.id); prefs.accountDataUserId = user.id; accountDataRefreshPending = false; normalizeSelection(); }
     syncMembershipFromUser(user);
     return changed;
   }
   function clearAccount(preserveProfile = true) {
     if (preserveProfile) rememberProfile();
+    if (signed) rememberAccountInbox(accountId());
     invalidateAccount(); signed = false; verifiedUserId = '';
-    prefs.accountProfile = {}; prefs.accountDataUserId = ''; prefs.membership = null; prefs.membershipDemo = null; prefs.demoMemberOrders = [];
+    prefs.accountProfile = {}; prefs.accountDataUserId = ''; prefs.extensionInbox = []; prefs.membership = null; prefs.membershipDemo = null; prefs.demoMemberOrders = [];
     data = clone(seed); normalizeSelection(); view = location.hostname === 'space.shiyubox.com' ? 'space' : 'home'; pending = null;
     publishMembership(null); rawPersist();
     closeAccountDialogs();
@@ -184,6 +256,7 @@
   publishMembership(null, false);
 
   persist = function accountPersist() {
+    discardRemovedExtensionEntries();
     if (!originalPersist()) return;
     if (!syncEnabled || !signed || !accountId() || prefs.accountDataUserId !== accountId()) return;
     clearTimeout(syncTimer);
@@ -238,7 +311,13 @@
 
   async function saveAccountData() {
     if (authBusy || !signed || !accountId() || verifiedUserId !== accountId() || sharedIdentity() !== accountId() || prefs.accountDataUserId !== accountId()) return;
+    if (accountSaveBusy) { accountSaveQueued = true; return; }
+    accountSaveBusy = true; accountSaveQueued = false;
     const userId = accountId(), ticket = requestTicket();
+    const entries = extensionEntries(userId);
+    const appliedIds = window.ShiyuExtensionStore?.applyPending?.({ signed, data, prefs }, entries, { inbox: false }) || [];
+    appliedIds.forEach(id => attemptedExtensionIds.add(id));
+    let successful = false;
     try {
       const response = await fetch('/api/shiyu/auth/account', {
         method: 'PUT',
@@ -246,9 +325,19 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, data }),
       });
-      if (!currentTicket(ticket) || accountId() !== userId) return;
-      if (!response.ok) { const result = await response.json(); toast(result.message || '空间保存失败'); await hydrateAccountData(); }
+      const result = await response.json();
+      if (!currentTicket(ticket) || accountId() !== userId || sharedIdentity() !== userId) return;
+      if (!response.ok) { toast(result.message || '空间保存失败'); await hydrateAccountData(); }
+      else if (result.userId === userId) {
+        successful = true;
+        try { window.ShiyuExtensionStore?.ackPending?.(userId, appliedIds); } catch { /* An unacknowledged journal is safe to replay. */ }
+      }
     } catch { /* local storage remains the fallback for offline preview */ }
+    finally {
+      accountSaveBusy = false;
+      if (accountSaveQueued) { accountSaveQueued = false; clearTimeout(syncTimer); syncTimer = setTimeout(() => { void saveAccountData(); }, 350); }
+      else if (successful) queueExtensionSync();
+    }
   }
 
   function normalizeSelection() {
@@ -364,20 +453,25 @@
   async function loadAccountData(userId) {
     const ticket = requestTicket();
     if (authBusy || !signed || verifiedUserId !== userId || accountId() !== userId) return;
+    const pendingBefore = extensionEntries(userId), extensionEpoch = extensionMutationEpoch;
     try {
       const response = await fetch('/api/shiyu/auth/account', { credentials: 'same-origin', cache: 'no-store' });
       if (!response.ok) return;
       const result = await response.json();
       if (!currentTicket(ticket) || accountId() !== userId || verifiedUserId !== userId || result.userId !== userId) return;
+      // A GET issued before a bookmark save can arrive after its PUT/ACK. Reject
+      // that stale payload even if the successfully saved journal is now empty.
+      if (extensionEpoch !== extensionMutationEpoch) { accountDataRefreshPending = true; return; }
       accountDataRefreshPending = false;
       if (Array.isArray(result.data)) {
         syncEnabled = false;
-        data = clone(result.data);
+        data = mergeExtensionEntries(result.data, userId, pendingBefore);
         prefs.accountDataUserId = userId;
         normalizeSelection();
         originalPersist();
         syncEnabled = true;
         render();
+        queueExtensionSync();
       }
     } catch { /* unauthenticated/static hosting keeps the local prototype available */ }
   }

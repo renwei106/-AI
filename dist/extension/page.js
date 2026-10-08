@@ -5,6 +5,7 @@ addEventListener('pageshow', resetPageScroll);
 addEventListener('load', resetPageScroll, { once: true });
 const themeMedia = matchMedia('(prefers-color-scheme: dark)');
 const officialFonts = { 'youfeng': '"Shiyu Youfeng"', 'qingya-song': '"Shiyu Qingya Song"', 'wenrun-kai': '"Shiyu Wenrun Kai"' };
+const syncPageThemeColor = () => requestAnimationFrame(() => { const meta = document.querySelector('meta[name="theme-color"]'); const color = getComputedStyle(document.body).backgroundColor; if (meta && color) meta.content = color; });
 async function applyOfficialFont() {
   let font = officialFonts.youfeng;
   try { const response = await fetch('/api/shiyu/operations', { cache: 'no-store' }); if (response.ok) { const { officialFont } = await response.json(); font = officialFonts[officialFont] || font; } } catch {}
@@ -20,6 +21,7 @@ function applyPageMode() {
   document.documentElement.style.setProperty('--action-color', color);
   document.documentElement.style.setProperty('--on-action', luminance > .42 ? '#202326' : '#ffffff');
   document.documentElement.dataset.extensionDark = String(mode === 'dark' || mode === 'system' && themeMedia.matches);
+  syncPageThemeColor();
 }
 themeMedia.addEventListener('change', applyPageMode);
 addEventListener('storage', applyPageMode);
@@ -32,7 +34,7 @@ const browsers = [
   { id: 'qq', name: 'QQ 浏览器', short: 'QQ', icon: 'assets/browsers/qq.svg', address: 'chrome://extensions', install: 'crx' },
   { id: 'quark', name: '夸克浏览器', short: '夸克', icon: 'assets/browsers/quark.svg', address: 'chrome://extensions', install: 'crx' },
   { id: 'firefox', name: 'Firefox 火狐', short: 'Firefox', icon: 'assets/browsers/firefox.svg', address: 'about:addons', install: 'xpi' }
-].map(browser => ({ ...browser, version: '1.0.0', download: ['chrome', 'edge'].includes(browser.id) ? 'downloads/shiyu-extension-1.0.0.zip' : `downloads/shiyu-extension-${browser.id}-1.0.0.zip` }));
+].map(browser => ({ ...browser, version: '1.0.1', download: ['chrome', 'edge'].includes(browser.id) ? 'downloads/shiyu-extension-1.0.1.zip' : `downloads/shiyu-extension-${browser.id}-1.0.1.zip` }));
 let selectedBrowser = null;
 let firefoxRelease = { ready: false };
 fetch('firefox-release.json', { cache: 'no-store' }).then(response => response.ok ? response.json() : null).then(async release => {

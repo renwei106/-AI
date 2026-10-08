@@ -3,6 +3,7 @@
   'use strict';
   const KEY = 'yiyu-prototype-v1';
   const EVENT_KEY = 'shiyu-extension-change';
+  const PENDING_KEY = 'shiyu-extension-pending-v1';
   function read() {
     const value = JSON.parse(localStorage.getItem(KEY) || '{}');
     if (!value || typeof value !== 'object') throw new Error('无法读取拾隅数据，请先打开拾隅。');
@@ -41,9 +42,62 @@
     if (!g) throw new Error('该分组已变更，请刷新后重新选择。');
     return { group: g, label: [s.name, c.name, g.name].join(' / ') };
   }
-  function commit(value, detail) {
-    // One atomic localStorage write: quota failures never report success or remove inbox entries.
-    try { localStorage.setItem(KEY, JSON.stringify(value)); } catch { throw new Error('本机存储空间不足，尚未保存，请清理后重试。'); }
+  function pending(accountId) {
+    let entries; try { entries = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'); } catch { entries = []; }
+    return (Array.isArray(entries) ? entries : []).filter(entry => entry && typeof entry.id === 'string' && (!accountId || entry.accountId === accountId));
+  }
+  function ackPending(accountId, ids) {
+    const selected = new Set(ids);
+    if (!accountId || !selected.size) return;
+    localStorage.setItem(PENDING_KEY, JSON.stringify(pending().filter(entry => entry.accountId !== accountId || !selected.has(entry.id))));
+  }
+  function applyPending(value, entries, options = {}) {
+    const owner = identity(value), applied = [];
+    if (!owner) return applied;
+    for (const entry of entries) {
+      if (entry.accountId !== owner) continue;
+      if (entry.kind === 'inbox' && options.inbox !== false) {
+        const row = entry.entry;
+        if (!row?.id || !Array.isArray(row.item)) continue;
+        let item; try { item = bookmark({ title: row.item[0], url: row.item[1], description: row.item[2], icon: row.item[3] }); } catch { continue; }
+        value.prefs ||= {}; const inbox = value.prefs.extensionInbox ||= [];
+        if (!inbox.some(saved => saved.id === row.id || saved.item[1] === item[1])) inbox.unshift({ ...row, item });
+        applied.push(entry.id);
+      } else if (['group', 'move'].includes(entry.kind)) {
+        let target; try { target = destination(value, entry); } catch { continue; }
+        if (options.groups !== false) {
+          if (!Array.isArray(entry.item)) continue;
+          let item; try { item = bookmark({ title: entry.item[0], url: entry.item[1], description: entry.item[2], icon: entry.item[3] }); } catch { continue; }
+          if (!target.group.items.some(saved => saved[1] === item[1])) target.group.items.push(item);
+          applied.push(entry.id);
+        }
+        if (options.inbox !== false && entry.removeInboxIds?.length) {
+          const removed = new Set(entry.removeInboxIds);
+          value.prefs ||= {}; value.prefs.extensionInbox = (value.prefs.extensionInbox || []).filter(row => !removed.has(row.id));
+        }
+      }
+    }
+    return applied;
+  }
+  function journalEntry(value, fields) { return { id: crypto.randomUUID(), accountId: requireLogin(value), createdAt: Date.now(), ...fields }; }
+  function commit(value, detail, changes) {
+    // Persist state and its journal together; roll back our state write if either fails.
+    const previous = localStorage.getItem(KEY), serialized = JSON.stringify(value);
+    try {
+      localStorage.setItem(KEY, serialized);
+      if (changes) {
+        const owner = requireLogin(value), removed = new Set(changes.removeInboxIds || []);
+        const entries = pending().filter(entry => entry.accountId !== owner || entry.kind !== 'inbox' || !removed.has(entry.entry?.id));
+        if (changes.category) for (const entry of entries) if (entry.accountId === owner && entry.kind === 'inbox' && changes.category.ids.includes(entry.entry?.id)) entry.entry.category = changes.category.value;
+        entries.push(...(changes.add || []));
+        localStorage.setItem(PENDING_KEY, JSON.stringify(entries));
+      }
+    } catch {
+      // If the journal cannot be saved, do not report a bookmark that could disappear
+      // during account hydration. Never roll back another tab's newer state.
+      if (localStorage.getItem(KEY) === serialized) try { if (previous === null) localStorage.removeItem(KEY); else localStorage.setItem(KEY, previous); } catch {}
+      throw new Error('本机存储空间不足，尚未保存，请清理后重试。');
+    }
     try { localStorage.setItem(EVENT_KEY, crypto.randomUUID()); } catch { /* Data is already committed. */ }
     root.dispatchEvent(new CustomEvent('shiyu-extension-change', { detail }));
   }
@@ -53,13 +107,14 @@
     if (input.mode === 'temporary') {
       const inbox = value.prefs.extensionInbox ||= [];
       if (inbox.some(x => x.item[1] === item[1])) return { duplicate: true, label: '稍后整理' };
-      inbox.unshift({ id: crypto.randomUUID(), item, category: 'archive', createdAt: Date.now() });
-      commit(value); return { label: '稍后整理' };
+      const entry = { id: crypto.randomUUID(), item, category: 'archive', createdAt: Date.now() };
+      inbox.unshift(entry);
+      commit(value, undefined, { add: [journalEntry(value, { kind: 'inbox', entry })] }); return { label: '稍后整理' };
     }
     if (input.mode !== 'group') throw new Error('请选择收藏方式。');
     const { group, label } = destination(value, input);
     if (group.items.some(x => x[1] === item[1])) return { duplicate: true, label };
-    group.items.push(item); commit(value); return { label };
+    group.items.push(item); commit(value, undefined, { add: [journalEntry(value, { kind: 'group', item, spaceId: input.spaceId, sceneId: input.sceneId, groupId: input.groupId })] }); return { label };
   }
   function inbox() { const value = read(); requireLogin(value); return value.prefs?.extensionInbox || []; }
   function search(input) {
@@ -89,23 +144,25 @@
     const { group, label } = destination(value, input);
     if (!group.items.some(x => x[1] === entry.item[1])) group.items.push(bookmark({ title: entry.item[0], url: entry.item[1], description: entry.item[2], icon: entry.item[3] }));
     value.prefs.extensionInbox = entries.filter(x => x.id !== input.id);
-    commit(value); return { label };
+    commit(value, undefined, { removeInboxIds: [entry.id], add: [journalEntry(value, { kind: 'move', item: entry.item, spaceId: input.spaceId, sceneId: input.sceneId, groupId: input.groupId, removeInboxIds: [entry.id] })] }); return { label };
   }
   function updateInbox(input) {
     const value=read();requireLogin(value,input.accountId);
     const entries=value.prefs?.extensionInbox||[],ids=new Set(input.ids||[]),selected=entries.filter(x=>ids.has(x.id));
     if(!ids.size||selected.length!==ids.size)throw new Error('所选内容已变更，请重新选择。');
-    let label='';
+    let label='',journal;
     if(input.action==='archive'){
       const target=destination(value,input);label=target.label;
       const items=selected.map(x=>bookmark({title:x.item[0],url:x.item[1],description:x.item[2],icon:x.item[3]}));
       for(const item of items)if(!target.group.items.some(x=>x[1]===item[1]))target.group.items.push(item);
       value.prefs.extensionInbox=entries.filter(x=>!ids.has(x.id));
-    }else if(input.action==='clear')value.prefs.extensionInbox=entries.filter(x=>!ids.has(x.id));
+      journal={removeInboxIds:[...ids],add:items.map(item=>journalEntry(value,{kind:'group',item,spaceId:input.spaceId,sceneId:input.sceneId,groupId:input.groupId,removeInboxIds:[...ids]}))};
+    }else if(input.action==='clear'){value.prefs.extensionInbox=entries.filter(x=>!ids.has(x.id));journal={removeInboxIds:[...ids]};}
     else if(input.action==='category'&&['temporary','archive'].includes(input.category)){
       for(const entry of selected)entry.category=input.category;
+      journal={category:{ids:[...ids],value:input.category}};
     }else throw new Error('不支持的整理操作。');
-    commit(value,input.action==='category'?{type:'inbox-category'}:undefined);return {count:selected.length,label};
+    commit(value,input.action==='category'?{type:'inbox-category'}:undefined,journal);return {count:selected.length,label};
   }
   function seedInboxDemo(){
     const value=read(),id=requireLogin(value);value.prefs||={};value.prefs.laterDemoOwners||={};
@@ -115,5 +172,5 @@
     for(const [title,url,category] of examples)if(!inbox.some(x=>x.item[1]===url))inbox.push({id:crypto.randomUUID(),item:[title,url,'演示网址，可归档或清除'],category,demo:true,createdAt:Date.now()});
     value.prefs.laterDemoOwners[id]=true;commit(value);
   }
-  root.ShiyuExtensionStore = Object.freeze({ snapshot, save, search, inbox, move, updateInbox, seedInboxDemo, KEY, EVENT_KEY });
+  root.ShiyuExtensionStore = Object.freeze({ snapshot, save, search, inbox, move, updateInbox, seedInboxDemo, pending, applyPending, ackPending, KEY, EVENT_KEY, PENDING_KEY });
 })(globalThis);

@@ -99,15 +99,19 @@
   function refresh(event) {
     const value = JSON.parse(localStorage.getItem(store.KEY) || '{}');
     if (!Array.isArray(value.data)) return;
+    store.applyPending?.(value, store.pending?.(value.signed ? value.prefs?.accountProfile?.id : '') || []);
     if(event?.detail?.type==='inbox-category'){
+      if (!signed || !value.signed || prefs.accountProfile?.id !== value.prefs?.accountProfile?.id) return;
       prefs.extensionInbox=value.prefs?.extensionInbox||[];
       if(laterDrawer?.open)drawLaterDrawer();
+      window.syncShiyuExtensionChanges?.();
       return;
     }
     data = value.data; prefs = { ...defaults, ...value.prefs }; signed = !!value.signed;
     overrides = value.overrides || {}; styles = value.styles || {};
     if (value.themeMemory) themeMemory = value.themeMemory;
     render();
+    window.syncShiyuExtensionChanges?.();
     if(laterDrawer?.open){if(!signed||store.snapshot().accountId!==laterAccount)laterDrawer.close();else drawLaterDrawer();}
   }
   window.addEventListener('shiyu-extension-change', refresh);
@@ -124,6 +128,8 @@
       return { ok: false, error: '不支持的插件操作。' };
     } catch (error) { return { ok: false, error: error.message }; }
   } });
+  // Cold saves can precede app.js initializing the page's in-memory preferences.
+  if (store.pending?.(store.snapshot().accountId).length) refresh();
   updateHeader(); decorateWorkspace();
   const query = new URLSearchParams(location.search);
   if (query.get('extension') === 'login' && !signed) show('#login');

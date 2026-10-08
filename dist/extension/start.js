@@ -5,6 +5,7 @@ addEventListener('pageshow', resetPageScroll)
 addEventListener('load', resetPageScroll, { once: true })
 const themeMedia = matchMedia('(prefers-color-scheme: dark)')
 const officialFonts = { 'youfeng': '"Shiyu Youfeng"', 'qingya-song': '"Shiyu Qingya Song"', 'wenrun-kai': '"Shiyu Wenrun Kai"' }
+const syncPageThemeColor = () => requestAnimationFrame(() => { const meta = document.querySelector('meta[name="theme-color"]'); const color = getComputedStyle(document.body).backgroundColor; if (meta && color) meta.content = color })
 async function applyOfficialFont() {
   let font = officialFonts.youfeng
   try {
@@ -23,6 +24,7 @@ function applyPageMode() {
   document.documentElement.dataset.extensionDark = String(mode === 'dark' || mode === 'system' && themeMedia.matches)
   document.documentElement.dataset.themed = 'true'
   document.documentElement.dataset.themeDark = document.documentElement.dataset.extensionDark
+  syncPageThemeColor()
 }
 themeMedia.addEventListener('change', applyPageMode); addEventListener('storage', applyPageMode); applyPageMode()
 applyOfficialFont()
