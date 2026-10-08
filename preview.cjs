@@ -102,7 +102,7 @@ http.createServer(async(req,res)=>{
   if(/^\/assets\/toolbox\/(?:common|memo|todo|icons|emoji|cutout)\.svg$/.test(pathname))file=pathname.slice(1)
   if(/^\/assets\/memo-paper\/(?:engine\.js|carousel\.js|LICENSE|THIRD_PARTY_NOTICES\.txt|vat\/geo\/vertex_animation_textures1_mesh\.fbx|vat\/tex\/vertex_animation_textures1_pos\.exr)$/.test(pathname))file=pathname.slice(1)
   if(pathname==='/official/')file='official/index.html'
-  else if(pathname==='/official/v2/'||pathname==='/official/v2'||pathname==='/official/v2/index.html'){res.writeHead(302,{Location:'https://www.shiyubox.com/'+req.url.slice(pathname.length),'Cache-Control':'no-store'});res.end();return}
+  else if(pathname==='/official/v2/'||pathname==='/official/v2'||pathname==='/official/v2/index.html'){res.writeHead(301,{Location:'https://www.shiyubox.com/'+req.url.slice(pathname.length),'Cache-Control':'no-store'});res.end();return}
   else if(pathname.startsWith('/official/v2/')){res.writeHead(410,{'Cache-Control':'no-store'});res.end('Gone');return}
   else if(pathname==='/official/v3/'||pathname==='/official/v3')file='official/v3/index.html'
   else if(/^\/official\/(?!.*\.\.)[A-Za-z0-9._/-]+$/.test(pathname))file=pathname.slice(1)

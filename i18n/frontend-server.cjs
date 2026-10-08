@@ -23,6 +23,12 @@ async function localized(req,res,file,root){
  }
  content??=fs.readFileSync(path.join(root,file),'utf8');
  if(file==='index.html'){
+  // The application homepage is separate from the official site and private entry hosts.
+  const fromLocalProxy=['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket?.remoteAddress);
+  const hostname=String(fromLocalProxy&&req.headers['x-shiyu-public-host']||req.headers.host||'').toLowerCase().split(':')[0];
+  if(hostname==='shiyubox.com'&&['/','/index.html'].includes(url.pathname)&&!url.searchParams.has('page')){
+   content=content.replace('</head>','<link rel="canonical" href="https://shiyubox.com/"></head>');
+  }
   const client={locale,settings:state.settings,country:region,dictionary:state.dictionaries?.[locale]||{}};
   content=content.replace(/<html lang="[^"]*"/,'<html lang="'+locale+'"');
   if(locale!=='zh-CN')content=content.replace(/(<script\b[^>]*\bsrc=")([^"#]+\.js(?:\?[^"#]*)?)(")/g,(all,start,src,end)=>{
