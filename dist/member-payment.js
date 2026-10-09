@@ -320,17 +320,18 @@
  }
  openMemberOrders = function () {
   const d = memberDialog('member-orders', '我的订单');
-  d.innerHTML += '<div class="member-empty">正在加载订单…</div>'; d.showModal();
+  d.innerHTML += '<div class="member-empty"><div class="member-orders-status" role="status">正在加载订单…</div></div>'; d.showModal();
   Promise.allSettled([request('/orders'), fetch('/api/shiyu/auth/membership-records', { credentials: 'same-origin', cache: 'no-store' }).then(async response => { const data = await response.json(); if (!response.ok) throw Error(data.message || '记录加载失败'); return data; })]).then(results => {
    if (!d.open) return;
-   const target = d.querySelector('.member-empty'), payments = results[0].status === 'fulfilled' ? results[0].value.items : [];
+   const target = d.querySelector('.member-empty'), payments = results[0].status === 'fulfilled' ? results[0].value.items.filter(o => o.status === 'paid') : [];
    const records = results[1].status === 'fulfilled' ? results[1].value.items : [];
-   if (results.every(item => item.status === 'rejected')) { target.textContent = results[1].reason.message; return; }
-   const labels = { created: '待支付', pending: '待支付', unknown: '结果待确认', paid: '支付成功', closed: '已关闭' };
-   const paidRows = payments.map((o, i) => '<button class="member-order-row" data-real-order="'+i+'"><span>'+text(o.planName)+'<small>'+text(new Date(o.createdAt).toLocaleString())+'</small></span><span>¥'+money(o.amount)+'<small>'+text(o.provider === 'free' && o.status === 'paid' ? '领取成功' : labels[o.status] || o.status)+'　↗</small></span></button>').join('') + records.filter(r => r.source === 'payment' && !payments.some(o => o.id === r.orderId)).map(r => '<div class="member-order-row"><span>'+text(r.title)+'<small>'+text(new Date(r.time).toLocaleString())+'</small></span><span>¥'+Number(r.amount || 0).toFixed(2)+'<small>'+text(r.duration)+'</small></span></div>').join('');
-   const rewards = records.filter(r => r.source === 'reward').map(r => '<div class="member-order-row"><span>'+text(r.title)+'<small>'+text(new Date(r.time).toLocaleString())+'</small></span><span>'+text(r.duration)+'<small>活动奖励</small></span></div>').join('');
-   target.innerHTML = '<h3>购买与续费</h3>'+(paidRows || '<p>暂无购买记录</p>')+'<h3>活动奖励</h3>'+(rewards || '<p>暂无奖励记录</p>');
-   target.querySelectorAll('[data-real-order]').forEach(button => button.onclick = () => showOrder(payments[Number(button.dataset.realOrder)]));
+   if (results.every(item => item.status === 'rejected')) { target.innerHTML = '<div class="member-orders-status" role="status"><p>' + text(results[1].reason.message || '订单加载失败，请稍后重试。') + '</p><button type="button" class="member-order-detail" data-orders-retry>重新加载</button></div>'; target.querySelector('[data-orders-retry]').onclick = () => { d.close(); openMemberOrders(); }; return; }
+   const rows = payments.map(o => ({ id: o.id, duration: o.days ? o.days + ' 天' : records.find(r => r.orderId === o.id)?.duration || '—', time: o.createdAt, title: o.planName, type: o.provider === 'free' ? '免费领取' : '付费购买', amount: '¥' + money(o.amount) }));
+   records.filter(r => r.source === 'reward' || (r.source === 'payment' && !payments.some(o => o.id === r.orderId))).forEach(r => rows.push({ id: r.orderId || r.rewardId || r.id || '—', duration: r.duration || '—', time: r.time, title: r.planName || r.title, type: r.source === 'reward' ? '活动奖励' : '付费购买', amount: '¥' + Number(r.amount || 0).toFixed(2) }));
+   rows.sort((a, b) => new Date(b.time) - new Date(a.time));
+   const body = rows.map(r => '<tr><td class="member-order-id">' + text(r.id) + '</td><td>' + text(r.type) + '</td><td>' + text(r.amount) + '</td><td>' + text(r.title) + '<small class="member-order-duration">' + text(r.duration) + '</small></td><td>' + text(new Date(r.time).toLocaleString()) + '</td></tr>').join('');
+   target.innerHTML = '<div class="member-orders-scroll"><table class="member-orders-table"><thead><tr><th scope="col">订单编号</th><th scope="col">类型</th><th scope="col">金额</th><th scope="col">订单内容</th><th scope="col">时间</th></tr></thead><tbody>' + (body || '<tr><td colspan="5" class="member-orders-empty">暂无订单记录</td></tr>') + '</tbody></table></div>';
+   if (results.some(item => item.status === 'rejected')) target.insertAdjacentHTML('beforeend', '<p class="member-orders-error" role="status">部分订单记录加载失败，请关闭后重试。</p>');
   });
  };
  async function initialize() {

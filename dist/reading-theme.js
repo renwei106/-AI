@@ -4,8 +4,6 @@
   const bookIcon=svgIcon('<path d="M12 6C9 3 5 3 2 4v15c4-1 7 0 10 2 3-2 6-3 10-2V4c-3-1-7-1-10 2Zm0 0v15"/><path d="M5 8h4m-4 4h4m6-4h4m-4 4h4"/>');
   COPY_DEFAULTS.reading={title:'翻开喜欢，自有天地',intro:'留一页空白，给此刻的自己'};
   LINK_VIEWS.shelf=['藏书架',2,4];
-  const modeBefore=linkMode;
-  linkMode=function(id){return id==='follow'&&effective().theme==='reading'?'shelf':modeBefore(id);};
 
   // Resolution-independent still life, drawn locally. No uploaded or remote image is needed.
   function stillLife(prefix='reading') {
@@ -123,7 +121,7 @@
   dock=function(){dockBefore();if(dockTheme()!=='reading')return;const trigger=$('.dock-trigger');if(!trigger)return;const label=trigger.querySelector('.dock-label')?.outerHTML||'';trigger.innerHTML=`<span class="reading-dock-book" aria-hidden="true">${bookIcon}</span>${label}`;};
 
   const settingsBefore=openLinkSettings;
-  openLinkSettings=function(){settingsBefore();const panel=$('#link-view-settings'),choice=panel?.querySelector('[data-link-view=shelf]'),main=panel?.querySelector('.style-scroll-body>.link-view-grid');if(!choice||!main)return;choice.innerHTML=`<span>${bookIcon}</span>藏书架`;choice.title='书脊朝外，把收藏摞成一架好书';const after=main.querySelector('[data-link-view=poly]')||main.querySelector('[data-link-view=calendar]');if(after)after.after(choice);else main.append(choice);};
+  openLinkSettings=function(){settingsBefore();const panel=$('#link-view-settings'),choice=panel?.querySelector('[data-link-view=shelf]'),main=panel?.querySelector('.style-scroll-body>.link-view-grid');if(!choice||!main)return;choice.innerHTML=`<span>${bookIcon}</span>藏书架`;choice.title='书脊朝外，把收藏摞成一架好书';const after=main.querySelector('[data-link-view=calendar]');if(after)after.after(choice);else main.append(choice);};
   const fitBefore=columnFit;
   columnFit=function(){const fit=fitBefore();if(fit.mode!=='shelf')return fit;const width=$('.group:not([hidden]) .cards')?.clientWidth||$('.workspace-tools')?.clientWidth||800,max=Math.max(1,Math.min(4,Math.floor((width+36)/286))),saved=displayRule()?.columns??prefs.groupColumns?.[currentGroup().id];return{...fit,max,count:Math.min(max,saved||max),auto:!saved};};
 

@@ -166,7 +166,7 @@
  }
  function apply(color){
   if(!/^#[0-9a-f]{6}$/i.test(color))return;
-  style.textContent=`body .membership-dialog{${palette(color,false).replaceAll(";"," !important;")}}body[data-dark="true"] .membership-dialog{${palette(color,true).replaceAll(";"," !important;")}}body #member-center.member-polished .member-plans>button[data-published-plan][aria-pressed=true]{background:var(--member-selected);color:#fff}`;
+  style.textContent=`body .membership-dialog:not(#member-orders){${palette(color,false).replaceAll(";"," !important;")}}body[data-dark="true"] .membership-dialog:not(#member-orders){${palette(color,true).replaceAll(";"," !important;")}}body #member-center.member-polished .member-plans>button[data-published-plan][aria-pressed=true]{background:var(--member-selected);color:#fff}`;
  }
  apply('#46634e');
  const officialStyle=document.createElement('style');officialStyle.id='member-official-theme';document.head.append(officialStyle);

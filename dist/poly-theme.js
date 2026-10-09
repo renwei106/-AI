@@ -3,21 +3,6 @@
   'use strict';
   const PRESETS=[['mountain','山岚','把远山，收进日常','01'],['ocean','潮汐','心里有一片海','02'],['dunes','沙丘','风走过，留下形状','03'],['fox','狐影','与一份灵动相遇','04'],['deer','林鹿','在安静里，遇见自然','05'],['portrait','侧影','每个人，都有自己的棱角','06']];
   const gem='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="m4 8 5-5h6l5 5-8 13L4 8Z M4 8h16M9 3 8 8l4 13 4-13-1-5"/></svg>';
-  // Register a selectable bookmark style in the existing scope / persistence flow.
-  LINK_VIEWS.poly=['棱光拾景',3,6];
-  const linkModeBefore=linkMode;
-  linkMode=function(id){return id==='follow'&&effective().theme==='poly'?'poly':linkModeBefore(id);};
-  const linkSettingsBefore=openLinkSettings;
-  openLinkSettings=function(){
-    linkSettingsBefore();
-    const panel=$('#link-view-settings'),choice=panel?.querySelector('[data-link-view=poly]'),main=panel?.querySelector('.style-scroll-body>.link-view-grid');
-    if(!choice||!main)return;
-    // Keep theme companions after the standard theme styles.
-    choice.innerHTML=`<span>${gem}</span>棱光拾景`;
-    choice.title='三角切面的轻量卡片，保留网址图标与名称';
-    const calendar=main.querySelector('[data-link-view=calendar]');
-    if(calendar)calendar.after(choice);else main.append(choice);
-  };
   const svgCache=new Map(); let shapeId=0, custom=null, loadDone=false, menu, upload, job=0, worker=null, rejectWorker=null, busy=false;
   const options=()=>({preset:'mountain',detail:'balanced',tone:'original',...(prefs.polyScene||{})});
   COPY_DEFAULTS.poly={title:'把喜欢，拾成风景',intro:'一片山海，一点灵感。让日常有自己的形状。'};

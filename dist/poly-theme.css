@@ -23,11 +23,6 @@ body[data-theme=poly][data-view=home] .dock-trigger .poly-dock-gem,body[data-the
 body[data-theme=poly] .poly-dock-gem { display:grid; place-items:center; width:62px; height:56px; margin:0 auto 10px; color:var(--accent); }
 .poly-dock-gem svg { width:46px; height:46px; fill:var(--poly-facet); stroke-width:.7; transition:transform .3s; }
 .dock-trigger:hover .poly-dock-gem svg { transform:translateY(-4px) rotate(5deg); }
-body[data-theme=poly] .workspace .cards[data-display=cards] .bookmark,.workspace .cards[data-display=poly] .bookmark { position:relative; isolation:isolate; background:var(--surface); box-shadow:none; border:0; border-radius:14px; transition:background .2s,transform .2s; }
-body[data-theme=poly] .workspace .cards[data-display=cards] .bookmark:before,.workspace .cards[data-display=poly] .bookmark:before { content:''; position:absolute; pointer-events:none; inset:0; z-index:-1; border-radius:inherit; background:conic-gradient(from 210deg at 89% 75%,transparent 0deg 43deg,var(--poly-facet) 44deg 83deg,transparent 84deg 172deg,var(--poly-facet) 173deg 224deg,transparent 225deg); }
-body[data-theme=poly] .workspace .cards[data-display=cards] .bookmark:hover,.workspace .cards[data-display=poly] .bookmark:hover { transform:translateY(-3px); background:color-mix(in srgb,var(--accent) 4%,var(--surface)); }
-body[data-theme=poly] .workspace .cards[data-display=cards] .site-icon,.workspace .cards[data-display=poly] .site-icon { background:var(--surface); border-radius:9px; padding:5px; }
-body[data-theme=poly] .workspace .cards[data-display=cards] .bookmark p,.workspace .cards[data-display=poly] .bookmark p { position:relative; }
 .theme-preview.mini-poly { background:#edf0e7; }
 .theme-preview.mini-poly svg { width:100%; height:100%; }
 .poly-settings-entry { margin-top:20px; display:flex; align-items:center; gap:10px; width:100%; padding:14px; background:var(--soft); border-radius:12px; font-size:12px; }
@@ -63,16 +58,9 @@ body[data-theme=poly] .workspace .cards[data-display=cards] .bookmark p,.workspa
 .poly-editor-footer>span { flex:1; }.poly-editor-footer button { padding:10px 16px; border-radius:10px; font-size:12px; }.poly-editor-footer [data-poly-remove] { color:var(--muted); padding-left:0; font-size:11px; }
 .poly-editor-footer button:disabled { opacity:.45; cursor:wait; }
 
-body[data-theme=poly][data-dark=true] .workspace .cards[data-display=cards] .site-icon:has(img),body[data-dark=true] .workspace .cards[data-display=poly] .site-icon:has(img) { background:#f4f5ef; }
 @media(max-width:720px) { [data-poly-caption] { font-size:16px; bottom:124px; left:6%; }.poly-change { bottom:112px; right:5%; }.home-poly .utility-search { bottom:22px; right:5%; }.home-poly .utility-search button>span { display:none; } }
 @media(max-width:480px) { #poly-scene-picker { padding:18px; max-height:calc(100svh - 24px); }.poly-editor-preview { height:180px; }.poly-editor-preview>img { max-height:168px; }.poly-preset-grid>button>span { height:66px; }.poly-upload-tile { flex-wrap:wrap; gap:8px; }.poly-upload-tile>span { font-size:10px; }.poly-editor-footer { bottom:-18px; gap:4px; }.poly-editor-footer button { padding:10px 11px; }.poly-editor-footer [data-poly-remove] { font-size:10px; }.poly-segmented button { padding:7px 12px; } }
-@media(prefers-reduced-motion:reduce) { .poly-art,.poly-dock-gem svg,body[data-theme=poly] .workspace .cards[data-display=cards] .bookmark { transition:none; } }
 
-#link-view-settings [data-link-view=poly]>span { display:grid; place-items:center; width:20px; height:20px; }
-#link-view-settings [data-link-view=poly]>span>svg { display:block; width:20px; height:20px; }
-.workspace .cards[data-display=poly] { --poly-facet:color-mix(in srgb,var(--accent) 10%,transparent); display:grid; grid-template-columns:repeat(var(--group-columns,3),minmax(0,1fr)); gap:14px; }
-@media(max-width:760px) { .workspace .cards[data-display=poly] { grid-template-columns:repeat(min(var(--group-columns,3),2),minmax(0,1fr)); } }
-@media(prefers-reduced-motion:reduce) { .workspace .cards[data-display=poly] .bookmark { transition:none; } }
 
 /* In-place wallpaper controls and their compact effects popover. */
 .poly-tools { position:absolute; right:4.5%; bottom:76px; display:flex; align-items:center; gap:6px; pointer-events:auto; }
@@ -97,3 +85,5 @@ body[data-dark=true] .poly-effects { --ink:color-mix(in srgb,var(--accent) 6%,#f
 .poly-menu-status { margin:6px 10px; color:var(--muted); font-size:11px; line-height:1.6; }
 .poly-menu-status:empty { display:none; }
 @media(max-width:720px) { .poly-tools { bottom:190px; right:5%; }.poly-effects { right:5%; bottom:242px; max-height:calc(100svh - 266px); }[data-poly-caption] { bottom:196px; } }
+
+@media(prefers-reduced-motion:reduce){.poly-art,.poly-dock-gem svg{transition:none}}
