@@ -4,6 +4,7 @@ const root=__dirname;
 function run(exe,args){const r=cp.spawnSync(exe,args,{stdio:'inherit',windowsHide:true});if(r.status!==0)throw Error('Build failed: '+exe);}
 run(process.execPath,['build-extension-current.cjs']);
 const source=path.join(root,'.local/all-browser-current');fs.mkdirSync(source,{recursive:true});fs.cpSync(path.join(root,'dist/extension/current'),source,{recursive:true});
+const retiredAdapter=path.join(source,'account-store.js');if(fs.existsSync(retiredAdapter))fs.unlinkSync(retiredAdapter);
 const version=JSON.parse(fs.readFileSync(path.join(source,'manifest.json'))).version;
 const key=path.join(root,'.local/browser-extension.pem');if(!fs.existsSync(key))throw Error('Existing signing key required to preserve extension identity');
 const exe=['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].find(x=>fs.existsSync(x));if(!exe)throw Error('Chromium packer missing');

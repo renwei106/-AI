@@ -4,6 +4,24 @@ const fs = require('node:fs'), path = require('node:path'), vm = require('node:v
 const { randomUUID } = require('node:crypto');
 const root = path.resolve(__dirname, '..'), KEY = 'yiyu-prototype-v1';
 const clone = value => JSON.parse(JSON.stringify(value));
+const lockQueues = new WeakMap();
+function sharedLocks(local) {
+  let queues = lockQueues.get(local); if (!queues) { queues = new Map(); lockQueues.set(local, queues); }
+  return { async request(name, options, action) {
+    if (typeof options === 'function') { action = options; options = {}; }
+    const previous = queues.get(name) || Promise.resolve();
+    let release, cancel;
+    const done = new Promise(resolve => { release = resolve; });
+    queues.set(name, previous.then(() => done));
+    const signal = options?.signal;
+    const aborted = new Promise((_, reject) => {
+      cancel = () => { const error = new Error('Lock wait aborted'); error.name = 'AbortError'; reject(error); };
+      if (signal?.aborted) cancel(); else signal?.addEventListener('abort', cancel, { once: true });
+    });
+    try { await Promise.race([previous, aborted]); if (signal?.aborted) throw Object.assign(new Error('Lock wait aborted'), { name: 'AbortError' }); return await action(); }
+    finally { signal?.removeEventListener('abort', cancel); release(); }
+  } };
+}
 const dataFor = owner => [{id:'s',name:owner,scenes:[{id:'c',name:'场景',groups:[{id:'g',name:'收藏',items:[]}]}]}];
 const stateFor = owner => ({signed:true,data:dataFor(owner),prefs:{accountProfile:{id:owner,name:owner},accountDataUserId:owner,extensionInbox:[]},styles:{},overrides:{}});
 const inputFor = (owner,suffix,mode='group') => ({accountId:owner,mode,title:suffix,url:'https://example.test/'+suffix,spaceId:'s',sceneId:'c',groupId:'g'});
@@ -19,7 +37,7 @@ function fixture({local=new Map([[KEY,JSON.stringify(stateFor('a'))]]),owner='a'
     styles:{},overrides:{},seed:dataFor('seed'),defaults:{},view:'home',spaceId:'s',sceneId:'c',transitionUntil:0,
     localStorage:{getItem:key=>local.has(key)?local.get(key):null,setItem:(key,value)=>local.set(key,String(value)),removeItem:key=>local.delete(key)},
     sessionStorage:{getItem:()=>null,setItem(){}},location:{hostname:'shiyubox.com',origin:'https://shiyubox.com',search:''},
-    navigator:{},matchMedia:()=>({matches:false}),URL,URLSearchParams,Date,Map,Set,WeakSet,Object,Array,JSON,
+    navigator:{locks:sharedLocks(local)},matchMedia:()=>({matches:false}),URL,URLSearchParams,Date,Map,Set,WeakSet,Object,Array,JSON,AbortController,AbortSignal,
     crypto:{randomUUID},CustomEvent:class{constructor(type,options={}){this.type=type;this.detail=options.detail}},
     setTimeout:(callback,delay)=>{const id=++timerId;timers.set(id,{callback,delay});return id},clearTimeout:id=>timers.delete(id),
     addEventListener:(type,fn)=>{if(!handlers.has(type))handlers.set(type,[]);handlers.get(type).push(fn)},
@@ -44,9 +62,12 @@ function fixture({local=new Map([[KEY,JSON.stringify(stateFor('a'))]]),owner='a'
       return finish();
     }};
   context.window=context;context.globalThis=context;
+  context.effective=()=>context.prefs;
   context.persist=()=>context.localStorage.setItem(KEY,JSON.stringify({signed:context.signed,data:context.data,prefs:context.prefs,styles:context.styles,overrides:context.overrides}));
   const sandbox=vm.createContext(context);
   vm.runInContext(fs.readFileSync(path.join(root,'dist/extension/store.js'),'utf8'),sandbox);
+  vm.runInContext(fs.readFileSync(path.join(root,'dist/extension/account-sync.js'),'utf8'),sandbox);
+  f.sync=context.ShiyuAccountSync;
   f.store=context.ShiyuExtensionStore;
   f.initialize=()=>{vm.runInContext(fs.readFileSync(path.join(root,'dist/extension/integration.js'),'utf8'),sandbox);vm.runInContext(accountPrefix,sandbox);f.api=context.__accountQa;f.initialized=true};
   f.state=()=>clone(f.initialized?f.api.getState():saved());f.saved=()=>clone(saved());f.pending=owner=>clone(f.store.pending(owner));
@@ -122,4 +143,38 @@ test('a stale tab user persist retains an unobserved concurrent cold save journa
   const otherTab=fixture({local:f.local,server:f.server});otherTab.store.save(inputFor('a','unobserved'));
   f.api.userPersist();f.clearTimers();assert.equal(f.pending('a').length,1);
   await f.api.save();assert.equal(f.pending('a').length,0);assert.equal(f.server.a[0].scenes[0].groups[0].items[0][1],'https://example.test/unobserved');
+});
+
+test('website writer reads after a shared lock wait and retains local edits plus acknowledged plugin additions',async()=>{
+  const f=fixture();f.initialize();await f.api.verify();f.clearTimers();
+  const other=fixture({local:f.local,server:f.server});let release,entered=false;
+  const writing=other.sync.withLock('a',{deadline:Date.now()+8000},async()=>{entered=true;await new Promise(resolve=>{release=resolve})});
+  await other.microtasks();assert(entered);
+  const saving=f.api.save();await f.microtasks();
+  assert.equal(f.requests.filter(request=>request.method==='PUT').length,0,'Website must wait for the other writer lock.');
+  f.api.getState().data[0].scenes[0].groups[0].items.push(['Local edit','https://example.test/local-edit','','']);f.api.userPersist();
+  other.store.save(inputFor('a','confirmed-plugin'));
+  f.server.a=clone(other.saved().data);other.store.ackPending('a',other.pending('a').map(entry=>entry.id));
+  release();await writing;await saving;f.clearTimers();
+  assert.deepEqual(f.server.a[0].scenes[0].groups[0].items.map(item=>item[1]),['https://example.test/local-edit','https://example.test/confirmed-plugin']);
+  assert.deepEqual(f.saved().data[0].scenes[0].groups[0].items.map(item=>item[1]),['https://example.test/local-edit','https://example.test/confirmed-plugin']);
+});
+
+test('move recovery survives a website GET that captured the former move and a fresh account hydration',async()=>{
+  const f=fixture();f.initialize();await f.api.verify();f.clearTimers();
+  f.store.save(inputFor('a','restored-move','temporary'));f.clearTimers();
+  const original=clone(f.saved().prefs.extensionInbox[0]);
+  f.store.move({accountId:'a',id:original.id,spaceId:'s',sceneId:'c',groupId:'g',confirmCloud:true});f.clearTimers();
+  const oldMoveId=f.pending('a').find(entry=>entry.kind==='move').id;
+  f.server.a[0].scenes[0].groups=[{id:'g2',name:'新的分组',items:[]}];
+  const hold={};f.holdGET=hold;const hydrating=f.api.verify();await started(f,hold);
+  const recovered=await f.sync.flush('a',{deadline:Date.now()+8000});
+  assert(recovered.recoveredMoveIds.includes(oldMoveId));assert(!f.pending('a').some(entry=>entry.id===oldMoveId));
+  hold.release();await hydrating;f.clearTimers();
+  assert.deepEqual(f.saved().prefs.extensionInbox,[original],'A stale GET must not replay its captured move over the recovered inbox row.');
+  await f.api.verify();f.clearTimers();
+  assert.deepEqual(f.saved().prefs.extensionInbox,[original]);assert.equal(f.saved().data[0].scenes[0].groups[0].id,'g2');
+  const reloaded=fixture({local:f.local,server:f.server});reloaded.initialize();await reloaded.api.verify();
+  assert.deepEqual(reloaded.saved().prefs.extensionInbox,[original]);assert(!reloaded.pending('a').some(entry=>entry.id===oldMoveId));
+  assert.equal(f.requests.filter(request=>request.method==='PUT').length,0,'Recovery and hydration must not resurrect the removed cloud destination.');
 });

@@ -3,6 +3,29 @@
 (() => {
   const clone = value => JSON.parse(JSON.stringify(value));
   const accountId = () => prefs.accountProfile?.id || '';
+  const accountTimeout = () => { const error = new Error('读取超时，请重试连接拾隅。'); error.name = 'AbortError'; return error; };
+  function accountFetch(url, options = {}, deadline = Date.now() + 8000) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) return Promise.reject(accountTimeout());
+    return fetch(url, { ...options, signal: AbortSignal.timeout(remaining) });
+  }
+  let accountSyncPromise;
+  function accountSync(deadline) {
+    if (window.ShiyuAccountSync) return Promise.resolve(window.ShiyuAccountSync);
+    if (!accountSyncPromise) {
+      accountSyncPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script'), timer = setTimeout(() => finish(accountTimeout()), 8000);
+        const finish = error => { clearTimeout(timer); script.onload = script.onerror = null; if (error) { script.remove(); accountSyncPromise = null; reject(error); } else resolve(window.ShiyuAccountSync); };
+        script.src = '/extension/account-sync.js'; script.async = true;
+        script.onload = () => finish(window.ShiyuAccountSync ? null : new Error('同步暂不可用，请重试。'));
+        script.onerror = () => finish(new Error('同步暂不可用，请重试。'));
+        document.head.append(script);
+      });
+    }
+    let timer;
+    return Promise.race([accountSyncPromise, new Promise((_, reject) => { timer = setTimeout(() => reject(accountTimeout()), Math.max(0, deadline - Date.now())); })]).finally(() => clearTimeout(timer));
+  }
+  void accountSync(Date.now() + 8000).catch(() => {});
   let syncTimer = 0;
   let syncEnabled = true;
   let membershipRequest = 0;
@@ -285,10 +308,12 @@
     if (authBusy) return;
     const requestId = ++membershipRequest;
     const ticket = requestTicket();
+    const deadline = Date.now() + 8000;
     try {
-      const response = await fetch('/api/shiyu/auth/session', { credentials: 'same-origin', cache: 'no-store' });
+      const response = await accountFetch('/api/shiyu/auth/session', { credentials: 'same-origin', cache: 'no-store' }, deadline);
       if (!response.ok) return;
       const result = await response.json();
+      if (Date.now() >= deadline) throw accountTimeout();
       if (requestId !== membershipRequest || !currentTicket(ticket)) return;
       if (result.authenticated !== true || !result.user?.id) {
         if (signed || sharedIdentity()) clearAccount();
@@ -299,7 +324,7 @@
       const changed = adoptUser(result.user);
       rawPersist();
       if (changed || accountDataRefreshPending || prefs.accountDataUserId !== result.user.id) {
-        await loadAccountData(result.user.id);
+        await loadAccountData(result.user.id, deadline);
       }
       if (verifiedUserId === result.user.id && (changed || previousMembership !== JSON.stringify(prefs.membership || null) || previousProfile !== JSON.stringify(prefs.accountProfile || {}))) render();
       return (!authBusy && requestId === membershipRequest && verifiedUserId === result.user.id && localIdentity() === result.user.id && sharedIdentity() === result.user.id) || undefined;
@@ -314,24 +339,32 @@
     if (accountSaveBusy) { accountSaveQueued = true; return; }
     accountSaveBusy = true; accountSaveQueued = false;
     const userId = accountId(), ticket = requestTicket();
-    const entries = extensionEntries(userId);
-    const appliedIds = window.ShiyuExtensionStore?.applyPending?.({ signed, data, prefs }, entries, { inbox: false }) || [];
-    appliedIds.forEach(id => attemptedExtensionIds.add(id));
+    const deadline = Date.now() + 8000;
     let successful = false;
     try {
-      const response = await fetch('/api/shiyu/auth/account', {
-        method: 'PUT',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, data }),
+      const sync = await accountSync(deadline);
+      await sync.withLock(userId, { deadline }, async scope => {
+        if (!currentTicket(ticket) || accountId() !== userId || sharedIdentity() !== userId || verifiedUserId !== userId || prefs.accountDataUserId !== userId) return;
+        // Read after obtaining the origin's lock: another frame may have saved a
+        // plugin addition while this writer waited. Keep the latest local graph,
+        // including ordinary edits, and reapply only this owner's pending entries.
+        const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        if (saved.signed && saved.prefs?.accountProfile?.id === userId && saved.prefs?.accountDataUserId === userId && Array.isArray(saved.data)) data = clone(saved.data);
+        const entries = extensionEntries(userId);
+        const appliedIds = window.ShiyuExtensionStore?.applyPending?.({ signed, data, prefs }, entries, { inbox: false }) || [];
+        appliedIds.forEach(id => attemptedExtensionIds.add(id));
+        sync.check(scope.deadline, scope.signal);
+        const { response, value: result } = await sync.request('/api/shiyu/auth/account', {
+          method: 'PUT', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, data }),
+        }, scope);
+        if (!currentTicket(ticket) || accountId() !== userId || sharedIdentity() !== userId) return;
+        // A failed cloud write must not hydrate over the user's local changes.
+        if (!response.ok) { toast(result.message || '空间保存失败'); return; }
+        if (result.userId === userId) {
+          successful = true;
+          try { window.ShiyuExtensionStore?.ackPending?.(userId, appliedIds); } catch { /* Retain the journal if acknowledgement cannot persist. */ }
+        }
       });
-      const result = await response.json();
-      if (!currentTicket(ticket) || accountId() !== userId || sharedIdentity() !== userId) return;
-      if (!response.ok) { toast(result.message || '空间保存失败'); await hydrateAccountData(); }
-      else if (result.userId === userId) {
-        successful = true;
-        try { window.ShiyuExtensionStore?.ackPending?.(userId, appliedIds); } catch { /* An unacknowledged journal is safe to replay. */ }
-      }
     } catch { /* local storage remains the fallback for offline preview */ }
     finally {
       accountSaveBusy = false;
@@ -450,14 +483,15 @@
     return originalWorkspace(...args);
   };
 
-  async function loadAccountData(userId) {
+  async function loadAccountData(userId, deadline = Date.now() + 8000) {
     const ticket = requestTicket();
     if (authBusy || !signed || verifiedUserId !== userId || accountId() !== userId) return;
     const pendingBefore = extensionEntries(userId), extensionEpoch = extensionMutationEpoch;
     try {
-      const response = await fetch('/api/shiyu/auth/account', { credentials: 'same-origin', cache: 'no-store' });
+      const response = await accountFetch('/api/shiyu/auth/account', { credentials: 'same-origin', cache: 'no-store' }, deadline);
       if (!response.ok) return;
       const result = await response.json();
+      if (Date.now() >= deadline) throw accountTimeout();
       if (!currentTicket(ticket) || accountId() !== userId || verifiedUserId !== userId || result.userId !== userId) return;
       // A GET issued before a bookmark save can arrive after its PUT/ACK. Reject
       // that stale payload even if the successfully saved journal is now empty.

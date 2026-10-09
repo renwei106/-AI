@@ -87,7 +87,8 @@
       localStorage.setItem(KEY, serialized);
       if (changes) {
         const owner = requireLogin(value), removed = new Set(changes.removeInboxIds || []);
-        const entries = pending().filter(entry => entry.accountId !== owner || entry.kind !== 'inbox' || !removed.has(entry.entry?.id));
+        const discarded = new Set(changes.removePendingIds || []);
+        const entries = pending().filter(entry => entry.accountId !== owner || !discarded.has(entry.id) && (entry.kind !== 'inbox' || !removed.has(entry.entry?.id)));
         if (changes.category) for (const entry of entries) if (entry.accountId === owner && entry.kind === 'inbox' && changes.category.ids.includes(entry.entry?.id)) entry.entry.category = changes.category.value;
         entries.push(...(changes.add || []));
         localStorage.setItem(PENDING_KEY, JSON.stringify(entries));
@@ -102,7 +103,7 @@
     root.dispatchEvent(new CustomEvent('shiyu-extension-change', { detail }));
   }
   function save(input) {
-    const value = read(); requireLogin(value, input?.accountId);
+    const value = read(), owner = requireLogin(value, input?.accountId);
     const item = bookmark(input); value.prefs ||= {};
     if (input.mode === 'temporary') {
       const inbox = value.prefs.extensionInbox ||= [];
@@ -113,7 +114,15 @@
     }
     if (input.mode !== 'group') throw new Error('请选择收藏方式。');
     const { group, label } = destination(value, input);
-    if (group.items.some(x => x[1] === item[1])) return { duplicate: true, label };
+    const existing = group.items.find(x => x[1] === item[1]);
+    if (existing) {
+      // Only the authenticated bridge requests confirmation of an existing local
+      // item. A duplicate may be a website edit that has not reached the cloud.
+      if (input.confirmCloud === true && !pending(owner).some(entry => ['group', 'move'].includes(entry.kind) && entry.spaceId === input.spaceId && entry.sceneId === input.sceneId && entry.groupId === input.groupId && entry.item?.[1] === item[1])) {
+        commit(value, undefined, { add: [journalEntry(value, { kind: 'group', item: existing, spaceId: input.spaceId, sceneId: input.sceneId, groupId: input.groupId })] });
+      }
+      return { duplicate: true, label };
+    }
     group.items.push(item); commit(value, undefined, { add: [journalEntry(value, { kind: 'group', item, spaceId: input.spaceId, sceneId: input.sceneId, groupId: input.groupId })] }); return { label };
   }
   function inbox() { const value = read(); requireLogin(value); return value.prefs?.extensionInbox || []; }
@@ -144,7 +153,26 @@
     const { group, label } = destination(value, input);
     if (!group.items.some(x => x[1] === entry.item[1])) group.items.push(bookmark({ title: entry.item[0], url: entry.item[1], description: entry.item[2], icon: entry.item[3] }));
     value.prefs.extensionInbox = entries.filter(x => x.id !== input.id);
-    commit(value, undefined, { removeInboxIds: [entry.id], add: [journalEntry(value, { kind: 'move', item: entry.item, spaceId: input.spaceId, sceneId: input.sceneId, groupId: input.groupId, removeInboxIds: [entry.id] })] }); return { label };
+    commit(value, undefined, { removeInboxIds: [entry.id], add: [journalEntry(value, { kind: 'move', item: entry.item, spaceId: input.spaceId, sceneId: input.sceneId, groupId: input.groupId, removeInboxIds: [entry.id], ...(input.confirmCloud === true ? { inboxEntry: entry } : {}) })] }); return { label };
+  }
+  function recoverPendingMoves(accountId, ids) {
+    const value = read(); requireLogin(value, accountId);
+    const selected = new Set(ids), recovered = [], replacements = [];
+    value.prefs ||= {}; const inbox = value.prefs.extensionInbox ||= [];
+    let sidecar; try { sidecar = JSON.parse(localStorage.getItem('shiyu-extension-inbox:' + accountId) || '[]'); } catch { sidecar = []; }
+    for (const entry of pending(accountId)) {
+      if (!selected.has(entry.id) || entry.kind !== 'move' || !entry.removeInboxIds?.[0] || !Array.isArray(entry.item)) continue;
+      // Restore the original local row only after the server confirms that its
+      // destination no longer exists. Replacing the failed move prevents a later
+      // retry from silently replaying it to a different/old destination.
+      const source = entry.inboxEntry || (Array.isArray(sidecar) ? sidecar.find(row => row.id === entry.removeInboxIds[0]) : null) || { category: 'archive', createdAt: entry.createdAt };
+      bookmark({ title: entry.item[0], url: entry.item[1], description: entry.item[2], icon: entry.item[3] });
+      const row = inbox.find(row => row.id === entry.removeInboxIds[0] || row.item?.[1] === entry.item[1]) || { ...source, id: entry.removeInboxIds[0], item: [...entry.item] };
+      if (!inbox.includes(row)) inbox.unshift(row);
+      replacements.push(journalEntry(value, { kind: 'inbox', entry: row })); recovered.push(entry.id);
+    }
+    if (recovered.length) commit(value, undefined, { removePendingIds: recovered, add: replacements });
+    return recovered;
   }
   function updateInbox(input) {
     const value=read();requireLogin(value,input.accountId);
@@ -172,5 +200,5 @@
     for(const [title,url,category] of examples)if(!inbox.some(x=>x.item[1]===url))inbox.push({id:crypto.randomUUID(),item:[title,url,'演示网址，可归档或清除'],category,demo:true,createdAt:Date.now()});
     value.prefs.laterDemoOwners[id]=true;commit(value);
   }
-  root.ShiyuExtensionStore = Object.freeze({ snapshot, save, search, inbox, move, updateInbox, seedInboxDemo, pending, applyPending, ackPending, KEY, EVENT_KEY, PENDING_KEY });
+  root.ShiyuExtensionStore = Object.freeze({ snapshot, save, search, inbox, move, recoverPendingMoves, updateInbox, seedInboxDemo, pending, applyPending, ackPending, KEY, EVENT_KEY, PENDING_KEY });
 })(globalThis);

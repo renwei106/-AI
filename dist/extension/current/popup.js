@@ -1,6 +1,9 @@
+import { attachLocalClient } from './local-client.js';
+
 const $ = selector => document.querySelector(selector);
 const extensionApi = globalThis.browser || globalThis.chrome;
 const preview = ['http:', 'https:'].includes(location.protocol) && new URLSearchParams(location.search).has('preview');
+const requestClient = preview ? null : attachLocalClient(extensionApi);
 const demoState = { signed: true, accountId: 'preview', name: '林间', inboxCount: 3, spaces: [
   { id: 'work', name: '工作空间', scenes: [{ id: 'daily', name: '日常工作', groups: [{ id: 'tools', name: '效率工具' }, { id: 'read', name: '稍后阅读' }] }] },
   { id: 'life', name: '生活空间', scenes: [{ id: 'weekend', name: '周末日常', groups: [{ id: 'ideas', name: '生活灵感' }] }] }
@@ -40,6 +43,17 @@ function setSiteIdentity() {
   if (candidates.length) image.src = candidates[cursor++];
 }
 systemDark.addEventListener('change', () => { if (activeTheme?.mode === 'system') applyTheme(activeTheme); });
+const REQUEST_TIMEOUT_MS = 8000;
+const mutationRequests = new Map();
+function mutationKey(type, payload) {
+  const ordered = value => Array.isArray(value) ? value.map(ordered) : value && typeof value === 'object'
+    ? Object.fromEntries(Object.keys(value).sort().map(key => [key, ordered(value[key])])) : value;
+  const identity = type === 'tool-records' && payload?.action === 'save' && payload.item
+    ? { ...payload, item: { ...payload.item } } : payload;
+  // The tool API assigns its own timestamp; a retry keeps the record's intent and request ID.
+  if (identity !== payload) delete identity.item.updated;
+  return JSON.stringify([type, ordered(identity)]);
+}
 async function call(type, extra = {}) {
   if (preview) {
     if (type === 'state') return { ...demoState, signed: new URLSearchParams(location.search).get('signed') === '1', theme: previewTheme() };
@@ -47,16 +61,36 @@ async function call(type, extra = {}) {
     if (type === 'search') { const query = String(extra.payload?.query || '').toLocaleLowerCase(); const items = demoSearchItems.filter(item => [item.title, item.url, item.description, item.path].some(value => value.toLocaleLowerCase().includes(query))); return { total: items.length, items }; }
     if(type==='list'){const items=demoSearchItems.map((x,i)=>({...x,id:i===2?'demo-inbox':undefined,inbox:i===2,spaceId:'work',sceneId:'daily',groupId:'tools'}));return {accountId:'preview',items,commonGroups:[{id:'common-tools',name:'拾隅',items:items.slice(0,2)},{id:'common-reading',name:'稍后阅读',items:[]},{id:'common-life',name:'生活灵感',items:[]}]};}
     if(type==='move')return {label:'所选分组'};
-    if (type === 'version') return { current: '1.0.1', latest: '1.0.1', hasUpdate: false, browser: 'chrome' };
+    if (type === 'version') return { current: '1.0.2', latest: '1.0.2', hasUpdate: false, browser: 'chrome' };
     return;
   }
-  let timer;
-  const request = extensionApi.runtime.sendMessage({ type, ...extra });
-  const response = type === 'state' ? await Promise.race([request, new Promise((_, reject) => {
-    timer = setTimeout(() => reject(new Error('读取超时，请重试连接拾隅。')), 3000);
-  })]).finally(() => clearTimeout(timer)) : await request;
-  if (!response?.ok) throw new Error(response?.error || '连接中断，请重试。');
-  return response.value;
+  const mutation = type === 'save' || type === 'move' || type === 'tool-records' && extra.payload?.action === 'save';
+  const key = mutation ? mutationKey(type, extra.payload) : null;
+  let operation = key && mutationRequests.get(key);
+  if (operation?.flight) return operation.flight;
+  if (mutation && !operation) {
+    operation = { requestId: extra.requestId || crypto.randomUUID(), flight: null };
+    mutationRequests.set(key, operation);
+  }
+  const flight = (async () => {
+    let timer;
+    try {
+      const request = requestClient.send({ type, ...extra, ...(operation ? { requestId: operation.requestId } : {}) });
+      const response = await Promise.race([request, new Promise((_, reject) => {
+        timer = setTimeout(() => {
+          const error = new Error('读取超时，请重试连接拾隅。'); error.code = 'TIMEOUT'; reject(error);
+        }, REQUEST_TIMEOUT_MS);
+      })]);
+      if (!response?.ok) { const error = new Error(response?.error || '连接中断，请重试。'); error.code = response?.code; throw error; }
+      if (operation && mutationRequests.get(key) === operation) mutationRequests.delete(key);
+      return response.value;
+    } finally { clearTimeout(timer); }
+  })();
+  if (operation) {
+    operation.flight = flight;
+    try { return await flight; } finally { if (operation.flight === flight) operation.flight = null; }
+  }
+  return flight;
 }
 function status(text, kind = '') { $('#status').textContent = text; $('#status').className = kind; }
 function renderSearch(result, query) {
@@ -163,21 +197,49 @@ async function saveDraft() {
   draft = { url: current.url, title: $('#title').value, description: $('#description').value, mode, spaceId: $('#space').value, sceneId: $('#scene').value, groupId: $('#group').value };
   try { await extensionApi.storage.local.set({ draft }); } catch { status('草稿未能暂存，请保持窗口打开后重试。', 'error'); }
 }
-async function connect() {
-  document.body.dataset.auth = 'checking';
-  document.dispatchEvent(new Event('trial-auth-change'));
-  $('#retry').hidden = true; setDestinationLoading(true); updateSave(); status('正在连接拾隅…');
-  try {
-    state = await call('state');
-    document.body.classList.toggle('guest', !state.signed); $('#login-panel').hidden = state.signed;
-    applyTheme(state.theme || null);
-    options($('#space'), state.spaces, draft?.spaceId); fillScenes(draft);
-    setDestinationLoading(!state.signed, '请先登录');
-    $('#editor').disabled = !state.signed || !current?.url;
-    status(!state.signed ? '登录后才能收藏。' : !current?.url ? '此页面无法收藏，请打开普通 HTTP / HTTPS 网页。' : '');
-    updateSave();
-  } catch (error) { state = null; setDestinationLoading(true, '读取失败'); $('#editor').disabled = true; updateSave(); status(error.message, 'error'); $('#retry').hidden = false; }
-  finally { document.body.dataset.auth = state?.signed ? 'signed' : state ? 'guest' : 'error'; document.dispatchEvent(new Event('trial-auth-change')); }
+let connectFlight = null, connectSerial = 0;
+function connect({ silent = false } = {}) {
+  if (connectFlight) return connectFlight;
+  if (silent && busy) return Promise.resolve(state);
+  const serial = ++connectSerial, previous = state;
+  if (!silent || !state) {
+    document.body.dataset.auth = 'checking';
+    document.dispatchEvent(new Event('trial-auth-change'));
+    $('#retry').hidden = true; setDestinationLoading(true); updateSave(); status('正在连接拾隅…');
+  }
+  const flight = (async () => {
+    let publish = !silent;
+    try {
+      const next = await call('state');
+      if (serial !== connectSerial) return state;
+      publish ||= !previous || next.signed !== previous.signed || next.accountId !== previous.accountId || document.body.dataset.auth !== (next.signed ? 'signed' : 'guest');
+      const placesChanged = JSON.stringify(next.spaces) !== JSON.stringify(previous?.spaces);
+      state = next;
+      applyTheme(state.theme || null);
+      if (publish || placesChanged) {
+        document.body.classList.toggle('guest', !state.signed); $('#login-panel').hidden = state.signed;
+        options($('#space'), state.spaces, draft?.spaceId); fillScenes(draft);
+        setDestinationLoading(!state.signed, '请先登录');
+        $('#editor').disabled = busy || !state.signed || !current?.url;
+        if (!busy) status(!state.signed ? '登录后才能收藏。' : !current?.url ? '此页面无法收藏，请打开普通 HTTP / HTTPS 网页。' : '');
+        $('#retry').hidden = true; updateSave();
+      }
+      return state;
+    } catch (error) {
+      if (serial !== connectSerial) return state;
+      publish = true; state = null; setDestinationLoading(true, '读取失败'); $('#editor').disabled = true; updateSave(); status(error.message, 'error'); $('#retry').hidden = false;
+      return null;
+    } finally {
+      if (serial === connectSerial && publish) {
+        document.body.dataset.auth = state?.signed ? 'signed' : state ? 'guest' : 'error';
+        document.dispatchEvent(new Event('trial-auth-change'));
+      }
+    }
+  })();
+  connectFlight = flight;
+  const release = () => { if (connectFlight === flight) connectFlight = null; };
+  void flight.then(release, release);
+  return flight;
 }
 document.querySelectorAll('.place-trigger').forEach(trigger => trigger.onclick = () => {
   const shell = trigger.closest('.select-shell'), menu = shell.querySelector('.place-menu'), opening = menu.hidden;

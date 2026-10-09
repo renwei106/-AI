@@ -21,7 +21,9 @@ test -d "$old"
 test -f "$record"
 test -s "$checksums"
 test -f /tmp/release-state.mjs
-if [ "$resume" = --resume ]; then test -d "$new"; else test ! -e "$new"; test -s "$archive"; fi
+if [ "$resume" = --resume ]; then
+  test -d "$new"; test ! -L "$new"; test "$(readlink -f "$new")" = "$new"
+else test ! -e "$new"; test ! -L "$new"; test -s "$archive"; fi
 version=$("$node" -e 'const fs=require("node:fs"),r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(r.target!=="website"||!/^V\d+\.\d+\.\d+$/.test(r.version))throw Error("Invalid website release record");console.log(r.version)' "$record")
 commit=$("$node" -e 'const fs=require("node:fs"),r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(!/^[a-f0-9]{40}$/.test(r.commit||""))throw Error("Invalid website release commit");console.log(r.commit)' "$record")
 if [ -f "$old/RELEASE_VERSION" ]; then
@@ -97,8 +99,23 @@ if [ "$resume" != --resume ]; then
   tar -xzf "$archive" -C "$new"
 fi
 cd "$new"
+# Remove only explicitly approved retired resources in the prepared release,
+# after checking their previous bytes. Never touch a shared path or current.
+"$node" - "$record" "$new" <<'RETIRED'
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const record=JSON.parse(fs.readFileSync(process.argv[2],'utf8')),root=fs.realpathSync(process.argv[3]);
+if(root!==path.resolve(process.argv[3]))throw Error('Prepared release is a symbolic link');
+for(const item of record.deletedFiles||[]){
+  if(item.path!=='dist/extension/current/account-store.js'||!/^[a-f0-9]{64}$/.test(item.sha256||''))throw Error('Unexpected retired resource');
+  const target=path.join(root,item.path),parent=fs.realpathSync(path.dirname(target));
+  if(!parent.startsWith(root+path.sep))throw Error('Retired resource escapes the prepared release');
+  if(!fs.existsSync(target))continue;
+  if(!fs.lstatSync(target).isFile()||crypto.createHash('sha256').update(fs.readFileSync(target)).digest('hex')!==item.sha256)throw Error('Retired resource baseline differs');
+  fs.unlinkSync(target);
+}
+RETIRED
 sha256sum -c "$checksums"
-for file in dist/app.js dist/v4.js dist/world.js dist/desktop-pet.js dist/desktop-pet-host.js dist/extension/page.js dist/extension/start.js; do "$node" --check "$file"; done
+for file in dist/app.js dist/v4.js dist/world.js dist/desktop-pet.js dist/desktop-pet-host.js dist/account-access.js dist/extension/page.js dist/extension/start.js dist/extension/store.js dist/extension/integration.js dist/extension/bridge.js dist/extension/account-sync.js dist/extension/current/background.js dist/extension/current/local-client.js dist/extension/current/popup.js dist/extension/current/trial.js dist/extension/current/trial-apps.js; do "$node" --check "$file"; done
 # Website and plugin records must describe the files actually being published.
 "$node" -e 'const fs=require("node:fs"),path=require("node:path"),r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));if(r.extensionRecord){const requested=r.extensionRecord.version.replace(/^V/,""),manifest=JSON.parse(fs.readFileSync("dist/extension/current/manifest.json","utf8")),release=JSON.parse(fs.readFileSync("dist/extension/release.json","utf8")),old=JSON.parse(fs.readFileSync(path.join(process.argv[2],"dist/extension/current/manifest.json"),"utf8")),next=old.version.split(".").map(Number);next[2]++;if(requested!==next.join(".")||manifest.version!==requested||release.latest!==requested)throw Error("Plugin version is not the next patch or does not match the release record")}' "$record" "$old"
 printf '%s\n' "$id" > RELEASE_ID

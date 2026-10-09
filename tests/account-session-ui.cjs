@@ -41,7 +41,7 @@ async function until(fn, message, timeout = 12000) {
 }
 async function fixture(browser, session = 'B') {
   const context = await browser.newContext({ viewport: { width: 1388, height: 1041 }, reducedMotion: 'reduce' });
-  const f = { context, session, saved: { A: dataFor('A'), B: dataFor('B') }, requests: [], writes: [], errors: [],
+  const f = { context, session, saved: { A: dataFor('A'), B: dataFor('B') }, avatars: { A: null, B: null }, avatarWrites: [], requests: [], writes: [], errors: [], errorDetails: [], unmatched: [],
     holds: [], armed: [], storageWrites: [] };
   f.holdNext = (pathname, page) => {
     const hold = { pathname, page, release: null, started: false };
@@ -62,7 +62,7 @@ async function fixture(browser, session = 'B') {
       return result;
     };
   }, initial);
-  context.on('page', page => page.on('pageerror', error => f.errors.push(error.message)));
+  context.on('page', page => page.on('pageerror', error => { f.errors.push(error.message); f.errorDetails.push({message:error.message,stack:error.stack,page:page.url()}); }));
   if (baseline) for (const filename of ['account-access.js', 'v4.js', 'app.js', 'theme-availability.js']) {
     const source = fs.readFileSync(path.join(out, 'before-' + filename));
     await context.route(new RegExp('/' + filename.replaceAll('.', '\\.') + '(?:\\?|$)'), route => route.fulfill({ status: 200, contentType: 'application/javascript', body: source }));
@@ -108,11 +108,48 @@ async function fixture(browser, session = 'B') {
       if (pathname === '/api/shiyu/payments/status') return json(route, { enabled: false, providers: {} });
       if (pathname === '/api/shiyu/payments/account') return json(route, { member: !!user?.member, membership: user?.membership || null });
       if (pathname === '/api/shiyu/auth/invitations') return json(route, { enabled: false, items: [] });
+      if (pathname === '/api/shiyu/auth/avatar') {
+        if (!user) return json(route, { message: '请先登录' }, 401);
+        if (method === 'PUT') {
+          assert.equal(body.userId, user.id, 'avatar writes must carry the current authenticated owner');
+          f.avatarWrites.push({ owner, body: clone(body) });
+          f.avatars[owner] = { avatarId: body.avatarId, gender: body.gender };
+        } else assert.equal(method, 'GET');
+        return json(route, { userId: user.id, profile: clone(f.avatars[owner]) });
+      }
+      // Auxiliary reads belong to this fixture too. In particular, v4 prefetches
+      // a WeChat QR before opening login; forwarding it to an unavailable local
+      // auth proxy creates a real unhandled rejection unrelated to these scenarios.
+      if (method === 'GET') {
+        if (pathname === '/api/shiyu/auth/wechat/qr') return json(route, { scene: 'isolated-qa-scene', expiresIn: 300,
+          qrUrl: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" fill="white"/></svg>') });
+        if (pathname === '/api/shiyu/auth/wechat/status') return json(route, { status: 'waiting' });
+        if (pathname === '/api/shiyu/login-methods') return json(route, { loginMethods: { phone: true, email: true, password: true, wechat: true, order: ['phone','email','password','wechat'] } });
+        if (pathname === '/api/shiyu/operations') return json(route, { onboarding: { enabled: false }, world: { enabled: false }, access: {}, personalization: {}, officialFont: 'youfeng' });
+        if (pathname === '/api/shiyu/member-visual') return json(route, {});
+        if (pathname === '/api/shiyu/auth/welcome-gift') return json(route, { pending: false, requiresGuide: false });
+        if (pathname === '/api/shiyu/avatars') return json(route, { items: ['one','two','three'].map((name,index) => ({ id: 'qa-avatar-' + name, name: '测试头像' + index, category: 'QA', enabled: true, gender: 'all', color: '#345678', sort: index, imageUrl: '/api/shiyu/avatar-assets/qa-avatar-' + name + '.png' })) });
+        if (/^\/api\/shiyu\/avatar-assets\/qa-avatar-(?:one|two|three)\.png$/.test(pathname)) return route.fulfill({ status: 200, contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl2fZ8AAAAASUVORK5CYII=', 'base64') });
+        if (pathname === '/api/shiyu/filing') return json(route, { filing: {} });
+        if (pathname === '/api/shiyu/auth/newspaper') return json(route, { userId: user?.id || null, newspaper: { cover: {}, edition: {}, editions: [] } });
+        if (pathname === '/api/shiyu/auth/onboarding') return json(route, { userId: user?.id || null, onboarding: { round: 1, welcome: { completed: true }, home: { completed: true }, space: { completed: true } } });
+        if (pathname === '/api/shiyu/auth/security') return json(route, { userId: user?.id || null, security: { hasPassword: true, wechatBound: false, wechatNickname: '' } });
+        if (pathname === '/api/shiyu/favicon') return json(route, { icon: '' });
+        if (pathname === '/api/shiyu/payments/quote') {
+          const query = new URL(request.url()).searchParams, quantity = Math.max(1, Number(query.get('quantity')) || 1);
+          return json(route, { quote: { planId: query.get('planId'), quantity, amount: 1000 * quantity, days: 30 * quantity, baseUnitCents: 1000, bonusDays: 0, token: 'isolated-qa-quote' } });
+        }
+        // Reuse the document's locale bootstrap exactly, avoiding a settings
+        // mismatch that would intentionally reload it during an auth race.
+        if (pathname === '/api/shiyu/i18n/public') return json(route, await page.evaluate(() => window.SHIYU_LOCALE_STATE || { locale: 'zh-CN', settings: { languages: [{ code: 'zh-CN', name: '简体中文', enabled: true }], fallback: 'zh-CN' } }));
+      }
       if (method !== 'GET') return json(route, { message: 'QA blocks real writes' }, 403);
-      return route.continue(); // Preserve read-only i18n/config loading; fake i18n causes reloads.
+      f.unmatched.push({pathname,method,owner,page:page.url()});
+      f.errors.push('Unmocked read-only API: ' + pathname);
+      return json(route, { message: 'QA requires an isolated read fixture' }, 404);
     } catch (error) { if (!context._closed) f.errors.push(error.message); try { await route.abort(); } catch {} }
   });
-  f.close = async () => { for (const hold of f.holds) hold.release?.(); await context.close(); };
+  f.close = async () => { if(f.errors.length) fs.writeFileSync(path.join(out,'fixture-errors.json'),JSON.stringify({errors:f.errorDetails,unmatched:f.unmatched,requests:f.requests},null,2)); for (const hold of f.holds) hold.release?.(); await context.close(); };
   return f;
 }
 async function ready(page) {
@@ -141,11 +178,14 @@ async function logout(page) {
   await page.bringToFront();
   await page.locator('header [data-account-open]').hover();
   await page.locator('.account-menu [data-account-signout]').click();
+  const confirm = page.locator('#account-signout-confirm [data-signout-confirm]');
+  if (await confirm.count()) await confirm.click();
 }
 async function loginAs(page, key = 'A', options = {}) {
   await page.evaluate(() => { document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close()); show('#login'); });
   const mode = options.code ? (key === 'A' ? 'phone' : 'email') : 'password';
-  await page.locator(`[data-account-tab="${mode}"]`).click();
+  // The current UI lists other login methods, omitting its already-active tab.
+  if (await page.evaluate(() => accountLoginTab) !== mode) await page.locator(`[data-account-tab="${mode}"]`).click();
   await page.waitForTimeout(120);
   for (const [selector, value] of [['[data-login-account]', key === 'A' ? '13800000001' : 'b@example.test'], ['[data-login-credential]', options.credential || 'Isolated-QA-Password']]) {
     await page.locator(selector).click(); await page.locator(selector).fill(value);
@@ -155,6 +195,7 @@ async function loginAs(page, key = 'A', options = {}) {
 const loginA = page => loginAs(page, 'A');
 function checkWrites(f) {
   assert(f.writes.every(write => write.body.userId === userFor(write.owner).id), 'every account PUT must include its authenticated owner');
+  assert(f.avatarWrites.every(write => write.body.userId === userFor(write.owner).id), 'every avatar PUT must include its authenticated owner');
   assert(f.writes.every(write => !JSON.stringify(write.body.data).includes(write.owner === 'A' ? 'B_ONLY' : 'A_ONLY')), 'cross-account dataset was submitted');
   assert(f.storageWrites.every(write => !(write.session === 'A' && write.value.signed && write.value.prefs?.accountProfile?.id === 'qa-email-b')), 'a stale B tab overwrote shared identity after login A');
   assert.deepEqual(f.errors, []);
@@ -244,6 +285,10 @@ async function staleThemeScenario(browser, presence = false) {
     await until(() => held.started, 'missing delayed B theme request: ' + pathname);
     assert.equal(held.owner, 'B');
     await logout(main); await until(() => f.session === null, 'logout did not complete');
+    await expectUser(main, null);
+    await main.waitForFunction(() => window.__shiyuThemeCatalog?.find(item => item.id === 'cosmos')?.qaOwner === null);
+    const expiredClose = main.locator('#theme-preview-expired[open] [data-theme-preview-close]');
+    if (await expiredClose.isVisible()) await expiredClose.click();
     await loginA(main); await expectUser(main, 'A'); await expectUser(stale, 'A');
     const themeIsA = () => window.__shiyuThemeCatalog?.find(item => item.id === 'cosmos')?.qaOwner === 'A' && window.__shiyuThemeCatalog.find(item => item.id === 'cosmos').allowed === false;
     await stale.waitForFunction(themeIsA); // New account refresh must not wait on B's old promise.
@@ -280,8 +325,9 @@ async function profileIsolationScenario(browser) {
       await page.locator('[data-profile-item-value]').fill(`${key}的本机昵称`);
       await page.locator('[data-profile-item-save]').click();
       await page.evaluate(() => { document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close()); window.openShiyuProfileEditor('avatar'); });
-      const choice = page.locator('[data-profile-choice]').nth(key === 'B' ? 1 : 2);
-      const avatar = await choice.getAttribute('data-profile-choice'); await choice.click();
+      const choice = page.locator('[data-avatar-choice]').nth(key === 'B' ? 1 : 2);
+      const avatar = 'catalog:' + await choice.getAttribute('data-avatar-choice'); await choice.click();
+      await page.waitForFunction(() => !document.querySelector('#avatar-catalog-picker')?.open);
       const birthday = key === 'B' ? '1992-03-04' : '1998-07-08';
       await page.evaluate(birthday => { prefs.accountProfile.birthday = birthday; persist(); document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close()); }, birthday);
       custom[key] = { name: `${key}的本机昵称`, avatar, birthday };

@@ -116,6 +116,21 @@
   }
   window.addEventListener('shiyu-extension-change', refresh);
   window.addEventListener('storage', event => { if (event.key === store.EVENT_KEY) refresh(); });
+  // Publish derived appearance only. The extension can preserve this page's scene
+  // override without querying or waiting for its rendering thread.
+  function publishExtensionTheme() {
+    if (!signed || !prefs.accountProfile?.id) return;
+    const theme = effective(), key = 'shiyu-extension-theme:' + prefs.accountProfile.id;
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || '{}');
+      saved[location.pathname] = { color: theme.color || '#48614c', mode: theme.mode || 'system' };
+      const serialized = JSON.stringify(saved);
+      if (localStorage.getItem(key) !== serialized) localStorage.setItem(key, serialized);
+    } catch { /* Appearance hints are optional; account data is not changed. */ }
+  }
+  const renderWithExtensionTheme = render;
+  render = function (...args) { const result = renderWithExtensionTheme.apply(this, args); publishExtensionTheme(); return result; };
+  publishExtensionTheme();
   window.shiyuExtensionBridge = Object.freeze({ async dispatch(request) {
     try {
       if (request?.type === 'state') {
