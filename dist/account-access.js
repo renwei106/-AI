@@ -743,3 +743,71 @@
     dialog.showModal(); sync();
   }
 })();
+
+// Profile OAuth completes on the phone after the desktop has already logged in.
+(() => {
+  const endpoint='/api/shiyu/auth/wechat/profile';
+  let owner='',timer=0,busy=false,applying=false,until=0,last={};
+  const id=()=>signed?String(accountProfile().id||''):'';
+  const owns=user=>!!user&&id()===user&&(()=>{try{return JSON.parse(localStorage.getItem('yiyu-prototype-v1')||'{}').prefs?.accountProfile?.id===user}catch{return false}})();
+  const key=user=>'shiyu-wechat-profile-manual:'+user;
+  const manual=user=>{try{return JSON.parse(localStorage.getItem(key(user))||'{}')}catch{return {name:true,avatar:true}}};
+  const basePersist=persist;
+  function mark(field){const user=id();if(!owns(user))return;const flags={...manual(user),[field]:true,pending:true};try{localStorage.setItem(key(user),JSON.stringify(flags))}catch{}void protect(user);}
+  let protecting=null;
+  async function protect(user){
+    if(!owns(user))return false;const flags=manual(user);if(!flags.pending)return true;
+    if(protecting){await protecting;return owns(user)&&!manual(user).pending;}
+    protecting=(async()=>{try{
+      const r=await fetch(endpoint,{method:'PUT',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:user,nameManual:flags.name===true,avatarManual:flags.avatar===true}),signal:AbortSignal.timeout(6000)});
+      if(!r.ok)return false;const data=await r.json();if(data.userId!==user||!owns(user))return false;
+      const current=manual(user);if(current.name===flags.name&&current.avatar===flags.avatar)localStorage.setItem(key(user),JSON.stringify({...current,pending:false}));return true;
+    }catch{return false}})().finally(()=>protecting=null);return protecting;
+  }
+  persist=function(...args){
+    const user=id(),p=accountProfile();
+    if(!applying&&owns(user)&&last.id===user){if(p.name!==last.name)mark('name');if(p.avatar!==last.avatar)mark('avatar');}
+    const result=basePersist(...args);last={id:user,name:p.name,avatar:p.avatar};return result;
+  };
+  function paint(){
+    updateHeader();const d=document.querySelector('#account-center[open]');if(!d)return;
+    const p=accountProfile();
+    d.querySelectorAll('.account-avatar,[data-profile-edit="avatar"]>span').forEach(node=>node.innerHTML=avatarMarkup(p.avatar));
+    d.querySelectorAll('.account-summary b,.profile-view-summary>div>b').forEach(node=>node.textContent=p.name);
+    const row=d.querySelector('[data-profile-edit="nickname"]>span');if(row){const arrow=row.querySelector('.profile-row-arrow');row.textContent=p.name;if(arrow)row.append(arrow);}
+    d.querySelectorAll('[data-profile-nickname],#profile-name').forEach(input=>{if(!manual(id()).name)input.value=p.name;});
+  }
+  function apply(field,value,user){
+    if(!owns(user)||manual(user)[field]||!value||accountProfile()[field==='name'?'name':'avatar']===value)return;
+    applying=true;try{prefs.accountProfile={...accountProfile(),[field==='name'?'name':'avatar']:value};persist();paint();}finally{applying=false;}
+  }
+  const schedule=delay=>{clearTimeout(timer);if(owner&&Date.now()<until)timer=setTimeout(poll,delay);};
+  async function poll(){
+    const user=owner;if(!owns(user))return;if(busy){schedule(2000);return;}busy=true;
+    try {
+      if(!await protect(user))return;
+      const r=await fetch(endpoint,{credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(6000)});if(!r.ok)return;
+      const result=await r.json();if(!owns(user)||result.userId!==user)return;
+      if(!result.enabled){until=0;return;}
+      if(result.nickname&&!result.nameManual)apply('name',result.nickname,user);
+      const picker=document.querySelector('#avatar-catalog-picker[open]');
+      if(result.avatar&&!result.avatarManual&&!manual(user).avatar&&!picker&&accountProfile().avatar!==result.avatar){
+        const value=result.avatar;const image=new Image();
+        const loaded=await new Promise(resolve=>{const timeout=setTimeout(()=>resolve(false),6000);image.onload=()=>{clearTimeout(timeout);resolve(true)};image.onerror=()=>{clearTimeout(timeout);resolve(false)};image.src=endpoint+'-avatar?v='+encodeURIComponent(value.slice(7));});
+        if(loaded&&!document.querySelector('#avatar-catalog-picker[open]'))apply('avatar',value,user);
+      }
+      const deferred=!!result.avatar&&!result.avatarManual&&!manual(user).avatar&&accountProfile().avatar!==result.avatar;
+      if(!result.pending&&!deferred)until=0;
+    }catch{/* Optional authorization never blocks login, editing, or account use. */}
+    finally{busy=false;if(owns(user))schedule(document.hidden?10000:2000);else start();}
+  }
+  function start(){const user=id();if(!owns(user)){clearTimeout(timer);owner='';return;}if(owner===user)return;owner=user;until=Date.now()+15*60*1000;const p=accountProfile();last={id:user,name:p.name,avatar:p.avatar};schedule(0);}
+  const nicknameInput=node=>node?.matches?.('[data-profile-nickname],#profile-name')||node?.matches?.('#profile-item-editor input')&&document.querySelector('#profile-item-editor h2')?.textContent.includes('昵称');
+  document.addEventListener('input',event=>{if(nicknameInput(event.target))mark('name');},true);
+  document.addEventListener('close',event=>{if(event.target.id==='avatar-catalog-picker')schedule(0);},true);
+  window.ShiyuWechatProfile={markAvatar:()=>mark('avatar')};
+  window.addEventListener('shiyu-account-state',start);window.addEventListener('shiyu-session-ready',start);
+  window.addEventListener('focus',()=>{start();schedule(0);});window.addEventListener('online',()=>{start();schedule(0);});
+  window.addEventListener('storage',event=>{if(event.key===key(id()))schedule(0);if(event.key==='yiyu-prototype-v1')start();});
+  start();
+})();

@@ -27,7 +27,8 @@
   async function prefetch(list){let index=0;await Promise.all(Array.from({length:3},async()=>{while(index<list.length)await cacheImage(list[index++])}))}
   function imageMarkup(item){void cacheImage(item);return `<img class="shiyu-avatar-image" src="${esc(pngs.get(item.imageUrl)||item.imageUrl)}" data-avatar-url="${esc(item.imageUrl)}" alt="${esc(item.name)}" decoding="async">`}
   const originalMarkup=avatarMarkup;
-  avatarMarkup=function(value){const id=String(value||'').replace(/^catalog:/,''),item=find(id);if(item)return imageMarkup(item);if(String(value||'').startsWith('data:')||String(value||'').startsWith('catalog:'))return entityIcon(ACCOUNT_AVATARS[0]);return originalMarkup(value)};
+  window.addEventListener('error',event=>{const img=event.target;if(img?.tagName==='IMG'&&img.getAttribute('src')?.startsWith('/api/shiyu/auth/wechat/profile-avatar?')){const fallback=document.createElement('span');fallback.innerHTML=originalMarkup(ACCOUNT_AVATARS[0]);img.replaceWith(...fallback.childNodes)}},true);
+  avatarMarkup=function(value){if(/^wechat:[a-f0-9]{24}$/.test(String(value||'')))return '<img class="shiyu-avatar-image" src="/api/shiyu/auth/wechat/profile-avatar?v='+encodeURIComponent(value.slice(7))+'" alt="微信头像" decoding="async">';const id=String(value||'').replace(/^catalog:/,''),item=find(id);if(item)return imageMarkup(item);if(String(value||'').startsWith('data:')||String(value||'').startsWith('catalog:'))return entityIcon(ACCOUNT_AVATARS[0]);return originalMarkup(value)};
   function paintAccount(){
     const d=document.querySelector('#account-center');if(!d||!signed)return;
     const grid=d.querySelector('.people-avatars');if(grid){const label=grid.previousElementSibling;if(label?.tagName==='LABEL'&&label.textContent.trim()==='选择一个喜欢的自己')label.remove();grid.remove()}
@@ -51,6 +52,7 @@
   async function saveSelection(avatarId,nextGender){
     const id=currentId();if(!owns(id)){toast('请先登录');return false}
     const item=find(avatarId);if(avatarId&&avatarId!==selectedId()&&(!item?.enabled||item.deletedAt)){toast('此头像已下架，请重新选择');return false}
+    if(avatarId&&avatarId!==selectedId())window.ShiyuWechatProfile?.markAvatar();
     const token=++saveSequence,record={avatarId,gender:gender(nextGender),pending:true,revision:Date.now()+'-'+token};
     const old=recordFor(id),oldProfile={...accountProfile()},cached=await cacheImage(item);
     if(!owns(id)||token!==saveSequence)return false;

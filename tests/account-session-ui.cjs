@@ -80,6 +80,7 @@ async function fixture(browser, session = 'B') {
     }
     try {
       if (pathname === '/api/shiyu/auth/session') return json(route, user ? { authenticated: true, user } : { authenticated: false, entitlements: free.entitlements });
+      if (pathname === '/api/shiyu/auth/wechat/profile') return json(route, { userId: user?.id, enabled: false });
       if (pathname === '/api/shiyu/auth/login') {
         assert.equal(method, 'POST');
         if (body.credential === 'wrong-password' || body.credential === '000000') return json(route, { message: body.mode === 'code' ? '验证码不正确' : '密码不正确' }, 401);
