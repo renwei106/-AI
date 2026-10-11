@@ -1,0 +1,57 @@
+/* Additive home theme; catalog, access, account and navigation stay shared. */
+(()=>{
+ 'use strict';
+ const ID='threeBody',P=window.ShiyuThreeBodyPhysics;
+ THEMES[ID]={...THEMES.base,name:'三体',en:'THREE BODY',desc:'轻轻改变，让轨道走向未知。',mini:'三'};
+ THEME_IDENTITIES[ID]=['三体','lib-Orbit'];
+ COPY_DEFAULTS[ID]={...COPY_DEFAULTS.base,title:'秩序之间，\n藏着未知。',intro:'三颗星，彼此牵引。一次轻推，让未来改道。'};
+ const artwork=themeArtwork;themeArtwork=id=>id===ID?'<img src="assets/three-body/cover.svg" alt="三体" style="width:100%;height:100%;object-fit:cover">':artwork(id);
+ let root,dispose,activeOwner;
+ const owner=()=>signed?String(accountProfile().id||''):'guest';
+ function paintCopy(){const copy=currentCopy(ID);if(root?.isConnected){root.querySelector('h1').textContent=copy.title;root.querySelector('.intro').textContent=copy.intro;}}
+ function mount(stage){
+  root=stage;activeOwner=owner();let dead=false,frame=0,previous=0,paused=matchMedia('(prefers-reduced-motion: reduce)').matches,loaded=false,allow=true,adminDefault=P.defaults(),config=P.defaults(),simulation=P.create(config),history=[[],[],[]],lastTrail=-1,lastStatus=0,width=innerWidth,height=innerHeight,scale=150,center={x:0,y:0},drag=null;
+  const copy=currentCopy(ID);
+  stage.insertAdjacentHTML('afterbegin',`<canvas class="three-body-canvas" aria-label="三体引力模拟，拖动天体可改变运动方向"></canvas><div class="three-body-copy"><span class="eyebrow" data-live-date>${dateText()}</span><h1>${esc(copy.title)}</h1><p class="intro">${esc(copy.intro)}</p></div><button class="three-body-open" aria-label="三体参数" aria-expanded="false">${icon('settings')}</button><aside class="three-body-panel" aria-label="三体参数" hidden><header><strong>三体</strong><button class="three-body-close" aria-label="关闭三体参数">关闭</button></header><div class="three-body-scroll"><p class="three-body-note">改变一点，看看接下来会发生什么。</p><div data-three-fields></div><p class="three-body-note" data-three-custom></p></div><footer><button class="three-body-reset">恢复八字轨道</button></footer></aside><div class="three-body-actions"><button data-three-pause>${paused?'继续':'暂停'}</button><button data-three-push>轻推一下</button></div><span class="three-body-status" role="status" aria-live="polite">正在载入</span>`);
+  const canvas=stage.querySelector('canvas'),ctx=canvas.getContext('2d'),panel=stage.querySelector('aside'),open=stage.querySelector('.three-body-open'),status=stage.querySelector('.three-body-status'),pause=stage.querySelector('[data-three-pause]'),push=stage.querySelector('[data-three-push]'),abort=new AbortController();
+  const observer=new MutationObserver(()=>{if(!stage.isConnected)dispose?.();});observer.observe(document.querySelector('#main'),{childList:true});
+  const storageKey='shiyu-three-body-settings:'+activeOwner;
+  function saved(){try{return JSON.parse(localStorage.getItem(storageKey)||'null');}catch{return null;}}
+  function save(){if(!allow)return;try{localStorage.setItem(storageKey,JSON.stringify(P.normalize(config)));}catch{status.textContent='本次参数仅在当前页面保留';}}
+  function reset(){config=P.normalize(allow?P.defaults():adminDefault);simulation=P.create(config);history=[[],[],[]];lastTrail=-1;center={x:0,y:0};previous=0;save();fields();status.textContent=allow?'八字轨道':'初始轨道';}
+  function fields(){stage.querySelector('[data-three-fields]').innerHTML=[...config.bodies.map((b,i)=>({key:'mass'+i,label:'天体 '+String(i+1).padStart(2,'0')+' · 质量',value:b.mass,min:.2,max:3,step:.1})),{key:'gravity',label:'引力强度',value:config.gravity,min:.2,max:2,step:.1},{key:'speed',label:'时间速度',value:config.speed,min:.2,max:2,step:.1}].map(f=>`<label class="three-body-field"><span>${f.label}</span><input type="range" data-three-param="${f.key}" aria-label="${f.label}" min="${f.min}" max="${f.max}" step="${f.step}" value="${f.value}" ${!allow?'disabled':''}><output>${Number(f.value).toFixed(1)}</output></label>`).join('');stage.querySelector('[data-three-custom]').textContent=allow?'拖动天体，给它一个轻推。':'当前场景由管理员设定。';stage.querySelector('.three-body-reset').textContent=allow?'恢复八字轨道':'恢复初始轨道';push.hidden=!allow;canvas.style.pointerEvents=allow?'auto':'none';}
+  function togglePanel(show){panel.hidden=!show;open.setAttribute('aria-expanded',String(show));if(show)panel.querySelector('button').focus();else open.focus();}
+  open.onclick=()=>togglePanel(panel.hidden);stage.querySelector('.three-body-close').onclick=()=>togglePanel(false);
+  panel.addEventListener('keydown',e=>{if(e.key==='Escape')togglePanel(false);});
+  stage.querySelector('.three-body-reset').onclick=reset;
+  pause.onclick=()=>{paused=!paused;pause.textContent=paused?'继续':'暂停';previous=0;};
+  push.onclick=()=>{if(!loaded||!allow)return;simulation.bodies[0].vx+=.08;simulation.bodies[0].vy-=.04;save();status.textContent='轻推天体 01';};
+  panel.addEventListener('input',e=>{const key=e.target.dataset.threeParam;if(!key||!allow)return;const value=Number(e.target.value);e.target.nextElementSibling.textContent=value.toFixed(1);if(key.startsWith('mass')){const i=Number(key.slice(4));config.bodies[i].mass=value;simulation.bodies[i].mass=value;}else{config[key]=value;if(key==='gravity')simulation.gravity=value;}save();status.textContent='参数已改变';});
+  const screen=b=>({x:width*(width<700?.5:.64)+(b.x-center.x)*scale,y:height*(width<700?.59:.51)+(b.y-center.y)*scale});
+  canvas.style.touchAction='none';
+  canvas.addEventListener('pointerdown',e=>{if(!loaded||!allow||!panel.hidden)return;let best=-1,distance=40;simulation.bodies.forEach((b,i)=>{const p=screen(b),d=Math.hypot(e.clientX-p.x,e.clientY-p.y);if(d<distance){best=i;distance=d;}});if(best<0)return;drag={i:best,x:e.clientX,y:e.clientY,ex:e.clientX,ey:e.clientY};canvas.setPointerCapture(e.pointerId);});
+  canvas.addEventListener('pointermove',e=>{if(drag){drag.ex=e.clientX;drag.ey=e.clientY;}});
+  const release=(e,cancel=false)=>{if(!drag)return;if(!cancel){const dx=(e.clientX-drag.x)/scale*.6,dy=(e.clientY-drag.y)/scale*.6,len=Math.hypot(dx,dy),factor=len>.5?.5/len:1,b=simulation.bodies[drag.i];b.vx+=dx*factor;b.vy+=dy*factor;save();status.textContent='轻推天体 '+String(drag.i+1).padStart(2,'0');}drag=null;};
+  canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',e=>release(e,true));
+  function resize(){width=innerWidth;height=innerHeight;const dpr=Math.min(2,devicePixelRatio||1);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);}
+  function visibility(){previous=0;}
+  addEventListener('resize',resize);document.addEventListener('visibilitychange',visibility);resize();
+  function draw(now){if(dead)return;frame=requestAnimationFrame(draw);if(document.hidden){previous=0;return;}if(!loaded)return;const elapsed=previous?Math.min(.033,(now-previous)/1000):0;previous=now;if(!paused&&!drag)P.advance(simulation,elapsed*config.speed);
+   if(simulation.time-lastTrail>=.012||lastTrail<0){simulation.bodies.forEach((b,i)=>{history[i].push({x:b.x,y:b.y,t:simulation.time});while(history[i].length>1200||history[i].length&&simulation.time-history[i][0].t>config.trail)history[i].shift();});lastTrail=simulation.time;}
+   const all=simulation.bodies,mean={x:all.reduce((a,b)=>a+b.x,0)/3,y:all.reduce((a,b)=>a+b.y,0)/3};center.x+=(mean.x-center.x)*.03;center.y+=(mean.y-center.y)*.03;const extent=Math.max(1.25,...all.map(b=>Math.hypot(b.x-center.x,b.y-center.y))),target=Math.min(width*(width<700?.4:.27),height*.29)/extent;scale+=(target-scale)*.035;
+   ctx.clearRect(0,0,width,height);const accent=resolveThemeColor(),ink=getComputedStyle(document.body).getPropertyValue('--ink').trim()||accent,colors=[accent,ink,accent];
+   history.forEach((trail,i)=>{if(trail.length<2)return;ctx.lineWidth=i===2?1.8:1.1;ctx.strokeStyle=colors[i];ctx.globalAlpha=i===1?.2:.42;ctx.beginPath();trail.forEach((b,j)=>{const p=screen(b);j?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y);});ctx.stroke();});ctx.globalAlpha=1;
+   all.forEach((b,i)=>{const p=screen(b),r=7+Math.cbrt(b.mass)*5;const glow=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r*5);glow.addColorStop(0,colors[i]);glow.addColorStop(1,'transparent');ctx.globalAlpha=.16;ctx.fillStyle=glow;ctx.beginPath();ctx.arc(p.x,p.y,r*5,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;ctx.fillStyle=colors[i];ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle=ink;ctx.globalAlpha=.5;ctx.lineWidth=.6;ctx.stroke();ctx.globalAlpha=.65;ctx.font='10px system-ui';ctx.fillText('0'+(i+1),p.x+r+7,p.y+3);ctx.globalAlpha=1;});
+   if(drag){ctx.strokeStyle=accent;ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(drag.x,drag.y);ctx.lineTo(drag.ex,drag.ey);ctx.stroke();ctx.setLineDash([]);}
+   if(now-lastStatus>4000){status.textContent=paused?'已暂停':'三颗天体 · 相互牵引';lastStatus=now;}
+  }
+  frame=requestAnimationFrame(draw);
+  fetch('/api/shiyu/operations',{cache:'no-store',signal:abort.signal}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{if(dead)return;const source=data.threeBodyContent||{};allow=source.allowCustomize!==false;adminDefault=P.normalize(source.defaults);config=P.normalize(allow?saved()||adminDefault:adminDefault);simulation=P.create(config);fields();loaded=true;status.textContent='三颗天体 · 相互牵引';}).catch(()=>{if(!dead)status.textContent='配置加载失败，请刷新重试。';});
+  // The read-only diagnostic also supports numerical and lifecycle verification.
+  window.ShiyuThreeBodyScene={snapshot:()=>({bodies:simulation.bodies.map(b=>({...b})),points:simulation.bodies.map(screen),time:simulation.time,paused,loaded,allow}),reset};
+  dispose=()=>{if(dead)return;dead=true;cancelAnimationFrame(frame);abort.abort();observer.disconnect();removeEventListener('resize',resize);document.removeEventListener('visibilitychange',visibility);delete window.ShiyuThreeBodyScene;};
+ }
+ const beforeHome=home;home=function(){if(view==='home'&&effective().theme===ID&&root?.isConnected&&activeOwner===owner()){paintCopy();return;}dispose?.();beforeHome();if(view==='home'&&effective().theme===ID){const stage=document.querySelector('.home-threeBody');if(stage)mount(stage);}};
+ const beforeCopy=applyHomeCopy;applyHomeCopy=function(){beforeCopy();if(view==='home'&&effective().theme===ID)paintCopy();};
+ window.addEventListener('shiyu-account-state',()=>{if(view==='home'&&effective().theme===ID){if(activeOwner!==owner())home();}else dispose?.();});
+})();

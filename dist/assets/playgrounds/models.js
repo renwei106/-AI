@@ -1,13 +1,67 @@
+/* Nine mutually attracting bodies, in illustrative screen units. */
+(function(root){
+ 'use strict';
+ root.ShiyuSolarSystemModel=function(config){
+  const names=['太阳','水星','金星','地球','火星','木星','土星','天王星','海王星'];
+  const masses=[100,.00002,.00025,.0003,.00003,.095,.028,.0044,.0051];
+  const radii=[11,2.7,3.7,4,3.2,7,6,4.8,4.6];
+  const colors=['#e6ad4c','#a7a29a','#c7a273','#639eaa','#bf785d','#b59373','#c5b28a','#7baeb0','#6489bc'];
+  let bodies=[],trails=[],time=0,trailTime=0,grab=null,center={x:0,y:0,z:0},scale=46;
+  const project=v=>({x:v.x+.45*v.z,y:.62*v.y-.6*v.z});
+  const point=b=>{const q=project({x:b.x-center.x,y:b.y-center.y,z:b.z-center.z});return {x:512+q.x*scale,y:265+q.y*scale};};
+  const world=(p,z)=>({x:center.x+(p.x-512)/scale-.45*(z-center.z),y:center.y+((p.y-265)/scale+.6*(z-center.z))/.62});
+  function reset(){
+   const distances=[.65,.95,1.3,1.65,2.25,2.9,3.55,4.25];
+   const inclinations=[0,7,3.4,0,1.85,1.3,2.5,.77,1.77];
+   bodies=names.map((name,i)=>{const a=i*2.399,r=i?distances[i-1]:0,v=i?Math.sqrt(config.gravity*100/r):0,tilt=inclinations[i]*Math.PI/180;return {name,mass:masses[i],x:Math.cos(a)*r,y:Math.sin(a)*r*Math.cos(tilt),z:Math.sin(a)*r*Math.sin(tilt),vx:-Math.sin(a)*v,vy:Math.cos(a)*v*Math.cos(tilt),vz:Math.cos(a)*v*Math.sin(tilt)};});
+   const mass=masses.reduce((a,b)=>a+b,0),vx=bodies.reduce((a,b)=>a+b.mass*b.vx,0)/mass,vy=bodies.reduce((a,b)=>a+b.mass*b.vy,0)/mass;
+   const vz=bodies.reduce((a,b)=>a+b.mass*b.vz,0)/mass;
+   // Illustrative common motion at 60 degrees to the reference orbital plane.
+   bodies.forEach(b=>{b.vx+=.425-vx;b.vy-=vy;b.vz+=.85*Math.sin(Math.PI/3)-vz});trails=names.map(()=>[]);time=0;trailTime=0;grab=null;center={x:0,y:0,z:0};scale=46;
+  }
+  function acceleration(p){const a=bodies.map(()=>({x:0,y:0,z:0}));for(let i=0;i<9;i++)for(let j=i+1;j<9;j++){const d={x:bodies[j].x-bodies[i].x,y:bodies[j].y-bodies[i].y,z:bodies[j].z-bodies[i].z},k=p.gravity/Math.pow(d.x*d.x+d.y*d.y+d.z*d.z+.0004,1.5);for(const axis of ['x','y','z']){a[i][axis]+=d[axis]*k*bodies[j].mass;a[j][axis]-=d[axis]*k*bodies[i].mass;}}return a;}
+  // Contact uses actual spatial distance, not apparent screen overlap.
+  function contacts(){for(let pass=0;pass<4;pass++)for(let i=0;i<9;i++)for(let j=i+1;j<9;j++){
+   const a=bodies[i],b=bodies[j],delta={x:b.x-a.x,y:b.y-a.y,z:b.z-a.z},d=Math.hypot(delta.x,delta.y,delta.z),limit=(radii[i]+radii[j])/46;if(d>=limit)continue;
+   const normal=d>1e-10?{x:delta.x/d,y:delta.y/d,z:delta.z/d}:{x:1,y:0,z:0},total=a.mass+b.mass,overlap=limit-d+1e-8;
+   let closing=0;for(const axis of ['x','y','z']){a[axis]-=normal[axis]*overlap*b.mass/total;b[axis]+=normal[axis]*overlap*a.mass/total;closing+=(b['v'+axis]-a['v'+axis])*normal[axis];}
+   if(closing<0){const impulse=-2*closing/(1/a.mass+1/b.mass);for(const axis of ['x','y','z']){a['v'+axis]-=impulse*normal[axis]/a.mass;b['v'+axis]+=impulse*normal[axis]/b.mass;}}
+  }}
+  function frame(p,dt){
+   const sun=bodies[0],near=bodies.filter(b=>Math.hypot(b.x-sun.x,b.y-sun.y,b.z-sun.z)<7),mass=near.reduce((a,b)=>a+b.mass,0),target={x:near.reduce((a,b)=>a+b.x*b.mass,0)/mass,y:near.reduce((a,b)=>a+b.y*b.mass,0)/mass,z:near.reduce((a,b)=>a+b.z*b.mass,0)/mass},blend=1-Math.exp(-dt*3);
+   for(const axis of ['x','y','z']){const offset=target[axis]-center[axis];center[axis]+=Math.sign(offset)*Math.max(0,Math.abs(offset)-(axis==='y'?1.2:1.6))*blend;}
+   const extent=Math.max(2,...near.map(b=>Math.hypot(b.x-target.x,b.y-target.y,b.z-target.z)));scale+=(Math.max(30,Math.min(85,190/extent))-scale)*blend;
+   if(p.wrap)bodies.forEach((b,i)=>{const q=point(b),x=((q.x+24)%848+848)%848-24,y=((q.y+24)%568+568)%568-24;if(q.x < -24||q.x>824||q.y < -24||q.y>544){const next=world({x,y},b.z);b.x=next.x;b.y=next.y;trails[i].push({x:b.x,y:b.y,z:b.z,t:trailTime,break:true});}});
+  }
+  function update(dt,p){config=p;if(grab)return;contacts();let remaining=dt*p.speed*.3;
+   while(remaining>1e-9){let h=Math.min(remaining,1/360);for(let i=0;i<9;i++)for(let j=i+1;j<9;j++){const a=bodies[i],b=bodies[j],r=Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);h=Math.min(h,.03*Math.sqrt(Math.pow(r*r+.0004,1.5)/(p.gravity*(a.mass+b.mass))),.04*Math.max(.02,r)/Math.max(.01,Math.hypot(a.vx-b.vx,a.vy-b.vy,a.vz-b.vz)));}
+    const a=acceleration(p);bodies.forEach((b,i)=>{b.vx+=a[i].x*h/2;b.vy+=a[i].y*h/2;b.vz+=a[i].z*h/2;b.x+=b.vx*h;b.y+=b.vy*h;b.z+=b.vz*h});contacts();const next=acceleration(p);bodies.forEach((b,i)=>{b.vx+=next[i].x*h/2;b.vy+=next[i].y*h/2;b.vz+=next[i].z*h/2});time+=h;remaining-=h;
+   }
+   trailTime+=dt;frame(p,dt);bodies.forEach((b,i)=>{trails[i].push({x:b.x,y:b.y,z:b.z,t:trailTime});while(trails[i].length&&(trailTime-trails[i][0].t>p.trail||trails[i].length>4002))trails[i].shift();});
+  }
+  function interact(p,tool){let best=-1,d=18; bodies.forEach((b,i)=>{const q=point(b),distance=Math.hypot(q.x-p.x,q.y-p.y);if(distance<d){d=distance;best=i}});if(best<0)return false;grab={i:best,tool,x:p.x,y:p.y,original:{...bodies[best]}};return true;}
+  function addedVelocity(p){const x=(p.x-grab.x)/scale*1.2,y=(p.y-grab.y)/(scale*.62)*1.2,length=Math.hypot(x,y),original=grab.original,limit=Math.max(.5,Math.min(4,Math.hypot(original.vx,original.vy,original.vz)*.5)),factor=length>limit?limit/length:1;return {x:x*factor,y:y*factor};}
+  function release(p){if(!grab)return;const b=bodies[grab.i];if(!p)Object.assign(b,grab.original);else{const added=addedVelocity(p);b.vx=grab.original.vx+added.x;b.vy=grab.original.vy+added.y;}grab=null;}
+  function draw(c,palette,p,pointer){
+   const transform=c.getTransform(),ratio=Math.abs(transform.a/transform.d)||1,circle=(x,y,r)=>c.ellipse(x,y,r,r*ratio,0,0,Math.PI*2);
+   trails.forEach((trail,i)=>{if(trail.length<2||p.trail<=0)return;c.strokeStyle=colors[i];c.lineWidth=.8;for(let j=1;j<trail.length;j++){if(trail[j].break)continue;const a=point(trail[j-1]),b=point(trail[j]),remaining=p.trail-(trailTime-(trail[j-1].t+trail[j].t)/2),f=Math.max(0,Math.min(1,remaining/(p.trail*.35)));c.globalAlpha=.24*f*f*(3-2*f);c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();}});
+   bodies.map((b,i)=>({b,i})).sort((a,b)=>(a.b.y*.6+a.b.z*.62)-(b.b.y*.6+b.b.z*.62)).forEach(({b,i})=>{const q=point(b);c.globalAlpha=.06;c.fillStyle=colors[i];c.beginPath();circle(q.x,q.y,radii[i]*2);c.fill();c.globalAlpha=1;c.beginPath();circle(q.x,q.y,radii[i]);c.fill();if(i===6){c.globalAlpha=.5;c.strokeStyle=colors[i];c.beginPath();c.ellipse(q.x,q.y,11,3,-.3,0,Math.PI*2);c.stroke();}c.globalAlpha=.65;c.fillStyle=palette[1];c.font=(7/Math.abs(transform.d))+'px system-ui';c.fillText(b.name,q.x+radii[i]+5,q.y+3);});c.globalAlpha=1;
+   if(grab&&pointer){const q=point(bodies[grab.i]);c.strokeStyle=palette[0];c.globalAlpha=.7;c.beginPath();circle(q.x,q.y,radii[grab.i]+5);c.stroke();const added=addedVelocity(pointer);root.ShiyuVelocityPreview?.draw(c,q,project({x:grab.original.vx,y:grab.original.vy,z:grab.original.vz}),project({...added,z:0}),palette[0],95/Math.max(Math.abs(transform.a),Math.abs(transform.d)),7/Math.abs(transform.d),true);c.globalAlpha=1;}
+  }
+  reset();return {update,draw,interact,release,configure:p=>{config=p},action:reset,stats:()=>({bodies:bodies.map(b=>({...b})),points:bodies.map(point),simulationTime:time})};
+ };
+})(window);
+
 /* Six bounded interactive models. All run locally, without network assets. */
 (function(root){
  'use strict';
  const W=800,H=520,rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),circle=(c,x,y,r)=>{const t=c.getTransform(),ratio=Math.sqrt(Math.abs(t.d/t.a))||1;c.beginPath();c.ellipse(x,y,r*ratio,r/ratio,0,0,Math.PI*2);c.fill();};
  const wrapped=(v,size)=>((v%size)+size)%size;
- function velocityPreview(c,q,velocity,added,accent,maxLength=95,fontSize=10){
-  const combined={x:velocity.x+added.x,y:velocity.y+added.y},factor=maxLength/Math.max(1,Math.hypot(velocity.x,velocity.y),Math.hypot(added.x,added.y),Math.hypot(combined.x,combined.y));
-  c.save();const arrow=(v,color,label,dashed,offset)=>{const dx=v.x*factor,dy=v.y*factor,x=q.x+dx,y=q.y+dy;c.strokeStyle=color;c.fillStyle=color;c.lineWidth=.8;c.setLineDash(dashed?[4,4]:[]);if(Math.hypot(dx,dy)>2){c.beginPath();c.moveTo(q.x,q.y);c.lineTo(x,y);c.stroke();c.setLineDash([]);const a=Math.atan2(dy,dx);c.beginPath();c.moveTo(x,y);c.lineTo(x-5*Math.cos(a-.45),y-5*Math.sin(a-.45));c.lineTo(x-5*Math.cos(a+.45),y-5*Math.sin(a+.45));c.closePath();c.fill();}if(label){c.font=fontSize+'px system-ui';c.fillText(label,x+10,y+offset);}};
-  c.globalAlpha=.6;arrow(velocity,'#497eb0','',false,-12);arrow(added,'#bb793d',Math.hypot(added.x,added.y).toFixed(2),false,14);c.globalAlpha=.22;arrow(combined,accent,'',true,0);c.globalAlpha=1;
-  c.setLineDash([2,4]);c.globalAlpha=.18;c.strokeStyle=accent;c.beginPath();c.moveTo(q.x+velocity.x*factor,q.y+velocity.y*factor);c.lineTo(q.x+combined.x*factor,q.y+combined.y*factor);c.stroke();c.restore();
+ function velocityPreview(c,q,velocity,added,accent,maxLength=95,fontSize=10,showParallelogram=false,pixelsPerVelocity){
+  const combined={x:velocity.x+added.x,y:velocity.y+added.y},factor=pixelsPerVelocity??maxLength/Math.max(1,Math.hypot(velocity.x,velocity.y),Math.hypot(added.x,added.y),Math.hypot(combined.x,combined.y));
+  c.save();const arrow=(v,color,label,dashed,offset)=>{const dx=v.x*factor,dy=v.y*factor,x=q.x+dx,y=q.y+dy;c.strokeStyle=color;c.fillStyle=color;c.lineWidth=.8;c.setLineDash(dashed?[4,4]:[]);if(Math.hypot(dx,dy)>(showParallelogram?1e-8:2)){c.beginPath();c.moveTo(q.x,q.y);c.lineTo(x,y);c.stroke();c.setLineDash([]);const a=Math.atan2(dy,dx);c.beginPath();c.moveTo(x,y);c.lineTo(x-5*Math.cos(a-.45),y-5*Math.sin(a-.45));c.lineTo(x-5*Math.cos(a+.45),y-5*Math.sin(a+.45));c.closePath();c.fill();}if(label){c.font=fontSize+'px system-ui';c.fillText(label,x+10,y+offset);}};
+  c.globalAlpha=showParallelogram?.9:.6;arrow(velocity,'#497eb0',showParallelogram?'原速度':'',false,-12);arrow(added,'#bb793d',showParallelogram?'新增速度':Math.hypot(added.x,added.y).toFixed(2),false,14);c.globalAlpha=showParallelogram?.85:.22;arrow(combined,accent,showParallelogram?'合速度':'',true,0);c.globalAlpha=1;
+  {c.setLineDash([2,4]);c.globalAlpha=showParallelogram?.45:.18;c.strokeStyle=accent;c.beginPath();c.moveTo(q.x+velocity.x*factor,q.y+velocity.y*factor);c.lineTo(q.x+combined.x*factor,q.y+combined.y*factor);if(showParallelogram){c.moveTo(q.x+added.x*factor,q.y+added.y*factor);c.lineTo(q.x+combined.x*factor,q.y+combined.y*factor);}c.stroke();}c.restore();
  }
  root.ShiyuVelocityPreview={draw:velocityPreview};
  function particleLife(config){
@@ -61,24 +115,6 @@
   function draw(c,colors){const torn=new Set(links.filter(l=>l.cut).map(l=>l.a));c.fillStyle=colors[0];for(let y=0;y<rows-1;y++)for(let x=0;x<cols-1;x++){const i=y*cols+x,a=nodes[i],b=nodes[i+1],d=nodes[i+cols],e=nodes[i+cols+1];if(dist(a,b)>35||dist(a,d)>35||torn.has(i))continue;c.globalAlpha=.08+.12*(.5+.5*Math.sin(a.x*.02+a.y*.015));c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.lineTo(e.x,e.y);c.lineTo(d.x,d.y);c.closePath();c.fill();}c.globalAlpha=.3;c.strokeStyle=colors[0];c.lineWidth=.6;for(const l of links){if(l.cut)continue;const a=nodes[l.a],b=nodes[l.b];c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();}c.globalAlpha=1;c.fillStyle=colors[1];for(const n of [...nodes.filter(n=>n.pin),...fallenPins]){c.globalAlpha=n.age===undefined?1:Math.max(0,1-n.age/1.2);circle(c,n.x,n.y-3,4);c.strokeStyle=colors[1];c.lineWidth=1;c.beginPath();c.moveTo(n.x,n.y);c.lineTo(n.x,n.y+6);c.stroke();}c.globalAlpha=1;}
   return {update,draw,interact,configure:()=>{},action:()=>nodes.forEach(n=>n.pin=false),stats:()=>({nodes:nodes.length,cut:links.filter(l=>l.cut).length,pinned:nodes.filter(n=>n.pin).length,positions:nodes.filter((_,i)=>i%90===0).map(n=>[n.x,n.y])})};
  }
- function magnetGarden(config){
-  const magnets=[{x:270,y:230,polarity:1,angle:0},{x:535,y:295,polarity:-1,angle:0}],iron=[];let grab=-1;
-  function configure(p){while(iron.length<p.count)iron.push({x:rand(20,780),y:rand(20,500)});iron.length=p.count;}configure(config);
-  function field(x,y,p){let fx=0,fy=0;for(const m of magnets)for(const side of [-1,1]){const dx=x-(m.x+Math.cos(m.angle)*side*26),dy=y-(m.y+Math.sin(m.angle)*side*26),k=side*m.polarity*p.strength/Math.pow(dx*dx+dy*dy+120,1.5);fx+=dx*k;fy+=dy*k;}return {x:fx,y:fy};}
-  function interact(p,tool){grab=-1;let best=-1,d=65;magnets.forEach((m,i)=>{const n=dist(m,p);if(n<d){d=n;best=i;}});if(tool==='add'){if(magnets.length<5)magnets.push({x:clamp(p.x,40,760),y:clamp(p.y,40,480),polarity:1,angle:0});}else if(tool==='flip'){if(best>=0)magnets[best].polarity*=-1;}else grab=best;}
-  function update(dt,p,pointer){if(grab>=0&&pointer?.down){const m=magnets[grab];if(pointer.tool==='rotate'){if(Math.hypot(pointer.x-m.x,pointer.y-m.y)>8)m.angle=Math.atan2(pointer.y-m.y,pointer.x-m.x);}else{m.x=clamp(pointer.x,40,760);m.y=clamp(pointer.y,40,480);}}if(!pointer?.down)grab=-1;}
-  function draw(c,colors,p){c.strokeStyle=colors[0];c.globalAlpha=.12;c.lineWidth=.8;for(const m of magnets)for(let k=0;k<12;k++){let x=m.x+Math.cos(k*Math.PI/6)*38,y=m.y+Math.sin(k*Math.PI/6)*38;c.beginPath();c.moveTo(x,y);for(let i=0;i<90;i++){const f=field(x,y,p),len=Math.hypot(f.x,f.y)||1;x+=f.x/len*4*m.polarity;y+=f.y/len*4*m.polarity;c.lineTo(x,y);if(x<0||x>W||y<0||y>H)break;}c.stroke();}c.globalAlpha=.68;c.lineWidth=1.2;for(const b of iron){if(magnets.some(m=>Math.hypot(b.x-m.x,b.y-m.y)<38))continue;const f=field(b.x,b.y,p),angle=Math.atan2(f.y,f.x),r=2+Math.min(3,Math.hypot(f.x,f.y)*10000);c.beginPath();c.moveTo(b.x-Math.cos(angle)*r,b.y-Math.sin(angle)*r);c.lineTo(b.x+Math.cos(angle)*r,b.y+Math.sin(angle)*r);c.stroke();}c.globalAlpha=1;for(const m of magnets){c.save();c.translate(m.x,m.y);c.rotate(m.angle);c.fillStyle=m.polarity>0?colors[0]:colors[1];c.fillRect(-28,-12,28,24);c.fillStyle=m.polarity>0?colors[1]:colors[0];c.fillRect(0,-12,28,24);c.fillStyle=colors[2];c.font='10px system-ui';c.fillText(m.polarity>0?'N':'S',-18,4);c.fillText(m.polarity>0?'S':'N',9,4);c.restore();}}
-  return {update,draw,interact,configure,action:()=>{magnets[magnets.length-1].polarity*=-1;},stats:()=>({magnets:magnets.map(m=>({...m})),iron:iron.length})};
- }
- function digitalLife(){
-  const nx=112,ny=72,n=nx*ny,A=new Float32Array(n).fill(1),B=new Float32Array(n),aNext=new Float32Array(n),bNext=new Float32Array(n),walls=new Uint8Array(n),off=document.createElement('canvas');off.width=nx;off.height=ny;const oc=off.getContext('2d'),image=oc.createImageData(nx,ny),probe=document.createElement('canvas').getContext('2d');let accumulator=0,ticks=0,colorCache='',rgb=[0,0,0];
-  function interact(p,tool){const cx=Math.floor(p.x/W*nx),cy=Math.floor(p.y/H*ny);for(let y=-4;y<=4;y++)for(let x=-4;x<=4;x++){if(x*x+y*y>16)continue;const px=cx+x,py=cy+y;if(px<0||px>=nx||py<0||py>=ny)continue;const i=py*nx+px;if(tool==='wall'){walls[i]=1;A[i]=1;B[i]=0;}else if(tool==='erase'){walls[i]=0;A[i]=1;B[i]=0;}else if(tool==='food'){A[i]=1;B[i]=Math.max(B[i],.08);}else{walls[i]=0;A[i]=.5;B[i]=.25+Math.random()*.2;}}}
-  for(const [x,y] of [[300,200],[420,275],[540,200],[380,360]])interact({x,y},'seed');
-  function tick(p){ticks++;const feed=.025+p.nutrition*.02,kill=.07-p.vitality*.015;for(let y=0;y<ny;y++)for(let x=0;x<nx;x++){const i=y*nx+x;if(walls[i]){aNext[i]=1;bNext[i]=0;continue;}let la=-A[i],lb=-B[i];for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const j=(p.wrap?wrapped(y+dy,ny):clamp(y+dy,0,ny-1))*nx+(p.wrap?wrapped(x+dx,nx):clamp(x+dx,0,nx-1)),weight=!dx||!dy?.2:.05;la+=A[j]*weight;lb+=B[j]*weight;}const reaction=A[i]*B[i]*B[i];aNext[i]=clamp(A[i]+la-reaction+feed*(1-A[i]),0,1);bNext[i]=clamp(B[i]+lb*.5+reaction-(kill+feed)*B[i],0,1);}A.set(aNext);B.set(bNext);}
-  function update(dt,p,pointer){if(pointer?.down)interact(pointer,pointer.tool);accumulator+=dt*p.speed*120;for(let k=0;k<8&&accumulator>=1;k++){tick(p);accumulator--;}}
-  function draw(c,colors){const color=colors[0];if(color!==colorCache){colorCache=color;probe.fillStyle=color;probe.fillRect(0,0,1,1);rgb=probe.getImageData(0,0,1,1).data;}for(let i=0;i<n;i++){const j=i*4;image.data[j]=rgb[0];image.data[j+1]=rgb[1];image.data[j+2]=rgb[2];image.data[j+3]=walls[i]?65:clamp((B[i]-.025)*800,0,240);}oc.putImageData(image,0,0);c.imageSmoothingEnabled=true;c.drawImage(off,0,0,W,H);}
-  return {update,draw,interact,configure:()=>{},action:()=>interact({x:rand(100,700),y:rand(100,420)},'seed'),stats:()=>({ticks,activity:B.reduce((s,v)=>s+v,0),walls:walls.reduce((s,v)=>s+v,0)})};
- }
  function binarySystem(config){
   const total=config.mass0+config.mass1,relative=Math.sqrt(config.gravity*total*4/Math.pow(4+.0001,1.5));
   const bodies=[{mass:config.mass0,x:-2*config.mass1/total,y:0,vx:0,vy:-relative*config.mass1/total},{mass:config.mass1,x:2*config.mass0/total,y:0,vx:0,vy:relative*config.mass0/total}],trails=[[],[]];let gravity=config.gravity,time=0,grab=null,scale=150,center={x:0,y:0};
@@ -88,9 +124,9 @@
   function update(dt,p,pointer){configure(p);if(grab&&pointer?.down)return;let remaining=dt*p.speed,steps=0;while(remaining>1e-10&&steps++<1000){const r=Math.hypot(bodies[1].x-bodies[0].x,bodies[1].y-bodies[0].y),h=Math.min(remaining,1/720,.02*Math.sqrt(Math.pow(r*r+.0001,1.5)/(gravity*(bodies[0].mass+bodies[1].mass))));const a=acceleration();bodies.forEach((b,i)=>{b.vx+=a[i].x*h/2;b.vy+=a[i].y*h/2;b.x+=b.vx*h;b.y+=b.vy*h;});const next=acceleration();bodies.forEach((b,i)=>{b.vx+=next[i].x*h/2;b.vy+=next[i].y*h/2;});remaining-=h;time+=h;}bodies.forEach((b,i)=>{trails[i].push({x:b.x,y:b.y});if(trails[i].length>1000)trails[i].shift();});}
   function interact(p){let best=-1,d=28;bodies.forEach((b,i)=>{const distance=dist(point(b),p);if(distance<d){d=distance;best=i;}});if(best<0)return false;grab={i:best,x:p.x,y:p.y};return true;}
   function release(pointer){if(grab&&pointer){const dx=(pointer.x-grab.x)/scale*.6,dy=(pointer.y-grab.y)/scale*.6,factor=Math.min(1,.5/(Math.hypot(dx,dy)||1));bodies[grab.i].vx+=dx*factor;bodies[grab.i].vy+=dy*factor;}grab=null;}
-  function draw(c,colors,p,pointer){const total=bodies[0].mass+bodies[1].mass;center={x:bodies.reduce((s,b)=>s+b.x*b.mass,0)/total,y:bodies.reduce((s,b)=>s+b.y*b.mass,0)/total};scale=180/Math.max(1.25,...bodies.map(b=>Math.hypot(b.x-center.x,b.y-center.y)));const palette=[colors[0],colors[2]];trails.forEach((trail,i)=>{c.strokeStyle=palette[i];c.globalAlpha=.3;c.lineWidth=1;c.beginPath();trail.forEach((b,j)=>{const q=point(b);j?c.lineTo(q.x,q.y):c.moveTo(q.x,q.y);});c.stroke();});
+  function draw(c,colors,p,pointer){const total=bodies[0].mass+bodies[1].mass;center={x:bodies.reduce((s,b)=>s+b.x*b.mass,0)/total,y:bodies.reduce((s,b)=>s+b.y*b.mass,0)/total};scale=180/Math.max(1.25,...bodies.map(b=>Math.hypot(b.x-center.x,b.y-center.y)));const palette=[colors[0],colors[2]];trails.forEach((trail,i)=>{c.strokeStyle=palette[i];c.lineWidth=1;let previous=trail.length?point(trail[0]):null;for(let j=1;j<trail.length;j++){const q=point(trail[j]),fade=Math.min(1,(1000-trail.length+j-.5)/350);c.globalAlpha=.3*fade*fade*(3-2*fade);c.beginPath();c.moveTo(previous.x,previous.y);c.lineTo(q.x,q.y);c.stroke();previous=q;}});
    bodies.forEach((b,i)=>{const q=point(b),r=8+Math.cbrt(b.mass)*5,glow=c.createRadialGradient(q.x,q.y,0,q.x,q.y,r*4);glow.addColorStop(0,palette[i]);glow.addColorStop(1,'transparent');c.globalAlpha=.15;c.fillStyle=glow;circle(c,q.x,q.y,r*4);c.globalAlpha=1;c.fillStyle=palette[i];circle(c,q.x,q.y,r);c.globalAlpha=.65;c.font='8px system-ui';c.fillText(i===0?'α':'β',q.x+r+6,q.y+3);});c.globalAlpha=1;if(grab&&pointer){const b=bodies[grab.i],q=point(b),dx=(pointer.x-grab.x)/scale*.6,dy=(pointer.y-grab.y)/scale*.6,factor=Math.min(1,.5/(Math.hypot(dx,dy)||1));velocityPreview(c,q,{x:b.vx,y:b.vy},{x:dx*factor,y:dy*factor},colors[0],70,8);}}
   return {update,draw,configure,interact,release,action:()=>{bodies[0].vx+=.08;bodies[0].vy-=.04;},stats:()=>({bodies:bodies.map(b=>({...b})),points:bodies.map(point),positions:bodies.map(b=>[b.x,b.y]),simulationTime:time,energy:bodies.reduce((s,b)=>s+b.mass*(b.vx*b.vx+b.vy*b.vy)/2,0)-gravity*bodies[0].mass*bodies[1].mass/Math.sqrt((bodies[0].x-bodies[1].x)**2+(bodies[0].y-bodies[1].y)**2+.0001),momentum:{x:bodies.reduce((s,b)=>s+b.mass*b.vx,0),y:bodies.reduce((s,b)=>s+b.mass*b.vy,0)}})};
  }
- const models={binarySystem,particleLife,ecoGarden,elementSandbox,softFabric,magnetGarden,digitalLife};root.ShiyuPlaygroundModels={create:(id,config)=>models[id](config),width:W,height:H};
+ const models={binarySystem,particleLife,ecoGarden,elementSandbox,softFabric};root.ShiyuPlaygroundModels={create:(id,config)=>models[id](config),width:W,height:H};
 })(window);

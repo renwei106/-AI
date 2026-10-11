@@ -1,0 +1,84 @@
+{
+  "status": "proposal-only-not-published",
+  "source": "https://raw.githubusercontent.com/radix-ui/colors/main/src/light.ts",
+  "documentation": "https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale",
+  "choices": [
+    {
+      "id": "#48614c",
+      "name": "薄荷青绿",
+      "value": "#7ecfbd",
+      "reference": "mint7",
+      "previous": {
+        "enabled": true,
+        "name": "青禾绿",
+        "value": "#6f947f"
+      }
+    },
+    {
+      "id": "#45433c",
+      "name": "云雾浅灰",
+      "value": "#b8bcba",
+      "reference": "sage8",
+      "previous": {
+        "enabled": true,
+        "name": "云山灰",
+        "value": "#88939f"
+      }
+    },
+    {
+      "id": "#bd9055",
+      "name": "奶油暖黄",
+      "value": "#e9c162",
+      "reference": "amber7",
+      "previous": {
+        "enabled": true,
+        "name": "燕麦金",
+        "value": "#b59a6d"
+      }
+    },
+    {
+      "id": "#467ea5",
+      "name": "晴空雾蓝",
+      "value": "#8dcae3",
+      "reference": "sky7",
+      "previous": {
+        "enabled": true,
+        "name": "晴岚蓝",
+        "value": "#6d95b5"
+      }
+    },
+    {
+      "id": "#8b83d1",
+      "name": "柔雾浅紫",
+      "value": "#b8baf8",
+      "reference": "iris7",
+      "previous": {
+        "enabled": true,
+        "name": "木槿紫",
+        "value": "#9a89b5"
+      }
+    },
+    {
+      "id": "#ba794f",
+      "name": "蜜桃暖橙",
+      "value": "#f5ae73",
+      "reference": "orange7",
+      "previous": {
+        "enabled": true,
+        "name": "杏陶橙",
+        "value": "#c28d71"
+      }
+    },
+    {
+      "id": "#a95e76",
+      "name": "樱花柔粉",
+      "value": "#e7acd0",
+      "reference": "pink7",
+      "previous": {
+        "enabled": true,
+        "name": "海棠粉",
+        "value": "#ba8598"
+      }
+    }
+  ]
+}

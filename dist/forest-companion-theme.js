@@ -61,16 +61,17 @@
     dispose?.();
     const copy = currentCopy(ID), account = owner(), aborter = new AbortController();
     root.insertAdjacentHTML('afterbegin', `<div class="forest-backdrop" aria-hidden="true"><img class="forest-poster" src="${POSTER}" alt="" fetchpriority="high"><video class="forest-video" muted playsinline preload="auto" poster="${POSTER}" tabindex="-1" disablepictureinpicture></video><div class="forest-shade"></div></div><div class="base-composition forest-copy"><div class="eyebrow" data-live-date>${dateText()}</div><h1>${esc(copy.title)}</h1><p class="intro">${esc(copy.intro)}</p></div>`);
-    root.insertAdjacentHTML('beforeend', '<div class="forest-picker" role="group" aria-label="切换互动视频"><div class="forest-dots"></div><button type="button" class="forest-upload" title="添加本地视频 · MP4，2～10 秒，最大 20 MB" aria-label="添加本地视频" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4m-4 4 4-4 4 4M5 15v5h14v-5"/></svg></button><button type="button" class="forest-remove" title="移除此账号的当前本地视频" aria-label="移除当前本地视频" hidden>×</button><input type="file" accept="video/mp4,.mp4" hidden><span class="forest-status" role="status" aria-live="polite"></span></div>');
-    const video = root.querySelector('video'), poster = root.querySelector('.forest-poster'), picker = root.querySelector('.forest-picker'), dots = root.querySelector('.forest-dots'), upload = root.querySelector('.forest-upload'), remove = root.querySelector('.forest-remove'), input = picker.querySelector('input'), status = root.querySelector('.forest-status');
+    root.insertAdjacentHTML('beforeend', '<div class="forest-picker" role="group" aria-label="切换互动视频"><button type="button" class="forest-open" title="主题设置" aria-label="互动视频主题设置" aria-expanded="false" aria-controls="forest-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m10.2 10.4-3-2.7m6.5 2.6 3.5-3.5m-3.1 6.4 4.1 2.3m-7.7-1.6-2.9 3.8"/><circle cx="12" cy="12" r="2.4"/><circle cx="6" cy="6.5" r="1.7"/><circle cx="18.5" cy="5.5" r="1.7"/><circle cx="20" cy="16.5" r="1.7"/><circle cx="6.5" cy="19" r="1.7"/></svg></button><aside id="forest-panel" class="forest-panel" role="dialog" aria-modal="true" aria-label="互动视频主题" hidden><header><strong>主题</strong><button type="button" class="forest-close" aria-label="关闭主题切换">×</button></header><div class="forest-cards" role="group" aria-label="切换互动视频主题"></div></aside><button type="button" class="forest-upload" title="添加本地视频 · MP4，2～10 秒，最大 20 MB" aria-label="添加本地视频" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4m-4 4 4-4 4 4M5 15v5h14v-5"/></svg></button><button type="button" class="forest-remove" title="移除此账号的当前本地视频" aria-label="移除当前本地视频" hidden>×</button><input type="file" accept="video/mp4,.mp4" hidden><span class="forest-status" role="status" aria-live="polite"></span></div>');
+    const video = root.querySelector('video'), poster = root.querySelector('.forest-poster'), picker = root.querySelector('.forest-picker'), choice = root.querySelector('.forest-cards'), opener = root.querySelector('.forest-open'), panel = root.querySelector('.forest-panel'), upload = root.querySelector('.forest-upload'), remove = root.querySelector('.forest-remove'), input = picker.querySelector('input'), status = root.querySelector('.forest-status');
+    const backdrop = document.createElement('div'); backdrop.className = 'forest-panel-backdrop'; backdrop.hidden = true; document.body.append(backdrop, panel);
     let config = null, personal = [], clips = [], active = null, busy = false, refreshId = 0, personalLoaded = false, personalLoading = false;
     const urls = new Map();
     const mine = () => !dead && account === owner();
     const objectUrl = blob => { if (!urls.has(blob)) urls.set(blob, URL.createObjectURL(blob)); return urls.get(blob); };
     const materialize = item => item.local ? { ...item, video:objectUrl(item.blob), poster:objectUrl(item.posterBlob) } : item;
     function controls() {
-      dots.innerHTML = clips.map((item, index) => `<button type="button" class="forest-dot" data-clip="${esc(item.id)}" aria-label="${index + 1} · ${esc(item.name)}${item.local ? '（本机）' : ''}" title="${esc(item.name)}${item.local ? ' · 仅此账号本机可见' : ''}" aria-pressed="${item.id === active?.id}"><span></span></button>`).join('');
-      upload.hidden = !config?.allowUpload; upload.disabled = busy; remove.hidden = !active?.local; remove.disabled = busy;
+      choice.innerHTML = [...clips].sort((a, b) => Number(b.name === "毛线女孩") - Number(a.name === "毛线女孩")).map(item => '<button type="button" class="forest-card" data-clip="'+esc(item.id)+'" aria-pressed="'+(item.id===active?.id)+'"><img src="'+esc(materialize(item).poster)+'" alt=""><span>'+esc(item.name)+'</span></button>').join('');
+      upload.hidden = true; remove.hidden = true;
     }
     function selectClip(id, remember = true) {
       const item = clips.find(item => item.id === id) || clips[0];
@@ -199,13 +200,23 @@
       if (dead) return;
       dead = true; aborter.abort(); cancelAnimationFrame(raf); clearTimeout(watchdog); clearTimeout(pickerIdleTimer);
       observer.disconnect(); removal.disconnect(); listeners.forEach(remove => remove());
+      panel.remove(); backdrop.remove(); document.body.classList.remove("forest-panel-open");
       video.pause(); video.removeAttribute('src'); video.load();
       urls.forEach(url => URL.revokeObjectURL(url)); urls.clear();
       if (dispose === cleanup) dispose = null;
     }
     dispose = cleanup;
     root.dataset.forestState = 'static';
-    on(dots, 'click', event => { const button = event.target.closest('[data-clip]'); if (button && mine() && !busy) selectClip(button.dataset.clip); });
+    function togglePanel(show) {
+      panel.hidden = !show; backdrop.hidden = !show; opener.setAttribute('aria-expanded', String(show));
+      document.body.classList.toggle('forest-panel-open', show);
+      if (show) panel.querySelector('.forest-close').focus(); else opener.focus();
+    }
+    on(opener, 'click', () => { togglePanel(panel.hidden); revealPicker(); });
+    on(choice, 'click', event => { const button = event.target.closest('[data-clip]'); if (button && mine() && !busy) selectClip(button.dataset.clip); });
+    on(backdrop, 'click', () => togglePanel(false));
+    on(panel.querySelector('.forest-close'), 'click', () => togglePanel(false));
+    on(panel, 'keydown', event => { if (event.key === 'Escape') togglePanel(false); });
     on(upload, 'click', () => {
       if (!owner()) { if (typeof openLogin === 'function') openLogin('登录后可添加仅此账号可见的本地视频'); else show('#login'); return; }
       if (!mine() || !config?.allowUpload) return;

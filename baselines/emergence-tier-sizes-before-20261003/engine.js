@@ -1,0 +1,1202 @@
+import { SCENES, sanitize } from './scenes.js';
+
+const TAU = Math.PI * 2;
+const COSMIC_CHARGE = 1.2, COSMIC_EXPANSION = 4.8;
+const smooth = t => t * t * (3 - 2 * t);
+// Visual size only: keep the full-screen world and simulation distances unchanged.
+const BODY_SCALE_2D = .7, BODY_SCALE_3D = .22;
+// Abstract predator silhouettes follow the existing shape setting, without changing hunting bounds.
+const PREDATOR_MESHES = {
+  bird: {
+    vertices: [[2,0,0],[.15,.35,0],[-1.3,1.65,.15],[-.65,0,.3],[-1.3,-1.65,.15],[.15,-.35,0]],
+    faces: [[0,1,3],[1,2,3],[0,3,5],[3,4,5]],
+  },
+  fish: {
+    // A tapered body, dorsal fin, paired pectoral fins and an asymmetric forked tail.
+    vertices: [[2,0,0],[.5,.45,0],[.5,0,.38],[.5,-.45,0],[.5,0,-.3],[-1.2,0,0],[-.25,0,1.25],[-.65,1.05,-.1],[-.65,-1.05,-.1],[-2,0,1],[-1.7,0,0],[-2,0,-.7]],
+    faces: [[0,1,2],[0,2,3],[0,3,4],[0,4,1],[5,2,1],[5,3,2],[5,4,3],[5,1,4],[2,6,5],[1,7,5],[3,5,8],[5,9,10],[5,10,11]],
+  },
+};
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+const wrap = (value, length) => ((value % length) + length) % length;
+const shortest = (value, length) => value - Math.round(value / length) * length;
+const axisDelta = (value, length, threeD) => threeD ? value : shortest(value, length);
+const boundCoordinate = (value, length, threeD) => threeD ? clamp(value, 0, length) : wrap(value, length);
+const difference = (from, to, world) => ({ x: axisDelta(to.x - from.x, world.width, world.bounded), y: axisDelta(to.y - from.y, world.height, world.bounded) });
+function advance(p, step, world) {
+  const x = p.x + p.vx * step, y = p.y + p.vy * step;
+  if(world.bounded){p.x=x;p.y=y;return false;}
+  p.x = wrap(x, world.width); p.y = wrap(y, world.height);
+  return x < 0 || x >= world.width || y < 0 || y >= world.height;
+}
+function periodicCopies(p, world, padding, draw) {
+  if(world.bounded||p.incoming){draw(p.x,p.y);return;}
+  const xs = [0], ys = [0];
+  if (p.x < padding) xs.push(world.width);
+  if (p.x > world.width - padding) xs.push(-world.width);
+  if (p.y < padding) ys.push(world.height);
+  if (p.y > world.height - padding) ys.push(-world.height);
+  for (const x of xs) for (const y of ys) draw(p.x + x, p.y + y);
+}
+
+class Neighborhood {
+  constructor(size = 75) { this.size = size; this.cells = new Map(); }
+  build(particles, world) {
+    this.cells.clear();
+    this.cols = Math.max(1, Math.floor(world.width / this.size)); this.rows = Math.max(1, Math.floor(world.height / this.size));
+    this.cellWidth = world.width / this.cols; this.cellHeight = world.height / this.rows;
+    for (const p of particles) {
+      const key = `${Math.floor(p.x / this.cellWidth)},${Math.floor(p.y / this.cellHeight)}`;
+      if (!this.cells.has(key)) this.cells.set(key, []);
+      this.cells.get(key).push(p);
+    }
+  }
+  visit(p, radius, visit) {
+    const nx = Math.ceil(radius / this.cellWidth), ny = Math.ceil(radius / this.cellHeight), cx = Math.floor(p.x / this.cellWidth), cy = Math.floor(p.y / this.cellHeight);
+    for (let ix = 0; ix < Math.min(this.cols, nx * 2 + 1); ix++) for (let iy = 0; iy < Math.min(this.rows, ny * 2 + 1); iy++) {
+      const cell = this.cells.get(`${wrap(cx - nx + ix, this.cols)},${wrap(cy - ny + iy, this.rows)}`);
+      if (cell) for (const q of cell) if (p !== q) visit(q);
+    }
+  }
+}
+
+function limit(p, min, max) {
+  const speed = Math.hypot(p.vx, p.vy);
+  if (speed < .00001) { p.vx = min; p.vy = 0; return; }
+  const factor = clamp(speed, min, max) / speed;
+  p.vx *= factor; p.vy *= factor;
+}
+function projectPointer(engine, p, strength = .2) {
+  const m = engine.pointer;
+  if (!m.active || !['repel', 'attract'].includes(engine.config.pointer)) return { x: 0, y: 0 };
+  const { x: dx, y: dy } = difference(m, p, engine.world), d = Math.hypot(dx, dy);
+  if (d > 145 || d < .01) return { x: 0, y: 0 };
+  const f = (1 - d / 145) * strength * (engine.config.pointer === 'attract' ? -.55 : 1);
+  return { x: dx / d * f, y: dy / d * f };
+}
+
+const flock = {
+  create(e, i, edge = false) {
+    const x = Math.random() * e.world.width, y = Math.random() * e.world.height, angle = Math.random() * TAU;
+    return seed3(e, { x, y, vx: Math.cos(angle) * 1.45, vy: Math.sin(angle) * 1.45, size: 2 + Math.random() * 1.2, phase: Math.random() * TAU, z: Math.random(), age: edge ? 0 : 1 });
+  },
+  update(e, step) {
+    const c = e.config, fish = c.shape === 'fish', radius = c.perception;
+    e.grid.build(e.particles, e.world);
+    // Calculate from a single snapshot before integrating, avoiding array-order bias.
+    for (const p of e.particles) {
+      let count = 0, sx = 0, sy = 0, ax = 0, ay = 0, cx = 0, cy = 0;
+      e.grid.visit(p, radius, q => {
+        const { x: dx, y: dy } = difference(p, q, e.world), d2 = dx * dx + dy * dy;
+        if (d2 > radius * radius || d2 < .0001) return;
+        count++; ax += q.vx; ay += q.vy; cx += dx; cy += dy;
+        if (d2 < 20 * 20) { sx -= dx / d2; sy -= dy / d2; }
+      });
+      let fx = sx * c.separation * .9, fy = sy * c.separation * .9;
+      if (count) { fx += (ax / count - p.vx) * .047 * c.alignment + cx / count * .0008 * c.cohesion; fy += (ay / count - p.vy) * .047 * c.alignment + cy / count * .0008 * c.cohesion; }
+      for (const hunter of e.predators) {
+        const { x: dx, y: dy } = difference(hunter, p, e.world), distance = Math.hypot(dx, dy);
+        if (distance < 115 && distance > .01) { fx += dx / distance * (1 - distance / 115) * .65; fy += dy / distance * (1 - distance / 115) * .65; }
+      }
+      const pointer = projectPointer(e, p);
+      fx += pointer.x; fy += pointer.y;
+      if (fish) { fx += Math.cos(p.y / e.world.height * TAU + e.time * .16) * c.current * .019; fy += Math.sin(p.x / e.world.width * TAU + e.time * .16) * c.current * .032; }
+      // Tiny individual perturbations keep perfectly aligned packs from freezing.
+      fx += Math.cos(p.phase + e.time * .7) * .0018;
+      fy += Math.sin(p.phase + e.time * .7) * .0018;
+      const force = Math.hypot(fx, fy), scale = force > .25 ? .25 / force : 1;
+      p.ax = fx * scale; p.ay = fy * scale;
+    }
+    for (const p of e.particles) {
+      p.vx += p.ax * step; p.vy += p.ay * step; limit(p, fish ? .75 : 1.15, fish ? 1.8 : 2.35);
+      advance(p, step, e.world);
+      p.age = Math.min(1, p.age + step / 90);
+    }
+    e.syncPredators();
+    const eaten = new Set();
+    for (const hunter of e.predators) {
+      hunter.rest = Math.max(0, hunter.rest - step);
+      let target = null, nearest = Infinity;
+      for (const p of e.particles) {
+        if (eaten.has(p)) continue;
+        const delta = difference(hunter, p, e.world), d = delta.x ** 2 + delta.y ** 2;
+        if (d < nearest) { target = p; nearest = d; }
+      }
+      if (target && !hunter.rest) {
+        const d = Math.sqrt(nearest) || 1;
+        const delta = difference(hunter, target, e.world);
+        hunter.vx += (delta.x / d * 2.7 * c.huntSpeed - hunter.vx) * .019 * step;
+        hunter.vy += (delta.y / d * 2.7 * c.huntSpeed - hunter.vy) * .019 * step;
+        if (d < c.captureRadius) { eaten.add(target); hunter.rest = c.huntRest * 60; hunter.meals++; e.captured++; e.fades.push({ x: target.x, y: target.y, life: 1 }); if (c.replenish === 'yes') e.respawns.push(e.time + 2.5); }
+      } else { hunter.vx *= .99; hunter.vy *= .99; }
+      for (const other of e.predators) if (other !== hunter) {
+        const { x: dx, y: dy } = difference(other, hunter, e.world), d = Math.hypot(dx, dy);
+        if (d < 40 && d > .01) { hunter.vx += dx / d * .04 * step; hunter.vy += dy / d * .04 * step; }
+      }
+      limit(hunter, .25, 2.7 * c.huntSpeed); advance(hunter, step, e.world);
+    }
+    if (eaten.size) e.particles = e.particles.filter(p => !eaten.has(p));
+    e.respawns = e.respawns.filter(at => {
+      if (at > e.time) return true;
+      if (c.replenish === 'yes' && e.particles.length < c.count) e.particles.push(this.create(e, e.particles.length, true));
+      return false;
+    });
+    e.breedPopulation(step / 60);
+  },
+  draw(e, ctx) {
+    const c = e.config;
+    for (const p of e.particles) {
+      const depth = c.depth === 'depth', size = p.size * BODY_SCALE_2D * (depth ? .65 + p.z * .8 : 1);
+      periodicCopies(p, e.world, 14, (x, y) => {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(p.vy, p.vx));
+      ctx.globalAlpha = (depth ? .3 + p.z * .65 : .76) * p.age;
+      ctx.fillStyle = e.particleTint(p,e.palette.particle);
+      if (c.shape === 'dot') { ctx.beginPath(); ctx.arc(0, 0, size * .7, 0, TAU); ctx.fill(); }
+      else if (c.shape === 'line') { ctx.strokeStyle = e.particleTint(p,e.palette.particle); ctx.lineWidth = 1.1 * BODY_SCALE_2D; ctx.beginPath(); ctx.moveTo(-size * 1.7, 0); ctx.lineTo(size, 0); ctx.stroke(); }
+      else if (c.shape === 'bird') {
+        const wing=.75+Math.sin(e.time*6+p.phase)*.3;
+        ctx.beginPath();ctx.moveTo(size*1.7,0);ctx.lineTo(0,-size*.4);ctx.lineTo(-size*1.6,-size*2*wing);ctx.lineTo(-size*.7,0);ctx.lineTo(-size*1.6,size*2*wing);ctx.lineTo(0,size*.4);ctx.closePath();ctx.fill();
+      } else if (c.shape === 'fish') {
+        ctx.beginPath(); ctx.ellipse(0, 0, size * 1.7, size * .65, 0, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(-size * 1.4, 0); ctx.lineTo(-size * 2.5, -size * .8); ctx.lineTo(-size * 2.5, size * .8); ctx.closePath(); ctx.fill();
+      } else { ctx.beginPath(); ctx.moveTo(size * 1.9, 0); ctx.lineTo(-size, size * .85); ctx.lineTo(-size * .4, 0); ctx.lineTo(-size, -size * .85); ctx.closePath(); ctx.fill(); }
+      ctx.restore();
+      });
+    }
+    for (const p of e.predators) {
+      periodicCopies(p, e.world, 14, (x, y) => {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(p.vy, p.vx)); ctx.fillStyle = e.particleTint(p,e.palette.predator);
+      ctx.globalAlpha = .95;
+      ctx.scale(BODY_SCALE_2D, BODY_SCALE_2D);
+      ctx.beginPath();
+      if (c.shape === 'bird') {
+        ctx.moveTo(11,0); ctx.lineTo(1,-2); ctx.lineTo(-8,-10); ctx.lineTo(-4,0); ctx.lineTo(-8,10); ctx.lineTo(1,2);
+      } else if (c.shape === 'fish') {
+        ctx.moveTo(12,0); ctx.quadraticCurveTo(7,-3,3,-3);
+        ctx.lineTo(0,-8); ctx.lineTo(-2,-3); ctx.lineTo(-7,-1);
+        ctx.lineTo(-12,-6); ctx.lineTo(-10,0); ctx.lineTo(-12,5); ctx.lineTo(-7,1);
+        ctx.lineTo(-2,2.5); ctx.lineTo(1,6); ctx.lineTo(.5,2.8); ctx.quadraticCurveTo(7,3,12,0);
+      } else {
+        ctx.moveTo(11,0); ctx.lineTo(-8,6); ctx.lineTo(-3,0); ctx.lineTo(-8,-6);
+      }
+      ctx.closePath(); ctx.fill(); ctx.restore();
+      });
+    }
+  },
+};
+
+const COSMIC_STAGES = [
+  {name:'尘埃',key:null,mass:0,radius:1,color:0},
+  {name:'碎片',key:'fragmentMass',mass:2,radius:1.25,color:3},
+  {name:'碎石',key:'rockMass',mass:8,radius:1.5,color:6},
+  {name:'卫星',key:'satelliteMass',mass:32,radius:1.8,color:9},
+  {name:'行星',key:'planetMass',mass:128,radius:2.1,color:12},
+  {name:'星系源',key:'sourceMass',mass:512,radius:2.45,color:14},
+  {name:'黑洞',key:'blackHoleMass',mass:2048,radius:2.8,color:16},
+];
+const cosmicStage = (e,p) => {
+  let stage=0;
+  for(let i=1;i<COSMIC_STAGES.length;i++){
+    if(i===6&&e.config.blackHoles==='no')break;
+    if(p.mass>=(e.config[COSMIC_STAGES[i].key]??COSMIC_STAGES[i].mass))stage=i;
+  }
+  return stage;
+};
+const cosmosRadius = (p = {}) => COSMIC_STAGES[p.stage??0].radius;
+const cosmicVisualRadius = p => cosmosRadius(p);
+const COSMIC_GRAVITY = .6, COSMIC_RATE = .3, COSMIC_LIMIT = 30000;
+const cosmicVisibleSpan = e => Math.min(e.width,e.height)/(e.is3D?e.projection3.focal/e.projection3.distance:e.scale);
+// Express gravity, contact distances and seed velocities in the same spatial units.
+// 3D uses a closer camera; it must not accelerate a smaller world with the 2D G.
+const cosmicUnit = e => cosmicVisibleSpan(e)/900;
+const cosmicG = e => COSMIC_GRAVITY * cosmicUnit(e)**3;
+// A 2D universe is a single XY plane, including a scene switched from 3D mid-birth.
+function flattenCosmos(e) {
+  const flatten=p=>{p.z3=e.world.depth/2;p.pz=p.z3;p.vz=0;p.az=0;};
+  for(const p of [...e.particles,...e.fades,...(e.cosmicBirth?.packets||[])]){
+    flatten(p);
+    if(p.birthTarget)flatten(p.birthTarget);
+    for(const sample of p.trail||[])sample[2]=e.world.depth/2;
+  }
+  if(e.cosmicBirth?.center)flatten(e.cosmicBirth.center);
+}
+// A visual cutoff for negligible distant forces, not a physical limit of gravity.
+const cosmicLensRadius = e => Math.min(150,e.width*.23,e.height*.23);
+const cosmicViewScale = e => e.is3D?e.projection3.focal/e.projection3.distance:e.scale;
+// Equal radius bands for successive mass doublings: 1, 2, 4 ... 512 unit masses.
+const cosmicReach = (e,mass,blackHoleLevel=0) => {
+  const lens=cosmicLensRadius(e)/cosmicViewScale(e);
+  const ordinary=lens*(mass<1?.16*Math.cbrt(Math.max(.001,mass)):Math.min(1,.16+.084*Math.log2(mass)));
+  return ordinary+(lens*1.5-ordinary)*clamp(blackHoleLevel,0,1);
+};
+// Sparse local queries for dense star fields. Flock neighbourhoods stay independent.
+class CosmicIndex {
+  constructor(e,threeD,size,previous=false) {
+    this.threeD=threeD;this.periodic=!threeD&&!e.world.bounded;this.cells=new Map();
+    this.n=[e.world.width,e.world.height,e.world.depth].map(length=>Math.max(1,Math.floor(length/size)));
+    this.s=[e.world.width,e.world.height,e.world.depth].map((length,i)=>length/this.n[i]);
+    this.previous=previous;
+  }
+  key(x,y,z){if(this.periodic){x=wrap(x,this.n[0]);y=wrap(y,this.n[1]);}return (x+32768)*4294967296+(y+32768)*65536+(this.threeD?z+32768:0);}
+  add(p,value){const key=this.key(Math.floor((this.previous?p.px:p.x)/this.s[0]),Math.floor((this.previous?p.py:p.y)/this.s[1]),this.threeD?Math.floor((this.previous?p.pz:p.z3)/this.s[2]):0);let cell=this.cells.get(key);if(!cell)this.cells.set(key,cell=[]);cell.push(value);}
+  visit(p,r,fn){
+    const px=this.previous?p.px:p.x,py=this.previous?p.py:p.y,pz=this.previous?p.pz:p.z3;
+    const x0=Math.floor((px-r)/this.s[0]),y0=Math.floor((py-r)/this.s[1]),z0=this.threeD?Math.floor((pz-r)/this.s[2]):0;
+    let x1=Math.floor((px+r)/this.s[0]),y1=Math.floor((py+r)/this.s[1]);const z1=this.threeD?Math.floor((pz+r)/this.s[2]):0;
+    if(this.periodic){x1=Math.min(x1,x0+this.n[0]-1);y1=Math.min(y1,y0+this.n[1]-1);}
+    for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++){
+      const cell=this.cells.get(this.key(x,y,z));if(cell)for(const item of cell)fn(item);
+    }
+  }
+}
+function cosmicPointer(e,p,threeD) {
+  if(!e.pointer.active||e.orbitDrag||!['attract','repel'].includes(e.config.pointer))return;
+  // A cursor source at each body's screen depth keeps intervention local and visible.
+  const s=threeD?volume.project(e,p):{x:p.x*e.scale,y:p.y*e.scale,k:e.scale};
+  const px=e.pointer.x*e.scale+e.origin.x,py=e.pointer.y*e.scale+e.origin.y;
+  const dx=px-s.x,dy=py-s.y,d=Math.hypot(dx,dy),radius=cosmicLensRadius(e);
+  if(d>=radius||d<.1)return;
+  const sign=e.config.pointer==='attract'?1:-1;
+  const force=sign*.18*cosmicUnit(e)*(1-d/radius)**2*Math.min(1,d/12);
+  const ax=dx/d*force,ay=dy/d*force;
+  if(threeD){
+    const {yaw,pitch}=e.camera,cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+    p.ax+=cy*ax+sy*sp*ay;p.ay+=cp*ay;p.az+=sy*ax-cy*sp*ay;
+  }else {p.ax+=ax;p.ay+=ay;}
+}
+function evolveBlackHoles(e,step) {
+  const enabled=e.config.blackHoles==='yes';
+  for(const p of e.particles){
+    // A theme rule based on the mass currently present, including incoming dust.
+    // Once formed, a hole stays one until reset or the rule is switched off.
+    p.stage=cosmicStage(e,p);
+    p.blackHole=enabled&&p.stage===6;
+    const target=p.blackHole?1:0;
+    p.blackHoleLevel=enabled?(p.blackHoleLevel||0)+(target-(p.blackHoleLevel||0))*(1-Math.exp(-step/45)):0;
+  }
+}
+// Keep the existing trail setting; each increment retains 25 ms of playback time.
+const cosmicTrailDuration = e => e.config.trail / 40;
+function recordCosmicTrail(e,p) {
+  const duration=cosmicTrailDuration(e);
+  if(!duration){p.trail.length=0;return;}
+  if(!p.trail.length||e.trailTime-p.trail.at(-1)[3]>=.02)p.trail.push([p.x,p.y,p.z3,e.trailTime]);
+  const cutoff=e.trailTime-duration;
+  // Retain one older sample to interpolate the exact start of the time window.
+  while(p.trail.length>1&&p.trail[1][3]<=cutoff)p.trail.shift();
+}
+function drawCosmicTrails(e,ctx,project,world,threeD=false) {
+  // Batch similar opacities: a soft fade without thousands of gradient objects.
+  const bands=Array.from({length:24},()=>[]),opacityStep=.26/bands.length;
+  const minLength=.35/(Math.abs(ctx.getTransform().a)/e.dpr);
+  for(const p of e.particles){
+    if(p.releaseAt>e.time)continue;
+    const duration=cosmicTrailDuration(e);
+    if(!duration||!p.trail.length)continue;
+    const cutoff=e.trailTime-duration;
+    const history=[...p.trail,[p.x,p.y,p.z3,e.trailTime]];
+    const points=history.map(([x,y,z3,time])=>{const point=project({x,y,z3});point.time=time;return point;});
+    // Subpixel trails are already covered by the stellar dot; magnification lowers
+    // this threshold so those same trails remain visible through the lens.
+    let length=0;for(let i=1;i<points.length;i++)length+=Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y);
+    if(length<minLength)continue;
+    for(let i=1;i<points.length;i++){
+      let a=points[i-1];const b=points[i];
+      if(b.time<=cutoff)continue;
+      if(a.time<cutoff){const t=(cutoff-a.time)/(b.time-a.time);a={...a,x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,time:cutoff};}
+      const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);
+      if(d<.001)continue;
+      if(Math.abs(dx)>world.width/2||Math.abs(dy)>world.height/2)continue;
+      const fade=clamp(((a.time+b.time)/2-cutoff)/duration,0,1)**1.6;
+      const alpha=.18*fade*(threeD?.95-(a.depth+b.depth)*.3:.72);
+      const band=Math.round(alpha/opacityStep)-1;
+      if(band<0)continue;
+      const midpoint={incoming:p.incoming,x:world.bounded||p.incoming?(a.x+b.x)/2:wrap((a.x+b.x)/2,world.width),y:world.bounded||p.incoming?(a.y+b.y)/2:wrap((a.y+b.y)/2,world.height)};
+      periodicCopies(midpoint,world,Math.max(Math.abs(dx),Math.abs(dy))/2+1,(x,y)=>bands[Math.min(band,bands.length-1)].push([x-dx/2,y-dy/2,x+dx/2,y+dy/2]));
+    }
+  }
+  ctx.save();ctx.lineWidth=threeD?.7:.65;ctx.strokeStyle=e.palette.particle;
+  for(let i=0;i<bands.length;i++){
+    if(!bands[i].length)continue;
+    ctx.globalAlpha=(i+1)*opacityStep;ctx.beginPath();
+    for(const [x1,y1,x2,y2] of bands[i]){ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);}
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawCosmicBody(e,ctx,p,x,y,k=1,alpha=.8) {
+  if(p.releaseAt>e.time)return;
+  p.stage=cosmicStage(e,p);
+  const level=p.stage/6,color=e.particleTint(p,e.palette.mass[COSMIC_STAGES[p.stage].color]);
+  const radius=Math.max(.55,(p.visualRadius ?? cosmicVisualRadius(p))*k);
+  ctx.save();
+  if(p.mass>1.5){
+    const halo=Math.max(radius*2,cosmosRadius(p)*k*4),g=ctx.createRadialGradient(x,y,0,x,y,halo);
+    g.addColorStop(0,color);g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.globalAlpha=alpha*(.12+level*.2);ctx.beginPath();ctx.arc(x,y,halo,0,TAU);ctx.fill();
+  }
+  ctx.globalAlpha=alpha*(.75+level*.25);ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.fill();ctx.restore();
+  if(p.blackHoleLevel>.001){
+    const t=p.blackHoleLevel,r=Math.max(.55,COSMIC_STAGES[6].radius*k)+Math.min(4,3*k);
+    const growth=clamp(Math.log2(Math.max(1,p.mass/(e.config.blackHoleMass||2048)))/5,0,1);
+    const core=r*(.48+.44*growth);
+    ctx.save();ctx.globalAlpha=alpha*t;
+    const glow=ctx.createRadialGradient(x,y,r*.8,x,y,r*4);
+    glow.addColorStop(0,e.palette.particle);glow.addColorStop(.3,e.palette.glow);glow.addColorStop(1,'transparent');
+    ctx.fillStyle=glow;ctx.beginPath();ctx.arc(x,y,r*4,0,TAU);ctx.fill();
+    ctx.strokeStyle=e.palette.particle;ctx.lineWidth=Math.max(.65,k*.55);
+    ctx.beginPath();
+    if(e.is3D)ctx.ellipse(x,y,r*2.1,r*.7,-.35,0,TAU);else ctx.arc(x,y,r*2.1,0,TAU);
+    ctx.stroke();
+    ctx.fillStyle='#06080c';ctx.beginPath();ctx.arc(x,y,core,0,TAU);ctx.fill();
+    ctx.globalAlpha=alpha*t*.75;ctx.beginPath();ctx.arc(x,y,core,0,TAU);ctx.stroke();ctx.restore();
+  }
+}
+function collideCosmos(e,step,threeD) {
+  const w=e.world,particles=e.particles,used=new Set(),born=[];
+  const travel=particles.map(p=>Math.hypot(p.vx,p.vy,threeD?p.vz:0)*step);
+  const index=new CosmicIndex(e,threeD,12*cosmicUnit(e),true);
+  let maxReach=0;
+  for(let i=0;i<particles.length;i++){index.add(particles[i],i);maxReach=Math.max(maxReach,particles[i].radius+travel[i]);}
+  for(let i=0;i<particles.length;i++){
+    const a=particles[i];if(used.has(a))continue;
+    const candidates=[];index.visit(a,a.radius+travel[i]+maxReach,j=>{if(j>i)candidates.push(j);});candidates.sort((a,b)=>a-b);
+    for(const j of candidates){
+      const b=particles[j];if(used.has(b))continue;
+      const dx=axisDelta(b.px-a.px,w.width,threeD||w.bounded),dy=axisDelta(b.py-a.py,w.height,threeD||w.bounded),dz=threeD?b.pz-a.pz:0;
+      const vx=b.vx-a.vx,vy=b.vy-a.vy,vz=threeD?b.vz-a.vz:0,contact=a.radius+b.radius;
+      const v2=vx*vx+vy*vy+vz*vz,t=v2?clamp(-(dx*vx+dy*vy+dz*vz)/v2,0,step):0;
+      if((dx+vx*t)**2+(dy+vy*t)**2+(dz+vz*t)**2>contact*contact)continue;
+      const large=a.mass>=b.mass?a:b,mass=a.mass+b.mass;
+      // Theme rule: compare tiers before absorption, even if this merge upgrades
+      // the survivor. Lower-tier dust adds mass without redirecting its host.
+      const sameTier=cosmicStage(e,a)===cosmicStage(e,b);
+      const velocity=key=>sameTier?(a.mass*a[key]+b.mass*b[key])/mass:large[key];
+      const remnant={...large,mass,vx:velocity('vx'),vy:velocity('vy'),vz:threeD?velocity('vz'):0,trail:[],collisionAt:0,mergeAt:0};
+      remnant.stage=cosmicStage(e,remnant);remnant.blackHole=e.config.blackHoles==='yes'&&remnant.stage===6;
+      born.push(remnant);used.add(a);used.add(b);e.merged++;
+      if(e.followTarget===a||e.followTarget===b)e.followTarget=remnant;
+      e.fades.push({x:large.x,y:large.y,z3:large.z3,life:1});break;
+    }
+  }
+  if(used.size)e.particles=particles.filter(p=>!used.has(p)).concat(born);
+  if(e.fades.length>80)e.fades=e.fades.slice(-80);
+}
+function attractPair(a,b,w,strength,threeD,reach,softening) {
+  const dx=axisDelta(b.x-a.x,w.width,threeD||w.bounded),dy=axisDelta(b.y-a.y,w.height,threeD||w.bounded),dz=threeD?b.z3-a.z3:0;
+  const distance2=dx*dx+dy*dy+dz*dz;
+  if(distance2>=reach*reach)return;
+  const distance=Math.sqrt(distance2),taper=1-smooth(clamp((distance/reach-.65)/.35,0,1));
+  // Exact inverse-square force outside the tiny contact core. A symmetric cutoff
+  // preserves action/reaction when a large body reaches a much smaller one.
+  const soft=Math.max(softening,a.radius+b.radius),r2=Math.max(distance2,soft*soft),f=strength*taper/(r2*Math.sqrt(r2));
+  a.ax+=dx*f*b.mass;a.ay+=dy*f*b.mass;a.az+=dz*f*b.mass;
+  b.ax-=dx*f*a.mass;b.ay-=dy*f*a.mass;b.az-=dz*f*a.mass;
+}
+function mutualAttraction(e,threeD) {
+  const w=e.world,strength=cosmicG(e)*e.config.mutualGravity;
+  const softening=3.6*cosmicUnit(e),grid=new CosmicIndex(e,threeD,18*cosmicUnit(e));
+  const items=e.particles.map((p,index)=>({p,index,reach:cosmicReach(e,p.mass,p.blackHoleLevel||0)}));
+  for(const item of items)grid.add(item.p,item);
+  for(const a of items)grid.visit(a.p,a.reach,b=>{
+    if(a===b||b.reach>a.reach||b.reach===a.reach&&b.index<a.index)return;
+    attractPair(a.p,b.p,w,strength,threeD,a.reach,softening);
+  });
+}
+
+function updateCosmos(e,step,threeD=false) {
+  const w=e.world,c=e.config,unit=cosmicUnit(e);
+  evolveBlackHoles(e,step);
+  const forces=()=>{
+    for(const p of e.particles){
+      p.mass=p.mass||1;p.radius=cosmosRadius(p)*.24*unit+3*unit*(p.blackHoleLevel||0);
+      p.ax=0;p.ay=0;p.az=0;
+      cosmicPointer(e,p,threeD);
+    }
+    if(c.mutualGravity>0)mutualAttraction(e,threeD);
+  };
+  // Kick-drift-kick leapfrog. Resolve close approaches with shorter steps;
+  // quiet orbital motion does not need the extra full gravity evaluation.
+  forces();
+  let remaining=step;
+  while(remaining>1e-10){
+    const acceleration=e.particles.reduce((peak,p)=>Math.max(peak,Math.hypot(p.ax,p.ay,p.az)),1e-9);
+    // Re-evaluate after every substep: a flyby can enter the strong-force core
+    // mid-frame. Resolve its curve without replacing or damping its velocity.
+    const h=Math.min(remaining,.3,.1*Math.sqrt(3.6*unit/acceleration));
+    for(const p of e.particles){
+      p.px=p.x;p.py=p.y;p.pz=p.z3;
+      p.vx+=p.ax*h/2;p.vy+=p.ay*h/2;if(threeD)p.vz+=p.az*h/2;
+      if(p.incoming){
+        p.x+=p.vx*h;p.y+=p.vy*h;p.z3+=p.vz*h;
+        const screen=threeD?volume.project(e,p):{x:p.x*e.scale,y:p.y*e.scale};
+        if(screen.x>12&&screen.x<e.width-12&&screen.y>12&&screen.y<e.height-12)p.incoming=false;
+      }else if(threeD?advance3(p,h,w):advance(p,h,w))p.trail.length=0;
+    }
+    if(c.collisions!=='off')collideCosmos(e,h,threeD);
+    forces();
+    for(const p of e.particles){p.vx+=p.ax*h/2;p.vy+=p.ay*h/2;if(threeD)p.vz+=p.az*h/2;}
+    remaining-=h;
+  }
+  for(const p of e.particles){
+    const targetRadius=cosmicVisualRadius(p);
+    p.visualRadius=(p.visualRadius??targetRadius)+(targetRadius-(p.visualRadius??targetRadius))*(1-Math.exp(-.08*step));
+    recordCosmicTrail(e,p);
+  }
+}
+
+const gravity = {
+  create(e) {
+    const x = Math.random() * e.world.width, y = Math.random() * e.world.height;
+    const dx=x-e.world.width/2,dy=y-e.world.height/2,r=Math.max(28,Math.hypot(dx,dy));
+    const enclosed=clamp((r/(Math.min(e.world.width,e.world.height)*.5))**2,0,1);
+    const pull=cosmicG(e)*e.config.mutualGravity*e.config.count*enclosed;
+    // Keep enough initial drift for flybys even without an external attractor.
+    const v=clamp(Math.sqrt(Math.max(12,pull)/r),.08,1.2)*e.config.orbit;
+    // Scattered positions with mostly tangential motion avoid immediate radial collapse.
+    const direction=Math.random()<.03?-1:1,a=Math.atan2(dy,dx)+direction*Math.PI/2+(Math.random()-.5)*.5;
+    const p=seed3(e, { x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, size: 1.8, mass:1, collisionAt:0, z: Math.random(), trail: [], age: 1 });
+    if(e.is3D)p.vz*=v*.35;else {p.z3=e.world.depth/2;p.vz=0;}
+    return p;
+  },
+  update(e, step) {
+    updateCosmos(e,step);
+  },
+  draw(e, ctx) {
+    const c = e.config;
+    drawCosmicTrails(e,ctx,q=>q,e.world);
+    for (const p of e.particles) {
+      const alpha = c.depth === 'depth' ? .25 + p.z * .7 : .72;
+      periodicCopies(p, e.world, cosmosRadius(p)*4, (x, y) => drawCosmicBody(e,ctx,p,x,y,BODY_SCALE_2D,alpha));
+    }
+    ctx.globalAlpha = 1;
+  },
+};
+
+function drawCosmicBirth(e,ctx,view) {
+  if(!e.cosmicBirth)return;
+  const birth=e.cosmicBirth,elapsed=e.time-birth.startedAt;
+  const charging=!birth.born,t=charging?clamp(elapsed/COSMIC_CHARGE,0,1):clamp((elapsed-COSMIC_CHARGE)/.65,0,1);
+  ctx.save();ctx.setTransform(e.dpr*view.zoom,0,0,e.dpr*view.zoom,e.dpr*view.x,e.dpr*view.y);
+  // Small expanding packets break up at staggered times, without fixed attractors.
+  for(const packet of birth.packets||[]){
+    if(!packet.secondary)continue;
+    const age=elapsed-COSMIC_CHARGE,after=age-packet.delay;
+    if(after<0||after>.55)continue;
+    const t=clamp(age/COSMIC_EXPANSION,0,1),travel=1-Math.exp(-5*t),frames=age*60*COSMIC_RATE,center=birth.center;
+    const point={x:center.x+(packet.x-center.x)*travel+packet.vx*frames,y:center.y+(packet.y-center.y)*travel+packet.vy*frames,z3:center.z3+(packet.z3-center.z3)*travel+packet.vz*frames};
+    const s=e.is3D?volume.project(e,point):{x:point.x*e.scale,y:point.y*e.scale};
+    const fade=after<0?1:1-after/.55,r=after<0?5:5+22*(1-fade);
+    const halo=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,r);
+    halo.addColorStop(0,e.palette.center);halo.addColorStop(1,'transparent');
+    ctx.globalAlpha=.48*fade;ctx.fillStyle=halo;ctx.beginPath();ctx.arc(s.x,s.y,r,0,TAU);ctx.fill();
+    if(after<0){ctx.globalAlpha=.78;ctx.fillStyle=e.palette.particle;ctx.beginPath();ctx.arc(s.x,s.y,1.4,0,TAU);ctx.fill();}
+  }
+  if(!charging&&t>=1){ctx.restore();return;}
+  const screen=birth.center?(e.is3D?volume.project(e,birth.center):{x:birth.center.x*e.scale,y:birth.center.y*e.scale}):{x:e.width/2,y:e.height/2};
+  const x=e.world.bounded?screen.x:wrap(screen.x,e.width),y=e.world.bounded?screen.y:wrap(screen.y,e.height);
+  const radius=charging?14+20*t+Math.sin(t*Math.PI*6)*2:14+100*(1-(1-t)**3);
+  const glow=ctx.createRadialGradient(x,y,0,x,y,radius);
+  glow.addColorStop(0,e.palette.center);glow.addColorStop(.18,e.palette.glow);glow.addColorStop(1,'transparent');
+  ctx.globalAlpha=charging?.4+.5*t:(1-t)**2;ctx.fillStyle=glow;
+  ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.fill();
+  ctx.fillStyle=e.palette.center;ctx.globalAlpha=charging?.65+.35*t:(1-t)**3;
+  const core=birth.recycling?birth.radius*(t<.5?1-.3*smooth(t*2):.7+.45*smooth((t-.5)*2)):2+2*t;
+  ctx.beginPath();ctx.arc(x,y,charging?core:4+8*t,0,TAU);ctx.fill();
+  ctx.restore();
+}
+
+// A bounded 3D habitat. World coordinates stay continuous; only the projected
+// screen edges repeat, so orbiting cannot expose an interior teleport seam.
+const delta3 = (a, b) => ({x:b.x-a.x,y:b.y-a.y,z:b.z3-a.z3});
+const norm3 = v => Math.hypot(v.x,v.y,v.z);
+function limit3(p,min,max) { const v=Math.hypot(p.vx,p.vy,p.vz)||1, f=clamp(v,min,max)/v;p.vx*=f;p.vy*=f;p.vz*=f; }
+function advance3(p,step,w) {
+  for(const [position,velocity,length] of [['x','vx',w.width],['y','vy',w.height],['z3','vz',w.depth]]){
+    const margin=Math.min(100,length*.18),value=p[position];
+    if(value<margin&&p[velocity]<0)p[velocity]+=(1-value/margin)*.09*step;
+    else if(value>length-margin&&p[velocity]>0)p[velocity]-=(1-(length-value)/margin)*.09*step;
+    const next=value+p[velocity]*step;
+    // Reflect rare overshoots locally instead of moving to the opposite face.
+    if(next<0){p[position]=clamp(-next,0,length);p[velocity]=Math.abs(p[velocity]);}
+    else if(next>length){p[position]=clamp(2*length-next,0,length);p[velocity]=-Math.abs(p[velocity]);}
+    else p[position]=next;
+  }
+  return false;
+}
+function seed3(e,p,parent) { p.z3=parent?boundCoordinate(parent.z3+(Math.random()-.5)*20,e.world.depth,e.is3D):Math.random()*e.world.depth;p.vz=parent?parent.vz:(Math.random()-.5)*2;return p; }
+class Neighborhood3 {
+  build(particles,w,radius) {
+    this.w=w;this.n=[w.width,w.height,w.depth].map(v=>Math.max(1,Math.floor(v/radius)));this.size=[w.width,w.height,w.depth].map((v,i)=>v/this.n[i]);this.cells=new Map();
+    for(const p of particles){const key=this.key(...this.cell(p));if(!this.cells.has(key))this.cells.set(key,[]);this.cells.get(key).push(p);}
+  }
+  cell(p){return [p.x,p.y,p.z3].map((v,i)=>clamp(Math.floor(v/this.size[i]),0,this.n[i]-1));}
+  key(x,y,z){return (x*this.n[1]+y)*this.n[2]+z;}
+  visit(p,fn){const c=this.cell(p),n=this.n;for(let x=Math.max(0,c[0]-1);x<=Math.min(n[0]-1,c[0]+1);x++)for(let y=Math.max(0,c[1]-1);y<=Math.min(n[1]-1,c[1]+1);y++)for(let z=Math.max(0,c[2]-1);z<=Math.min(n[2]-1,c[2]+1);z++){const cell=this.cells.get(this.key(x,y,z));if(cell)for(const q of cell)if(q!==p)fn(q);}}
+}
+const volume = {
+  update(e,step) {
+    const c=e.config,w=e.world;
+    if(e.scene.model==='gravity'){updateCosmos(e,step,true);return;}
+    const fish=c.shape==='fish',radius=c.perception;
+    e.grid3.build(e.particles,w,radius);
+    for(const p of e.particles){
+      let count=0,sx=0,sy=0,sz=0,ax=0,ay=0,az=0,cx=0,cy=0,cz=0;
+      e.grid3.visit(p,q=>{const d=delta3(p,q,w),d2=d.x*d.x+d.y*d.y+d.z*d.z;if(d2>radius*radius||d2<.0001)return;count++;ax+=q.vx;ay+=q.vy;az+=q.vz;cx+=d.x;cy+=d.y;cz+=d.z;if(d2<400){sx-=d.x/d2;sy-=d.y/d2;sz-=d.z/d2;}});
+      let fx=sx*c.separation*.9,fy=sy*c.separation*.9,fz=sz*c.separation*.9;
+      if(count){fx+=(ax/count-p.vx)*.047*c.alignment+cx/count*.0008*c.cohesion;fy+=(ay/count-p.vy)*.047*c.alignment+cy/count*.0008*c.cohesion;fz+=(az/count-p.vz)*.047*c.alignment+cz/count*.0008*c.cohesion;}
+      for(const h of e.predators){const d=delta3(h,p,w),r=norm3(d);if(r<115&&r>.01){const f=(1-r/115)*.65/r;fx+=d.x*f;fy+=d.y*f;fz+=d.z*f;}}
+      if(fish){fx+=Math.cos(p.y/w.height*TAU+e.time*.16)*c.current*.019;fy+=Math.sin(p.x/w.width*TAU+e.time*.16)*c.current*.032;fz+=Math.sin(p.z3/w.depth*TAU+e.time*.12)*c.current*.025;}
+      fx+=Math.cos(p.phase+e.time*.7)*.0018;fy+=Math.sin(p.phase+e.time*.7)*.0018;fz+=Math.sin(p.phase+e.time*.5)*.0018;
+      const force=Math.hypot(fx,fy,fz),f=force>.25?.25/force:1;p.ax=fx*f;p.ay=fy*f;p.az=fz*f;
+    }
+    for(const p of e.particles){p.vx+=p.ax*step;p.vy+=p.ay*step;p.vz+=p.az*step;limit3(p,fish?.75:1.15,fish?1.8:2.35);advance3(p,step,w);p.age=Math.min(1,p.age+step/90);}
+    e.syncPredators();const eaten=new Set();
+    for(const h of e.predators){
+      h.rest=Math.max(0,h.rest-step);let target,nearest=Infinity;
+      for(const p of e.particles){if(eaten.has(p))continue;const d=delta3(h,p,w),r=norm3(d);if(r<nearest){nearest=r;target=p;}}
+      if(target&&!h.rest){const d=delta3(h,target,w),r=nearest||1;h.vx+=(d.x/r*2.7*c.huntSpeed-h.vx)*.019*step;h.vy+=(d.y/r*2.7*c.huntSpeed-h.vy)*.019*step;h.vz+=(d.z/r*2.7*c.huntSpeed-h.vz)*.019*step;
+        if(nearest<c.captureRadius){eaten.add(target);h.rest=c.huntRest*60;h.meals++;e.captured++;e.fades.push({x:target.x,y:target.y,z3:target.z3,life:1});if(c.replenish==='yes')e.respawns.push(e.time+2.5);}
+      }else {h.vx*=.99;h.vy*=.99;h.vz*=.99;}
+      for(const other of e.predators)if(other!==h){const d=delta3(other,h,w),r=norm3(d);if(r<40&&r>.01){h.vx+=d.x/r*.04*step;h.vy+=d.y/r*.04*step;h.vz+=d.z/r*.04*step;}}
+      limit3(h,.25,2.7*c.huntSpeed);advance3(h,step,w);
+    }
+    if(eaten.size)e.particles=e.particles.filter(p=>!eaten.has(p));
+    e.respawns=e.respawns.filter(at=>{if(at>e.time)return true;if(c.replenish==='yes'&&e.particles.length<c.count)e.particles.push(e.model.create(e,e.particles.length,true));return false;});
+    e.breedPopulation(step/60);
+  },
+  project(e,p) {
+    const w=e.world,c=e.camera,x=p.x-w.width/2,y=p.y-w.height/2,z=p.z3-w.depth/2;
+    const u=x*Math.cos(c.yaw)+z*Math.sin(c.yaw),v=-x*Math.sin(c.yaw)+z*Math.cos(c.yaw);
+    const yy=y*Math.cos(c.pitch)-v*Math.sin(c.pitch),zz=y*Math.sin(c.pitch)+v*Math.cos(c.pitch);
+    const {distance,focal}=e.projection3,k=focal/(distance+zz);
+    const depth=clamp(.5+zz/Math.hypot(w.width,w.height,w.depth),0,1);
+    const sizeK=e.scale*2*clamp(k/(focal/distance),.65,1.3);
+    return {x:e.width/2+u*k,y:e.height/2+yy*k,z:zz,k,sizeK,depth};
+  },
+  draw(e,ctx,view) {
+    ctx.setTransform(e.dpr*view.zoom,0,0,e.dpr*view.zoom,e.dpr*view.x,e.dpr*view.y);
+    const project=p=>this.project(e,p),cosmos=e.scene.model==='gravity';
+    const screenWorld={width:e.width,height:e.height,bounded:e.world.bounded};
+    if(cosmos)drawCosmicTrails(e,ctx,project,screenWorld,true);
+    const items=[];
+    for(const item of [...e.particles.map(p=>({p,type:'particle'})),...e.predators.map(p=>({p,type:'predator'})),...e.fades.map(p=>({p,type:'fade'}))]){
+      const raw=project(item.p);
+      const padding=Math.max(18,(cosmos?cosmosRadius(item.p)*4:14)*raw.sizeK);
+      periodicCopies({incoming:item.p.incoming,x:screenWorld.bounded||item.p.incoming?raw.x:wrap(raw.x,e.width),y:screenWorld.bounded||item.p.incoming?raw.y:wrap(raw.y,e.height)},screenWorld,padding,(x,y)=>items.push({...item,screen:{...raw,rawX:raw.x,rawY:raw.y,x,y}}));
+    }
+    items.sort((a,b)=>b.screen.z-a.screen.z);
+    for(const {p,type,screen:s} of items){
+      const predator=type==='predator',alpha=predator?1-s.depth*.25:.95-s.depth*.6;
+      ctx.globalAlpha=alpha*(p.age??1);ctx.fillStyle=e.particleTint(p,predator?e.palette.predator:e.palette.particle);
+      if(type==='fade'){ctx.globalAlpha=p.life*.4;ctx.strokeStyle=e.palette.impact;ctx.beginPath();ctx.arc(s.x,s.y,(3+(1-p.life)*8)*s.sizeK,0,TAU);ctx.stroke();continue;}
+      if(cosmos||(!predator&&e.config.shape==='dot')){
+        if(cosmos)drawCosmicBody(e,ctx,p,s.x,s.y,s.sizeK*BODY_SCALE_3D,alpha);
+        else {ctx.beginPath();ctx.arc(s.x,s.y,Math.max(.55,p.size*s.sizeK*BODY_SCALE_3D),0,TAU);ctx.fill();}continue;
+      }
+      // A small faceted body oriented along its full 3D velocity.
+      const speed=Math.hypot(p.vx,p.vy,p.vz)||1,f={x:p.vx/speed,y:p.vy/speed,z:p.vz/speed};
+      const r=Math.hypot(f.x,f.z),side=r>.001?{x:-f.z/r,y:0,z:f.x/r}:{x:1,y:0,z:0};
+      const up={x:f.y*side.z-f.z*side.y,y:f.z*side.x-f.x*side.z,z:f.x*side.y-f.y*side.x};
+      const size=(predator?7:p.size*1.5)*BODY_SCALE_3D;
+      const vertex=(a,b,c)=>{const q=project({x:p.x+size*(f.x*a+side.x*b+up.x*c),y:p.y+size*(f.y*a+side.y*b+up.y*c),z3:p.z3+size*(f.z*a+side.z*b+up.z*c)});return {...q,x:s.x+(q.x-s.rawX)*s.sizeK/s.k,y:s.y+(q.y-s.rawY)*s.sizeK/s.k};};
+      if(!predator&&e.config.shape==='line'){const a=vertex(-2,0,0),b=vertex(2,0,0);ctx.strokeStyle=e.particleTint(p,e.palette.particle);ctx.lineWidth=Math.max(.7,s.sizeK*BODY_SCALE_3D);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();continue;}
+      const fish=!predator&&e.config.shape==='fish',bird=!predator&&e.config.shape==='bird',vertices=bird?[[2,0,0],[0,.4,0],[-1.6,2,Math.sin(e.time*6+p.phase)*.8],[-.6,0,.3],[-1.6,-2,Math.sin(e.time*6+p.phase)*.8],[0,-.4,0]]:fish?[[2,0,0],[0,.65,0],[0,0,.65],[0,-.65,0],[0,0,-.65],[-1.8,0,0],[-2.6,1,0],[-2.6,-1,0]]:[[2,0,0],[-1,1,0],[-.4,0,.5],[-1,-1,0]];
+      const faces=bird?[[0,1,3],[1,2,3],[0,3,5],[3,4,5]]:fish?[[0,1,2],[0,2,3],[0,3,4],[0,4,1],[5,2,1],[5,3,2],[5,4,3],[5,1,4],[5,6,7]]:[[0,1,2],[0,2,3],[1,3,2]];
+      const mesh=predator&&PREDATOR_MESHES[e.config.shape],bodyFaces=mesh?mesh.faces:faces;
+      const points=(mesh?mesh.vertices:vertices).map(v=>vertex(...v));
+      bodyFaces.map(face=>({face,z:face.reduce((v,i)=>v+points[i].z,0)/3})).sort((a,b)=>b.z-a.z).forEach(({face},i)=>{ctx.globalAlpha=alpha*(p.age??1)*(predator?.85+i/bodyFaces.length*.15:.65+i/bodyFaces.length*.35);ctx.beginPath();face.forEach((index,j)=>{const q=points[index];if(j)ctx.lineTo(q.x,q.y);else ctx.moveTo(q.x,q.y);});ctx.closePath();ctx.fill();});
+    }ctx.globalAlpha=1;
+  },
+};
+
+export const MODELS = Object.freeze({ flock, gravity });
+
+export class EmergenceEngine {
+  constructor(canvas, { scene = 'birds', config, color = '#48614c', predatorColor, dark = false } = {}) {
+    this.canvas = canvas; this.ctx = canvas.getContext('2d', { alpha: true });
+    this.grid3 = new Neighborhood3(); this.camera = {yaw:-.25,pitch:.15};
+    this.grid = new Neighborhood(); this.pointer = { active: false, x: 0, y: 0 };
+    this.paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.time = 0; this.tick = 0; this.lastFrame = 0; this.accumulator = 0; this.destroyed = false; this.boost = 1;
+    this.setPalette(color, dark, predatorColor); this.resize(); this.setScene(scene, config);
+    this.onResize = () => this.resize(); this.onVisibility = () => { this.lastFrame = 0; this.accumulator = 0; };
+    window.addEventListener('resize', this.onResize); document.addEventListener('visibilitychange', this.onVisibility);
+    this.resizeObserver=new ResizeObserver(()=>{const box=this.canvas.getBoundingClientRect();if(box.width!==this.width||box.height!==this.height)this.resize();});
+    this.resizeObserver.observe(this.canvas);
+    // Capture the object at press time: it may move before click/double-click resolves.
+    this.followDown=event=>{
+      if(event.button!==0||!event.isPrimary||this.config.pointer!=='magnify')return;
+      this.lensPointer={x:event.clientX,y:event.clientY};
+      this.followGesture={x:event.clientX,y:event.clientY,at:performance.now(),moved:false,target:this.pickParticle(event.clientX,event.clientY)};
+    };
+    this.followMove=event=>{
+      const g=this.followGesture;if(g&&Math.hypot(event.clientX-g.x,event.clientY-g.y)>6)g.moved=true;
+      this.lensPointer=event.target===this.canvas?{x:event.clientX,y:event.clientY}:null;
+      if(this.followTarget){
+        if(!this.pointerInLens()){this.followHintUntil=0;clearTimeout(this.followHintTimer);}
+        if(this.paused)this.draw();
+      }
+    };
+    this.followClick=event=>{
+      if(event.button!==0||this.config.pointer!=='magnify')return;
+      if(event.detail>1)return;
+      this.followPrevious=this.followTarget||null;
+      const g=this.followGesture;
+      if(!g||g.moved||performance.now()-g.at>280||!g.target)return;
+      clearTimeout(this.followTimer);
+      this.followTimer=setTimeout(()=>{
+        this.followTimer=null;
+        if(!this.destroyed&&this.config.pointer==='magnify'&&this.hasParticle(g.target)){
+          this.followTarget=g.target;this.followHintUntil=performance.now()+1800;
+          clearTimeout(this.followHintTimer);
+          this.followHintTimer=setTimeout(()=>{this.followHintUntil=0;if(!this.destroyed&&this.paused)this.draw();},1800);
+          this.draw();
+        }
+      },350);
+    };
+    this.followDouble=()=>{
+      clearTimeout(this.followTimer);this.followTimer=null;
+      if(this.followPrevious!==undefined){this.followTarget=this.followPrevious;this.followPrevious=undefined;this.draw();}
+    };
+    this.followEscape=event=>{
+      if(event.key==='Escape'&&(this.followTarget||this.followTimer)){
+        event.preventDefault();event.stopImmediatePropagation();this.clearFollow();this.draw();
+      }
+    };
+    this.followContext=event=>{
+      if(this.config.pointer!=='magnify'||!(this.followTarget||this.followTimer))return;
+      event.preventDefault();event.stopPropagation();this.clearFollow();
+      this.setPointer(event.clientX,event.clientY);this.draw();
+    };
+    this.canvas.addEventListener('contextmenu',this.followContext);
+    this.lensZoom=2.5;
+    this.lensWheel=event=>{
+      if(this.destroyed||this.config.pointer!=='magnify'||event.ctrlKey)return false;
+      const lens=this.magnifierView(),box=this.canvas.getBoundingClientRect();
+      if(Math.hypot(event.clientX-box.left-lens.x,event.clientY-box.top-lens.y)>lens.radius)return false;
+      event.preventDefault();event.stopImmediatePropagation();
+      const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?this.height:1);
+      this.lensZoom=clamp(this.lensZoom*Math.exp(-clamp(delta,-240,240)*.002),2.5,10);
+      this.draw();return true;
+    };
+    // The home navigation capture handler offers the lens its wheel event first.
+    this.canvas.consumeMagnifierWheel=this.lensWheel;
+    this.canvas.addEventListener('wheel',this.lensWheel,{passive:false});
+    this.canvas.addEventListener('pointerdown',this.followDown,true);
+    window.addEventListener('pointermove',this.followMove,true);
+    this.canvas.addEventListener('click',this.followClick);
+    this.canvas.addEventListener('dblclick',this.followDouble);
+    window.addEventListener('keydown',this.followEscape,true);
+    this.orbitDown = event => {
+      if (!this.is3D || !event.isPrimary || event.button !== 0) return;
+      event.preventDefault(); event.stopImmediatePropagation(); this.setBoost(false); this.pointer.active=false;
+      this.orbitDrag={id:event.pointerId,x:event.clientX,y:event.clientY}; this.canvas.setPointerCapture(event.pointerId); this.canvas.style.cursor='grabbing';
+    };
+    this.orbitMove = event => { const d=this.orbitDrag;if(!d||d.id!==event.pointerId)return;event.preventDefault();event.stopImmediatePropagation();this.rotateCamera((event.clientX-d.x)/this.width*TAU,(event.clientY-d.y)/this.height*Math.PI);d.x=event.clientX;d.y=event.clientY; };
+    this.orbitUp = event => {if(this.orbitDrag?.id!==event.pointerId)return;event.stopImmediatePropagation();this.endOrbit();};
+    this.orbitBlur = () => this.endOrbit();
+    this.canvas.addEventListener('pointerdown',this.orbitDown,true);
+    this.canvas.addEventListener('lostpointercapture',this.orbitBlur);
+    window.addEventListener('pointermove',this.orbitMove,{capture:true,passive:false});
+    window.addEventListener('pointerup',this.orbitUp,true);window.addEventListener('pointercancel',this.orbitUp,true);
+    window.addEventListener('blur',this.orbitBlur);document.addEventListener('visibilitychange',this.orbitBlur);
+    this.frame = this.frame.bind(this); this.raf = requestAnimationFrame(this.frame);
+  }
+  get is3D() { return this.config?.depth === 'depth'; }
+  rotateCamera(yaw,pitch) {this.camera.yaw=wrap(this.camera.yaw+yaw,TAU);this.camera.pitch=clamp(this.camera.pitch+pitch,-Math.PI*.47,Math.PI*.47);this.containEdges();this.draw();}
+  containEdges(step=0,rebase=false) {
+    const w=this.world;if(!w)return;
+    w.bounded=this.config?.edgeWrap==='no';
+    if(!w.bounded||!this.width||!this.height)return;
+    const cy=Math.cos(this.camera.yaw),sy=Math.sin(this.camera.yaw),cp=Math.cos(this.camera.pitch),sp=Math.sin(this.camera.pitch);
+    const right=[cy,0,sy],up=[sy*sp,cp,-cy*sp],forward=[-sy*cp,sp,cy*cp];
+    const dot=(p,b)=>p.vx*b[0]+p.vy*b[1]+p.vz*b[2];
+    const turn=(position,velocity,inset,length,k)=>{
+      if(position<=inset&&velocity<0||position>=length-inset&&velocity>0)return -velocity;
+      const zone=Math.min(60,length*.12),gap=velocity<0?position-inset:length-inset-position;
+      return gap<zone?velocity-Math.sign(velocity)*Math.min(Math.abs(velocity)+k*.3,k*.18*step*(1-Math.max(0,gap)/zone)**2):velocity;
+    };
+    for(const [items,predator] of [[this.particles||[],false],[this.predators||[],true]])for(const p of items){
+      if(p.incoming)continue;
+      if(!this.is3D){
+        const inset=Math.min(Math.min(this.width,this.height)*.08,2+(predator?11:this.scene.model==='gravity'?1.8:p.size*2.8)*BODY_SCALE_2D*this.scale);
+        p.vx=turn(p.x*this.scale,p.vx*this.scale,inset,this.width,this.scale)/this.scale;
+        p.vy=turn(p.y*this.scale,p.vy*this.scale,inset,this.height,this.scale)/this.scale;
+        const x=clamp(p.x,inset/this.scale,w.width-inset/this.scale),y=clamp(p.y,inset/this.scale,w.height-inset/this.scale);
+        if((x!==p.x||y!==p.y)&&p.trail)p.trail=[];
+        p.x=x;p.y=y;continue;
+      }
+      const screen=volume.project(this,p),k=screen.k;
+      const inset=Math.min(Math.min(this.width,this.height)*.08,2+(predator?18:this.scene.model==='gravity'?1.8:p.size*4)*BODY_SCALE_3D*screen.sizeK);
+      // On enabling the boundary, retain the currently visible periodic image.
+      const x=clamp(rebase?wrap(screen.x,this.width):screen.x,inset,this.width-inset),y=clamp(rebase?wrap(screen.y,this.height):screen.y,inset,this.height-inset);
+      const u=(screen.x-this.width/2)/k,v=(screen.y-this.height/2)/k,vz=dot(p,forward),distance=this.projection3.distance+screen.z;
+      const vx=(dot(p,right)-u*vz/distance)*k,vy=(dot(p,up)-v*vz/distance)*k;
+      const dx=(turn(screen.x,vx,inset,this.width,k)-vx)/k,dy=(turn(screen.y,vy,inset,this.height,k)-vy)/k;
+      p.vx+=right[0]*dx+up[0]*dy;p.vy+=right[1]*dx+up[1]*dy;p.vz+=right[2]*dx+up[2]*dy;
+      if(x!==screen.x||y!==screen.y){
+        const ax=(x-screen.x)/k,ay=(y-screen.y)/k;
+        p.x+=right[0]*ax+up[0]*ay;p.y+=right[1]*ax+up[1]*ay;p.z3+=right[2]*ax+up[2]*ay;
+        // Stay inside the depth habitat too. Radial contraction keeps the screen projection inside its edges.
+        const rx=p.x-w.width/2,ry=p.y-w.height/2,rz=p.z3-w.depth/2;
+        const fit=Math.min(1,w.width/2/(Math.abs(rx)||1),w.height/2/(Math.abs(ry)||1),w.depth/2/(Math.abs(rz)||1));
+        p.x=w.width/2+rx*fit;p.y=w.height/2+ry*fit;p.z3=w.depth/2+rz*fit;
+        if(p.trail)p.trail=[];
+      }
+    }
+  }
+  endOrbit() {const d=this.orbitDrag;this.orbitDrag=null;if(d&&this.canvas.hasPointerCapture(d.id))this.canvas.releasePointerCapture(d.id);this.canvas.style.cursor=this.is3D?'grab':'';}
+  setPalette(color, dark, predatorColor = this.predatorColor) {
+    this.predatorColor = /^#[a-f0-9]{6}$/i.test(predatorColor) ? predatorColor : undefined;
+    this.color = /^#[a-f0-9]{6}$/i.test(color) ? color : '#48614c'; this.dark = dark;
+    const rgb = [1, 3, 5].map(i => parseInt(this.color.slice(i, i + 2), 16));
+    const max = Math.max(...rgb), delta = max - Math.min(...rgb);
+    const hue = !delta ? 0 : max === rgb[0] ? (rgb[1]-rgb[2])/delta : max === rgb[1] ? (rgb[2]-rgb[0])/delta+2 : (rgb[0]-rgb[1])/delta+4;
+    const mix = (target, amount, alpha = 1) => `rgba(${rgb.map((v, i) => Math.round(v * (1 - amount) + target[i] * amount)).join(',')},${alpha})`;
+    this.palette = {
+      particle: mix(dark ? [228, 238, 216] : [20, 42, 30], dark ? .72 : .15),
+      focus: mix(dark ? [255,255,255] : [0,0,0], dark ? .42 : .28),
+      mass:Array.from({length:17},(_,i)=>mix(dark?[255,241,202]:[20,42,30],dark?.2+i/16*.75:.15+i/16*.65)),
+      // The theme host supplies its next palette color; standalone engines retain their fallback.
+      predator: this.predatorColor || `hsl(${(hue*60+540)%360}, 80%, ${dark?66:35}%)`,
+      impact: dark ? '#d6b690' : '#967451',
+
+
+
+
+      center: dark ? '#e2d8ad' : '#688674', glow: dark ? 'rgba(212,204,159,.18)' : 'rgba(78,112,84,.12)',
+    };
+    if (this.scene) this.draw();
+  }
+  resize() {
+    const previous = this.world;
+    const box = this.canvas.getBoundingClientRect(); this.width = box.width; this.height = box.height;
+    const dpr = Math.min(devicePixelRatio || 1, 2); this.dpr = dpr;
+    this.canvas.width = Math.round(box.width * dpr); this.canvas.height = Math.round(box.height * dpr);
+    this.scale = Math.min(box.width / (box.width > 700 ? 1500 : 900), box.height / 1000) * 1.1;
+    this.origin = { x: 0, y: 0 };
+    this.world = { width: box.width / this.scale, height: box.height / this.scale, depth: Math.min(box.width,box.height) / this.scale * .85, bounded:this.config?.edgeWrap==='no' };
+    // Frame an interior region, rather than fitting the entire periodic box on screen.
+    // The viewport fits inside the projected inscribed sphere at every camera angle,
+    // so all four edges (including corners) extend into the surrounding 3D space.
+    const radius=Math.min(this.world.width,this.world.height,this.world.depth)/2;
+    const distance=Math.hypot(this.world.width,this.world.height,this.world.depth)*1.3;
+    this.projection3={distance,focal:Math.hypot(box.width,box.height)*Math.sqrt(distance*distance-radius*radius)/(2*radius)*1.08};
+    if (previous) {
+      const birthCenter=this.cosmicBirth?.born&&this.cosmicBirth.center?[this.cosmicBirth.center]:[];
+      for (const p of [...(this.particles || []), ...(this.predators || []), ...(this.fades || []), ...(this.cosmicBirth?.packets||[]), ...birthCenter]) {
+        if(p.birthTarget)for(const [axis,velocity,length] of [['x','vx','width'],['y','vy','height'],['z3','vz','depth']]){
+          const ratio=this.world[length]/previous[length];p.birthTarget[axis]*=ratio;p.birthTarget[velocity]*=ratio;
+        }
+        p.x = boundCoordinate(p.x / previous.width * this.world.width, this.world.width, this.is3D||this.world.bounded); p.y = boundCoordinate(p.y / previous.height * this.world.height, this.world.height, this.is3D||this.world.bounded);
+        p.z3 = boundCoordinate(p.z3 / previous.depth * this.world.depth, this.world.depth, this.is3D);
+        if (p.trail) p.trail.length = 0;
+      }
+    }
+    this.pointer.active = false;
+    this.containEdges();
+    if (this.scene) this.draw();
+  }
+  setScene(id, config) {
+    this.scene = SCENES[id] || SCENES.birds; this.model = MODELS[this.scene.model];
+    this.config = sanitize(this.scene.id, config); this.pointer.active = false; this.reset();
+    this.canvas.dataset.scene = this.scene.id;
+  }
+  reset(opening = true) {
+    this.clearFollow();
+    this.endOrbit(); this.canvas.dataset.dimension=this.is3D?'3d':'2d';
+    this.setBoost(false);
+    this.time = 0; this.trailTime = 0; this.tick = 0; this.accumulator = 0; this.lastFrame = 0; this.captured = 0;
+    this.predators = []; this.respawns = []; this.fades = [];
+    this.cosmicEdgeReached=false;this.merged=0;this.shattered=0;this.deflected=0;this.influxClock=0;this.incomingMass=0;this.arrived=0;
+    this.birthClock = 0; this.predatorBirthClock = 0; this.born = 0; this.predatorBorn = 0;
+    this.cosmicBirth = opening&&this.scene.model==='gravity'?{born:false,startedAt:0}:null;
+    this.particles = this.scene.model==='gravity'?[]:Array.from({ length: this.config.count }, (_, i) => this.model.create(this, i));
+    if(this.scene.model==='gravity'&&!opening){
+      // Changing the count uses the same bound initial state, without replaying the flash.
+      this.cosmicBirth={born:false,startedAt:-COSMIC_CHARGE-COSMIC_EXPANSION};this.advanceCosmicBirth(0);
+    }
+    this.syncPredators(true); this.containEdges(0,true); this.draw();
+  }
+  advanceCosmicBirth(step) {
+    if(!this.cosmicBirth)return false;
+    const birth=this.cosmicBirth,elapsed=this.time-birth.startedAt;
+    if(elapsed<COSMIC_CHARGE){
+      if(birth.recycling){
+        const p=birth.center,drag=Math.exp(-.055*step);p.vx*=drag;p.vy*=drag;p.vz*=drag;
+        if(this.is3D)advance3(p,step,this.world);else advance(p,step,this.world);
+        this.containEdges();
+      }
+      return true;
+    }
+    if(!this.cosmicBirth.born){
+      const w=this.world,center=birth.center||{x:w.width/2,y:w.height/2,z3:w.depth/2,vx:0,vy:0,vz:0};
+      const count=this.config.count,total=birth.recycling?center.mass:count,span=cosmicVisibleSpan(this),unit=cosmicUnit(this);
+      // Radial directions fill a disk in 2D and a sphere in 3D, never three seeded rings.
+      const direction=()=>{
+        const a=Math.random()*TAU,z=this.is3D?Math.random()*2-1:0,r=Math.sqrt(1-z*z);
+        return {x:Math.cos(a)*r,y:Math.sin(a)*r,z3:z};
+      };
+      // Most dust is visible in the first blast. Only a small minority travels
+      // together before a later local burst; it is never the main particle supply.
+      const secondaryCount=Math.max(2,Math.round(Math.sqrt(count)/5)),groupSize=8;
+      const packetCount=count-secondaryCount*(groupSize-1);
+      const packets=Array.from({length:packetCount},(_,i)=>{
+        const d=direction(),r=Math.random()**(this.is3D?1/3:1/2),secondary=i<secondaryCount;
+        // One radius in world units on every axis: a disk or sphere, never a
+        // screen-aspect rectangle. A denser inner cloud encourages local growth.
+        const radius=span*.52*r; // Integrated blast impulse, not a destination.
+        const drift=(.65+Math.random()*.75)*unit*this.config.orbit;
+        const point={x:center.x+d.x*radius,y:center.y+d.y*radius,z3:this.is3D?center.z3+d.z3*radius:w.depth/2};
+        return {...point,
+          vx:d.x*drift,vy:d.y*drift,vz:d.z3*drift,secondary,delay:secondary?2+Math.random()*.9:1.6,spread:secondary?span*.028:0};
+      });
+      const weights=Array.from({length:count},()=>.12+Math.random()*.88),weightSum=weights.reduce((sum,value)=>sum+value,0);
+      this.particles=Array.from({length:count},(_,i)=>{
+        const j=i<packetCount?i:Math.floor((i-packetCount)/(groupSize-1)),packet=packets[j],d=direction(),radius=packet.spread*Math.random()**(this.is3D?1/3:1/2);
+        const mass=total*weights[i]/weightSum,speed=unit*this.config.orbit;
+        const target={x:packet.x+d.x*radius,y:packet.y+d.y*radius,z3:this.is3D?packet.z3+d.z3*radius:w.depth/2,
+          vx:packet.vx+(d.x*.045-d.y*.085)*speed,vy:packet.vy+(d.y*.045+d.x*.085)*speed,vz:this.is3D?packet.vz+d.z3*.06*speed:0};
+        if(w.bounded){const margin=span*.008;target.x=clamp(target.x,margin,w.width-margin);target.y=clamp(target.y,margin,w.height-margin);}
+        const p=this.model.create(this,i);
+        Object.assign(p,{mass,x:center.x,y:center.y,z3:center.z3,vx:0,vy:0,vz:0,
+          collisionAt:birth.startedAt+COSMIC_CHARGE+COSMIC_EXPANSION,mergeAt:birth.startedAt+COSMIC_CHARGE+COSMIC_EXPANSION,
+          trail:[],birthTarget:target,birthPacket:j,releaseAt:0});
+        return p;
+      });
+      birth.center={...center};birth.packets=packets;birth.born=true;
+    }
+    const age=elapsed-COSMIC_CHARGE;
+    // The first burst carries compact packets outward; each packet releases fine dust.
+    for(const p of this.particles){
+      const target=p.birthTarget;if(!target){if(p.incoming){p.x+=p.vx*step;p.y+=p.vy*step;p.z3+=p.vz*step;}continue;}
+      const packet=birth.packets[p.birthPacket];
+      const t=clamp(age/COSMIC_EXPANSION,0,1),frames=COSMIC_EXPANSION*60*COSMIC_RATE;
+      // Exponential loss of the initial blast speed, with a nonzero inertial drift.
+      const rate=5;
+      const travel=1-Math.exp(-rate*t);
+      const derivative=rate*Math.exp(-rate*t);
+      const local=packet.secondary?clamp((age-packet.delay)/(COSMIC_EXPANSION-packet.delay),0,1):0;
+      for(const [axis,velocity] of [['x','vx'],['y','vy'],['z3','vz']]){
+        const delta=packet[axis]-birth.center[axis],offset=target[axis]-packet[axis];
+        p[axis]=birth.center[axis]+delta*travel+packet[velocity]*age*60*COSMIC_RATE+offset*smooth(local);
+        p[velocity]=packet[velocity]+delta*derivative/frames+(packet.secondary?offset*6*local*(1-local)/((COSMIC_EXPANSION-packet.delay)*60*COSMIC_RATE):0);
+      }
+      recordCosmicTrail(this,p);
+      if(t===1){p.birthTarget=null;p.birthPacket=null;p.releaseAt=0;}
+    }
+    this.detectCosmicEdge();
+    if(age<COSMIC_EXPANSION){this.replenishCosmos(step/(60*COSMIC_RATE));return true;}
+    this.cosmicBirth=null;
+    return false;
+  }
+  detectCosmicEdge(step=0) {
+    if(this.scene.model!=='gravity'||this.cosmicEdgeReached)return;
+    for(const p of this.particles){
+      if(p.incoming)continue;
+      const q={x:p.x+p.vx*step,y:p.y+p.vy*step,z3:p.z3+p.vz*step};
+      const screen=this.is3D?volume.project(this,q):{x:q.x*this.scale,y:q.y*this.scale};
+      const inset=this.is3D?2+1.8*BODY_SCALE_3D*screen.sizeK:2+1.8*BODY_SCALE_2D*this.scale;
+      if(screen.x<=inset||screen.x>=this.width-inset||screen.y<=inset||screen.y>=this.height-inset){this.cosmicEdgeReached=true;return;}
+    }
+  }
+  replenishCosmos(dt) {
+    if(this.scene.model!=='gravity'||(this.cosmicBirth&&!this.cosmicBirth.born)||!this.cosmicEdgeReached||this.config.influx!=='yes'){this.influxClock=0;return;}
+    this.influxClock+=dt;
+    const interval=this.config.influxInterval/this.config.influxBatch;
+    const births=Math.min(60,Math.floor((this.influxClock+1e-9)/interval));
+    if(!births)return;
+    this.influxClock=Math.max(0,this.influxClock-births*interval);
+    const w=this.world,cy=Math.cos(this.camera.yaw),sy=Math.sin(this.camera.yaw),cp=Math.cos(this.camera.pitch),sp=Math.sin(this.camera.pitch);
+    const right=[cy,0,sy],up=[sy*sp,cp,-cy*sp];
+    const k=this.is3D?this.projection3.focal/this.projection3.distance:this.scale;
+    for(let i=0;i<births&&this.particles.length<COSMIC_LIMIT;i++){
+      const edge=Math.floor(Math.random()*4),offset=.15+Math.random()*.7;
+      const x=edge===0?-6:edge===1?this.width+6:this.width*offset;
+      const y=edge===2?-6:edge===3?this.height+6:this.height*offset;
+      const u=(x-this.width/2)/k,v=(y-this.height/2)/k;
+      // Offset streams carry angular momentum instead of all aiming at the core.
+      const aim=Math.atan2(this.height/2-y,this.width/2-x);
+      const a=aim+(Math.random()<.5?-1:1)*(.35+Math.random()*.35);
+      const speed=(.65+Math.random()*.45)*cosmicUnit(this),vx=Math.cos(a)*speed,vy=Math.sin(a)*speed;
+      const p=this.model.create(this),mass=.2+Math.random()*.6;
+      Object.assign(p,{mass,incoming:true,trail:[],collisionAt:this.time+1,mergeAt:this.time+1});
+      if(this.is3D)Object.assign(p,{x:w.width/2+right[0]*u+up[0]*v,y:w.height/2+right[1]*u+up[1]*v,z3:w.depth/2+right[2]*u+up[2]*v,
+        vx:right[0]*vx+up[0]*vy,vy:right[1]*vx+up[1]*vy,vz:right[2]*vx+up[2]*vy});
+      else Object.assign(p,{x:x/k,y:y/k,vx,vy,vz:0});
+      this.particles.push(p);this.arrived++;this.incomingMass+=mass;
+    }
+  }
+  setConfig(config) {
+    const old = this.config, oldCount = old.count, oldReplenish = old.replenish;
+    this.config = sanitize(this.scene.id, config);
+    if(this.config.blackHoles==='no')for(const p of this.particles){p.blackHole=false;p.blackHoleLevel=0;}
+    if(this.config.pointer!=='magnify')this.clearFollow();
+    this.world.bounded=this.config.edgeWrap==='no';
+    if(old.edgeWrap!==this.config.edgeWrap)for(const p of this.particles){if(p.trail)p.trail=[];}
+    if(old.pointer!==this.config.pointer)this.pointer.active=false;
+    if(old.depth!==this.config.depth){
+      this.endOrbit();this.setBoost(false);this.pointer.active=false;this.fades=[];
+      for(const p of this.particles){if(p.trail)p.trail=[];}
+      if(this.scene.model==='gravity'&&!this.is3D)flattenCosmos(this);
+      this.canvas.dataset.dimension=this.is3D?'3d':'2d';
+    }
+    if (this.config.count !== oldCount) {
+      if(this.scene.model==='gravity'){if(!this.cosmicBirth||this.cosmicBirth.born)this.reset(false);return;}
+      this.particles.length = Math.min(this.particles.length, this.config.count);
+      while (this.particles.length < this.config.count) this.particles.push(this.model.create(this, this.particles.length));
+      this.respawns = [];
+    }
+    if (this.scene.model === 'flock') {
+      this.particles.length = Math.min(this.particles.length, this.config.populationCap);
+      if (old.breeding !== this.config.breeding || old.birthInterval !== this.config.birthInterval) this.birthClock = 0;
+      if (old.predatorBreeding !== this.config.predatorBreeding || old.predatorBirthInterval !== this.config.predatorBirthInterval || old.predators !== this.config.predators) this.predatorBirthClock = 0;
+    }
+    if (this.config.replenish === 'no') this.respawns = [];
+    else if (oldReplenish === 'no' && this.config.replenish === 'yes') this.respawns = Array.from({ length: Math.max(0, this.config.count - this.particles.length) }, (_, i) => this.time + 1 + i * .06);
+    this.syncPredators(old.predators !== this.config.predators); this.containEdges(0,old.edgeWrap!==this.config.edgeWrap||old.depth!==this.config.depth); this.draw();
+  }
+  createPredator(parent) {
+    const angle = Math.random() * TAU;
+    return seed3(this, { x: parent ? boundCoordinate(parent.x + Math.cos(angle) * 20, this.world.width, this.is3D||this.world.bounded) : Math.random() * this.world.width, y: parent ? boundCoordinate(parent.y + Math.sin(angle) * 20, this.world.height, this.is3D||this.world.bounded) : Math.random() * this.world.height, vx: Math.cos(angle) * .8, vy: Math.sin(angle) * .8, rest: 0, meals: 0 }, parent);
+  }
+  syncPredators(resetCount = false) {
+    const target = this.config.predators || 0;
+    this.predators.length = Math.min(target === 0 ? 0 : resetCount ? target : this.config.predatorCap, this.predators.length);
+    if (resetCount) while (this.predators.length < target) this.predators.push(this.createPredator());
+  }
+  breedPopulation(dt) {
+    const c = this.config;
+    if (c.breeding === 'yes' && this.particles.length) {
+      this.birthClock += dt;
+      if (this.birthClock + 1e-9 >= c.birthInterval) {
+        this.birthClock = 0;
+        const parents = this.particles.length, count = Math.min(c.birthBatch, c.populationCap - parents);
+        for (let i = 0; i < count; i++) {
+          const parent = this.particles[Math.floor(Math.random() * parents)], newborn = this.model.create(this, this.particles.length, true), angle = Math.random() * TAU;
+          newborn.x = boundCoordinate(parent.x + Math.cos(angle) * 15, this.world.width, this.is3D||this.world.bounded); newborn.y = boundCoordinate(parent.y + Math.sin(angle) * 15, this.world.height, this.is3D||this.world.bounded);
+          newborn.vx = parent.vx; newborn.vy = parent.vy; seed3(this,newborn,parent);
+          this.particles.push(newborn); this.born++;
+        }
+      }
+    } else this.birthClock = 0;
+    if (c.predatorBreeding === 'yes' && this.predators.length) {
+      this.predatorBirthClock = Math.min(c.predatorBirthInterval, this.predatorBirthClock + dt);
+      if (this.predatorBirthClock + 1e-9 >= c.predatorBirthInterval && this.predators.length < c.predatorCap && this.particles.length) {
+        const parent = this.predators.find(hunter => hunter.meals >= c.birthMeals);
+        if (parent) {
+          parent.meals -= c.birthMeals;
+          this.predators.push(this.createPredator(parent)); this.predatorBorn++; this.predatorBirthClock = 0;
+        }
+      }
+    } else this.predatorBirthClock = 0;
+  }
+  setPointer(x, y, active = true) {
+    if(this.is3D&&this.scene.model!=='gravity'&&this.config.pointer!=='magnify'){this.pointer.active=false;return;}
+    const box=this.canvas.getBoundingClientRect();
+    this.pointer = { x: (x-box.left-this.origin.x)/this.scale, y: (y-box.top-this.origin.y)/this.scale, active };
+    this.lastLensPosition={x:x-box.left,y:y-box.top};
+    if(this.paused&&this.config.pointer==='magnify')this.draw();
+  }
+  clearPointer() {
+    const wasActive=this.pointer.active;this.pointer.active=false;
+    this.lensPointer=null;this.followHintUntil=0;clearTimeout(this.followHintTimer);
+    if((wasActive||this.followTarget)&&this.paused&&this.config.pointer==='magnify')this.draw();
+  }
+  // Pointer events can cancel a hold every few milliseconds. They must not reset simulation time.
+  setBoost(active) { this.boost = active && !this.paused && !this.is3D ? 2 : 1; }
+  setPaused(value) {
+    if (this.paused === value) return;
+    this.paused = value; this.setBoost(false); this.lastFrame = 0; this.accumulator = 0; this.draw();
+  }
+  step(dt = 1 / 60) {
+    const step = dt * 60 * (this.scene.model==='gravity'?COSMIC_RATE:1); this.time += dt; this.trailTime+=dt/(this.config.speed*this.boost); this.tick++;
+    if(this.advanceCosmicBirth(step))return;
+    this.detectCosmicEdge(step);
+    this.containEdges(step);
+    (this.is3D ? volume : this.model).update(this, step);
+    this.containEdges();
+    for (const fade of this.fades) fade.life -= dt * 2;
+    this.fades = this.fades.filter(fade => fade.life > 0);
+    if(this.scene.model==='gravity'&&!this.cosmicBirth&&this.particles.length&&this.config.collisions!=='off'){
+      const total=this.particles.reduce((sum,p)=>sum+p.mass,0);
+      const center=this.particles.reduce((largest,p)=>p.mass>largest.mass?p:largest);
+      // Recycle at 99% of the mass currently present, before adding new dust.
+      // Gather the small remainder without losing its mass or momentum.
+      if(center.mass>=total*.99){
+        const momentum=this.particles.reduce((sum,p)=>[sum[0]+p.mass*p.vx,sum[1]+p.mass*p.vy,sum[2]+p.mass*p.vz],[0,0,0]);
+        const k=this.is3D?volume.project(this,center).sizeK*BODY_SCALE_3D:this.scale*BODY_SCALE_2D;
+        this.cosmicEdgeReached=false;this.cosmicBirth={born:false,startedAt:this.time,recycling:true,center,radius:Math.max(1,cosmicVisualRadius(center)*k)};
+        center.mass=total;[center.vx,center.vy,center.vz]=momentum.map(v=>v/total);
+        if(this.followTarget&&this.particles.includes(this.followTarget))this.followTarget=center;
+        this.particles=[center];center.trail=[];this.fades=[];
+      }
+    }
+    this.replenishCosmos(dt);
+  }
+  frame(now) {
+    if (this.destroyed) return;
+    if (!document.hidden && !this.paused) {
+      const elapsed = this.lastFrame ? Math.min((now - this.lastFrame) / 1000, .06) : 0;
+      this.accumulator += elapsed * this.config.speed * this.boost;
+      let iterations = 0;
+      while (this.accumulator >= 1 / 60 && iterations++ < 16) { this.step(); this.accumulator -= 1 / 60; }
+      this.draw();
+    }
+    this.lastFrame = now; this.raf = requestAnimationFrame(this.frame);
+  }
+  draw() {
+    this.hoverTarget=null;
+    if(this.config.pointer==='magnify'&&this.pointer.active&&!this.orbitDrag){
+      const box=this.canvas.getBoundingClientRect();
+      this.hoverTarget=this.pickParticle(box.left+this.pointer.x*this.scale+this.origin.x,box.top+this.pointer.y*this.scale+this.origin.y);
+    }
+    this.canvas.style.cursor=this.orbitDrag?'grabbing':this.paused&&this.hoverTarget?'pointer':this.is3D?'grab':'';
+    const ctx = this.ctx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.drawWorld(ctx);this.drawMagnifier();
+  }
+  drawWorld(ctx,view={zoom:1,x:0,y:0}) {
+    if(this.cosmicBirth?.recycling&&!this.cosmicBirth.born){drawCosmicBirth(this,ctx,view);return;}
+    ctx.setTransform(this.dpr*this.scale*view.zoom,0,0,this.dpr*this.scale*view.zoom,this.dpr*(this.origin.x*view.zoom+view.x),this.dpr*(this.origin.y*view.zoom+view.y));
+    if(this.is3D){volume.draw(this,ctx,view);drawCosmicBirth(this,ctx,view);return;}
+    this.model.draw(this, ctx);
+    for (const fade of this.fades) { ctx.globalAlpha = fade.life * .35; ctx.strokeStyle = this.palette.impact; ctx.lineWidth = .8; ctx.beginPath(); ctx.arc(fade.x, fade.y, 3 + (1 - fade.life) * 8, 0, TAU); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+    drawCosmicBirth(this,ctx,view);
+  }
+  particleTint(p,base) {
+    return this.config.pointer==='magnify'&&(p===this.hoverTarget||p===this.followTarget)?this.palette.focus:base;
+  }
+  hasParticle(p) { return !!p&&(this.particles?.includes(p)||this.predators?.includes(p)); }
+  clearFollow() {
+    clearTimeout(this.followTimer);this.followTimer=null;this.followTarget=null;this.followPrevious=undefined;this.followGesture=null;this.hoverTarget=null;
+    clearTimeout(this.followHintTimer);this.followHintUntil=0;
+  }
+  particleScreen(p) {
+    const point=this.is3D?volume.project(this,p):{x:p.x*this.scale+this.origin.x,y:p.y*this.scale+this.origin.y};
+    if(!this.world.bounded&&!p.incoming){point.x=wrap(point.x,this.width);point.y=wrap(point.y,this.height);}
+    return point;
+  }
+  drawMassLegend(container) {
+    container.replaceChildren();
+    for(const stage of COSMIC_STAGES){
+      const item=document.createElement('span'),canvas=document.createElement('canvas'),label=document.createElement('span');
+      label.textContent=stage.name;canvas.width=64;canvas.height=48;canvas.style.width='32px';canvas.style.height='24px';canvas.setAttribute('aria-hidden','true');
+      const ctx=canvas.getContext('2d');ctx.scale(2,2);
+      const mass=stage.key?(this.config[stage.key]??stage.mass):.5;
+      const sample={mass,stage:COSMIC_STAGES.indexOf(stage),visualRadius:stage.radius,blackHoleLevel:stage.name==='黑洞'?1:0};
+      drawCosmicBody(this,ctx,sample,16,12,1,1);
+      item.append(canvas,label);container.append(item);
+    }
+  }
+  magnifierView() {
+    if(this.followTarget&&!this.hasParticle(this.followTarget))this.clearFollow();
+    const point=this.followTarget?this.particleScreen(this.followTarget):{
+      x:this.pointer.active?this.pointer.x*this.scale+this.origin.x:(this.lastLensPosition?.x??this.width/2),
+      y:this.pointer.active?this.pointer.y*this.scale+this.origin.y:(this.lastLensPosition?.y??this.height/2),
+    };
+    return {...point,zoom:this.lensZoom||2.5,radius:Math.min(150,this.width*.23,this.height*.23)};
+  }
+  pointerInLens(lens=this.magnifierView()) {
+    if(!this.lensPointer)return false;
+    const box=this.canvas.getBoundingClientRect();
+    return Math.hypot(this.lensPointer.x-box.left-lens.x,this.lensPointer.y-box.top-lens.y)<=lens.radius;
+  }
+  pickParticle(clientX,clientY) {
+    if(this.config.pointer!=='magnify')return null;
+    const box=this.canvas.getBoundingClientRect(),x=clientX-box.left,y=clientY-box.top,lens=this.magnifierView();
+    const inLens=Math.hypot(x-lens.x,y-lens.y)<=lens.radius;
+    const world={width:this.width,height:this.height,bounded:this.world.bounded};
+    let target=null,best=10;
+    for(const p of [...this.particles,...this.predators]){
+      if(p.releaseAt>this.time)continue;
+      const point=this.particleScreen(p);
+      periodicCopies({...point,incoming:p.incoming},world,lens.radius,(px,py)=>{
+        const sx=inLens?lens.x+(px-lens.x)*lens.zoom:px,sy=inLens?lens.y+(py-lens.y)*lens.zoom:py;
+        if(inLens&&Math.hypot(sx-lens.x,sy-lens.y)>lens.radius)return;
+        const distance=Math.hypot(sx-x,sy-y);
+        if(distance<best){best=distance;target=p;}
+      });
+    }
+    return target;
+  }
+  drawMagnifier() {
+    if(this.config.pointer!=='magnify'||!this.width||!this.height)return;
+    const ctx=this.ctx,{x,y,zoom,radius}=this.magnifierView();
+    // Render the same world again at lens resolution: crisp shapes, no physics updates or image feedback.
+    const side=Math.ceil(radius*2*this.dpr);
+    if(!this.lensCanvas){this.lensCanvas=document.createElement('canvas');this.lensContext=this.lensCanvas.getContext('2d');}
+    if(this.lensCanvas.width!==side||this.lensCanvas.height!==side){this.lensCanvas.width=side;this.lensCanvas.height=side;}
+    this.lensContext.setTransform(1,0,0,1,0,0);this.lensContext.clearRect(0,0,side,side);
+    this.drawWorld(this.lensContext,{zoom,x:radius-x*zoom,y:radius-y*zoom});
+    ctx.save();ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.globalAlpha=1;
+    ctx.save();ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.clip();
+    ctx.clearRect(x-radius-1,y-radius-1,radius*2+2,radius*2+2);
+    ctx.drawImage(this.lensCanvas,x-radius,y-radius,radius*2,radius*2);ctx.restore();
+    // A very narrow, low-opacity blurred rim keeps the centre optically crisp.
+    ctx.save();ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.arc(x,y,radius-10,0,TAU,true);ctx.clip('evenodd');
+    ctx.filter='blur(1.2px)';ctx.globalAlpha=.24;
+    ctx.drawImage(this.lensCanvas,x-radius,y-radius,radius*2,radius*2);ctx.restore();
+    const rim=ctx.createRadialGradient(x,y,radius-12,x,y,radius+3);
+    rim.addColorStop(0,'transparent');rim.addColorStop(.72,this.palette.particle);rim.addColorStop(1,'transparent');
+    ctx.globalAlpha=.07;ctx.fillStyle=rim;ctx.beginPath();ctx.arc(x,y,radius+3,0,TAU);ctx.fill();
+    ctx.strokeStyle=this.palette.particle;ctx.globalAlpha=.22;ctx.lineWidth=1;
+    ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.stroke();
+    // Mark the exact same target used by click hit-testing, including periodic copies.
+    const target=this.hoverTarget||this.followTarget;
+    if(target){
+      const point=this.particleScreen(target),world={width:this.width,height:this.height,bounded:this.world.bounded};
+      ctx.save();ctx.beginPath();ctx.arc(x,y,radius-3,0,TAU);ctx.clip();
+      periodicCopies({...point,incoming:target.incoming},world,radius,(px,py)=>{
+        const sx=x+(px-x)*zoom,sy=y+(py-y)*zoom;
+        ctx.strokeStyle=this.palette.focus;ctx.globalAlpha=.85;ctx.lineWidth=1;
+        ctx.beginPath();ctx.arc(sx,sy,7,0,TAU);ctx.stroke();
+      });ctx.restore();
+    }
+    const canFocus=this.paused&&this.hoverTarget&&this.hoverTarget!==this.followTarget;
+    const showExit=this.followTarget&&(performance.now()<this.followHintUntil||this.pointerInLens({x,y,radius}));
+    const hints=canFocus?['点击聚焦']:[];
+    ctx.globalAlpha=.72;ctx.fillStyle=this.palette.particle;ctx.font='10px system-ui, sans-serif';ctx.textAlign='center';
+    const hintInset=showExit?16:0;
+    ctx.fillText(`${Number(zoom.toFixed(1))}×`,x,y+radius-16-hints.length*16-hintInset);
+    hints.forEach((hint,i)=>ctx.fillText(hint,x,y+radius-16-(hints.length-1-i)*16-hintInset));
+    if(showExit){
+      ctx.save();ctx.font='9px system-ui, sans-serif';ctx.globalAlpha=.4;ctx.textBaseline='middle';
+      const arcRadius=radius-13,glyphs=[...'右键 / Esc 退出跟随'];
+      const widths=glyphs.map(char=>ctx.measureText(char).width+.6),total=widths.reduce((a,b)=>a+b,0);
+      let offset=-total/2;
+      for(let i=0;i<glyphs.length;i++){
+        const angle=Math.PI/2-(offset+widths[i]/2)/arcRadius;
+        ctx.save();ctx.translate(x+Math.cos(angle)*arcRadius,y+Math.sin(angle)*arcRadius);ctx.rotate(angle-Math.PI/2);
+        ctx.fillText(glyphs[i],0,0);ctx.restore();offset+=widths[i];
+      }
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+  snapshot() {
+    return { dimension:this.is3D?'3d':'2d', camera:{...this.camera}, scene: this.scene.id, model: this.scene.model, world: { ...this.world }, boundary: this.world.bounded?'screen-contained':this.is3D?'screen-periodic-bounded-depth':'periodic', count: this.particles.length, target: this.config.count, populationLimit: this.config.populationCap || this.config.count, predators: this.predators.length, predatorLimit: this.config.predatorCap || 0, born: this.born, predatorBorn: this.predatorBorn, birthClock: this.birthClock, predatorBirthClock: this.predatorBirthClock, captured: this.captured, pending: this.respawns.length, time: this.time, paused: this.paused, finite: this.particles.every(p => [p.x, p.y, p.z3, p.vx, p.vy, p.vz].every(Number.isFinite)), particles: this.particles.slice(0, 12).map(p => ({ x: p.x, y: p.y, z: p.z3, vx: p.vx, vy: p.vy, vz:p.vz })) };
+  }
+  destroy() {
+    this.clearFollow();
+    this.canvas.removeEventListener('wheel',this.lensWheel);
+    delete this.canvas.consumeMagnifierWheel;
+    this.canvas.removeEventListener('contextmenu',this.followContext);
+    this.canvas.removeEventListener('pointerdown',this.followDown,true);
+    window.removeEventListener('pointermove',this.followMove,true);
+    this.canvas.removeEventListener('click',this.followClick);
+    this.canvas.removeEventListener('dblclick',this.followDouble);
+    window.removeEventListener('keydown',this.followEscape,true);
+    this.destroyed = true; this.endOrbit(); cancelAnimationFrame(this.raf);
+    this.resizeObserver.disconnect();
+    this.lensCanvas=null;this.lensContext=null;
+    this.canvas.removeEventListener('pointerdown',this.orbitDown,true);this.canvas.removeEventListener('lostpointercapture',this.orbitBlur);
+    window.removeEventListener('pointermove',this.orbitMove,true);window.removeEventListener('pointerup',this.orbitUp,true);window.removeEventListener('pointercancel',this.orbitUp,true);
+    window.removeEventListener('blur',this.orbitBlur);document.removeEventListener('visibilitychange',this.orbitBlur);
+    window.removeEventListener('resize', this.onResize); document.removeEventListener('visibilitychange', this.onVisibility);
+  }
+}
+
+
+

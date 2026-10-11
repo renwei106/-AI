@@ -1,0 +1,56 @@
+{
+  "1711-light": {
+    "scroll": true,
+    "mergedScene": true,
+    "shapes": true,
+    "legacyMigration": true,
+    "copy": true,
+    "actions": true,
+    "persistence": true
+  },
+  "1711-dark": {
+    "scroll": true,
+    "mergedScene": true,
+    "shapes": true,
+    "legacyMigration": true,
+    "copy": true,
+    "actions": true,
+    "persistence": true
+  },
+  "1440-light": {
+    "scroll": true,
+    "mergedScene": true,
+    "shapes": true,
+    "legacyMigration": true,
+    "copy": true,
+    "actions": true,
+    "persistence": true
+  },
+  "1440-dark": {
+    "scroll": true,
+    "mergedScene": true,
+    "shapes": true,
+    "legacyMigration": true,
+    "copy": true,
+    "actions": true,
+    "persistence": true
+  },
+  "390-light": {
+    "scroll": true,
+    "mergedScene": true,
+    "shapes": true,
+    "legacyMigration": true,
+    "copy": true,
+    "actions": true,
+    "persistence": true
+  },
+  "390-dark": {
+    "scroll": true,
+    "mergedScene": true,
+    "shapes": true,
+    "legacyMigration": true,
+    "copy": true,
+    "actions": true,
+    "persistence": true
+  }
+}

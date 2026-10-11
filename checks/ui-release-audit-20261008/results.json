@@ -1,0 +1,372 @@
+{
+  "results": [
+    {
+      "label": "home base light",
+      "meta": "#dadfdb",
+      "bg": "color(srgb 0.856471 0.876078 0.859608)",
+      "body": "color(srgb 0.856471 0.876078 0.859608)",
+      "rootColor": "color(srgb 0.856471 0.876078 0.859608)",
+      "theme": "base",
+      "mode": "false"
+    },
+    {
+      "label": "home base dark",
+      "meta": "#1b2121",
+      "bg": "color(srgb 0.104941 0.127922 0.130863)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.104941 0.127922 0.130863)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "home globe light",
+      "meta": "#dadfdb",
+      "bg": "rgba(0, 0, 0, 0)",
+      "body": "rgba(0, 0, 0, 0)",
+      "rootColor": "color(srgb 0.856471 0.876078 0.859608)",
+      "theme": "globe",
+      "mode": "false"
+    },
+    {
+      "label": "home globe dark",
+      "meta": "#1b2121",
+      "bg": "rgba(0, 0, 0, 0)",
+      "body": "rgba(0, 0, 0, 0)",
+      "rootColor": "color(srgb 0.104941 0.127922 0.130863)",
+      "theme": "globe",
+      "mode": "true"
+    },
+    {
+      "label": "home music light",
+      "meta": "#dadfdb",
+      "bg": "color(srgb 0.856471 0.876078 0.859608)",
+      "body": "color(srgb 0.856471 0.876078 0.859608)",
+      "rootColor": "color(srgb 0.856471 0.876078 0.859608)",
+      "theme": "music",
+      "mode": "false"
+    },
+    {
+      "label": "home music dark",
+      "meta": "#1b2121",
+      "bg": "color(srgb 0.104941 0.127922 0.130863)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.104941 0.127922 0.130863)",
+      "theme": "music",
+      "mode": "true"
+    },
+    {
+      "label": "space dark",
+      "meta": "#1b2121",
+      "bg": "color(srgb 0.104941 0.127922 0.130863)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.104941 0.127922 0.130863)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "world dark",
+      "meta": "#faf9f6",
+      "bg": "rgb(250, 249, 246)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "rgb(250, 249, 246)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "membership from world",
+      "meta": "#181818",
+      "bg": "rgb(24, 24, 24)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "rgb(24, 24, 24)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "world after membership close",
+      "meta": "#faf9f6",
+      "bg": "rgb(250, 249, 246)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "rgb(250, 249, 246)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "home after world close",
+      "meta": "#1b2121",
+      "bg": "color(srgb 0.104941 0.127922 0.130863)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.104941 0.127922 0.130863)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "toolbox",
+      "meta": "#1b2121",
+      "bg": "rgba(0, 0, 0, 0)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.104941 0.127922 0.130863)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "home after toolbox",
+      "meta": "#1b2121",
+      "bg": "color(srgb 0.104941 0.127922 0.130863)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.104941 0.127922 0.130863)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "common",
+      "meta": "#231f31",
+      "bg": "rgba(0, 0, 0, 0)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.137059 0.121804 0.193569)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "membership from common",
+      "meta": "#181818",
+      "bg": "rgb(24, 24, 24)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "rgb(24, 24, 24)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "common after membership close",
+      "meta": "#231f31",
+      "bg": "rgba(0, 0, 0, 0)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.137059 0.121804 0.193569)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "home after common",
+      "meta": "#1b2121",
+      "bg": "color(srgb 0.104941 0.127922 0.130863)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.104941 0.127922 0.130863)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "memo",
+      "meta": "#1b2121",
+      "bg": "rgba(0, 0, 0, 0)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.104941 0.127922 0.130863)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "home after memo",
+      "meta": "#1b2121",
+      "bg": "color(srgb 0.104941 0.127922 0.130863)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.104941 0.127922 0.130863)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "todo",
+      "meta": "#1b2121",
+      "bg": "rgba(0, 0, 0, 0)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.104941 0.127922 0.130863)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "home after todo",
+      "meta": "#1b2121",
+      "bg": "color(srgb 0.104941 0.127922 0.130863)",
+      "body": "color(srgb 0.104941 0.127922 0.130863)",
+      "rootColor": "color(srgb 0.104941 0.127922 0.130863)",
+      "theme": "base",
+      "mode": "true"
+    },
+    {
+      "label": "quick-start dark",
+      "meta": "rgb(0, 0, 0)",
+      "bg": "rgb(0, 0, 0)",
+      "body": "rgb(0, 0, 0)",
+      "rootColor": "color(srgb 0.100863 0.129098 0.109569)"
+    },
+    {
+      "label": "extension dark",
+      "meta": "rgb(0, 0, 0)",
+      "bg": "rgb(0, 0, 0)",
+      "body": "rgb(0, 0, 0)",
+      "rootColor": "rgb(23, 24, 26)"
+    }
+  ],
+  "geometry": [
+    {
+      "title": {
+        "x": 218,
+        "y": -418.3125,
+        "width": 387.859375,
+        "height": 28,
+        "bottom": -390.3125,
+        "right": 605.859375
+      },
+      "screen": {
+        "x": 667.859375,
+        "y": -418.3125,
+        "width": 550.125,
+        "height": 340,
+        "bottom": -78.3125,
+        "right": 1217.984375
+      },
+      "button": {
+        "x": 218,
+        "y": -125.3125,
+        "width": 111,
+        "height": 47,
+        "bottom": -78.3125,
+        "right": 329
+      },
+      "guide": {
+        "x": 218,
+        "y": -241.3125,
+        "width": 387.859375,
+        "height": 93,
+        "bottom": -148.3125,
+        "right": 605.859375
+      },
+      "fallback": null,
+      "status": {
+        "x": 218,
+        "y": -40.3125,
+        "width": 387.859375,
+        "height": 38,
+        "bottom": -2.3125,
+        "right": 605.859375
+      }
+    },
+    {
+      "title": {
+        "x": 218,
+        "y": 175.6875,
+        "width": 387.859375,
+        "height": 28,
+        "bottom": 203.6875,
+        "right": 605.859375
+      },
+      "screen": {
+        "x": 667.859375,
+        "y": 175.6875,
+        "width": 550.125,
+        "height": 340,
+        "bottom": 515.6875,
+        "right": 1217.984375
+      },
+      "button": {
+        "x": 218,
+        "y": 468.6875,
+        "width": 163,
+        "height": 47,
+        "bottom": 515.6875,
+        "right": 381
+      },
+      "guide": {
+        "x": 218,
+        "y": 352.6875,
+        "width": 387.859375,
+        "height": 93,
+        "bottom": 445.6875,
+        "right": 605.859375
+      },
+      "fallback": {
+        "x": 218,
+        "y": 527.6875,
+        "width": 387.859375,
+        "height": 30,
+        "bottom": 557.6875,
+        "right": 605.859375
+      },
+      "status": {
+        "x": 218,
+        "y": 575.6875,
+        "width": 387.859375,
+        "height": 45.59375,
+        "bottom": 621.28125,
+        "right": 605.859375
+      }
+    },
+    {
+      "title": {
+        "x": 218,
+        "y": 799.28125,
+        "width": 387.859375,
+        "height": 28,
+        "bottom": 827.28125,
+        "right": 605.859375
+      },
+      "screen": {
+        "x": 667.859375,
+        "y": 799.28125,
+        "width": 550.125,
+        "height": 340,
+        "bottom": 1139.28125,
+        "right": 1217.984375
+      },
+      "button": {
+        "x": 218,
+        "y": 1092.28125,
+        "width": 166.859375,
+        "height": 47,
+        "bottom": 1139.28125,
+        "right": 384.859375
+      },
+      "guide": {
+        "x": 218,
+        "y": 976.28125,
+        "width": 387.859375,
+        "height": 93,
+        "bottom": 1069.28125,
+        "right": 605.859375
+      },
+      "fallback": null,
+      "status": {
+        "x": 218,
+        "y": 1177.28125,
+        "width": 387.859375,
+        "height": 38,
+        "bottom": 1215.28125,
+        "right": 605.859375
+      }
+    }
+  ],
+  "errors": [],
+  "manifest": {
+    "id": "/",
+    "name": "拾隅",
+    "short_name": "拾隅",
+    "description": "你的个人上网入口",
+    "lang": "zh-CN",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#f6f8f3",
+    "theme_color": "#48614c",
+    "icons": [
+      {
+        "src": "./icon-192.png?v=brand4",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "./icon-512.png?v=brand4",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      }
+    ]
+  }
+}

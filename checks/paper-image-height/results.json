@@ -1,0 +1,42 @@
+[
+  {
+    "mode": "light",
+    "width": 763.296875,
+    "height": 331.4375
+  },
+  {
+    "mode": "light",
+    "width": 613.78125,
+    "height": 261.640625
+  },
+  {
+    "mode": "light",
+    "width": 583.140625,
+    "height": 193.953125
+  },
+  {
+    "mode": "light",
+    "width": 350,
+    "height": 220
+  },
+  {
+    "mode": "dark",
+    "width": 763.296875,
+    "height": 331.4375
+  },
+  {
+    "mode": "dark",
+    "width": 613.78125,
+    "height": 261.640625
+  },
+  {
+    "mode": "dark",
+    "width": 583.140625,
+    "height": 193.953125
+  },
+  {
+    "mode": "dark",
+    "width": 350,
+    "height": 220
+  }
+]

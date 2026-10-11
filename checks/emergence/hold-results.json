@@ -1,0 +1,14 @@
+{
+  "normal": 0.7166666666666672,
+  "accelerated": 1.4166666666666616,
+  "restored": 0.6999999999999975,
+  "speedUnchanged": true,
+  "release": true,
+  "panelSafe": true,
+  "blurSafe": true,
+  "pauseSafe": true,
+  "touchCancel": true,
+  "removedWater": true,
+  "migration": true,
+  "errors": []
+}

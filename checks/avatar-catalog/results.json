@@ -1,0 +1,17 @@
+{
+  "rename": true,
+  "accountSaved": true,
+  "reload": true,
+  "offlinePngAndPending": true,
+  "reconnect": true,
+  "otherDevice": true,
+  "accountIsolation": true,
+  "unknownAll": true,
+  "noUserUpload": true,
+  "deletedRetainsChosen": true,
+  "uploadTransparentPng": true,
+  "replace": true,
+  "visualDelete": true,
+  "adminGuard": true,
+  "pageErrors": []
+}

@@ -1,0 +1,280 @@
+1110	Search tasks
+1111	New
+1112	Search names or descriptions
+1113	Clear search
+1114	__SHIYU_VAR_0__Inbox
+1115	Switch task view
+1116	Drag to move · Drag top or bottom edge to resize
+1117	Drag tasks to change groups
+1118	Drag tasks to change quadrants
+1119	Help
+1120	Confirm
+1121	24-hour time, e.g. 09:30
+1122	Choose __SHIYU_VAR_0__
+1123	Tasks
+1124	__SHIYU_VAR_1__
+1125	Choose month
+1126	Previous year
+1127	Next year
+1128	__SHIYU_VAR_0__
+1129	__SHIYU_VAR_1__ / __SHIYU_VAR_2__
+1130	Enter date
+1131	Use arrow keys to choose __SHIYU_VAR_11__
+1132	Previous month
+1133	Next month
+1134	Select week
+1135	Choose date
+1136	Full week
+1137	Date
+1138	Remove group: __SHIYU_VAR_1__
+1139	New group name
+1140	Tasks in a removed group return to Inbox.
+1141	Add group
+1142	Enter a valid date, e.g. 2026-09-29.
+1143	Enter a group name.
+1144	Group added
+1145	Couldn't save group. Try again.
+1146	Remove group
+1147	All tasks return to Inbox. Dates, descriptions and completion status stay intact.
+1148	Group removed. Tasks kept.
+1149	New task
+1150	Task details
+1151	New task
+1152	Task name
+1153	What needs doing?
+1154	Add a few details…
+1155	Schedule
+1156	Start
+1157	End
+1158	Duration (minutes)
+1159	Close details
+1160	Not scheduled
+1161	Time slot
+1162	Start date
+1163	Start time
+1164	End date
+1165	End time
+1166	Priority
+1167	Adjust duration on the day's timeline
+1168	Deleted task
+1169	Kept for 30 days. Restoring keeps its original dates and group.
+1170	Delete forever
+1171	Restore task
+1172	__SHIYU_VAR_0__ · Timeline
+1173	__SHIYU_VAR_0__ · Adjust time
+1174	Close day timeline
+1175	Enter a task name.
+1176	Enter valid dates. The end date must not be before the start.
+1177	End time must be after start time, within one year.
+1178	Task saved
+1179	Couldn't save. Your input is still here. Fix storage and try again.
+1180	Tasks changed in another window. Load the latest version, or save your edits as a new task to keep both.
+1181	Save as new
+1182	Load latest
+1183	How to use
+1184	Make room in your day for what matters
+1185	Jot it down.
+1186	Click “New” at the top right and enter a name. Tasks without a group appear in Inbox.
+1187	Drag to the calendar.
+1188	Drop on a date for an all-day task, or on the timeline to set a time.
+1189	Adjust the duration.
+1190	Hover over a task's top or bottom edge to see resize handles. Drag the body to move it. Press Esc to cancel.
+1191	Group and complete.
+1192	Choose or add a group in details. Drag to Inbox to remove its group while keeping its schedule. Click the circle to complete, or the name to edit.
+1193	Find it again.
+1194	Switch between Calendar, Board and Matrix at the bottom left. Board shows all tasks by group, including unscheduled and completed tasks. Matrix groups by priority. Recently Deleted keeps tasks for 30 days.
+1195	On touchscreens, hold a task to drag. You can also enter dates, times and groups directly in details.
+1196	Tasks are stored per account in this browser. Export or import backups below. They don't sync to other devices automatically.
+1197	Close help
+1198	Add examples
+1199	Clear examples
+1200	Export backup
+1201	Import backup
+1202	Get started
+1203	My-tasks-__SHIYU_VAR_0__.json
+1204	Backup must be 20 MB or less
+1205	Import task backup
+1206	Merge __SHIYU_VAR_0__ tasks. Existing tasks with the same ID won't be overwritten.
+1207	Import
+1208	Backup imported
+1209	Couldn't read backup
+1210	Marked incomplete
+1211	Moved to Recently Deleted
+1212	Task restored
+1213	Permanent deletion cannot be undone.
+1214	Permanently deleted
+1215	Saved as a new task. Changes from the other window were kept.
+1216	Your unsaved changes will be discarded.
+1217	Load latest
+1218	Save your changes before adjusting duration.
+1219	Examples are already in your list
+1220	Added 5 example tasks
+1221	Examples cleared. Your tasks were kept.
+1222	Open a deleted task to restore it or delete it forever.
+1223	Selected tasks updated
+1224	Restore deleted tasks first.
+1225	Reschedule tasks
+1226	Schedule selected tasks
+1227	Each task keeps its original time and duration.
+1228	New date
+1229	Selected tasks rescheduled
+1230	Move to a date, timeline or Inbox
+1231	Reorder categories
+1232	Schedule for __SHIYU_VAR_0__
+1233	Move to Inbox · Remove group, keep time
+1234	Move to
+1235	Change to
+1236	Category order updated
+1237	Duration updated
+1238	Schedule updated
+1239	Shiyu Weekly
+1240	Page __SHIYU_VAR_1__
+1241	COLLECTION
+1242	Saved by __SHIYU_VAR_3__
+1243	Manage groups
+1244	＋ New scene
+1245	Manage scenes
+1246	＋ New space
+1247	Unsorted
+1248	Everyday
+1249	New space
+1250	New scene
+1251	Code
+1252	Open source
+1253	Dev docs
+1254	· Example
+1255	 sample bookmarks for this demo
+1256	View
+1257	Group layout
+1258	Per row
+1259	Columns per row
+1260	Playing cards
+1261	__SHIYU_VAR_2__ columns
+1262	Browse groups left
+1263	Browse groups right
+1264	Newspaper
+1265	Planet
+1266	Favorite links
+1267	Private collection · __SHIYU_VAR_0__
+1268	Collection
+1269	Group display
+1270	__SHIYU_VAR_1__ style
+1271	Group view
+1272	__SHIYU_VAR_0__ · This group only
+1273	Card style
+1274	Set columns
+1275	__SHIYU_VAR_0__ per row
+1276	More styles
+1277	Theme styles
+1278	Open in new tab ·
+1279	Edit __SHIYU_VAR_1__
+1280	Edit link
+1281	Current logo
+1282	Logo image URL (https://…)
+1283	Logo URL
+1284	Enter an image URL to replace the logo.
+1285	Notes
+1286	Enter a valid URL and an HTTP or HTTPS image URL.
+1287	Save space
+1288	Save scene
+1289	Save group
+1290	Save bookmark
+1291	Domain and icon matched. You can still edit them.
+1292	Group no longer exists. Choose another.
+1293	Bookmark saved
+1294	Set link view scope
+1295	Link view scope
+1296	Share bookmarks
+1297	Share scope
+1298	This space · __SHIYU_VAR_0__
+1299	This scene · __SHIYU_VAR_1__
+1300	Access
+1301	Public
+1302	Shiyu-share-
+1303	Encrypted page created. Send the file and password separately.
+1304	Public page created. Anyone with the file can view it.
+1305	Couldn't create the page. Try a browser that supports Web Crypto.
+1306	Choose space
+1307	Share space
+1308	Choose scene
+1309	Share scene
+1310	All scenes
+1311	Create a read-only share link. This service is local; public access requires deployment. Links contain no plain-text passwords.
+1312	Create & copy link
+1313	Copy link
+1314	Link copied
+1315	Copy the link above
+1316	Couldn't create link. Try again.
+1317	Copy & share
+1318	1 hour
+1319	1 day
+1320	7 days
+1321	1 month
+1322	View once
+1323	Creating link…
+1324	Enter a valid access password
+1325	(expires)
+1326	Link: __SHIYU_VAR_0__\nPassword: __SHIYU_VAR_1__\nValid for: __SHIYU_VAR_2____SHIYU_VAR_3__
+1327	; expires after the first successful view
+1328	Copied. Ready to share.
+1329	Auto-copy unavailable. Copy the content below.
+1330	Access is available until expiry. Protected shares require a password. View-once links expire after the first successful view.
+1331	Space settings
+1332	Per row
+1333	Use global settings
+1334	Edit scene description
+1335	Add a scene description
+1336	Link style
+1337	Applies throughout this space
+1338	Applies throughout this scene
+1339	Applies only to “__SHIYU_VAR_0__”
+1340	Current colors
+1341	Link pages
+1342	__SHIYU_VAR_0__ total
+1343	Per page
+1344	Items per page
+1345	Go to page
+1346	Last
+1347	Expand scene bar
+1348	Fold scene bar
+1349	Shiyu user
+1350	Moments in a Nook
+1351	__SHIYU_VAR_3__Manage scenes
+1352	Add your first scene
+1353	Make room for a new idea
+1354	Create a scene to give your bookmarks a home.
+1355	Add your first group
+1356	No scenes yet
+1357	Create a group, then save your favorite links.
+1358	Save your first link
+1359	Keep what you love here.
+1360	Visit Shiyu's website
+1361	Shiyu website
+1362	and up
+1363	Based on your plan
+1364	Loading benefits
+1365	Benefits depend on your current plan.
+1366	Features depend on your current plan
+1367	No email linked
+1368	Valid until __SHIYU_VAR_0__
+1369	Join to unlock more benefits
+1370	Membership
+1371	Loading…
+1372	Couldn't load agreement
+1373	Membership agreement isn't available yet
+1374	· Effective
+1375	Couldn't load agreement. Close and try again.
+1376	90 days per quarter
+1377	, member
+1378	Limits depend on your current plan
+1379	Explore themes in one place. Find one that fits the moment.
+1380	Exploring “
+1381	Make every day your own
+1382	Mix fonts, colors and link styles to suit you.
+1383	Member fonts
+1384	, colors
+1385	, layouts
+1386	, link styles
+1387	Custom colors are also available.
+1388	Spaces: 
+1389	. Each space has its own settings: 

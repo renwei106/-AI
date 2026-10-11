@@ -1,7 +1,7 @@
 /* All cover styling is scoped to this opt-in homepage; no workspace presentation is added. */
 body[data-theme=flow][data-view=home] { background:color-mix(in srgb,var(--accent) 88%,#dce5ff); }
-body[data-theme=flow][data-view=home][data-dark=false] { background:hsl(from var(--accent) h s 38%); }
-body[data-theme=flow][data-view=home][data-dark=true] { background:color-mix(in srgb,var(--accent) 27%,#111721); }
+body[data-theme=flow][data-view=home][data-dark=false] { background:var(--theme-cover,var(--accent)); }
+body[data-theme=flow][data-view=home][data-dark=true] { background:var(--theme-cover,color-mix(in srgb,var(--accent) 27%,#111721)); }
 body[data-theme=flow][data-view=home][data-dark=false] .brand-theme-menu { --ink:#26354b;--muted:#69768a; }
 body[data-theme=flow][data-view=home][data-dark=true] .brand-theme-menu { --ink:#f5f7ff;--muted:#aeb9d0; }
 body[data-theme=flow][data-view=home] .brand,body[data-theme=flow][data-view=home] .header-right>.icon-button,body[data-theme=flow][data-view=home] .account-entry { color:var(--flow-ink,#f5f7ff); }
@@ -11,8 +11,8 @@ body[data-theme=flow][data-view=home][data-dark=false] .header-right :is(.shiyu-
 body[data-theme=flow][data-view=home][data-dark=false] .header-right :is(.shiyu-language-trigger,[data-action="settings"]):hover{background:color-mix(in srgb,var(--flow-ink,#f5f7ff) 14%,transparent)}
 .home.home-flow { height:calc(100svh - 86px); min-height:0; padding:0; overflow:hidden; }
 .flow-cover { position:fixed; inset:0; z-index:0; overflow:hidden; background:color-mix(in srgb,var(--accent) 88%,#dce5ff); color:var(--flow-ink,#f5f7ff); }
-body[data-dark=false] .flow-cover { background:hsl(from var(--accent) h s 38%); }
-body[data-dark=true] .flow-cover { background:color-mix(in srgb,var(--accent) 27%,#111721); }
+body[data-dark=false] .flow-cover { background:var(--theme-cover,var(--accent)); }
+body[data-dark=true] .flow-cover { background:var(--theme-cover,color-mix(in srgb,var(--accent) 27%,#111721)); }
 .flow-canvas,.flow-depth-canvas { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
 .flow-canvas-back { z-index:0; }
 .flow-canvas-front { z-index:2; opacity:.86; }
@@ -65,3 +65,9 @@ body[data-view=home].global-chrome-idle .dock-trigger { opacity:.02; }
 
 /* The fifth mode keeps its water visible down to the viewport edge. */
 .flow-cover[data-particle-mode="water"] .flow-canvas-back{mask-image:none;-webkit-mask-image:none;}
+
+/* Daylight particle and text presentation. */
+body[data-dark=false] .flow-cover .flow-canvas-back { opacity:.58; }
+body[data-dark=false] .flow-cover .flow-canvas-front { opacity:.50; }
+body[data-dark=false] .flow-copy h1 { text-shadow:0 2px 8px #26354b0a; }
+body[data-dark=false] .flow-copy p { text-shadow:none; }

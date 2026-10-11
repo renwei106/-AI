@@ -1,0 +1,828 @@
+{
+  "errors": [],
+  "snapshots": [
+    {
+      "label": "en-home-base-light",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-base-dark",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-music-light",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-music-dark",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-cinema-light",
+      "chinese": [],
+      "overflow": [
+        {
+          "text": "01 — Moments01 — Moments01 — Moments01 — Moments01 — Moments",
+          "class": "memoir-photo-button",
+          "width": 570,
+          "scroll": 623
+        }
+      ]
+    },
+    {
+      "label": "en-home-cinema-dark",
+      "chinese": [],
+      "overflow": [
+        {
+          "text": "01 — Moments01 — Moments01 — Moments01 — Moments01 — Moments",
+          "class": "memoir-photo-button",
+          "width": 570,
+          "scroll": 623
+        }
+      ]
+    },
+    {
+      "label": "en-home-cosmos-light",
+      "chinese": [],
+      "overflow": [
+        {
+          "text": "Sun",
+          "class": "orbit-body is-center",
+          "width": 110,
+          "scroll": 119
+        },
+        {
+          "text": "Mercury",
+          "class": "orbit-body",
+          "width": 11,
+          "scroll": 28
+        },
+        {
+          "text": "Venus",
+          "class": "orbit-body",
+          "width": 14,
+          "scroll": 23
+        },
+        {
+          "text": "Earth",
+          "class": "orbit-body",
+          "width": 16,
+          "scroll": 35
+        },
+        {
+          "text": "Mars",
+          "class": "orbit-body",
+          "width": 13,
+          "scroll": 20
+        },
+        {
+          "text": "Jupiter",
+          "class": "orbit-body",
+          "width": 16,
+          "scroll": 28
+        },
+        {
+          "text": "Saturn",
+          "class": "orbit-body",
+          "width": 10,
+          "scroll": 24
+        },
+        {
+          "text": "Uranus",
+          "class": "orbit-body",
+          "width": 15,
+          "scroll": 27
+        },
+        {
+          "text": "Neptune",
+          "class": "orbit-body",
+          "width": 15,
+          "scroll": 31
+        }
+      ]
+    },
+    {
+      "label": "en-home-cosmos-dark",
+      "chinese": [],
+      "overflow": [
+        {
+          "text": "Sun",
+          "class": "orbit-body is-center",
+          "width": 110,
+          "scroll": 119
+        },
+        {
+          "text": "Mercury",
+          "class": "orbit-body",
+          "width": 11,
+          "scroll": 28
+        },
+        {
+          "text": "Venus",
+          "class": "orbit-body",
+          "width": 14,
+          "scroll": 23
+        },
+        {
+          "text": "Earth",
+          "class": "orbit-body",
+          "width": 16,
+          "scroll": 35
+        },
+        {
+          "text": "Mars",
+          "class": "orbit-body",
+          "width": 13,
+          "scroll": 20
+        },
+        {
+          "text": "Jupiter",
+          "class": "orbit-body",
+          "width": 16,
+          "scroll": 28
+        },
+        {
+          "text": "Saturn",
+          "class": "orbit-body",
+          "width": 10,
+          "scroll": 24
+        },
+        {
+          "text": "Uranus",
+          "class": "orbit-body",
+          "width": 15,
+          "scroll": 27
+        },
+        {
+          "text": "Neptune",
+          "class": "orbit-body",
+          "width": 15,
+          "scroll": 31
+        }
+      ]
+    },
+    {
+      "label": "en-home-globe-light",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-globe-dark",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-flip-light",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-flip-dark",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-rain-light",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-rain-dark",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-paper-light",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-paper-dark",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-poly-light",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-poly-dark",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-flow-light",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-home-flow-dark",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-settings-themes",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-settings-colors",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-settings-type",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-settings-layout",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-settings-copy",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-settings-desktop-pet",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-common",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-memo",
+      "chinese": [],
+      "overflow": [
+        {
+          "text": "Archive",
+          "class": "memo-cover-archive",
+          "width": 82,
+          "scroll": 97
+        },
+        {
+          "text": "Discard",
+          "class": "memo-cover-discard",
+          "width": 83,
+          "scroll": 98
+        },
+        {
+          "text": "Archive",
+          "class": "memo-cover-archive",
+          "width": 82,
+          "scroll": 97
+        },
+        {
+          "text": "Discard",
+          "class": "memo-cover-discard",
+          "width": 83,
+          "scroll": 98
+        },
+        {
+          "text": "Archive",
+          "class": "memo-cover-archive",
+          "width": 82,
+          "scroll": 97
+        },
+        {
+          "text": "Discard",
+          "class": "memo-cover-discard",
+          "width": 83,
+          "scroll": 98
+        },
+        {
+          "text": "Archive",
+          "class": "memo-cover-archive",
+          "width": 82,
+          "scroll": 97
+        },
+        {
+          "text": "Discard",
+          "class": "memo-cover-discard",
+          "width": 83,
+          "scroll": 98
+        },
+        {
+          "text": "Archive",
+          "class": "memo-cover-archive",
+          "width": 82,
+          "scroll": 97
+        },
+        {
+          "text": "Discard",
+          "class": "memo-cover-discard",
+          "width": 83,
+          "scroll": 98
+        }
+      ]
+    },
+    {
+      "label": "en-todo",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-todo-board",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-todo-priority",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-todo-calendar",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-todo-editor",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-toolbox",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-space",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名",
+        "用户收藏说明"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-follow",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名",
+        "用户收藏说明"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-cards",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名",
+        "用户收藏说明"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-poker",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名",
+        "用户收藏说明"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-paper",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-record",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-film",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-planet",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-calendar",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名",
+        "用户收藏说明"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-book",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-note",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名",
+        "用户收藏说明"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-icons",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-poly",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名",
+        "用户收藏说明"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-shelf",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户空间原名 / 用户场景原名",
+        "用户自定义说明",
+        "用户分组原名",
+        "用",
+        "用户收藏原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-space-style-settings",
+      "chinese": [
+        "Applies only to “用户分组原名”"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-atlas-radial",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-atlas-organization",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户分组原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-atlas-mindmap",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名",
+        "用户分组原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-atlas-spatial",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-atlas-solar",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-atlas-systems",
+      "chinese": [
+        "用户空间原名",
+        "用户场景原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-membership",
+      "chinese": [
+        "用户姓名原名"
+      ],
+      "overflow": []
+    },
+    {
+      "label": "en-favorites-base",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-favorites-music",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-favorites-cinema",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-favorites-cosmos",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-favorites-globe",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-favorites-flip",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-favorites-rain",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-favorites-paper",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-favorites-poly",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-favorites-flow",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-world-discover",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-world-resources",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-world-learning",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-world-materials",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-world-creators",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-world-collaboration",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-mobile-home",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-mobile-base",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-mobile-music",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-mobile-cinema",
+      "chinese": [],
+      "overflow": [
+        {
+          "text": "01 — Moments01 — Moments01 — Moments01 — Moments01 — Moments",
+          "class": "memoir-photo-button",
+          "width": 308,
+          "scroll": 341
+        }
+      ]
+    },
+    {
+      "label": "en-mobile-cosmos",
+      "chinese": [],
+      "overflow": [
+        {
+          "text": "Sun",
+          "class": "orbit-body is-center",
+          "width": 110,
+          "scroll": 119
+        },
+        {
+          "text": "Mercury",
+          "class": "orbit-body",
+          "width": 11,
+          "scroll": 37
+        },
+        {
+          "text": "Venus",
+          "class": "orbit-body",
+          "width": 14,
+          "scroll": 29
+        },
+        {
+          "text": "Earth",
+          "class": "orbit-body",
+          "width": 16,
+          "scroll": 35
+        },
+        {
+          "text": "Mars",
+          "class": "orbit-body",
+          "width": 13,
+          "scroll": 25
+        },
+        {
+          "text": "Jupiter",
+          "class": "orbit-body",
+          "width": 16,
+          "scroll": 35
+        },
+        {
+          "text": "Saturn",
+          "class": "orbit-body",
+          "width": 10,
+          "scroll": 31
+        },
+        {
+          "text": "Uranus",
+          "class": "orbit-body",
+          "width": 15,
+          "scroll": 35
+        },
+        {
+          "text": "Neptune",
+          "class": "orbit-body",
+          "width": 15,
+          "scroll": 39
+        }
+      ]
+    },
+    {
+      "label": "en-mobile-globe",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-mobile-flip",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-mobile-rain",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-mobile-paper",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-mobile-poly",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-mobile-flow",
+      "chinese": [],
+      "overflow": []
+    },
+    {
+      "label": "en-mobile-todo",
+      "chinese": [],
+      "overflow": []
+    }
+  ],
+  "requests": [
+    "http://127.0.0.1:49730/corner.css?corner-modules=20260924-memo-paper-v1",
+    "http://127.0.0.1:49730/memo-paper.css?paper=20260924",
+    "http://127.0.0.1:49730/corner.js?corner-modules=20260924-memo-paper-v1&locale=en",
+    "http://127.0.0.1:49730/memo-paper.js?paper=20260924&locale=en",
+    "http://127.0.0.1:49730/assets/memo-paper/carousel.js",
+    "http://127.0.0.1:49730/assets/memo-paper/engine.js",
+    "http://127.0.0.1:49730/assets/memo-paper/vat/geo/vertex_animation_textures1_mesh.fbx",
+    "http://127.0.0.1:49730/assets/memo-paper/vat/tex/vertex_animation_textures1_pos.exr",
+    "http://127.0.0.1:49730/todo-calendar.js?v=20260930-view-cycle&locale=en",
+    "http://127.0.0.1:49730/todo-calendar-core.js?locale=en",
+    "http://127.0.0.1:49730/todo-calendar.css"
+  ]
+}

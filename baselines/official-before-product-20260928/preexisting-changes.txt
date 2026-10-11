@@ -1,0 +1,3 @@
+ checks/verify-desktop-pet-integration.cjs | 20 +++++++++++++++++++-
+ dist/desktop-pet.js                       | 15 ++++++++++++---
+ 2 files changed, 31 insertions(+), 4 deletions(-)

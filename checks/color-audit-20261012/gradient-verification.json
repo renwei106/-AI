@@ -1,0 +1,437 @@
+{
+  "rows": [
+    {
+      "name": "两浅",
+      "mode": "light",
+      "theme": "base",
+      "gradient": "linear-gradient(135deg,#fff2cc,#dbeafe)",
+      "bodyImage": "linear-gradient(135deg, rgb(255, 242, 204), rgb(219, 234, 254))",
+      "cover": null,
+      "inkRatios": [
+        11.59875059598135,
+        10.605228905842708
+      ],
+      "controlRatios": [
+        4.974781613226874,
+        4.548653523348274
+      ],
+      "buttonRatio": 5.5496223421679405,
+      "raw": "linear-gradient(135deg,#fff2cc,#dbeafe)"
+    },
+    {
+      "name": "两浅",
+      "mode": "light",
+      "theme": "flow",
+      "gradient": "linear-gradient(135deg,#fff2cc,#dbeafe)",
+      "bodyImage": "linear-gradient(135deg, rgb(255, 242, 204), rgb(219, 234, 254))",
+      "cover": "linear-gradient(135deg, rgb(255, 242, 204), rgb(219, 234, 254))",
+      "inkRatios": [
+        11.59875059598135,
+        10.605228905842708
+      ],
+      "controlRatios": [
+        4.974781613226874,
+        4.548653523348274
+      ],
+      "buttonRatio": 5.5496223421679405,
+      "raw": "linear-gradient(135deg,#fff2cc,#dbeafe)"
+    },
+    {
+      "name": "两浅",
+      "mode": "dark",
+      "theme": "base",
+      "gradient": "linear-gradient(135deg,#4f4e47,#484e56)",
+      "bodyImage": "linear-gradient(135deg, rgb(79, 78, 71), rgb(72, 78, 86))",
+      "cover": null,
+      "inkRatios": [
+        7.160873245603643,
+        7.199600683600053
+      ],
+      "controlRatios": [
+        7.490377132849597,
+        7.530886593921298
+      ],
+      "buttonRatio": 18.824778955490753,
+      "raw": "linear-gradient(135deg,#fff2cc,#dbeafe)"
+    },
+    {
+      "name": "两浅",
+      "mode": "dark",
+      "theme": "flow",
+      "gradient": "linear-gradient(135deg,#4f4e47,#484e56)",
+      "bodyImage": "linear-gradient(135deg, rgb(79, 78, 71), rgb(72, 78, 86))",
+      "cover": "linear-gradient(135deg, rgb(79, 78, 71), rgb(72, 78, 86))",
+      "inkRatios": [
+        7.160873245603643,
+        7.199600683600053
+      ],
+      "controlRatios": [
+        7.490377132849597,
+        7.530886593921298
+      ],
+      "buttonRatio": 18.824778955490753,
+      "raw": "linear-gradient(135deg,#fff2cc,#dbeafe)"
+    },
+    {
+      "name": "两深",
+      "mode": "light",
+      "theme": "base",
+      "gradient": "linear-gradient(135deg,#babfcb,#b6c3bd)",
+      "bodyImage": "linear-gradient(135deg, rgb(186, 191, 203), rgb(182, 195, 189))",
+      "cover": null,
+      "inkRatios": [
+        7.025567858047353,
+        7.104054156975974
+      ],
+      "controlRatios": [
+        8.3253698755632,
+        8.41837694373867
+      ],
+      "buttonRatio": 15.332844237916378,
+      "raw": "linear-gradient(135deg,#10234d,#123c2a)"
+    },
+    {
+      "name": "两深",
+      "mode": "light",
+      "theme": "flow",
+      "gradient": "linear-gradient(135deg,#babfcb,#b6c3bd)",
+      "bodyImage": "linear-gradient(135deg, rgb(186, 191, 203), rgb(182, 195, 189))",
+      "cover": "linear-gradient(135deg, rgb(186, 191, 203), rgb(182, 195, 189))",
+      "inkRatios": [
+        7.025567858047353,
+        7.104054156975974
+      ],
+      "controlRatios": [
+        8.3253698755632,
+        8.41837694373867
+      ],
+      "buttonRatio": 15.332844237916378,
+      "raw": "linear-gradient(135deg,#10234d,#123c2a)"
+    },
+    {
+      "name": "两深",
+      "mode": "dark",
+      "theme": "base",
+      "gradient": "linear-gradient(135deg,#10234d,#123c2a)",
+      "bodyImage": "linear-gradient(135deg, rgb(16, 35, 77), rgb(18, 60, 42))",
+      "cover": null,
+      "inkRatios": [
+        13.140007594731264,
+        10.552159273052869
+      ],
+      "controlRatios": [
+        5.711422382316802,
+        4.5865908538783104
+      ],
+      "buttonRatio": 7.822414952344928,
+      "raw": "linear-gradient(135deg,#10234d,#123c2a)"
+    },
+    {
+      "name": "两深",
+      "mode": "dark",
+      "theme": "flow",
+      "gradient": "linear-gradient(135deg,#10234d,#123c2a)",
+      "bodyImage": "linear-gradient(135deg, rgb(16, 35, 77), rgb(18, 60, 42))",
+      "cover": "linear-gradient(135deg, rgb(16, 35, 77), rgb(18, 60, 42))",
+      "inkRatios": [
+        13.140007594731264,
+        10.552159273052869
+      ],
+      "controlRatios": [
+        5.711422382316802,
+        4.5865908538783104
+      ],
+      "buttonRatio": 7.822414952344928,
+      "raw": "linear-gradient(135deg,#10234d,#123c2a)"
+    },
+    {
+      "name": "深浅",
+      "mode": "light",
+      "theme": "base",
+      "gradient": "linear-gradient(135deg,#fff2cc,#babfcb)",
+      "bodyImage": "linear-gradient(135deg, rgb(255, 242, 204), rgb(186, 191, 203))",
+      "cover": null,
+      "inkRatios": [
+        11.59875059598135,
+        7.025567858047353
+      ],
+      "controlRatios": [
+        7.540017292756473,
+        4.567121493194685
+      ],
+      "buttonRatio": 8.411273434990411,
+      "raw": "linear-gradient(135deg,#fff2cc,#10234d)"
+    },
+    {
+      "name": "深浅",
+      "mode": "light",
+      "theme": "flow",
+      "gradient": "linear-gradient(135deg,#fff2cc,#babfcb)",
+      "bodyImage": "linear-gradient(135deg, rgb(255, 242, 204), rgb(186, 191, 203))",
+      "cover": "linear-gradient(135deg, rgb(255, 242, 204), rgb(186, 191, 203))",
+      "inkRatios": [
+        11.59875059598135,
+        7.025567858047353
+      ],
+      "controlRatios": [
+        7.540017292756473,
+        4.567121493194685
+      ],
+      "buttonRatio": 8.411273434990411,
+      "raw": "linear-gradient(135deg,#fff2cc,#10234d)"
+    },
+    {
+      "name": "深浅",
+      "mode": "dark",
+      "theme": "base",
+      "gradient": "linear-gradient(135deg,#4f4e47,#10234d)",
+      "bodyImage": "linear-gradient(135deg, rgb(79, 78, 71), rgb(16, 35, 77))",
+      "cover": null,
+      "inkRatios": [
+        7.160873245603643,
+        13.140007594731264
+      ],
+      "controlRatios": [
+        7.490377132849597,
+        13.744638263702186
+      ],
+      "buttonRatio": 18.824778955490753,
+      "raw": "linear-gradient(135deg,#fff2cc,#10234d)"
+    },
+    {
+      "name": "深浅",
+      "mode": "dark",
+      "theme": "flow",
+      "gradient": "linear-gradient(135deg,#4f4e47,#10234d)",
+      "bodyImage": "linear-gradient(135deg, rgb(79, 78, 71), rgb(16, 35, 77))",
+      "cover": "linear-gradient(135deg, rgb(79, 78, 71), rgb(16, 35, 77))",
+      "inkRatios": [
+        7.160873245603643,
+        13.140007594731264
+      ],
+      "controlRatios": [
+        7.490377132849597,
+        13.744638263702186
+      ],
+      "buttonRatio": 18.824778955490753,
+      "raw": "linear-gradient(135deg,#fff2cc,#10234d)"
+    },
+    {
+      "name": "黑白渐变",
+      "mode": "light",
+      "theme": "base",
+      "gradient": "linear-gradient(135deg,#bfbfbf,#ffffff)",
+      "bodyImage": "linear-gradient(135deg, rgb(191, 191, 191), rgb(255, 255, 255))",
+      "cover": null,
+      "inkRatios": [
+        7.0362953643872554,
+        12.93899721699327
+      ],
+      "controlRatios": [
+        11.419911464087086,
+        21
+      ],
+      "buttonRatio": 21,
+      "raw": "linear-gradient(135deg,#000000,#ffffff)"
+    },
+    {
+      "name": "黑白渐变",
+      "mode": "light",
+      "theme": "flow",
+      "gradient": "linear-gradient(135deg,#bfbfbf,#ffffff)",
+      "bodyImage": "linear-gradient(135deg, rgb(191, 191, 191), rgb(255, 255, 255))",
+      "cover": "linear-gradient(135deg, rgb(191, 191, 191), rgb(255, 255, 255))",
+      "inkRatios": [
+        7.0362953643872554,
+        12.93899721699327
+      ],
+      "controlRatios": [
+        11.419911464087086,
+        21
+      ],
+      "buttonRatio": 21,
+      "raw": "linear-gradient(135deg,#000000,#ffffff)"
+    },
+    {
+      "name": "黑白渐变",
+      "mode": "dark",
+      "theme": "base",
+      "gradient": "linear-gradient(135deg,#000000,#4c4f52)",
+      "bodyImage": "linear-gradient(135deg, rgb(0, 0, 0), rgb(76, 79, 82))",
+      "cover": null,
+      "inkRatios": [
+        17.99667140731711,
+        7.064355275706759
+      ],
+      "controlRatios": [
+        14.877435225839799,
+        5.839940378303261
+      ],
+      "buttonRatio": 14.877435225839799,
+      "raw": "linear-gradient(135deg,#000000,#ffffff)"
+    },
+    {
+      "name": "黑白渐变",
+      "mode": "dark",
+      "theme": "flow",
+      "gradient": "linear-gradient(135deg,#000000,#4c4f52)",
+      "bodyImage": "linear-gradient(135deg, rgb(0, 0, 0), rgb(76, 79, 82))",
+      "cover": "linear-gradient(135deg, rgb(0, 0, 0), rgb(76, 79, 82))",
+      "inkRatios": [
+        17.99667140731711,
+        7.064355275706759
+      ],
+      "controlRatios": [
+        14.877435225839799,
+        5.839940378303261
+      ],
+      "buttonRatio": 14.877435225839799,
+      "raw": "linear-gradient(135deg,#000000,#ffffff)"
+    },
+    {
+      "name": "亮色",
+      "mode": "light",
+      "theme": "base",
+      "gradient": "linear-gradient(135deg,#ffdd00,#4dd5ac)",
+      "bodyImage": "linear-gradient(135deg, rgb(255, 221, 0), rgb(77, 213, 172))",
+      "cover": null,
+      "inkRatios": [
+        9.608487358050729,
+        7.041875200446478
+      ],
+      "controlRatios": [
+        6.272152756549403,
+        4.596739872145448
+      ],
+      "buttonRatio": 8.4462167703797,
+      "raw": "linear-gradient(135deg,#ffdd00,#00c389)"
+    },
+    {
+      "name": "亮色",
+      "mode": "light",
+      "theme": "flow",
+      "gradient": "linear-gradient(135deg,#ffdd00,#4dd5ac)",
+      "bodyImage": "linear-gradient(135deg, rgb(255, 221, 0), rgb(77, 213, 172))",
+      "cover": "linear-gradient(135deg, rgb(255, 221, 0), rgb(77, 213, 172))",
+      "inkRatios": [
+        9.608487358050729,
+        7.041875200446478
+      ],
+      "controlRatios": [
+        6.272152756549403,
+        4.596739872145448
+      ],
+      "buttonRatio": 8.4462167703797,
+      "raw": "linear-gradient(135deg,#ffdd00,#00c389)"
+    },
+    {
+      "name": "亮色",
+      "mode": "dark",
+      "theme": "base",
+      "gradient": "linear-gradient(135deg,#564e13,#0c5a46)",
+      "bodyImage": "linear-gradient(135deg, rgb(86, 78, 19), rgb(12, 90, 70))",
+      "cover": null,
+      "inkRatios": [
+        7.213540384899721,
+        7.012042869338318
+      ],
+      "controlRatios": [
+        6.250719043465413,
+        6.076116242271261
+      ],
+      "buttonRatio": 15.594580564099848,
+      "raw": "linear-gradient(135deg,#ffdd00,#00c389)"
+    },
+    {
+      "name": "亮色",
+      "mode": "dark",
+      "theme": "flow",
+      "gradient": "linear-gradient(135deg,#564e13,#0c5a46)",
+      "bodyImage": "linear-gradient(135deg, rgb(86, 78, 19), rgb(12, 90, 70))",
+      "cover": "linear-gradient(135deg, rgb(86, 78, 19), rgb(12, 90, 70))",
+      "inkRatios": [
+        7.213540384899721,
+        7.012042869338318
+      ],
+      "controlRatios": [
+        6.250719043465413,
+        6.076116242271261
+      ],
+      "buttonRatio": 15.594580564099848,
+      "raw": "linear-gradient(135deg,#ffdd00,#00c389)"
+    },
+    {
+      "name": "相近",
+      "mode": "light",
+      "theme": "base",
+      "gradient": "linear-gradient(135deg,#96deda,#67d0cb)",
+      "bodyImage": "linear-gradient(135deg, rgb(150, 222, 218), rgb(103, 208, 203))",
+      "cover": null,
+      "inkRatios": [
+        8.47671145603362,
+        7.061872012225106
+      ],
+      "controlRatios": [
+        5.516578470494435,
+        4.595811867147944
+      ],
+      "buttonRatio": 8.420599644953798,
+      "raw": "linear-gradient(135deg,#96deda,#50c9c3)"
+    },
+    {
+      "name": "相近",
+      "mode": "light",
+      "theme": "flow",
+      "gradient": "linear-gradient(135deg,#96deda,#67d0cb)",
+      "bodyImage": "linear-gradient(135deg, rgb(150, 222, 218), rgb(103, 208, 203))",
+      "cover": "linear-gradient(135deg, rgb(150, 222, 218), rgb(103, 208, 203))",
+      "inkRatios": [
+        8.47671145603362,
+        7.061872012225106
+      ],
+      "controlRatios": [
+        5.516578470494435,
+        4.595811867147944
+      ],
+      "buttonRatio": 8.420599644953798,
+      "raw": "linear-gradient(135deg,#96deda,#50c9c3)"
+    },
+    {
+      "name": "相近",
+      "mode": "dark",
+      "theme": "base",
+      "gradient": "linear-gradient(135deg,#3b5354,#295556)",
+      "bodyImage": "linear-gradient(135deg, rgb(59, 83, 84), rgb(41, 85, 86))",
+      "cover": null,
+      "inkRatios": [
+        7.053970135046044,
+        7.1187665666341005
+      ],
+      "controlRatios": [
+        5.392467110445305,
+        5.442001290421039
+      ],
+      "buttonRatio": 13.757707617628789,
+      "raw": "linear-gradient(135deg,#96deda,#50c9c3)"
+    },
+    {
+      "name": "相近",
+      "mode": "dark",
+      "theme": "flow",
+      "gradient": "linear-gradient(135deg,#3b5354,#295556)",
+      "bodyImage": "linear-gradient(135deg, rgb(59, 83, 84), rgb(41, 85, 86))",
+      "cover": "linear-gradient(135deg, rgb(59, 83, 84), rgb(41, 85, 86))",
+      "inkRatios": [
+        7.053970135046044,
+        7.1187665666341005
+      ],
+      "controlRatios": [
+        5.392467110445305,
+        5.442001290421039
+      ],
+      "buttonRatio": 13.757707617628789,
+      "raw": "linear-gradient(135deg,#96deda,#50c9c3)"
+    }
+  ],
+  "errors": []
+}

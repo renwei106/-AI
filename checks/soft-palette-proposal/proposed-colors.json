@@ -1,0 +1,55 @@
+{
+  "enabled": true,
+  "order": [
+    "#48614c",
+    "#45433c",
+    "#bd9055",
+    "#467ea5",
+    "#8b83d1",
+    "#ba794f",
+    "#a95e76",
+    "custom"
+  ],
+  "options": {
+    "#48614c": {
+      "enabled": true,
+      "name": "翡翠绿",
+      "value": "#199b7b"
+    },
+    "#45433c": {
+      "enabled": true,
+      "name": "碧潭青",
+      "value": "#168fa3"
+    },
+    "#bd9055": {
+      "enabled": true,
+      "name": "琥珀金",
+      "value": "#ce961f"
+    },
+    "#467ea5": {
+      "enabled": true,
+      "name": "澄海蓝",
+      "value": "#3578d4"
+    },
+    "#8b83d1": {
+      "enabled": true,
+      "name": "鸢尾紫",
+      "value": "#8755c7"
+    },
+    "#ba794f": {
+      "enabled": true,
+      "name": "日光橙",
+      "value": "#e27642"
+    },
+    "#a95e76": {
+      "enabled": true,
+      "name": "莓果红",
+      "value": "#cc527a"
+    },
+    "custom": {
+      "enabled": true,
+      "name": "自定义配色",
+      "value": ""
+    }
+  }
+}

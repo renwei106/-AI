@@ -1,6 +1,6 @@
 /* Scoped to the memoir cover; other themes and the workspace keep their styles. */
 .home.home-memoir{position:relative;min-height:calc(100svh - 86px);padding:50px 7vw 165px;display:flex;align-items:center;justify-content:center;isolation:isolate}
-.home-memoir:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 70% 40%,color-mix(in srgb,var(--accent) 13%,transparent),transparent 60%),linear-gradient(125deg,color-mix(in srgb,var(--bg) 94%,#b99970),var(--bg))}
+.home-memoir:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--theme-art-background,var(--bg))}
 .memoir-cover{width:min(1220px,100%);display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center;gap:clamp(40px,6vw,100px);text-align:left}
 .memoir-copy{position:relative;padding-bottom:28px;min-width:0}
 .memoir-eyebrow{font-size:10px;letter-spacing:.18em;color:var(--muted);margin:0 0 34px;line-height:2}
@@ -72,3 +72,5 @@ body[data-theme=cinema][data-dark=true]{background-image:none}
 #memoir-editor .memoir-auto-option>span{white-space:nowrap;font-size:11px}
 #memoir-editor .memoir-editor-footer .primary{min-width:78px}
 #memoir-editor>.dialog-done{display:none!important}
+
+body[data-theme=cinema][data-view=home]:has(.home-memoir){--ink:var(--theme-art-ink);--muted:var(--theme-art-muted)}

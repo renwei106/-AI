@@ -1,0 +1,38 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os');
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const {PaymentStore}=require('../payments/store.cjs'),{createActivityAdmin}=require('../payments/activity-admin.cjs'),{createMembershipService}=require('../payments/membership.cjs'),{PaymentService}=require('../payments/service.cjs');
+const out=path.resolve('checks/activity-center'),temp=fs.mkdtempSync(path.join(os.tmpdir(),'activity-ui-'));fs.mkdirSync(out,{recursive:true});
+const store=new PaymentStore(':memory:'),plans=[{id:'monthly',name:'月会员',price:10,days:30,enabled:true,entitlements:[]},{id:'yearly',name:'年会员',price:120,days:365,enabled:true,entitlements:[]}];
+const memberships=createMembershipService({usersFile:path.join(temp,'users.json'),invitationsFile:path.join(temp,'invitations.json'),readPlans:()=>plans,readExperience:()=>({enabled:false,values:{}})});memberships.writeUsers([{id:'ui-user',name:'页面验证用户',memberEvents:[]}]);
+const config={enabled:true,wechat:{enabled:true,appId:'wx',mchId:'m'},alipay:{}};
+const admin=createActivityAdmin({store,memberships,config,providers:{}});
+(async()=>{const browser=await chromium.launch({channel:'msedge',headless:true});try{
+ const context=await browser.newContext({viewport:{width:1500,height:1000},colorScheme:'light',reducedMotion:'reduce'}),errors=[];
+ assert.equal((await context.request.post('http://127.0.0.1:5175/api/platform/login',{data:{account:'admin',password:'123456'}})).status(),200);
+ await context.route('**/api/shiyu/activities',async route=>{try{const value=route.request().method()==='GET'?admin.view():await admin.mutate(route.request().postDataJSON(),'页面测试管理员');await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(value)})}catch(e){await route.fulfill({status:e.status||400,contentType:'application/json',body:JSON.stringify({message:e.message})})}});
+ await context.routeWebSocket('**', socket=>socket.close());
+ const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:5175/apps/shiyu/activities');await page.getByRole('button',{name:'新建活动',exact:true}).waitFor();
+ await page.screenshot({path:path.join(out,'empty.png'),fullPage:true,animations:'disabled'});
+ await page.getByRole('button',{name:'新建活动',exact:true}).click();
+ await page.getByLabel('活动名称',{exact:true}).fill('秋日会员礼遇');await page.getByLabel('活动说明',{exact:true}).fill('月会员一分钱，额外赠送 3 天。');
+ await page.getByLabel('开始时间（北京时间）',{exact:true}).fill(new Date(Date.now()-60000+8*3600000).toISOString().slice(0,16));
+ await page.getByLabel('价格规则',{exact:true}).click();await page.getByText('分别指定套餐活动价',{exact:true}).click();
+ await page.getByLabel('适用套餐',{exact:true}).click();await page.getByText('月会员 · ¥10 / 30 天',{exact:true}).click();await page.keyboard.press('Escape');
+ await page.getByLabel('每份活动价（元）',{exact:true}).fill('0.01');await page.getByLabel('每份额外赠送天数',{exact:true}).fill('3');
+ await page.getByLabel('活动总优惠份数',{exact:true}).fill('100');await page.getByLabel('每账号累计优惠份数',{exact:true}).fill('2');
+ await page.screenshot({path:path.join(out,'create.png'),fullPage:true,animations:'disabled'});
+ await page.getByRole('button',{name:'校验并启用',exact:true}).click();await page.getByRole('dialog').waitFor({state:'hidden'});assert.equal(admin.view().campaigns.length,1);
+ await page.screenshot({path:path.join(out,'list.png'),fullPage:true,animations:'disabled'});
+ await page.getByPlaceholder('活动名称、ID').fill('无匹配');assert(await page.getByRole('button',{name:'秋日会员礼遇',exact:true}).isVisible());await page.getByRole('button',{name:/搜\s*索/}).click();assert.equal(await page.getByRole('button',{name:'秋日会员礼遇',exact:true}).count(),0);await page.getByRole('button',{name:/重\s*置/}).click();
+ await page.getByRole('button',{name:/复\s*制/}).click();await page.getByRole('button',{name:'校验并启用',exact:true}).click();await page.getByText(/存在同套餐、重叠时间且同优先级冲突/).waitFor();assert.equal(admin.view().campaigns.length,1);
+ await page.locator('input#priority').fill('200');await page.getByLabel('每份活动价（元）',{exact:true}).fill('0');await page.getByLabel('允许零元领取',{exact:true}).click();await page.getByRole('button',{name:'校验并启用',exact:true}).click();await page.getByRole('dialog').waitFor({state:'hidden'});
+ const free=admin.view().campaigns.find(c=>c.priority===200);store.db.prepare('UPDATE activities SET state=\'stopped\' WHERE id!=?').run(free.id);
+ // Start copied campaign now via fixture clock; no persistent/live configuration is touched.
+ const service=new PaymentService({config,store,memberships,providers:{},getPlans:async()=>plans});service.activities.now=()=>free.start+1000;
+ const q=service.activities.quote({id:'ui-user'},plans[0],1);await service.create({id:'ui-user'},{planId:'monthly',provider:'wechat',quantity:1,requestId:'ui-zero-order-12345',accepted:true,quoteToken:q.token});
+ await page.goto('http://127.0.0.1:5175/apps/shiyu/activity-records');await page.getByRole('button',{name:'查看明细',exact:true}).click();await page.getByText('零元领取（无外部支付）',{exact:true}).waitFor();await page.screenshot({path:path.join(out,'record.png'),fullPage:true,animations:'disabled'});
+ await page.getByRole('button',{name:'追加处理备注',exact:true}).click();await page.getByRole('textbox',{name:'处理原因',exact:true}).fill('核对订单和会员记录一致，验证备注追溯');await page.getByRole('button',{name:'确认并记录',exact:true}).click();assert(admin.view().audit.some(a=>a.action==='admin_note'));
+ await page.goto('http://127.0.0.1:5175/apps/shiyu/activity-audit');await page.getByText('操作记录（仅追加）',{exact:true}).waitFor();await page.screenshot({path:path.join(out,'audit.png'),fullPage:true,animations:'disabled'});
+ await page.emulateMedia({colorScheme:'dark'});await page.goto('http://127.0.0.1:5175/apps/shiyu/activities');await page.getByRole('button',{name:'新建活动',exact:true}).waitFor();await page.screenshot({path:path.join(out,'dark.png'),fullPage:true,animations:'disabled'});
+ assert.deepEqual(errors,[]);console.log('Activity admin UI passed: create, priority conflict, zero claim, explicit filters, records, audit and themes.');
+}finally{await browser.close();store.close();fs.rmSync(temp,{recursive:true,force:true})}})().catch(e=>{console.error(e);process.exitCode=1});

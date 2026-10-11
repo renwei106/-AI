@@ -1,0 +1,194 @@
+[
+  {
+    "file": "v4.css",
+    "selector": ".dialog-done button"
+  },
+  {
+    "file": "v4.css",
+    "selector": ".group-tabs button[aria-selected=true]"
+  },
+  {
+    "file": "v4.css",
+    "selector": ".entity-icon-grid button:hover,.entity-icon-grid button[aria-pressed=true]"
+  },
+  {
+    "file": "v4.css",
+    "selector": ".link-view-grid button:hover,.link-view-grid button[aria-pressed=true]"
+  },
+  {
+    "file": "v4.css",
+    "selector": ".column-options button:hover,.column-options button[aria-pressed=true]"
+  },
+  {
+    "file": "v4.css",
+    "selector": ".share-access-card.selected"
+  },
+  {
+    "file": "v4.css",
+    "selector": "#display-scope-dialog .scope-options button[aria-pressed=true]"
+  },
+  {
+    "file": "v4.css",
+    "selector": "#bookmark-pagination .select-options button[aria-selected=true]"
+  },
+  {
+    "file": "v4.css",
+    "selector": ".account-input-row button"
+  },
+  {
+    "file": "v4.css",
+    "selector": ".account-avatars button[aria-pressed=true]"
+  },
+  {
+    "file": "v4.css",
+    "selector": "#login .account-input-row button.is-ready"
+  },
+  {
+    "file": "v4.css",
+    "selector": ".profile-gender button[aria-pressed=true]"
+  },
+  {
+    "file": "v4.css",
+    "selector": "#birthday-dialog [data-birth-save]"
+  },
+  {
+    "file": "v4.css",
+    "selector": ".birth-column button[aria-selected=true]"
+  },
+  {
+    "file": "v4.css",
+    "selector": ".birth-footer button:last-child,.paper-editor-done"
+  },
+  {
+    "file": "v4.css",
+    "selector": ".custom-color-confirm"
+  },
+  {
+    "file": "v4.css",
+    "selector": "#space-share-dialog .primary"
+  },
+  {
+    "file": "v4.css",
+    "selector": "body[data-view=space] :is(.space-share,.display-scope-button,.global-search-trigger):is(:hover,:focus-visible)"
+  },
+  {
+    "file": "v4.css",
+    "selector": "body[data-view=space] #space-mode-menu>button[aria-pressed=true]"
+  },
+  {
+    "file": "v4.css",
+    "selector": "body[data-view=space] #space-mode-menu>button:is(:hover,:focus-visible)"
+  },
+  {
+    "file": "v4.css",
+    "selector": "body[data-view=space] #organization:is([data-list-kind=scene],[data-list-kind=group]) .entity-icon-button:is(:hover,:focus-visible)"
+  },
+  {
+    "file": "v4.css",
+    "selector": "body[data-view=space] #link-view-settings .link-view-grid button:is([aria-pressed=true],:hover,:focus-visible),body[data-view=space] #link-view-settings .link-view-grid button:is([aria-pressed=true],:hover,:focus-visible) :is(span,b,small,i,svg)"
+  },
+  {
+    "file": "v4.css",
+    "selector": "#login .account-input-row button.is-ready"
+  },
+  {
+    "file": "v4.css",
+    "selector": ".profile-editor-options button[aria-pressed=true]"
+  },
+  {
+    "file": "v4.css",
+    "selector": "#space-share-dialog .primary"
+  },
+  {
+    "file": "v4.css",
+    "selector": "#account-security-editor[data-security-kind=\"password\"] .security-channel-options button:hover,#account-security-editor[data-security-kind=\"password\"] .security-channel-options button[aria-selected=\"true\"]"
+  },
+  {
+    "file": "v4.css",
+    "selector": "#account-cancellation .account-cancel-verification .account-input-row button"
+  },
+  {
+    "file": "v4.css",
+    "selector": "#account-cancellation .account-cancel-agree button"
+  },
+  {
+    "file": "style.css",
+    "selector": ".search-tabs .selected"
+  },
+  {
+    "file": "style.css",
+    "selector": ".search-box .submit"
+  },
+  {
+    "file": "style.css",
+    "selector": ".scene-button.active"
+  },
+  {
+    "file": "style.css",
+    "selector": ".primary"
+  },
+  {
+    "file": "style.css",
+    "selector": ".player-controls .play-toggle"
+  },
+  {
+    "file": "style.css",
+    "selector": ".primary,.search-box .submit"
+  },
+  {
+    "file": "space-atlas.css",
+    "selector": "#space-atlas .at-header-actions>.primary"
+  },
+  {
+    "file": "memo-paper.css",
+    "selector": ".memo-paper-app .memo-write"
+  },
+  {
+    "file": "memo-paper.css",
+    "selector": ".memo-view-tabs button[aria-pressed=true]"
+  },
+  {
+    "file": "memo-paper.css",
+    "selector": ".memo-paper-status button"
+  },
+  {
+    "file": "memo-paper.css",
+    "selector": ".memo-paper-editor-top button"
+  },
+  {
+    "file": "memo-paper.css",
+    "selector": ".memo-paper-editor-actions button"
+  },
+  {
+    "file": "memo-paper.css",
+    "selector": ".memo-paper-access button"
+  },
+  {
+    "file": "memo-paper.css",
+    "selector": ".memo-page-controls button"
+  },
+  {
+    "file": "memo-paper.css",
+    "selector": ".memo-pour-confirm button.primary"
+  },
+  {
+    "file": "paper-edition.css",
+    "selector": ".paper-reader-active .newspaper [data-paper-edit]"
+  },
+  {
+    "file": "paper-edition.css",
+    "selector": ".paper-reader-active .edition-cover-edit"
+  },
+  {
+    "file": "paper-edition.css",
+    "selector": "#edition-editor button[type=submit]"
+  },
+  {
+    "file": "paper-edition.css",
+    "selector": ".paper-image-presets button[aria-pressed=true]"
+  },
+  {
+    "file": "avatar-catalog.css",
+    "selector": ".avatar-selected-mark"
+  }
+]

@@ -4,7 +4,8 @@
  const beforeColors=colorChoices;
  colorChoices=function(value,local=false){const holder=document.createElement('div');holder.innerHTML=beforeColors(value,local);const list=holder.querySelector('.named-colors');if(!list)return holder.innerHTML;const tiles=[...list.children],custom=list.querySelector('.custom-color'),rainbow='conic-gradient(from 30deg,#b28bbf,#8098be,#78a993,#c2b97e,#c18b79,#b28bbf)';
   if(custom){const sample=custom.querySelector('.color-sample'),badge=custom.querySelector('.custom-palette-badge');sample.style.background=rainbow;sample.querySelector('i').style.removeProperty('color');const saved=local?prefs.spacePreferences?.[spaceId]?.customColor:prefs.customColor;const chosen=!PALETTES.some(([v])=>v===value)?value:saved;if(badge){badge.style.background=chosen||rainbow;badge.setAttribute('aria-label',chosen?'已选自定义颜色':'自定义色板');}}
-  list.replaceChildren();for(const [name,gradient] of [['纯色',false],['渐变',true]]){const group=tiles.filter(tile=>!tile.classList.contains('custom-color')&&tile.style.getPropertyValue('--swatch').trim().startsWith('linear-gradient(')===gradient);if(!group.length&&(gradient||!custom))continue;const heading=document.createElement('small');heading.className='palette-group-title';heading.textContent=name;list.append(heading,...group);if(!gradient&&custom)list.append(custom);}return holder.innerHTML;
+  for(const tile of tiles){const value=tile.dataset.value||tile.dataset.spaceColor||'';tile.style.setProperty('--swatch-ink',window.ShiyuThemeColors.swatchContrast(value));tile.dataset.multicolor=String(!/^#[0-9a-f]{6}$/i.test(value));}
+  list.replaceChildren();for(const [name,gradient] of [['纯色',false],['渐变',true]]){const group=tiles.filter(tile=>!tile.classList.contains('custom-color')&&(tile.dataset.value||tile.dataset.spaceColor||'').startsWith('linear-gradient(')===gradient);if(!group.length&&(gradient||!custom))continue;const heading=document.createElement('small');heading.className='palette-group-title';heading.textContent=name;list.append(heading,...group);if(!gradient&&custom)list.append(custom);}return holder.innerHTML;
  };
  const beforeSettings=renderSettings;
  renderSettings=function(){const dialogs=[...document.querySelectorAll('#settings[open],#display-scope-dialog[open]')].map(d=>[d,d.scrollTop]);beforeSettings();for(const [d,top] of dialogs)d.scrollTop=top;};
@@ -27,6 +28,7 @@
  effective=function(){
   const result={...originalEffective()};
   if(!option('themes',result.theme))result.theme=!category('themes')||option('themes','base')?'base':first('themes','base');
+  result.color=window.ShiyuThemeColors.selection(result.color);
   const matching=config?.personalization?.colors?.options?.[result.color];if(matching?.value)result.color=matching.value;
   if(!option('colors',result.color))result.color=category('colors')?first('colors','#48614c'):'#48614c';
   if(!option('fonts',result.font))result.font=category('fonts')?first('fonts','youfeng'):'youfeng';

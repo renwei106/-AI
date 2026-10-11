@@ -1,0 +1,55 @@
+{
+  "enabled": true,
+  "order": [
+    "#48614c",
+    "#45433c",
+    "#bd9055",
+    "#467ea5",
+    "#8b83d1",
+    "#ba794f",
+    "#a95e76",
+    "custom"
+  ],
+  "options": {
+    "#48614c": {
+      "enabled": true,
+      "name": "薄荷青绿",
+      "value": "#7ecfbd"
+    },
+    "#45433c": {
+      "enabled": true,
+      "name": "云雾浅灰",
+      "value": "#b8bcba"
+    },
+    "#bd9055": {
+      "enabled": true,
+      "name": "奶油暖黄",
+      "value": "#e9c162"
+    },
+    "#467ea5": {
+      "enabled": true,
+      "name": "晴空雾蓝",
+      "value": "#8dcae3"
+    },
+    "#8b83d1": {
+      "enabled": true,
+      "name": "柔雾浅紫",
+      "value": "#b8baf8"
+    },
+    "#ba794f": {
+      "enabled": true,
+      "name": "蜜桃暖橙",
+      "value": "#f5ae73"
+    },
+    "#a95e76": {
+      "enabled": true,
+      "name": "樱花柔粉",
+      "value": "#e7acd0"
+    },
+    "custom": {
+      "enabled": true,
+      "name": "自定义配色",
+      "value": ""
+    }
+  }
+}

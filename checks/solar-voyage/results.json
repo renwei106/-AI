@@ -1,0 +1,53 @@
+{
+  "desktop": {
+    "planetFocus": 8,
+    "horizonReturns": 8,
+    "escape": true,
+    "errors": []
+  },
+  "mobile": {
+    "planetFocus": 8,
+    "horizonReturns": 8,
+    "escape": true,
+    "errors": []
+  },
+  "orbits": {
+    "periodClosure": true,
+    "finite": true,
+    "radii": [
+      [
+        "mercury",
+        1.7296141513320098
+      ],
+      [
+        "venus",
+        3.6431638624282217
+      ],
+      [
+        "earth",
+        3.8
+      ],
+      [
+        "mars",
+        2.264876803423114
+      ],
+      [
+        "jupiter",
+        27.093223657361644
+      ],
+      [
+        "saturn",
+        23.32200905717312
+      ],
+      [
+        "uranus",
+        11.79678947224951
+      ],
+      [
+        "neptune",
+        11.513794890664103
+      ]
+    ],
+    "moons": 454
+  }
+}

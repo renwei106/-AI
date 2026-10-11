@@ -1,0 +1,145 @@
+{
+  "mode": "built-in image_gen",
+  "frames": [
+    {
+      "id": 0,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-e98a7735-a529-47d6-8185-6ceacc78a965.png",
+      "prompt": "Use case: stylized-concept. Asset type: ONE independent transparent PNG animation frame for a desktop companion, NOT a sprite sheet. Primary request: a Chinese wuxia female swordswoman, adult character drawn as a refined small illustrated desktop companion, about 3 heads tall. Wearing a wide natural woven bamboo conical hat (douli), a dark cloth mask covering nose and mouth, a dark flowing cloak, practical layered charcoal clothing, fitted trousers and cloth boots, long black hair tied behind. She carries ONE straight Chinese jian sword with a simple dark sheath. Clean softly shaded hand-painted 2D cutout, fine dark outlines, readable silhouette, restrained detail, consistent proportions for subsequent animation. Frame STAND-0: full body standing in a relaxed 3/4 view facing screen right; right hand holds the sheathed sword pointing down beside her right leg, left hand rests naturally. Eyes calm and visible below hat brim. Transparent background, no ground shadow, no scenery, no lettering, no other people, no inset views. Entire hat, cape, hands, boots and sword must fit inside the image with at least 15% transparent padding on every side. Center the character on a square canvas, feet on a stable baseline near 82% of canvas height. Sharp individual outlines with absolutely no motion trails, duplicate limbs, afterimages, neighboring characters or cropped edges. This is a single isolated character pose."
+    },
+    {
+      "id": 1,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-f64ca278-850f-437a-a8ed-0b0568b88b94.png",
+      "prompt": "ONE independent transparent animation frame of EXACT SAME female masked wuxia swordswoman as reference. Preserve identity, full adult proportions, bamboo hat, dark mask, charcoal cloak, clothing patterns, boots, ponytail, sword design and painted line style. Pose: standing, right hand half draws sword from sheath held by left hand at waist, relaxed knees. Full body centered on square transparent canvas. Keep ALL hat/cloak/blade/boots inside with 15% padding. Single figure only, no sheet/grid, no text, ground or shadows, motion trails or duplicated limbs. Clean isolated sharp silhouette."
+    },
+    {
+      "id": 2,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-28b538ce-2ba4-4951-b0c4-ca4733d9b84f.png",
+      "prompt": "ONE independent transparent animation frame of EXACT SAME female masked wuxia swordswoman as reference. Preserve identity, full adult proportions, bamboo hat, dark mask, charcoal cloak, clothing patterns, boots, ponytail, sword design and painted line style. Pose: standing sword guard, right hand holds drawn straight blade diagonally forward upward, left holds empty scabbard by waist, calm stable stance. Full body centered on square transparent canvas. Keep ALL hat/cloak/blade/boots inside with 15% padding. Single figure only, no sheet/grid, no text, ground or shadows, motion trails or duplicated limbs. Clean isolated sharp silhouette."
+    },
+    {
+      "id": 3,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-43f7784c-b5b8-4622-a5c1-723d6b6aac05.png",
+      "prompt": "ONE independent transparent animation frame of EXACT SAME female masked wuxia swordswoman as reference. Preserve identity, full adult proportions, bamboo hat, dark mask, charcoal cloak, clothing patterns, boots, ponytail, sword design and painted line style. Pose: standing controlled practice end pose, right arm extends sword diagonally to right, left holds empty scabbard, feet planted. Full body centered on square transparent canvas. Keep ALL hat/cloak/blade/boots inside with 15% padding. Single figure only, no sheet/grid, no text, ground or shadows, motion trails or duplicated limbs. Clean isolated sharp silhouette."
+    },
+    {
+      "id": 4,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-3a924383-5276-4dea-b7b7-64a9ba7bec32.png",
+      "prompt": "Create ONE independent transparent animation frame. Reference is the exact character identity and outfit: preserve her adult proportions, dark mask, bamboo conical hat, charcoal cloak/clothes, black ponytail, straight jian sword and refined painted line style. Change ONLY pose. SIT neutral: seated cross-legged facing three-quarter right, both arms hugging her upright sheathed sword close against chest, wearing the same bamboo hat. Single full character, no other figure, no grid, no text, no ground shadow. Square transparent canvas, entire body/hat/cape/sword inside with 15% padding. No ghosting, motion trails, duplicated limbs or cropped parts. Keep anatomy coherent."
+    },
+    {
+      "id": 5,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-3683c6ce-5911-480d-b105-d028012ec8af.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Same cross-legged seated pose and sword hug; gently lower chin and close eyes in calm meditation. Keep hands and legs exactly positioned. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 6,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-dfc4e33d-5bee-45a6-bc5e-d3bd8d1ab0c1.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Same cross-legged seat; slightly tighten both arms around upright sword, lift shoulders a little and tilt head toward sword. Remain seated. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 7,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-fa8c8445-0d72-4d01-9418-feaddf748255.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Same cross-legged seat with arms hugging sword; turn head subtly toward viewer, tilt hat a little, eyes attentive. Keep rest fixed. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 8,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-ac54241c-3ace-4671-9db1-8aba1af06d1e.png",
+      "prompt": "Create ONE independent transparent animation frame. Reference is the exact character identity and outfit: preserve her adult proportions, dark mask, bamboo conical hat, charcoal cloak/clothes, black ponytail, straight jian sword and refined painted line style. Change ONLY pose. LIE neutral: reclining face upward toward viewer, head on screen left and feet screen right, both hands tucked behind head, hat taken off and resting over face, legs casually crossed with one knee raised, cloak resting beneath body. Full horizontal body. Single full character, no other figure, no grid, no text, no ground shadow. Square transparent canvas, entire body/hat/cape/sword inside with 15% padding. No ghosting, motion trails, duplicated limbs or cropped parts. Keep anatomy coherent."
+    },
+    {
+      "id": 9,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-033f0649-564b-46d4-a1ee-9ecfba29c845.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Same reclining pose hands behind head, hat over face, crossed legs; gently lower raised foot a few centimeters, keep all other placement fixed. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 10,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-c41f65c3-16d8-4f9b-9ef2-9c13aec50f3f.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Same reclining pose hands behind head, hat over face, crossed legs; gently extend raised ankle and point boot, keep torso and hands fixed. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 11,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-8657dbf3-82ee-4726-a9c6-e2b36b94841e.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Same reclining pose hands behind head hat over face; gently raise chest breathing, relax raised ankle, keep legs crossed and hands behind head. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 12,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-40713bf4-eb59-4d65-a1b3-966e2f24c430.png",
+      "prompt": "Create ONE independent transparent animation frame. Reference is the exact character identity and outfit: preserve her adult proportions, dark mask, bamboo conical hat, charcoal cloak/clothes, black ponytail, straight jian sword and refined painted line style. Change ONLY pose. JOG gait contact phase: facing right small run, left leg forward right leg back, front arm bent forward, other arm behind carrying the single sheathed sword, cape trailing gently. Single full character, no other figure, no grid, no text, no ground shadow. Square transparent canvas, entire body/hat/cape/sword inside with 15% padding. No ghosting, motion trails, duplicated limbs or cropped parts. Keep anatomy coherent."
+    },
+    {
+      "id": 13,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-4ec71f58-4e1e-4b7c-9609-7d5c75d152f1.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Next small running gait DOWN phase: same torso/head/arms orientation, front foot planted directly under body, other knee passing forward. Sword remains held by rear arm, cape slightly settles. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 14,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-0a6e9d33-d109-45f8-984d-da2f1062fac5.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Next small running gait opposite CONTACT phase: right leg forward left leg back (swap legs from reference); keep front arm ahead and other hand behind holding sword. Torso stable. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 15,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-e20ea7be-12d3-41d0-8284-639a389c7756.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Next small running gait UP phase: one foot toes push off below hips, opposite knee forward raised. Keep same head torso and sword rear hand. Cloak lifts slightly. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 16,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-69b24396-0603-4553-9d3d-a99b16f0c661.png",
+      "prompt": "ONE independent transparent animation frame of EXACT SAME female masked wuxia swordswoman as reference. Preserve identity, full adult proportions, bamboo hat, dark mask, charcoal cloak, clothing patterns, boots, ponytail, sword design and painted line style. Pose: fast running dash to right, torso leaning forward, front arm ahead bent, rear arm holding sheathed sword backward, long extended stride and trailing cape. Full body centered on square transparent canvas. Keep ALL hat/cloak/blade/boots inside with 15% padding. Single figure only, no sheet/grid, no text, ground or shadows, motion trails or duplicated limbs. Clean isolated sharp silhouette."
+    },
+    {
+      "id": 17,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-b7b149b2-f35c-4c6f-892d-ec009aa6a1e9.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Next fast running gait DOWN phase: torso leaning same amount, front leg bent contacting under hip, rear knee passes forward. Same front hand ahead and rear hand sword, trailing cape. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 18,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-bb028e47-6a66-4572-8bb9-cda16fe5e0ee.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Next fast running opposite CONTACT phase: swap forward and backward legs, long stride, maintain forward leaning torso, same front hand ahead and rear hand sword. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 19,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-a68a5d51-3ed7-480a-9c13-6e6c00ae8f7c.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Next fast running UP phase: pushing off toes under hip, opposite knee ahead raised, both heels lifted; same front arm ahead, rear arm holding sword, cape lifts. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 20,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-9e575399-1fa6-4480-9513-4383ef1ccdce.png",
+      "prompt": "ONE independent transparent animation frame of EXACT SAME female masked wuxia swordswoman as reference. Preserve identity, full adult proportions, bamboo hat, dark mask, charcoal cloak, clothing patterns, boots, ponytail, sword design and painted line style. Pose: preparing light wuxia jump, low crouched knees, weight on toes, right hand holding sheathed sword behind, cape beginning to lift. Full body centered on square transparent canvas. Keep ALL hat/cloak/blade/boots inside with 15% padding. Single figure only, no sheet/grid, no text, ground or shadows, motion trails or duplicated limbs. Clean isolated sharp silhouette."
+    },
+    {
+      "id": 21,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-8a09c29b-6c83-45f5-99fc-d0c6feab90f3.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Next wuxia JUMP rising pose: extend torso upward, knees gently lift, toes point downward, left arm balances to side, right hand keeps sheathed sword, cape rises. Full airborne figure. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 22,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-9c441a24-265c-4ee0-9236-7d7d47f64d0e.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Next wuxia JUMP apex pose: light airborne tuck, right knee raised in front, left leg trails, left hand forward balancing, right hand sword behind, cloak floating. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 23,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-c9bff798-7fee-459c-8554-a068e00d3708.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Wuxia JUMP landing pose: one toe gently touches down and knees bend to absorb landing, other foot behind, left hand extended down for balance and right hand keeps sword, cape settling. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 24,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-47156e10-bbd1-4c1f-8d41-2612ad901a8a.png",
+      "prompt": "ONE independent transparent animation frame of EXACT SAME female masked wuxia swordswoman as reference. Preserve identity, full adult proportions, bamboo hat, dark mask, charcoal cloak, clothing patterns, boots, ponytail, sword design and painted line style. Pose: airborne wuxia glide to right, one knee bent up and other leg stretched behind, left arm balances ahead and right hand carries sheathed sword behind, cape lifted elegantly. Full body centered on square transparent canvas. Keep ALL hat/cloak/blade/boots inside with 15% padding. Single figure only, no sheet/grid, no text, ground or shadows, motion trails or duplicated limbs. Clean isolated sharp silhouette."
+    },
+    {
+      "id": 25,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-ba5ba6be-d497-42a4-8bc1-229011056f25.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Same airborne wuxia glide, subtly raise leading knee and open balancing left hand upward, right hand keeps sword behind. Cape lifts slightly. Preserve torso orientation. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 26,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-3d054eb8-c977-45ec-846d-ca83a9995569.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Same airborne wuxia glide, gently extend leading leg forward and trail other leg, left arm extends outward, right hand keeps sword rear. Cape curves smoothly. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    },
+    {
+      "id": 27,
+      "path": "C:\\Users\\任伟的机械革命\\.codex\\generated_images\\01a0e340-9e34-7b11-8838-7d79a64dd735\\exec-a266a3bb-bd18-423d-adcf-9527ea9463da.png",
+      "prompt": "Edit reference into ONE adjacent animation frame, preserving EXACT character identity, outfit, anatomy/proportions, camera angle, painted line style and image scale. Same airborne wuxia glide gently preparing descent: both knees slightly closer and toes down, front balancing hand lowers, sword still behind, cape settles slightly. Keep bamboo hat, dark cloth mask, cloak, boots, long tied black hair and single straight sword. One complete isolated figure on transparent square canvas. Entire silhouette including blade/hat/cape/feet inside 15% padding, no cropping. No scene, shadows, text, grid, extra figure, ghosting or duplicate limbs. Change only described movement, no redesign."
+    }
+  ]
+}

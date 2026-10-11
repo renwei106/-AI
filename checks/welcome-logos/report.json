@@ -1,0 +1,4491 @@
+[
+  {
+    "id": "gift-site-007",
+    "name": "Google",
+    "url": "https://www.google.com/",
+    "oldLogo": "https://www.google.com/favicon.ico",
+    "status": "verified",
+    "pageError": "fetch failed",
+    "errors": [
+      {
+        "url": "https://www.google.com/favicon.ico",
+        "error": "fetch failed"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.google.com",
+    "asset": "assets/site-icons/welcome-gift-site-007.png",
+    "bytes": 1256,
+    "hash": "eb833886d9b91966e02e9c7a2ec7c27250245f6e9425edcb6c3ca260380954d7",
+    "checkedAt": "2026-10-01T14:44:35.103Z"
+  },
+  {
+    "id": "gift-site-011",
+    "name": "微博",
+    "url": "https://weibo.com/",
+    "oldLogo": "https://weibo.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://passport.weibo.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-011.ico",
+    "bytes": 5430,
+    "hash": "db39034db39398bf56b93bfc5cb0fd232d0f686da12bcce5c108d5fbbaeb4cc4",
+    "checkedAt": "2026-10-01T14:42:43.507Z"
+  },
+  {
+    "id": "gift-site-002",
+    "name": "必应中国",
+    "url": "https://cn.bing.com/",
+    "oldLogo": "https://cn.bing.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cn.bing.com/sa/simg/favicon-trans-bg-blue-mg-png.png",
+    "asset": "assets/site-icons/welcome-gift-site-002.png",
+    "bytes": 388,
+    "hash": "bdb1dd89ae8689f8d21bf3e228762585a65f1a877cd99f83edf5a719124dce20",
+    "checkedAt": "2026-10-01T14:42:43.523Z"
+  },
+  {
+    "id": "gift-site-001",
+    "name": "百度",
+    "url": "https://www.baidu.com/",
+    "oldLogo": "https://www.baidu.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.baidu.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-001.ico",
+    "bytes": 16958,
+    "hash": "c70088079fe9441a726c66ce0e73ae38315ec80051d3dd542c41b82fa0a1993a",
+    "checkedAt": "2026-10-01T14:42:43.531Z"
+  },
+  {
+    "id": "gift-site-003",
+    "name": "搜狗搜索",
+    "url": "https://www.sogou.com/",
+    "oldLogo": "https://www.sogou.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.sogou.com/images/logo/new/favicon.ico?v=4",
+    "asset": "assets/site-icons/welcome-gift-site-003.ico",
+    "bytes": 4286,
+    "hash": "79c62d0d261c6da8e2b2b8a3a070d905037b3f7142e42915b2dbdfcbd8c69eeb",
+    "checkedAt": "2026-10-01T14:42:43.535Z"
+  },
+  {
+    "id": "gift-site-005",
+    "name": "夸克",
+    "url": "https://www.quark.cn/",
+    "oldLogo": "https://www.quark.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://gw.alicdn.com/imgextra/i3/O1CN018r2tKf28YP7ev0fPF_!!6000000007944-2-tps-48-48.png",
+    "asset": "assets/site-icons/welcome-gift-site-005.png",
+    "bytes": 1121,
+    "hash": "229c9a4d1c642f1804290ea29d43e27fe3f4415f36855392ddfcae79c5f50961",
+    "checkedAt": "2026-10-01T14:42:43.556Z"
+  },
+  {
+    "id": "gift-site-010",
+    "name": "知乎",
+    "url": "https://www.zhihu.com/",
+    "oldLogo": "https://www.zhihu.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://static.zhihu.com/heifetz/assets/apple-touch-icon-152.81060cab.png",
+    "asset": "assets/site-icons/welcome-gift-site-010.png",
+    "bytes": 11701,
+    "hash": "486598e6da268702c81ecf94b2ef07d3bd03df85a38fb6233229d0c731380b39",
+    "checkedAt": "2026-10-01T14:42:43.558Z"
+  },
+  {
+    "id": "gift-site-006",
+    "name": "秘塔搜索",
+    "url": "https://metaso.cn/",
+    "oldLogo": "https://metaso.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://metaso.cn/apple-touch-icon.png",
+    "asset": "assets/site-icons/welcome-gift-site-006.png",
+    "bytes": 6421,
+    "hash": "b0059d84905d9ca970e9ee465feb7c1219b9110010dfafc0cb1239c8469fe558",
+    "checkedAt": "2026-10-01T14:42:43.563Z"
+  },
+  {
+    "id": "gift-site-004",
+    "name": "360搜索",
+    "url": "https://www.so.com/",
+    "oldLogo": "https://www.so.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://ss.360tres.com/static/121a1737750aa53d.ico",
+    "asset": "assets/site-icons/welcome-gift-site-004.png",
+    "bytes": 902,
+    "hash": "7b0b05f8119bbe6e5eba88fcd6df7698cdad1463b0ba7cfa3eadb429219329d1",
+    "checkedAt": "2026-10-01T14:42:43.606Z"
+  },
+  {
+    "id": "gift-site-017",
+    "name": "新华网",
+    "url": "https://www.xinhuanet.com/",
+    "oldLogo": "https://www.xinhuanet.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.xinhuanet.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-017.png",
+    "bytes": 301,
+    "hash": "215e45467f8b0af40f335206609b75a399414a3bf11762a8b5892048776c7c10",
+    "checkedAt": "2026-10-01T14:42:43.628Z"
+  },
+  {
+    "id": "gift-site-018",
+    "name": "人民网",
+    "url": "https://www.people.com.cn/",
+    "oldLogo": "https://www.people.com.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.people.com.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-018.ico",
+    "bytes": 1150,
+    "hash": "35b130e6ffd0e19cc7414cd0c47a5b278113ee2b89bf29573ab21d62123c3977",
+    "checkedAt": "2026-10-01T14:42:43.637Z"
+  },
+  {
+    "id": "gift-site-016",
+    "name": "央视新闻",
+    "url": "https://news.cctv.com/",
+    "oldLogo": "https://news.cctv.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://p1.img.cctvpic.com/photoAlbum/templet/common/DEPA1502157896010276/newslog200.jpg",
+    "asset": "assets/site-icons/welcome-gift-site-016.png",
+    "bytes": 14118,
+    "hash": "6eed159b2e72360fa4212749aca6e9e43a8e2f5cb8e9f91b4fd28495d1eab44e",
+    "checkedAt": "2026-10-01T14:42:43.656Z"
+  },
+  {
+    "id": "gift-site-019",
+    "name": "腾讯新闻",
+    "url": "https://news.qq.com/",
+    "oldLogo": "https://news.qq.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://mat1.gtimg.com/qqcdn/qqindex2021/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-019.png",
+    "bytes": 2314,
+    "hash": "5f642594d84a00bb48f2a5ee9f9c4158421fdb06b6b5a1201cb09e218847c042",
+    "checkedAt": "2026-10-01T14:42:43.712Z"
+  },
+  {
+    "id": "gift-site-014",
+    "name": "今日头条",
+    "url": "https://www.toutiao.com/",
+    "oldLogo": "https://www.toutiao.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://sf3-cdn-tos.douyinstatic.com/obj/eden-cn/uhbfnupkbps/toutiao_favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-014.ico",
+    "bytes": 7888,
+    "hash": "dc7b9705741e9fbc9a1a201cdc29d5e4de01329d09403df0a537f3c9599e0f85",
+    "checkedAt": "2026-10-01T14:42:43.760Z"
+  },
+  {
+    "id": "gift-site-015",
+    "name": "澎湃新闻",
+    "url": "https://www.thepaper.cn/",
+    "oldLogo": "https://www.thepaper.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.thepaper.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-015.ico",
+    "bytes": 4286,
+    "hash": "9a8e68dc03b5518bea680ccfada6b84d2ccb695197505fe70ca1be4637128b86",
+    "checkedAt": "2026-10-01T14:42:44.019Z"
+  },
+  {
+    "id": "gift-site-020",
+    "name": "网易新闻",
+    "url": "https://news.163.com/",
+    "oldLogo": "https://news.163.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://news.163.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-020.ico",
+    "bytes": 318,
+    "hash": "43c6594eb74940c6e0fb38d55c634425860093660f4eb0cb89334608dd9947eb",
+    "checkedAt": "2026-10-01T14:42:44.042Z"
+  },
+  {
+    "id": "gift-site-023",
+    "name": "AP News",
+    "url": "https://apnews.com/",
+    "oldLogo": "https://apnews.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://apnews.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/apnews.com",
+    "asset": "assets/site-icons/welcome-gift-site-023.png",
+    "bytes": 1852,
+    "hash": "0f4e498c5f776f11ebed89db9b09938127d2c6c30703aa1587522dce26c616f6",
+    "checkedAt": "2026-10-01T14:44:33.166Z"
+  },
+  {
+    "id": "gift-site-025",
+    "name": "CNN",
+    "url": "https://www.cnn.com/",
+    "oldLogo": "https://www.cnn.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://edition.cnn.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-025.ico",
+    "bytes": 11502,
+    "hash": "0cf453fe1114b59fa626c511484e5a9e502ddc2cc32875cfa6c37dd0673ba953",
+    "checkedAt": "2026-10-01T14:42:46.081Z"
+  },
+  {
+    "id": "gift-site-030",
+    "name": "WolframAlpha",
+    "url": "https://www.wolframalpha.com/",
+    "oldLogo": "https://www.wolframalpha.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.wolframalpha.com/_next/static/images/favicon_b48d893b991ff67016124a4d51822e63.ico",
+    "asset": "assets/site-icons/welcome-gift-site-030.ico",
+    "bytes": 27054,
+    "hash": "4bd93b0250508831250421a8a49f317c10fa74884653e10187cb754186cfd92e",
+    "checkedAt": "2026-10-01T14:42:47.958Z"
+  },
+  {
+    "id": "gift-site-031",
+    "name": "WPS Office",
+    "url": "https://www.wps.cn/",
+    "oldLogo": "https://www.wps.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.wps.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-031.ico",
+    "bytes": 4286,
+    "hash": "4fb684e63524072d2ce344fd56ecbdd8f402d669dc71e92d6389221473c32afa",
+    "checkedAt": "2026-10-01T14:42:48.048Z"
+  },
+  {
+    "id": "gift-site-032",
+    "name": "腾讯文档",
+    "url": "https://docs.qq.com/",
+    "oldLogo": "https://docs.qq.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://docs.idqqimg.com/tim/docs/desktop/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-032.ico",
+    "bytes": 4286,
+    "hash": "a41f0618d62d19d7907e4976a96985c6dd459984545db5924524b4e2f1e5ff44",
+    "checkedAt": "2026-10-01T14:42:48.283Z"
+  },
+  {
+    "id": "gift-site-033",
+    "name": "石墨文档",
+    "url": "https://shimo.im/",
+    "oldLogo": "https://shimo.im/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://as.smgv.cn/from_qbox/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-033.ico",
+    "bytes": 4286,
+    "hash": "89dc2a1291757c58958e2edd42aba090fdeb83d9ebffcd1228c71fc6eb9e390d",
+    "checkedAt": "2026-10-01T14:42:48.609Z"
+  },
+  {
+    "id": "gift-site-034",
+    "name": "语雀",
+    "url": "https://www.yuque.com/",
+    "oldLogo": "https://www.yuque.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://mdn.alipayobjects.com/huamei_0prmtq/afts/img/A*sRUdR543RjcAAAAAAAAAAAAADvuFAQ/original",
+    "asset": "assets/site-icons/welcome-gift-site-034.svg",
+    "bytes": 8017,
+    "hash": "d4ceb0d7544da97d57d973292e2bb5e07648d8d70fb668328680ea97ed0c1dd9",
+    "checkedAt": "2026-10-01T14:42:49.064Z"
+  },
+  {
+    "id": "gift-site-035",
+    "name": "金山文档",
+    "url": "https://www.kdocs.cn/",
+    "oldLogo": "https://www.kdocs.cn/favicon.ico",
+    "status": "verified",
+    "pageError": "",
+    "errors": [
+      {
+        "url": "https://account.kdocs.cn/favicon.ico",
+        "error": "HTTP 404"
+      },
+      {
+        "url": "https://www.kdocs.cn/favicon.ico",
+        "error": "HTTP 404"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.kdocs.cn",
+    "asset": "assets/site-icons/welcome-gift-site-035.png",
+    "bytes": 3004,
+    "hash": "d8dcb4bf87a52ced08e0c8170e9e6dd33360c3bd0592c887d42d59aace2c02f2",
+    "checkedAt": "2026-10-01T14:44:33.766Z"
+  },
+  {
+    "id": "gift-site-026",
+    "name": "The Guardian",
+    "url": "https://www.theguardian.com/",
+    "oldLogo": "https://www.theguardian.com/favicon.ico",
+    "status": "verified",
+    "pageError": "fetch failed",
+    "errors": [
+      {
+        "url": "https://www.theguardian.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.theguardian.com",
+    "asset": "assets/site-icons/welcome-gift-site-026.png",
+    "bytes": 4641,
+    "hash": "680a6d2b48d15499f359f225bbbbe904a32995e68713f8f7cc67d717aade4a7d",
+    "checkedAt": "2026-10-01T14:44:34.933Z"
+  },
+  {
+    "id": "gift-site-036",
+    "name": "Microsoft 365",
+    "url": "https://www.microsoft.com/microsoft-365",
+    "oldLogo": "https://www.microsoft.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.microsoft.com/favicon.ico?v2",
+    "asset": "assets/site-icons/welcome-gift-site-036.ico",
+    "bytes": 17174,
+    "hash": "90cdaf487716184e4034000935c605d1633926d348116d198f355a98b8c6cd21",
+    "checkedAt": "2026-10-01T14:42:53.113Z"
+  },
+  {
+    "id": "gift-site-038",
+    "name": "Notion",
+    "url": "https://www.notion.so/",
+    "oldLogo": "https://www.notion.so/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.notion.com/front-static/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-038.ico",
+    "bytes": 32038,
+    "hash": "541fc85f92e348bcf46f70944b95fd558d16adbc5a0698eaa1239dccd8c9e455",
+    "checkedAt": "2026-10-01T14:42:55.062Z"
+  },
+  {
+    "id": "gift-site-008",
+    "name": "DuckDuckGo",
+    "url": "https://duckduckgo.com/",
+    "oldLogo": "https://duckduckgo.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://duckduckgo.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/duckduckgo.com",
+    "asset": "assets/site-icons/welcome-gift-site-008.png",
+    "bytes": 12257,
+    "hash": "b552c66dc3a6be4bb64b8448dbc244d28d1669535396428d768fbff2155f1d2f",
+    "checkedAt": "2026-10-01T14:44:34.613Z"
+  },
+  {
+    "id": "gift-site-009",
+    "name": "Yahoo Search",
+    "url": "https://search.yahoo.com/",
+    "oldLogo": "https://search.yahoo.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://search.yahoo.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/search.yahoo.com",
+    "asset": "assets/site-icons/welcome-gift-site-009.ico",
+    "bytes": 2238,
+    "hash": "c6f7ee2cadae2e121342a8c4245141175bfe887776206deb17149d46cf3aa827",
+    "checkedAt": "2026-10-01T14:44:33.520Z"
+  },
+  {
+    "id": "gift-site-012",
+    "name": "Reddit",
+    "url": "https://www.reddit.com/",
+    "oldLogo": "https://www.reddit.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.reddit.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.reddit.com",
+    "asset": "assets/site-icons/welcome-gift-site-012.png",
+    "bytes": 1497,
+    "hash": "0c2a7a600dc8bc73fb1d47c092789f0e5ca8a8149b7fc07bf0ebd89ece909a7f",
+    "checkedAt": "2026-10-01T14:44:33.197Z"
+  },
+  {
+    "id": "gift-site-013",
+    "name": "Quora",
+    "url": "https://www.quora.com/",
+    "oldLogo": "https://www.quora.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.quora.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.quora.com",
+    "asset": "assets/site-icons/welcome-gift-site-013.ico",
+    "bytes": 285478,
+    "hash": "71b9be27b9a71e03736b8c3f55ae5eca53e022151e3e86b508495d28137b8611",
+    "checkedAt": "2026-10-01T14:44:33.354Z"
+  },
+  {
+    "id": "gift-site-040",
+    "name": "飞书",
+    "url": "https://www.feishu.cn/",
+    "oldLogo": "https://www.feishu.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.feishu.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-040.ico",
+    "bytes": 9662,
+    "hash": "69da9be6053530750202e4f674d621274bd86a9fc23f44a16c5e6c7aa56dfd9e",
+    "checkedAt": "2026-10-01T14:42:56.429Z"
+  },
+  {
+    "id": "gift-site-043",
+    "name": "腾讯会议",
+    "url": "https://meeting.tencent.com/",
+    "oldLogo": "https://meeting.tencent.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://meeting.tencent.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-043.ico",
+    "bytes": 9662,
+    "hash": "9fd53bcee529f2fca9a6e404cece0e6a9c85ec3e2ef56acbd5e615602d05711f",
+    "checkedAt": "2026-10-01T14:42:56.475Z"
+  },
+  {
+    "id": "gift-site-041",
+    "name": "钉钉",
+    "url": "https://www.dingtalk.com/",
+    "oldLogo": "https://www.dingtalk.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://gw.alicdn.com/imgextra/i3/O1CN014ZbI6ZTEhdC0ttN2_!!6000000003783-2-tps-444-444.png",
+    "asset": "assets/site-icons/welcome-gift-site-041.png",
+    "bytes": 6311,
+    "hash": "663c43ad2acd7f1cd26c253a29d3e95174ee49c58990bb39621a1a278b2a4bc4",
+    "checkedAt": "2026-10-01T14:42:56.543Z"
+  },
+  {
+    "id": "gift-site-044",
+    "name": "网易邮箱",
+    "url": "https://mail.163.com/",
+    "oldLogo": "https://mail.163.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://mail.163.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-044.png",
+    "bytes": 1027,
+    "hash": "186077ced6eb8addfda7c97876b93042591c7ace5842bdec537bfd43b62e1dc2",
+    "checkedAt": "2026-10-01T14:42:56.582Z"
+  },
+  {
+    "id": "gift-site-021",
+    "name": "Google News",
+    "url": "https://news.google.com/",
+    "oldLogo": "https://news.google.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://news.google.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/news.google.com",
+    "asset": "assets/site-icons/welcome-gift-site-021.png",
+    "bytes": 9462,
+    "hash": "409471bf4ac6deb7b2c0c741e4cbd362143c38a1b070feb33746ef00dc5a85cd",
+    "checkedAt": "2026-10-01T14:44:34.680Z"
+  },
+  {
+    "id": "gift-site-042",
+    "name": "企业微信",
+    "url": "https://work.weixin.qq.com/",
+    "oldLogo": "https://work.weixin.qq.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://wwcdn.weixin.qq.com/node/wwnl/wwnl/style/images/independent/favicon/favicon_48h$c976bd14.png",
+    "asset": "assets/site-icons/welcome-gift-site-042.png",
+    "bytes": 1498,
+    "hash": "96919f1d35658c8afebdfad634393b064f72c41f56426fba1b47a98b0d2fec73",
+    "checkedAt": "2026-10-01T14:42:56.647Z"
+  },
+  {
+    "id": "gift-site-022",
+    "name": "Reuters",
+    "url": "https://www.reuters.com/",
+    "oldLogo": "https://www.reuters.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.reuters.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.reuters.com",
+    "asset": "assets/site-icons/welcome-gift-site-022.ico",
+    "bytes": 4418,
+    "hash": "821bc756e59ef5044ee35b8af0e8488f18016f86e9dcb3501a5841a7f8552120",
+    "checkedAt": "2026-10-01T14:44:33.956Z"
+  },
+  {
+    "id": "gift-site-024",
+    "name": "BBC News",
+    "url": "https://www.bbc.com/news",
+    "oldLogo": "https://www.bbc.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.bbc.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.bbc.com",
+    "asset": "assets/site-icons/welcome-gift-site-024.svg",
+    "bytes": 751,
+    "hash": "388231ac048528715ffc2aebad84b58c19231d92156179d21c94d0b98d4f1d9b",
+    "checkedAt": "2026-10-01T14:44:33.723Z"
+  },
+  {
+    "id": "gift-site-045",
+    "name": "QQ邮箱",
+    "url": "https://mail.qq.com/",
+    "oldLogo": "https://mail.qq.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://res.wx.qq.com/t/webmail/webmail/res/images/qqmail_favicon_96h.8d124a7.png",
+    "asset": "assets/site-icons/welcome-gift-site-045.png",
+    "bytes": 3609,
+    "hash": "1289cb691eeb7f64ba36887ca410983eb771682f4517588f4ed5e6955064716f",
+    "checkedAt": "2026-10-01T14:42:56.705Z"
+  },
+  {
+    "id": "gift-site-049",
+    "name": "Teambition",
+    "url": "https://www.teambition.com/",
+    "oldLogo": "https://www.teambition.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.teambition.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-049.png",
+    "bytes": 7846,
+    "hash": "b4b4218e2af34b18abf56883c8244803c89a2d7a5685c2163e3c7cc5db036f0d",
+    "checkedAt": "2026-10-01T14:42:56.806Z"
+  },
+  {
+    "id": "gift-site-027",
+    "name": "Feedly",
+    "url": "https://feedly.com/",
+    "oldLogo": "https://feedly.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://feedly.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/feedly.com",
+    "asset": "assets/site-icons/welcome-gift-site-027.svg",
+    "bytes": 2574,
+    "hash": "88c7eec1f3ce21a5966a08e603a21662c7a0687b920077b1da3643b47025abeb",
+    "checkedAt": "2026-10-01T14:44:34.250Z"
+  },
+  {
+    "id": "gift-site-028",
+    "name": "Wikipedia",
+    "url": "https://www.wikipedia.org/",
+    "oldLogo": "https://www.wikipedia.org/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.wikipedia.org/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.wikipedia.org",
+    "asset": "assets/site-icons/welcome-gift-site-028.png",
+    "bytes": 3959,
+    "hash": "b7843adf6f029953638248d3f4fc7bc77195a1d0aaf708ceb4b32276cd695aed",
+    "checkedAt": "2026-10-01T14:44:34.074Z"
+  },
+  {
+    "id": "gift-site-050",
+    "name": "蓝湖",
+    "url": "https://lanhuapp.com/",
+    "oldLogo": "https://lanhuapp.com/favicon.ico",
+    "status": "verified",
+    "pageError": "",
+    "errors": [
+      {
+        "url": "https://lanhuapp.com/favicon.ico",
+        "error": "Input buffer contains unsupported image format"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/lanhuapp.com",
+    "asset": "assets/site-icons/welcome-gift-site-050.ico",
+    "bytes": 4286,
+    "hash": "d362b2ffd69ac23a6f4dd34a39d8d585bc6564a79814d1294ea4a22e974e05bc",
+    "checkedAt": "2026-10-01T14:44:34.553Z"
+  },
+  {
+    "id": "gift-site-048",
+    "name": "Calendly",
+    "url": "https://calendly.com/",
+    "oldLogo": "https://calendly.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://calendly.com/media/favicon/icon-32x32.png",
+    "asset": "assets/site-icons/welcome-gift-site-048.png",
+    "bytes": 1872,
+    "hash": "ed46a80704f8ecabe8e775bae40b87e36fa817096fdb4cd16ac422a951b2870f",
+    "checkedAt": "2026-10-01T14:42:57.607Z"
+  },
+  {
+    "id": "gift-site-057",
+    "name": "阿里云盘",
+    "url": "https://www.alipan.com/",
+    "oldLogo": "https://www.alipan.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://img.alicdn.com/imgextra/i2/O1CN01DOYcs71v3B6bOemVM_!!6000000006116-2-tps-512-512.png",
+    "asset": "assets/site-icons/welcome-gift-site-057.png",
+    "bytes": 19240,
+    "hash": "eded78046e6808993be52cf3fbc8e2de787bfd9ccb3bcb760e4859b6c4ef5032",
+    "checkedAt": "2026-10-01T14:42:57.841Z"
+  },
+  {
+    "id": "gift-site-056",
+    "name": "百度网盘",
+    "url": "https://pan.baidu.com/",
+    "oldLogo": "https://pan.baidu.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://nd-static.bdstatic.com/m-static/wp-brand/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-056.ico",
+    "bytes": 4286,
+    "hash": "7e352d358af25cacc5bf410c4a9de04056967b83e3fb8defec30d694129cefb3",
+    "checkedAt": "2026-10-01T14:42:57.843Z"
+  },
+  {
+    "id": "gift-site-029",
+    "name": "Internet Archive",
+    "url": "https://archive.org/",
+    "oldLogo": "https://archive.org/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://archive.org/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/archive.org",
+    "asset": "assets/site-icons/welcome-gift-site-029.ico",
+    "bytes": 4286,
+    "hash": "abac83a6e6813515818512cbe6b8714820e43471ac10dd997023dab93cd6aeca",
+    "checkedAt": "2026-10-01T14:44:34.920Z"
+  },
+  {
+    "id": "gift-site-046",
+    "name": "Slack",
+    "url": "https://slack.com/",
+    "oldLogo": "https://slack.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://a.slack-edge.com/9cc0056/img/icons/favicon-32.png",
+    "asset": "assets/site-icons/welcome-gift-site-046.png",
+    "bytes": 688,
+    "hash": "7ec7e6f7e53a91c4d70cf597a7d8995b8303d9f4ba3c1826afc0c8827a5a9e86",
+    "checkedAt": "2026-10-01T14:42:58.248Z"
+  },
+  {
+    "id": "gift-site-061",
+    "name": "微信读书",
+    "url": "https://weread.qq.com/",
+    "oldLogo": "https://weread.qq.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://rescdn.qqmail.com/node/wr/wrpage/style/images/independent/appleTouchIcon/apple-touch-icon-152x152.png",
+    "asset": "assets/site-icons/welcome-gift-site-061.png",
+    "bytes": 5841,
+    "hash": "67c685a841fa03f2f6ef1f177922265dad2395d00a419ecf0a38e68dbc3d4b59",
+    "checkedAt": "2026-10-01T14:42:58.925Z"
+  },
+  {
+    "id": "gift-site-055",
+    "name": "Miro",
+    "url": "https://miro.com/",
+    "oldLogo": "https://miro.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://framerusercontent.com/images/6FBG66PBxjV2QFaDfIdUi5mi9A.png",
+    "asset": "assets/site-icons/welcome-gift-site-055.png",
+    "bytes": 2082,
+    "hash": "f9fe6f4a130ce681f75ef976c6b9640d1546f2cedd0517d7182b4ee3bacea2ab",
+    "checkedAt": "2026-10-01T14:42:59.006Z"
+  },
+  {
+    "id": "gift-site-053",
+    "name": "monday.com",
+    "url": "https://monday.com/",
+    "oldLogo": "https://monday.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cdn.prod.website-files.com/656da6fea306219773d04208/65af6bd29fc8bb3d3d4ea39a_6464d702c3ac5c56000c2438_favicon-monday5-32.png",
+    "asset": "assets/site-icons/welcome-gift-site-053.png",
+    "bytes": 1159,
+    "hash": "d7ec04d36d1e4396ce9f7229c732afb3e51b35b3cc4f2e018f280f2bf89285ff",
+    "checkedAt": "2026-10-01T14:42:59.273Z"
+  },
+  {
+    "id": "gift-site-039",
+    "name": "Airtable",
+    "url": "https://www.airtable.com/",
+    "oldLogo": "https://www.airtable.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.airtable.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-039.png",
+    "bytes": 1156,
+    "hash": "d70dae9f09177c16f5bcfee7eea359a01eb77e10d2145e83762caedaa041ed05",
+    "checkedAt": "2026-10-01T14:42:59.474Z"
+  },
+  {
+    "id": "gift-site-063",
+    "name": "豆瓣读书",
+    "url": "https://book.douban.com/",
+    "oldLogo": "https://book.douban.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://book.douban.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-063.ico",
+    "bytes": 5686,
+    "hash": "14ad1b885c1103123e17d16ed68986e3e9fb911a1ca411d03a9e90f58dd0ba39",
+    "checkedAt": "2026-10-01T14:42:59.541Z"
+  },
+  {
+    "id": "gift-site-062",
+    "name": "得到",
+    "url": "https://www.dedao.cn/",
+    "oldLogo": "https://www.dedao.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.dedao.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-062.ico",
+    "bytes": 67646,
+    "hash": "21734d5057ce2962f5832334bc5d6ffe39116bd4a8753779e07759d8d9fa7d42",
+    "checkedAt": "2026-10-01T14:42:59.590Z"
+  },
+  {
+    "id": "gift-site-064",
+    "name": "番茄小说",
+    "url": "https://fanqienovel.com/",
+    "oldLogo": "https://fanqienovel.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://p1-tt.byteimg.com/origin/novel-static/a3621391ca2e537045168afda6722ee9",
+    "asset": "assets/site-icons/welcome-gift-site-064.png",
+    "bytes": 6446,
+    "hash": "85481ee5828b8049cf1c2eb8bd5343fce48c6a17f4b782649eb33929ae839e4c",
+    "checkedAt": "2026-10-01T14:42:59.614Z"
+  },
+  {
+    "id": "gift-site-068",
+    "name": "万方数据",
+    "url": "https://www.wanfangdata.com.cn/",
+    "oldLogo": "https://www.wanfangdata.com.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cdn.w.wanfangdata.com.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-068.ico",
+    "bytes": 9662,
+    "hash": "d8e3c69e7bf509257247fb66a76bb2366c1b20b462525f0016b53c871d1e9c81",
+    "checkedAt": "2026-10-01T14:42:59.803Z"
+  },
+  {
+    "id": "gift-site-067",
+    "name": "中国知网",
+    "url": "https://www.cnki.net/",
+    "oldLogo": "https://www.cnki.net/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.cnki.net/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-067.ico",
+    "bytes": 1150,
+    "hash": "b1d1e89b993a1328a1922c1e1b59a0cd6b9951985851526b045e47a3b9fcc896",
+    "checkedAt": "2026-10-01T14:42:59.851Z"
+  },
+  {
+    "id": "gift-site-069",
+    "name": "维普网",
+    "url": "https://www.cqvip.com/",
+    "oldLogo": "https://www.cqvip.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.cqvip.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-069.ico",
+    "bytes": 16958,
+    "hash": "e438db2830ccd25c8c561500c10ec8dd8b3c1ce3d45ff6f0a9fe7e62fdecfb0e",
+    "checkedAt": "2026-10-01T14:43:00.216Z"
+  },
+  {
+    "id": "gift-site-065",
+    "name": "Project Gutenberg",
+    "url": "https://www.gutenberg.org/",
+    "oldLogo": "https://www.gutenberg.org/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.gutenberg.org/gutenberg/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-065.png",
+    "bytes": 553,
+    "hash": "f01cdbea08903d1bd6c0136e6cd9002e4fe1e03fb068f53ebc1294dfbf8fe826",
+    "checkedAt": "2026-10-01T14:43:01.337Z"
+  },
+  {
+    "id": "gift-site-047",
+    "name": "Zoom",
+    "url": "https://zoom.us/",
+    "oldLogo": "https://zoom.us/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://st1.zoom.us/homepage/20260930-1234/primary/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-047.ico",
+    "bytes": 4286,
+    "hash": "58b6fee1a883d9b798dea9dbf8f262fb8875e035bfa571792b8967c4c0434d26",
+    "checkedAt": "2026-10-01T14:43:01.366Z"
+  },
+  {
+    "id": "gift-site-054",
+    "name": "ClickUp",
+    "url": "https://clickup.com/",
+    "oldLogo": "https://clickup.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://clickup.com/favicons/favicon-32x32.png",
+    "asset": "assets/site-icons/welcome-gift-site-054.png",
+    "bytes": 907,
+    "hash": "19aa118baf0a2f287a6e52335edda5c8d3489b184cf0420c142baf3336b11bb6",
+    "checkedAt": "2026-10-01T14:43:01.757Z"
+  },
+  {
+    "id": "gift-site-073",
+    "name": "JSTOR",
+    "url": "https://www.jstor.org/",
+    "oldLogo": "https://www.jstor.org/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.jstor.org/assets/global_20251201T215504/build/images/favicons/android-chrome-512x512.png",
+    "asset": "assets/site-icons/welcome-gift-site-073.png",
+    "bytes": 16632,
+    "hash": "3ce1c1353b82fb3f77c27bab6a48f3b4bf0b9993fe806922becb09e2f260adcd",
+    "checkedAt": "2026-10-01T14:43:02.073Z"
+  },
+  {
+    "id": "gift-site-072",
+    "name": "arXiv",
+    "url": "https://arxiv.org/",
+    "oldLogo": "https://arxiv.org/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://arxiv.org/static/browse/0.3.4/images/icons/apple-touch-icon.png",
+    "asset": "assets/site-icons/welcome-gift-site-072.png",
+    "bytes": 6206,
+    "hash": "d425f23c011712bbd9c9570c440ebb4f2840235e3ba635e4a41d33d4c1bd4907",
+    "checkedAt": "2026-10-01T14:43:02.082Z"
+  },
+  {
+    "id": "gift-site-071",
+    "name": "Semantic Scholar",
+    "url": "https://www.semanticscholar.org/",
+    "oldLogo": "https://www.semanticscholar.org/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cdn.semanticscholar.org/f9b8e7341641493f/img/favicon-196x196.png",
+    "asset": "assets/site-icons/welcome-gift-site-071.png",
+    "bytes": 13807,
+    "hash": "54ad321222acf7080735950edd1f27a1e7b97c82868a926625ca32d217d34f54",
+    "checkedAt": "2026-10-01T14:43:02.201Z"
+  },
+  {
+    "id": "gift-site-076",
+    "name": "百度文库",
+    "url": "https://wenku.baidu.com/",
+    "oldLogo": "https://wenku.baidu.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://edu-wenku.bdimg.com/v1/pc/2026PC/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-076.ico",
+    "bytes": 16958,
+    "hash": "ecf54a8526839c50620dda42fffbfbb4ac0d23b285be840e9fff32aac4c5518e",
+    "checkedAt": "2026-10-01T14:43:02.352Z"
+  },
+  {
+    "id": "gift-site-052",
+    "name": "Trello",
+    "url": "https://trello.com/",
+    "oldLogo": "https://trello.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://trello.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-052.ico",
+    "bytes": 2710,
+    "hash": "6245384a876e446ac4c95de04e2598c8d68023d845f4151599584afabc6203ab",
+    "checkedAt": "2026-10-01T14:43:02.363Z"
+  },
+  {
+    "id": "gift-site-077",
+    "name": "国家图书馆",
+    "url": "https://www.nlc.cn/",
+    "oldLogo": "https://www.nlc.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.nlc.cn/template_resource/20186/img/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-077.ico",
+    "bytes": 233534,
+    "hash": "61ca6eea4c6687b696439b13c12a6733844107b28e31d8c6e488ed39cee07860",
+    "checkedAt": "2026-10-01T14:43:02.425Z"
+  },
+  {
+    "id": "gift-site-060",
+    "name": "Box",
+    "url": "https://www.box.com/",
+    "oldLogo": "https://www.box.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.box.com/apple-touch-icon.png?tm4eng",
+    "asset": "assets/site-icons/welcome-gift-site-060.png",
+    "bytes": 7546,
+    "hash": "33f6dbaab0e214e3fb3be941a0ecec610a6a9c4c3dd77cdbf704d3949c6cf825",
+    "checkedAt": "2026-10-01T14:43:02.675Z"
+  },
+  {
+    "id": "gift-site-081",
+    "name": "印象笔记",
+    "url": "https://www.yinxiang.com/",
+    "oldLogo": "https://www.yinxiang.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.yinxiang.com/assets/favicon-CXSibozi.png",
+    "asset": "assets/site-icons/welcome-gift-site-081.png",
+    "bytes": 12391,
+    "hash": "234c2496343ecbcb40d28ba56e65acf3b8bef15b9cf8b2ded7b406cd31009090",
+    "checkedAt": "2026-10-01T14:43:02.867Z"
+  },
+  {
+    "id": "gift-site-082",
+    "name": "有道云笔记",
+    "url": "https://note.youdao.com/",
+    "oldLogo": "https://note.youdao.com/favicon.ico",
+    "status": "verified",
+    "pageError": "",
+    "errors": [
+      {
+        "url": "https://note.youdao.com/favicon.ico",
+        "error": "Input Buffer is empty"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/note.youdao.com",
+    "asset": "assets/site-icons/welcome-gift-site-082.ico",
+    "bytes": 16958,
+    "hash": "acd2513c304f6ac43e1885570f0b1dc417eddc3ef2479c89dce771b34ad257aa",
+    "checkedAt": "2026-10-01T14:44:34.940Z"
+  },
+  {
+    "id": "gift-site-075",
+    "name": "Zotero",
+    "url": "https://www.zotero.org/",
+    "oldLogo": "https://www.zotero.org/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.zotero.org/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-075.ico",
+    "bytes": 6518,
+    "hash": "78f27965abd9c6dcd8cebe8166ca6508e1ce122d8d3cabb3440ca1bc22b1ac3a",
+    "checkedAt": "2026-10-01T14:43:03.151Z"
+  },
+  {
+    "id": "gift-site-078",
+    "name": "国家哲社文献中心",
+    "url": "https://www.ncpssd.cn/",
+    "oldLogo": "https://www.ncpssd.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.ncpssd.cn/images/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-078.ico",
+    "bytes": 4286,
+    "hash": "edfa017dd36dfe4b0a61db84f7d63c9112d9ced0fa50a2fba74928ee977d2152",
+    "checkedAt": "2026-10-01T14:43:03.201Z"
+  },
+  {
+    "id": "gift-site-037",
+    "name": "Google Workspace",
+    "url": "https://workspace.google.com/",
+    "oldLogo": "https://workspace.google.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://workspace.google.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/workspace.google.com",
+    "asset": "assets/site-icons/welcome-gift-site-037.png",
+    "bytes": 956,
+    "hash": "12e1a144cb5dd87be4fc1fecaf44b071033839e10843fe6d611c681723680f06",
+    "checkedAt": "2026-10-01T14:44:35.028Z"
+  },
+  {
+    "id": "gift-site-083",
+    "name": "flomo",
+    "url": "https://flomoapp.com/",
+    "oldLogo": "https://flomoapp.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://flomoapp.com/images/logo-192x192.png",
+    "asset": "assets/site-icons/welcome-gift-site-083.png",
+    "bytes": 3818,
+    "hash": "e64d3fced02efbd68e8a296d794d0672c1611b848103ddb32d9d404a80786362",
+    "checkedAt": "2026-10-01T14:43:03.363Z"
+  },
+  {
+    "id": "gift-site-084",
+    "name": "幕布",
+    "url": "https://mubu.com/",
+    "oldLogo": "https://mubu.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://assets.mubu.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-084.ico",
+    "bytes": 4286,
+    "hash": "b54a35b348e963effd99be061f04d97df8b56f03b7c9633e34a0405326386c79",
+    "checkedAt": "2026-10-01T14:43:03.502Z"
+  },
+  {
+    "id": "gift-site-079",
+    "name": "Britannica",
+    "url": "https://www.britannica.com/",
+    "oldLogo": "https://www.britannica.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.britannica.com/favicon.ico",
+        "error": "HTTP 404"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.britannica.com",
+    "asset": "assets/site-icons/welcome-gift-site-079.png",
+    "bytes": 1292,
+    "hash": "fe8b9442b61a28a56932b0da3c1a792c98270d692b3907f6b059f977484aa8d2",
+    "checkedAt": "2026-10-01T14:44:36.008Z"
+  },
+  {
+    "id": "gift-site-051",
+    "name": "Asana",
+    "url": "https://asana.com/",
+    "oldLogo": "https://asana.com/favicon.ico",
+    "status": "verified",
+    "pageError": "",
+    "errors": [
+      {
+        "url": "https://brand.asana.biz/image/upload/f_auto:image,fl_preserve_transparency/v1696462483/asana_favicon_180x180.png",
+        "error": "HTTP 401"
+      },
+      {
+        "url": "https://brand.asana.biz/image/upload/f_auto:image,fl_preserve_transparency/v1696462483/asana_favicon_152x152.png",
+        "error": "HTTP 401"
+      },
+      {
+        "url": "https://brand.asana.biz/image/upload/f_auto:image,fl_preserve_transparency/v1696462483/asana_favicon_144x144.png",
+        "error": "HTTP 401"
+      },
+      {
+        "url": "https://brand.asana.biz/image/upload/f_auto:image,fl_preserve_transparency/v1696462483/asana_favicon_120x120.png",
+        "error": "HTTP 401"
+      },
+      {
+        "url": "https://brand.asana.biz/image/upload/f_auto:image,fl_preserve_transparency/v1696462482/asana_favicon_114x114.png",
+        "error": "HTTP 401"
+      },
+      {
+        "url": "https://brand.asana.biz/image/upload/f_auto:image,fl_preserve_transparency/v1696462482/asana_favicon_76x76.png",
+        "error": "HTTP 401"
+      },
+      {
+        "url": "https://brand.asana.biz/image/upload/f_auto:image,fl_preserve_transparency/v1696462482/asana_favicon_72x72.png",
+        "error": "HTTP 401"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/asana.com",
+    "asset": "assets/site-icons/welcome-gift-site-051.png",
+    "bytes": 2128,
+    "hash": "ef6c3b72c76a5d90c72f87d1e0015049f97f0d149ab1ddc7465d0e3e3a73ff87",
+    "checkedAt": "2026-10-01T14:44:34.983Z"
+  },
+  {
+    "id": "gift-site-088",
+    "name": "少数派",
+    "url": "https://sspai.com/",
+    "oldLogo": "https://sspai.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cdn-static.sspai.com/favicon/sspai.ico",
+    "asset": "assets/site-icons/welcome-gift-site-088.ico",
+    "bytes": 16958,
+    "hash": "62995e6583087fc0422a38843aeea6c982af3e1b473d3b8aae26e7c13921ea50",
+    "checkedAt": "2026-10-01T14:43:03.961Z"
+  },
+  {
+    "id": "gift-site-091",
+    "name": "站酷",
+    "url": "https://www.zcool.com.cn/",
+    "oldLogo": "https://www.zcool.com.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://public-static.zcool.com.cn/git_z/z/site/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-091.ico",
+    "bytes": 67646,
+    "hash": "89b12269a22c0fd05be32b4097bd1107f68deaf4c8f9df74fba5bf1392ea94b0",
+    "checkedAt": "2026-10-01T14:43:04.800Z"
+  },
+  {
+    "id": "gift-site-092",
+    "name": "UI中国",
+    "url": "https://www.ui.cn/",
+    "oldLogo": "https://www.ui.cn/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://www.ui.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-092.ico",
+    "bytes": 5430,
+    "hash": "5853a245692650b7c43cf9c7fe8e4d765f6254f0840e3a4ce32afbdc51242ac6",
+    "checkedAt": "2026-10-01T14:43:04.939Z"
+  },
+  {
+    "id": "gift-site-074",
+    "name": "PubMed",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/",
+    "oldLogo": "https://pubmed.ncbi.nlm.nih.gov/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cdn.ncbi.nlm.nih.gov/coreutils/nwds/img/favicons/favicon-192.png",
+    "asset": "assets/site-icons/welcome-gift-site-074.png",
+    "bytes": 4476,
+    "hash": "9821a9f3d1e8be7dcc3a7649f593400bfaff49d3dc00911ccb8de54790596613",
+    "checkedAt": "2026-10-01T14:43:05.414Z"
+  },
+  {
+    "id": "gift-site-087",
+    "name": "Readwise",
+    "url": "https://readwise.io/",
+    "oldLogo": "https://readwise.io/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://d34adp677peecb.cloudfront.net/static/images/favicons/favicon-32x32.8706bd85b82f.png",
+    "asset": "assets/site-icons/welcome-gift-site-087.png",
+    "bytes": 655,
+    "hash": "e9382b67fd41be7fc0c43da3264ae1b4e4eeb85b82b27bd13b073532aadf424f",
+    "checkedAt": "2026-10-01T14:43:05.482Z"
+  },
+  {
+    "id": "gift-site-095",
+    "name": "花瓣",
+    "url": "https://huaban.com/",
+    "oldLogo": "https://huaban.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://huaban.com/img/touch-icon-ipad-retina.png",
+    "asset": "assets/site-icons/welcome-gift-site-095.png",
+    "bytes": 7231,
+    "hash": "9b640fff8d81fe0dec13dafd96db6c5100dba6082420b15729b30baa7aac7788",
+    "checkedAt": "2026-10-01T14:43:05.737Z"
+  },
+  {
+    "id": "gift-site-096",
+    "name": "优设",
+    "url": "https://www.uisdc.com/",
+    "oldLogo": "https://www.uisdc.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://image.uisdc.com/wp-content/uploads/icons/uisdc-ico-apple180-2023.jpg",
+    "asset": "assets/site-icons/welcome-gift-site-096.png",
+    "bytes": 33866,
+    "hash": "4f54fb7c2813e6fd61eb680c2da719f77693b1d10efc0dfc721ad5656f17cb3c",
+    "checkedAt": "2026-10-01T14:43:05.984Z"
+  },
+  {
+    "id": "gift-site-097",
+    "name": "优设导航",
+    "url": "https://hao.uisdc.com/",
+    "oldLogo": "https://hao.uisdc.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://image.uisdc.com/wp-content/uploads/2018/05/uisdc-ico-apple.jpg",
+    "asset": "assets/site-icons/welcome-gift-site-097.png",
+    "bytes": 21502,
+    "hash": "c3bc3f983f056664cce0acadbcbaecfb5edcdbdaa00069955ef2a89d43c8a781",
+    "checkedAt": "2026-10-01T14:43:06.212Z"
+  },
+  {
+    "id": "gift-site-086",
+    "name": "Obsidian",
+    "url": "https://obsidian.md/",
+    "oldLogo": "https://obsidian.md/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://obsidian.md/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-086.ico",
+    "bytes": 31332,
+    "hash": "26669dbdcc7eba4a89ce9754a6fae800e0d965e8a0fa849c037fb4d4668a708c",
+    "checkedAt": "2026-10-01T14:43:06.273Z"
+  },
+  {
+    "id": "gift-site-094",
+    "name": "Dribbble",
+    "url": "https://dribbble.com/",
+    "oldLogo": "https://dribbble.com/favicon.ico",
+    "status": "verified",
+    "pageError": "",
+    "errors": [
+      {
+        "url": "https://dribbble.com/favicon.ico",
+        "error": "HTTP 404"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/dribbble.com",
+    "asset": "assets/site-icons/welcome-gift-site-094.png",
+    "bytes": 2666,
+    "hash": "9612878b04df0e7d52c0f61f7065e9d019bc02dbecef350dc0a5d7fdc5f4f859",
+    "checkedAt": "2026-10-01T14:44:35.033Z"
+  },
+  {
+    "id": "gift-site-100",
+    "name": "Mobbin",
+    "url": "https://mobbin.com/",
+    "oldLogo": "https://mobbin.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://framerusercontent.com/images/oPS7zaP2iinQmw4du221pyfo.svg",
+    "asset": "assets/site-icons/welcome-gift-site-100.svg",
+    "bytes": 4431,
+    "hash": "1176627280914da3b851bdeed82bd0eb8b149db357a900c5e8e7023f30918336",
+    "checkedAt": "2026-10-01T14:43:09.438Z"
+  },
+  {
+    "id": "gift-site-085",
+    "name": "Evernote",
+    "url": "https://evernote.com/",
+    "oldLogo": "https://evernote.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://evernote.com/images/evernote-logo-serp.png",
+    "asset": "assets/site-icons/welcome-gift-site-085.png",
+    "bytes": 1361,
+    "hash": "78f4d02e480cbe2a919d05e60fff0ea536a789ef145ed4acbc8c0da2ba334fe6",
+    "checkedAt": "2026-10-01T14:43:10.701Z"
+  },
+  {
+    "id": "gift-site-101",
+    "name": "Product Hunt",
+    "url": "https://www.producthunt.com/",
+    "oldLogo": "https://www.producthunt.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://www.producthunt.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-101.ico",
+    "bytes": 238142,
+    "hash": "d5879e90c3ac1b0b3ce180c63b30ed24927e21e10b300ffeda78bd7c74454be5",
+    "checkedAt": "2026-10-01T14:43:10.706Z"
+  },
+  {
+    "id": "gift-site-058",
+    "name": "Dropbox",
+    "url": "https://www.dropbox.com/",
+    "oldLogo": "https://www.dropbox.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.dropbox.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.dropbox.com",
+    "asset": "assets/site-icons/welcome-gift-site-058.ico",
+    "bytes": 4286,
+    "hash": "c0906d540d89dbe1f09b24f17b7f35b81350e8d381c1558b075c28ea913c450d",
+    "checkedAt": "2026-10-01T14:44:35.252Z"
+  },
+  {
+    "id": "gift-site-059",
+    "name": "OneDrive",
+    "url": "https://onedrive.live.com/",
+    "oldLogo": "https://onedrive.live.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://onedrive.live.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/onedrive.live.com",
+    "asset": "assets/site-icons/welcome-gift-site-059.ico",
+    "bytes": 7886,
+    "hash": "24638331466a52bb66f912090e7a9cc9e3df2236e39c187c9409104526b472b0",
+    "checkedAt": "2026-10-01T14:44:36.361Z"
+  },
+  {
+    "id": "gift-site-102",
+    "name": "即时设计",
+    "url": "https://js.design/",
+    "oldLogo": "https://js.design/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://img.js.design/assets/webImg/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-102.png",
+    "bytes": 8071,
+    "hash": "890261c8cf61daaa0b7178815a93c4327ef8c3a8da614a138187b4f35d5aeaad",
+    "checkedAt": "2026-10-01T14:49:28.199Z"
+  },
+  {
+    "id": "gift-site-103",
+    "name": "MasterGo",
+    "url": "https://mastergo.com/",
+    "oldLogo": "https://mastergo.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://mastergo.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-103.ico",
+    "bytes": 67646,
+    "hash": "914e250b83874af52339fb6480f2b3d130157491da316f98f7c0e90b7a497080",
+    "checkedAt": "2026-10-01T14:43:10.926Z"
+  },
+  {
+    "id": "gift-site-106",
+    "name": "创客贴",
+    "url": "https://www.chuangkit.com/",
+    "oldLogo": "https://www.chuangkit.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.chuangkit.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-106.ico",
+    "bytes": 5558,
+    "hash": "b8e6696dc5b7697c6e96dd139b9d40f4c01f27444890b2d01e9b382b3e3cd760",
+    "checkedAt": "2026-10-01T14:43:11.071Z"
+  },
+  {
+    "id": "gift-site-104",
+    "name": "Canva可画",
+    "url": "https://www.canva.cn/",
+    "oldLogo": "https://www.canva.cn/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://static.canva.cn/static/images/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-104.ico",
+    "bytes": 4414,
+    "hash": "ec2fbad47e598fe06c7a2b825224b3b1b8d8221f3002e6370e627d459ff0634a",
+    "checkedAt": "2026-10-01T14:43:11.178Z"
+  },
+  {
+    "id": "gift-site-105",
+    "name": "稿定设计",
+    "url": "https://www.gaoding.com/",
+    "oldLogo": "https://www.gaoding.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.gaoding.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-105.ico",
+    "bytes": 793,
+    "hash": "2ded4dc5c28a993bb99488b4b9b5caab6d076453cdf14615ac8f589a0a58925f",
+    "checkedAt": "2026-10-01T14:43:11.409Z"
+  },
+  {
+    "id": "gift-site-110",
+    "name": "Framer",
+    "url": "https://www.framer.com/",
+    "oldLogo": "https://www.framer.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://framerusercontent.com/images/Io89FonxEaWg4nxvQQllVLwPUUI.png",
+    "asset": "assets/site-icons/welcome-gift-site-110.png",
+    "bytes": 413,
+    "hash": "3d9ad12cc861bc73d1be58c5f44290317c0f7b1a0a6462154ba8a105e090a1b2",
+    "checkedAt": "2026-10-01T14:43:12.077Z"
+  },
+  {
+    "id": "gift-site-066",
+    "name": "Open Library",
+    "url": "https://openlibrary.org/",
+    "oldLogo": "https://openlibrary.org/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://openlibrary.org/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/openlibrary.org",
+    "asset": "assets/site-icons/welcome-gift-site-066.png",
+    "bytes": 7350,
+    "hash": "f6688dedc2f013b779e28f65d8112d0d57327e24d2db42fedd84b1e975e7db28",
+    "checkedAt": "2026-10-01T14:44:35.611Z"
+  },
+  {
+    "id": "gift-site-070",
+    "name": "Google Scholar",
+    "url": "https://scholar.google.com/",
+    "oldLogo": "https://scholar.google.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://scholar.google.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/scholar.google.com",
+    "asset": "assets/site-icons/welcome-gift-site-070.ico",
+    "bytes": 3871,
+    "hash": "8dac42076bd03098a771ac315fa277e0b70fa3030cc708554d74ed506fa3c2de",
+    "checkedAt": "2026-10-01T14:44:35.527Z"
+  },
+  {
+    "id": "gift-site-112",
+    "name": "包图网",
+    "url": "https://ibaotu.com/",
+    "oldLogo": "https://ibaotu.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://ibaotu.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-112.ico",
+    "bytes": 1150,
+    "hash": "d622dae3689c948693a2cf66226101e7724f40f2e36dc8810db9b9c3170f3dda",
+    "checkedAt": "2026-10-01T14:43:12.867Z"
+  },
+  {
+    "id": "gift-site-113",
+    "name": "摄图网",
+    "url": "https://699pic.com/",
+    "oldLogo": "https://699pic.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://699pic.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-113.ico",
+    "bytes": 4286,
+    "hash": "af5b7542682cfb8a06829947a81135fc92af2478e33c261015d9c951c5e2c82d",
+    "checkedAt": "2026-10-01T14:43:13.293Z"
+  },
+  {
+    "id": "gift-site-099",
+    "name": "Awwwards",
+    "url": "https://www.awwwards.com/",
+    "oldLogo": "https://www.awwwards.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://www.awwwards.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-099.ico",
+    "bytes": 15086,
+    "hash": "b6dfe84a24853c115fa270eaa7c434b26c1c48a5c642ddf40e43e33d5ceed716",
+    "checkedAt": "2026-10-01T14:43:13.617Z"
+  },
+  {
+    "id": "gift-site-114",
+    "name": "觅知网",
+    "url": "https://www.51miz.com/",
+    "oldLogo": "https://www.51miz.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.51miz.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-114.ico",
+    "bytes": 4286,
+    "hash": "08a5bb1222665400447ee7064a7f52e7e8bad17cc1efb2f731775009ba4a64d1",
+    "checkedAt": "2026-10-01T14:43:13.755Z"
+  },
+  {
+    "id": "gift-site-108",
+    "name": "Adobe Creative Cloud",
+    "url": "https://www.adobe.com/creativecloud.html",
+    "oldLogo": "https://www.adobe.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.adobe.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-108.ico",
+    "bytes": 15086,
+    "hash": "5eed69e764f1d40b943a19b4b36aca72519b2626dd519891173d7728a74d821c",
+    "checkedAt": "2026-10-01T14:43:13.855Z"
+  },
+  {
+    "id": "gift-site-117",
+    "name": "字由",
+    "url": "https://www.hellofont.cn/",
+    "oldLogo": "https://www.hellofont.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.hellofont.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-117.ico",
+    "bytes": 1150,
+    "hash": "96c6940683e868095eedddaabac501cbb8f2685bcfbe8a03b0b9a6c749aea723",
+    "checkedAt": "2026-10-01T14:43:13.898Z"
+  },
+  {
+    "id": "gift-site-118",
+    "name": "阿里图标库",
+    "url": "https://www.iconfont.cn/",
+    "oldLogo": "https://www.iconfont.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://img.alicdn.com/imgextra/i4/O1CN01Z5paLz1O0zuCC7osS_!!6000000001644-55-tps-83-82.svg",
+    "asset": "assets/site-icons/welcome-gift-site-118.svg",
+    "bytes": 5688,
+    "hash": "0972f73e5b58b01255d70ab0f408e25befb7ec5de429f55cb3a4d979468992fb",
+    "checkedAt": "2026-10-01T14:43:13.977Z"
+  },
+  {
+    "id": "gift-site-109",
+    "name": "Canva",
+    "url": "https://www.canva.com/",
+    "oldLogo": "https://www.canva.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.canva.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.canva.com",
+    "asset": "assets/site-icons/welcome-gift-site-109.ico",
+    "bytes": 4414,
+    "hash": "ec2fbad47e598fe06c7a2b825224b3b1b8d8221f3002e6370e627d459ff0634a",
+    "checkedAt": "2026-10-01T14:44:35.601Z"
+  },
+  {
+    "id": "gift-site-121",
+    "name": "DeepSeek",
+    "url": "https://chat.deepseek.com/",
+    "oldLogo": "https://chat.deepseek.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://fe-static.deepseek.com/chat/icon-180.png",
+    "asset": "assets/site-icons/welcome-gift-site-121.png",
+    "bytes": 5598,
+    "hash": "7d8f0df408fcd36ce5ca153b620399ec756f19211f4c12003f17dfde6250d2a1",
+    "checkedAt": "2026-10-01T14:43:14.415Z"
+  },
+  {
+    "id": "gift-site-107",
+    "name": "Figma",
+    "url": "https://www.figma.com/",
+    "oldLogo": "https://www.figma.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://static.figma.com/app/icon/2/icon-256.png",
+    "asset": "assets/site-icons/welcome-gift-site-107.png",
+    "bytes": 3900,
+    "hash": "1d8bb3c44ea295ce78dca7c02d8a95d3c2ed4a9635ad5ebeb9f94b5abe0ccd7e",
+    "checkedAt": "2026-10-01T14:43:14.468Z"
+  },
+  {
+    "id": "gift-site-123",
+    "name": "Kimi",
+    "url": "https://www.kimi.com/",
+    "oldLogo": "https://www.kimi.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.kimi.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-123.ico",
+    "bytes": 15086,
+    "hash": "df91c1ecf1d4894cf05845cdce44549ed3ccca3478b97a70972d1bc82ac4f2d1",
+    "checkedAt": "2026-10-01T14:43:14.687Z"
+  },
+  {
+    "id": "gift-site-124",
+    "name": "千问",
+    "url": "https://www.qianwen.com/",
+    "oldLogo": "https://www.qianwen.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://img.alicdn.com/imgextra/i2/O1CN01taBbMS1CfyJoOt0lB_!!6000000000109-2-tps-80-80.png",
+    "asset": "assets/site-icons/welcome-gift-site-124.png",
+    "bytes": 1023,
+    "hash": "9b88a0779132578521e11ad4f0d890795ec79be4ad021d433f34016636f902a1",
+    "checkedAt": "2026-10-01T14:43:14.834Z"
+  },
+  {
+    "id": "gift-site-120",
+    "name": "Coolors",
+    "url": "https://coolors.co/",
+    "oldLogo": "https://coolors.co/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://coolors.co/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/coolors.co",
+    "asset": "assets/site-icons/welcome-gift-site-120.png",
+    "bytes": 6146,
+    "hash": "bd808a3d2263467f7c7170c112c7aa58fe3a8af0eb3bf57a6f8dfdc5f371dd5c",
+    "checkedAt": "2026-10-01T14:44:35.413Z"
+  },
+  {
+    "id": "gift-site-115",
+    "name": "Unsplash",
+    "url": "https://unsplash.com/",
+    "oldLogo": "https://unsplash.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://unsplash.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-115.ico",
+    "bytes": 4286,
+    "hash": "920e3132716dc26b8eaef60d8383bc2dde094bf7642b34abe7b9fa41c6dc0c83",
+    "checkedAt": "2026-10-01T14:43:14.859Z"
+  },
+  {
+    "id": "gift-site-126",
+    "name": "智谱清言",
+    "url": "https://chatglm.cn/",
+    "oldLogo": "https://chatglm.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://chatglm.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-126.png",
+    "bytes": 1639,
+    "hash": "4c761ffd5b2dc9bb238024d72bb49160933e24ad33c1b1c7f8e9143784dca6cf",
+    "checkedAt": "2026-10-01T14:43:15.048Z"
+  },
+  {
+    "id": "gift-site-127",
+    "name": "讯飞星火",
+    "url": "https://xinghuo.xfyun.cn/",
+    "oldLogo": "https://xinghuo.xfyun.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://xinghuo.xfyun.cn/spark-icon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-127.ico",
+    "bytes": 4286,
+    "hash": "3d1f9028222ae204eac15b7a096ecb38f8999edcb502e42211888c2eca749ec8",
+    "checkedAt": "2026-10-01T14:43:15.073Z"
+  },
+  {
+    "id": "gift-site-125",
+    "name": "文心助手",
+    "url": "https://wenxin.baidu.com/",
+    "oldLogo": "https://wenxin.baidu.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.baidu.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-125.ico",
+    "bytes": 16958,
+    "hash": "c70088079fe9441a726c66ce0e73ae38315ec80051d3dd542c41b82fa0a1993a",
+    "checkedAt": "2026-10-01T14:43:15.109Z"
+  },
+  {
+    "id": "gift-site-128",
+    "name": "腾讯元宝",
+    "url": "https://yuanbao.tencent.com/",
+    "oldLogo": "https://yuanbao.tencent.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://static.yuanbao.tencent.com/m/yuanbao-web/favicon_new@32.png",
+    "asset": "assets/site-icons/welcome-gift-site-128.png",
+    "bytes": 895,
+    "hash": "596b57620242162513d170a34d80ffef42b46ad73f66ec8ee3b135f99fc17ae5",
+    "checkedAt": "2026-10-01T14:43:15.166Z"
+  },
+  {
+    "id": "gift-site-129",
+    "name": "天工AI",
+    "url": "https://www.tiangong.cn/",
+    "oldLogo": "https://www.tiangong.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://static.tiangong.cn/prod-pc-main-site-www-home/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-129.png",
+    "bytes": 471,
+    "hash": "cb0ecaa8bdb0f5b815a7ac381ee0c30987df972d3a3e618ec25aa1112fe2f0df",
+    "checkedAt": "2026-10-01T14:43:15.315Z"
+  },
+  {
+    "id": "gift-site-116",
+    "name": "Pexels",
+    "url": "https://www.pexels.com/",
+    "oldLogo": "https://www.pexels.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.pexels.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.pexels.com",
+    "asset": "assets/site-icons/welcome-gift-site-116.png",
+    "bytes": 1895,
+    "hash": "0ed9cbacf6bbb8deacac8494a9762184fdf9cab9b776ffb55c6b1ea0a457ebc6",
+    "checkedAt": "2026-10-01T14:44:36.087Z"
+  },
+  {
+    "id": "gift-site-080",
+    "name": "The Conversation",
+    "url": "https://theconversation.com/",
+    "oldLogo": "https://theconversation.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://theconversation.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/theconversation.com",
+    "asset": "assets/site-icons/welcome-gift-site-080.png",
+    "bytes": 4975,
+    "hash": "731838bed863d29996d722d73e909faf898a9840dcb74b0b6dde16a1cd80aa97",
+    "checkedAt": "2026-10-01T14:44:37.218Z"
+  },
+  {
+    "id": "gift-site-122",
+    "name": "豆包",
+    "url": "https://www.doubao.com/",
+    "oldLogo": "https://www.doubao.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/favicon/new-doubao/192x192.png",
+    "asset": "assets/site-icons/welcome-gift-site-122.png",
+    "bytes": 25750,
+    "hash": "48c0333c861ddc570c5178709ec0dee8eca5c11c389816484bafe042ff4fc6ee",
+    "checkedAt": "2026-10-01T14:43:15.443Z"
+  },
+  {
+    "id": "gift-site-134",
+    "name": "Microsoft Copilot",
+    "url": "https://copilot.microsoft.com/",
+    "oldLogo": "https://copilot.microsoft.com/favicon.ico",
+    "status": "verified",
+    "pageError": "fetch failed",
+    "errors": [
+      {
+        "url": "https://copilot.microsoft.com/favicon.ico",
+        "error": "fetch failed"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/copilot.microsoft.com",
+    "asset": "assets/site-icons/welcome-gift-site-134.svg",
+    "bytes": 3436,
+    "hash": "c5b0ad0fc0c6fd9c49131a972635e1aba4e65a0d0385c01d5be8735921d7ef8b",
+    "checkedAt": "2026-10-01T14:44:35.759Z"
+  },
+  {
+    "id": "gift-site-136",
+    "name": "即梦AI",
+    "url": "https://jimeng.jianying.com/",
+    "oldLogo": "https://jimeng.jianying.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://lf3-lv-buz.vlabstatic.com/obj/image-lvweb-buz/common/images/dreamina-v1.ico",
+    "asset": "assets/site-icons/welcome-gift-site-136.ico",
+    "bytes": 16958,
+    "hash": "1526054322006955f0bb748c45af230c57bff29a188c463169ee0ac0b2406203",
+    "checkedAt": "2026-10-01T14:43:15.992Z"
+  },
+  {
+    "id": "gift-site-137",
+    "name": "可灵AI",
+    "url": "https://klingai.com/",
+    "oldLogo": "https://klingai.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://p4-kling.klingai.com/kcdn/cdn-kcdn112452/kling-homepage-aio/logo-180x180.png",
+    "asset": "assets/site-icons/welcome-gift-site-137.png",
+    "bytes": 7743,
+    "hash": "9649fcabb93915f750cbea93380d2f3c30853b05adb4fae43bd863212de1e5d0",
+    "checkedAt": "2026-10-01T14:43:16.192Z"
+  },
+  {
+    "id": "gift-site-138",
+    "name": "海螺AI",
+    "url": "https://hailuoai.com/",
+    "oldLogo": "https://hailuoai.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cdn.hailuoai.com/hailuo-video-web/public_assets/favicon.png",
+    "asset": "assets/site-icons/welcome-gift-site-138.png",
+    "bytes": 3317,
+    "hash": "eda0051d6b846717e52d31caa9fccabb1559fc239398f28ba506ec0d0e6eafac",
+    "checkedAt": "2026-10-01T14:43:16.611Z"
+  },
+  {
+    "id": "gift-site-089",
+    "name": "Substack",
+    "url": "https://substack.com/",
+    "oldLogo": "https://substack.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://substack.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/substack.com",
+    "asset": "assets/site-icons/welcome-gift-site-089.png",
+    "bytes": 12262,
+    "hash": "63b9f4ed6b5c53678e7b0ac53be3cf3a59dc09475e310d356bb7f3a87e5da9a0",
+    "checkedAt": "2026-10-01T14:44:35.926Z"
+  },
+  {
+    "id": "gift-site-139",
+    "name": "通义万相",
+    "url": "https://tongyi.aliyun.com/wanxiang/",
+    "oldLogo": "https://tongyi.aliyun.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://g.alicdn.com/sail-web/wan-static-resources/0.0.30/images/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-139.png",
+    "bytes": 3348,
+    "hash": "08801b64fe60abe4de05b2b97f99485d5120ec54b750378aab0c5ca65585c2c5",
+    "checkedAt": "2026-10-01T14:43:16.792Z"
+  },
+  {
+    "id": "gift-site-090",
+    "name": "Medium",
+    "url": "https://medium.com/",
+    "oldLogo": "https://medium.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://medium.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/medium.com",
+    "asset": "assets/site-icons/welcome-gift-site-090.png",
+    "bytes": 4624,
+    "hash": "92d5ce3bcdf2d1456626442cca12af2c206639fd52f3b33a6bdc1a2f7ebf9a45",
+    "checkedAt": "2026-10-01T14:44:35.964Z"
+  },
+  {
+    "id": "gift-site-131",
+    "name": "Claude",
+    "url": "https://claude.ai/",
+    "oldLogo": "https://claude.ai/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cdn.prod.website-files.com/6889473510b50328dbb70ae6/6a74d3f8403574bbefffca2e_favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-131.png",
+    "bytes": 1744,
+    "hash": "9caa2e83121b6c444477e5f8e440d863d99b3d4b7ae0943d70bcfe62c43ba75a",
+    "checkedAt": "2026-10-01T14:43:17.868Z"
+  },
+  {
+    "id": "gift-site-093",
+    "name": "Behance",
+    "url": "https://www.behance.net/",
+    "oldLogo": "https://www.behance.net/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.behance.net/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.behance.net",
+    "asset": "assets/site-icons/welcome-gift-site-093.png",
+    "bytes": 2225,
+    "hash": "d7c147a4719908f1b5766d92661353f2fe21d9efbccf9fc1d3b1d31b5ed3dcfa",
+    "checkedAt": "2026-10-01T14:44:36.562Z"
+  },
+  {
+    "id": "gift-site-143",
+    "name": "扣子",
+    "url": "https://www.coze.cn/",
+    "oldLogo": "https://www.coze.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://lf-coze-web-cdn.coze.cn/obj/coze-web-cn/coze-space/static/favicon2.ico",
+    "asset": "assets/site-icons/welcome-gift-site-143.png",
+    "bytes": 1071,
+    "hash": "20c47dd8a4ba38f5d15bc0274487c242b59958554fc4867189af557453652a1a",
+    "checkedAt": "2026-10-01T14:43:18.061Z"
+  },
+  {
+    "id": "gift-site-144",
+    "name": "TRAE",
+    "url": "https://www.trae.cn/",
+    "oldLogo": "https://www.trae.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://lf-cdn.trae.com.cn/obj/trae-com-cn/trae_website_prod_cn/favicon.png",
+    "asset": "assets/site-icons/welcome-gift-site-144.png",
+    "bytes": 372,
+    "hash": "dfcf7d372322f820c757704735380c7e269a3fbb615ee6d9a5425d4c18e336d8",
+    "checkedAt": "2026-10-01T14:43:18.288Z"
+  },
+  {
+    "id": "gift-site-140",
+    "name": "Midjourney",
+    "url": "https://www.midjourney.com/",
+    "oldLogo": "https://www.midjourney.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.midjourney.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.midjourney.com",
+    "asset": "assets/site-icons/welcome-gift-site-140.png",
+    "bytes": 3711,
+    "hash": "379d3c687d494fa5482aebf9993a46d2ff373fb7d924585896bca232c19ba646",
+    "checkedAt": "2026-10-01T14:44:37.211Z"
+  },
+  {
+    "id": "gift-site-141",
+    "name": "Runway",
+    "url": "https://runwayml.com/",
+    "oldLogo": "https://runwayml.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://runway.com/icon.png?icon.35ps9bmugbe1e.png",
+    "asset": "assets/site-icons/welcome-gift-site-141.png",
+    "bytes": 4459,
+    "hash": "1b59bc622c743284f242e5b750820076ac5cfdd893f9b3a12ffbb4804a1f61b3",
+    "checkedAt": "2026-10-01T14:43:18.661Z"
+  },
+  {
+    "id": "gift-site-146",
+    "name": "Cursor",
+    "url": "https://cursor.com/",
+    "oldLogo": "https://cursor.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cursor.com/marketing-static/icon-192x192-light.png",
+    "asset": "assets/site-icons/welcome-gift-site-146.png",
+    "bytes": 6975,
+    "hash": "35612bbeae1a0a14e28507605c38fd8fffd87a30997c039d9f184152ec0e9801",
+    "checkedAt": "2026-10-01T14:43:18.830Z"
+  },
+  {
+    "id": "gift-site-098",
+    "name": "Pinterest",
+    "url": "https://www.pinterest.com/",
+    "oldLogo": "https://www.pinterest.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.pinterest.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.pinterest.com",
+    "asset": "assets/site-icons/welcome-gift-site-098.png",
+    "bytes": 1049,
+    "hash": "b975e8a9e990f1db7fdb2b0e8ec5df39da14df1b21985db5bb0c886cd6fd5f2d",
+    "checkedAt": "2026-10-01T14:44:36.265Z"
+  },
+  {
+    "id": "gift-site-111",
+    "name": "Webflow",
+    "url": "https://webflow.com/",
+    "oldLogo": "https://webflow.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://webflow.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-111.ico",
+    "bytes": 4286,
+    "hash": "00053b96c9cd17ef95bd8cb1f65283e45846d75120c010861edf1db50ecaeca1",
+    "checkedAt": "2026-10-01T14:43:19.712Z"
+  },
+  {
+    "id": "gift-site-151",
+    "name": "Gitee",
+    "url": "https://gitee.com/",
+    "oldLogo": "https://gitee.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://gitee.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-151.ico",
+    "bytes": 41566,
+    "hash": "2d1a42d094476e3c893e430032d5371a40af1cc2a025e089383a94bf992c671e",
+    "checkedAt": "2026-10-01T14:43:20.048Z"
+  },
+  {
+    "id": "gift-site-147",
+    "name": "Replit",
+    "url": "https://replit.com/",
+    "oldLogo": "https://replit.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://replit.com/public/icons/favicon-prompt-192-rebrand.png",
+    "asset": "assets/site-icons/welcome-gift-site-147.png",
+    "bytes": 1730,
+    "hash": "faee3b642a8985beace1d1551f932d7219b8e766a2b2dc61722b91d66df7ea68",
+    "checkedAt": "2026-10-01T14:43:21.364Z"
+  },
+  {
+    "id": "gift-site-153",
+    "name": "GitLab",
+    "url": "https://gitlab.com/",
+    "oldLogo": "https://gitlab.com/favicon.ico",
+    "status": "verified",
+    "pageError": "fetch failed",
+    "errors": [
+      {
+        "url": "https://gitlab.com/favicon.ico",
+        "error": "fetch failed"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/gitlab.com",
+    "asset": "assets/site-icons/welcome-gift-site-153.png",
+    "bytes": 1825,
+    "hash": "8c136bc2ea182ed890fd61f9dfc64eef12cccf30515324417dd85cfb6d104def",
+    "checkedAt": "2026-10-01T14:44:36.305Z"
+  },
+  {
+    "id": "gift-site-154",
+    "name": "稀土掘金",
+    "url": "https://juejin.cn/",
+    "oldLogo": "https://juejin.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://lf-web-assets.juejin.cn/obj/juejin-web/xitu_juejin_web/static/favicons/apple-touch-icon.png",
+    "asset": "assets/site-icons/welcome-gift-site-154.png",
+    "bytes": 5025,
+    "hash": "31e011cd47b9591ef6da1aeeec0211c43c9bcefef3db96709fadeadeeeff1540",
+    "checkedAt": "2026-10-01T14:43:21.618Z"
+  },
+  {
+    "id": "gift-site-155",
+    "name": "CSDN",
+    "url": "https://www.csdn.net/",
+    "oldLogo": "https://www.csdn.net/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://g.csdnimg.cn/static/logo/favicon32.ico",
+    "asset": "assets/site-icons/welcome-gift-site-155.ico",
+    "bytes": 4286,
+    "hash": "b06d7d65a2525564c443367277fcc15a19dd7857c635088b9396c172eee11b8f",
+    "checkedAt": "2026-10-01T14:43:22.503Z"
+  },
+  {
+    "id": "gift-site-156",
+    "name": "开源中国",
+    "url": "https://www.oschina.net/",
+    "oldLogo": "https://www.oschina.net/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://static.oschina.net/oschina/web/v2/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-156.ico",
+    "bytes": 4286,
+    "hash": "0a74948cd7057c05040cd5ac5466f73e3ef8cb768cefa4f4886f54595c54ad34",
+    "checkedAt": "2026-10-01T14:43:22.745Z"
+  },
+  {
+    "id": "gift-site-157",
+    "name": "SegmentFault",
+    "url": "https://segmentfault.com/",
+    "oldLogo": "https://segmentfault.com/favicon.ico",
+    "status": "verified",
+    "pageError": "",
+    "errors": [
+      {
+        "url": "https://static.segmentfault.com/main_site_next/prod/favicon.ico",
+        "error": "HTTP 403"
+      },
+      {
+        "url": "https://segmentfault.com/favicon.ico",
+        "error": "Input Buffer is empty"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/segmentfault.com",
+    "asset": "assets/site-icons/welcome-gift-site-157.ico",
+    "bytes": 4286,
+    "hash": "62791b71aa032f0c129edb79b9081f5647843355bd76d4bf5773077f7e53c4ab",
+    "checkedAt": "2026-10-01T14:44:36.364Z"
+  },
+  {
+    "id": "gift-site-158",
+    "name": "博客园",
+    "url": "https://www.cnblogs.com/",
+    "oldLogo": "https://www.cnblogs.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://assets.cnblogs.com/favicon_v3_3.ico",
+    "asset": "assets/site-icons/welcome-gift-site-158.ico",
+    "bytes": 4286,
+    "hash": "0fbdf7e66058bd8350993573b6079a92ee83f3b7e823740e16532012987e7733",
+    "checkedAt": "2026-10-01T14:43:23.465Z"
+  },
+  {
+    "id": "gift-site-142",
+    "name": "Stability AI",
+    "url": "https://stability.ai/",
+    "oldLogo": "https://stability.ai/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://images.squarespace-cdn.com/content/6213c340453c3f502425776e/804f0e8b-0028-4262-a8b0-b9f1c5de72c0/Favicon_small.png?format=100w&content-type=image%2Fpng",
+    "asset": "assets/site-icons/welcome-gift-site-142.png",
+    "bytes": 19012,
+    "hash": "c72feb349f9819914ee05d7aea01c068a6b68f226c557dfb628807a2302a89d6",
+    "checkedAt": "2026-10-01T14:43:24.302Z"
+  },
+  {
+    "id": "gift-site-149",
+    "name": "ElevenLabs",
+    "url": "https://elevenlabs.io/",
+    "oldLogo": "https://elevenlabs.io/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://elevenlabs.io/favicon.ico?9c55860cee08706b",
+    "asset": "assets/site-icons/welcome-gift-site-149.ico",
+    "bytes": 15086,
+    "hash": "383748742e8ca888d4dff626a1d2a9fc898fdebb6d3ae679b86f24f81c46fb5f",
+    "checkedAt": "2026-10-01T14:43:24.590Z"
+  },
+  {
+    "id": "gift-site-161",
+    "name": "菜鸟教程",
+    "url": "https://www.runoob.com/",
+    "oldLogo": "https://www.runoob.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://static.char123.com/images/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-161.ico",
+    "bytes": 4286,
+    "hash": "a4fac8550d33bb7d3332a1a7cf255a22c1dda05a85aba9aa36e68970253fad5d",
+    "checkedAt": "2026-10-01T14:43:25.843Z"
+  },
+  {
+    "id": "gift-site-162",
+    "name": "MDN Web Docs",
+    "url": "https://developer.mozilla.org/",
+    "oldLogo": "https://developer.mozilla.org/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://developer.mozilla.org/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-162.png",
+    "bytes": 889,
+    "hash": "96c0ce1381e9aa40295dbaa49b436d8e9ff3d67ed3f87bd12300780d3fc1a280",
+    "checkedAt": "2026-10-01T14:43:26.317Z"
+  },
+  {
+    "id": "gift-site-163",
+    "name": "Kubernetes",
+    "url": "https://kubernetes.io/",
+    "oldLogo": "https://kubernetes.io/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://kubernetes.io/icons/icon-128x128.png",
+    "asset": "assets/site-icons/welcome-gift-site-163.png",
+    "bytes": 7535,
+    "hash": "6a231227c765e1e365692ca5f4d589a4bc339d8d5c2831f29519c0a10c1f26be",
+    "checkedAt": "2026-10-01T14:43:26.660Z"
+  },
+  {
+    "id": "gift-site-160",
+    "name": "Stack Overflow",
+    "url": "https://stackoverflow.com/",
+    "oldLogo": "https://stackoverflow.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://stackoverflow.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/stackoverflow.com",
+    "asset": "assets/site-icons/welcome-gift-site-160.png",
+    "bytes": 2371,
+    "hash": "d107ba700895ab782f93351490bb62f38e378ba84ae3cc87f72dd8910e4f49f5",
+    "checkedAt": "2026-10-01T14:44:36.441Z"
+  },
+  {
+    "id": "gift-site-119",
+    "name": "Google Fonts",
+    "url": "https://fonts.google.com/",
+    "oldLogo": "https://fonts.google.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://fonts.google.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/fonts.google.com",
+    "asset": "assets/site-icons/welcome-gift-site-119.png",
+    "bytes": 6527,
+    "hash": "8df35bfb584d356240618a980b2e385c87e5725d5f7ae779829e023409545d0c",
+    "checkedAt": "2026-10-01T14:44:36.785Z"
+  },
+  {
+    "id": "gift-site-166",
+    "name": "腾讯云开发者",
+    "url": "https://cloud.tencent.com/developer",
+    "oldLogo": "https://cloud.tencent.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cloudcache.tencent-cloud.com/qcloud/favicon.ico?t=201902181234",
+    "asset": "assets/site-icons/welcome-gift-site-166.ico",
+    "bytes": 949,
+    "hash": "5171df10b79863d76d591705e52b93b4c5295e64d874e41fca5ecac351f5f45e",
+    "checkedAt": "2026-10-01T14:43:27.563Z"
+  },
+  {
+    "id": "gift-site-165",
+    "name": "W3C",
+    "url": "https://www.w3.org/",
+    "oldLogo": "https://www.w3.org/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.w3.org/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.w3.org",
+    "asset": "assets/site-icons/welcome-gift-site-165.png",
+    "bytes": 2901,
+    "hash": "76de18379d97bcd64e43297a3928cf2d06d7a590b8e1884b638ac02cb4f105ef",
+    "checkedAt": "2026-10-01T14:44:36.685Z"
+  },
+  {
+    "id": "gift-site-130",
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com/",
+    "oldLogo": "https://chatgpt.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://chatgpt.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/chatgpt.com",
+    "asset": "assets/site-icons/welcome-gift-site-130.png",
+    "bytes": 8200,
+    "hash": "650ba7b0db0376ad1c57bb23eae88916dcb020158b0984cab3a04ea28a5f006d",
+    "checkedAt": "2026-10-01T14:44:36.714Z"
+  },
+  {
+    "id": "gift-site-168",
+    "name": "华为开发者联盟",
+    "url": "https://developer.huawei.com/",
+    "oldLogo": "https://developer.huawei.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://res-static.hc-cdn.cn/aem/content/dam/cloudbu-site/archive/commons/web_resoure/cms/static/images/global/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-168.ico",
+    "bytes": 38078,
+    "hash": "f8c39aa1c89bbac2b120a0efc70b6f1240bca9bb61a98ae2cab05d21910bcb15",
+    "checkedAt": "2026-10-01T14:43:28.130Z"
+  },
+  {
+    "id": "gift-site-167",
+    "name": "阿里云开发者",
+    "url": "https://developer.aliyun.com/",
+    "oldLogo": "https://developer.aliyun.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://img.alicdn.com/tfs/TB1_ZXuNcfpK1RjSZFOXXa6nFXa-32-32.ico",
+    "asset": "assets/site-icons/welcome-gift-site-167.ico",
+    "bytes": 4286,
+    "hash": "a79cc4c0c10ae94fb5d6a56daf3f187b869e32f20a5bba1eaddad36ac3e21328",
+    "checkedAt": "2026-10-01T14:43:28.186Z"
+  },
+  {
+    "id": "gift-site-132",
+    "name": "Gemini",
+    "url": "https://gemini.google.com/",
+    "oldLogo": "https://gemini.google.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://gemini.google.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/gemini.google.com",
+    "asset": "assets/site-icons/welcome-gift-site-132.png",
+    "bytes": 3657,
+    "hash": "d31d7f02233cdd15551bf5c8e8b1d7cbe74bfa4f80a6aaf2e35a1c64325c8a85",
+    "checkedAt": "2026-10-01T14:44:36.721Z"
+  },
+  {
+    "id": "gift-site-169",
+    "name": "微信开放平台",
+    "url": "https://open.weixin.qq.com/",
+    "oldLogo": "https://open.weixin.qq.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico",
+    "asset": "assets/site-icons/welcome-gift-site-169.png",
+    "bytes": 636,
+    "hash": "5e95f71d79bf3f69a8ebd0a221ed1cf7f3d0a6630a830a1e2308d0e60c00409c",
+    "checkedAt": "2026-10-01T14:43:28.342Z"
+  },
+  {
+    "id": "gift-site-133",
+    "name": "Perplexity",
+    "url": "https://www.perplexity.ai/",
+    "oldLogo": "https://www.perplexity.ai/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.perplexity.ai/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.perplexity.ai",
+    "asset": "assets/site-icons/welcome-gift-site-133.ico",
+    "bytes": 15086,
+    "hash": "df9a6478592660077e4e774d37bae6db1eb4d7d9d2cac31f0dcdab8804f76c06",
+    "checkedAt": "2026-10-01T14:44:37.349Z"
+  },
+  {
+    "id": "gift-site-170",
+    "name": "百度智能云",
+    "url": "https://cloud.baidu.com/",
+    "oldLogo": "https://cloud.baidu.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://bce.bdstatic.com/img/newfavicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-170.ico",
+    "bytes": 38078,
+    "hash": "fe0756fc591ed4985144cd9f61784036b1ca2bc1ed3665ad08cd2f5d626d0e77",
+    "checkedAt": "2026-10-01T14:43:28.419Z"
+  },
+  {
+    "id": "gift-site-135",
+    "name": "Poe",
+    "url": "https://poe.com/",
+    "oldLogo": "https://poe.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://poe.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/poe.com",
+    "asset": "assets/site-icons/welcome-gift-site-135.ico",
+    "bytes": 4763,
+    "hash": "b9f1bb2d73658928d75955dd7dd2ce891ad04eeb50b301bb996f21d56cd98193",
+    "checkedAt": "2026-10-01T14:44:36.920Z"
+  },
+  {
+    "id": "gift-site-173",
+    "name": "力扣中国",
+    "url": "https://leetcode.cn/",
+    "oldLogo": "https://leetcode.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://leetcode.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-173.ico",
+    "bytes": 15406,
+    "hash": "864d3cfb2ed74b30b0723e6adcaa44e556655aca10ff0aa953f7ab21cbaf3765",
+    "checkedAt": "2026-10-01T14:43:28.859Z"
+  },
+  {
+    "id": "gift-site-174",
+    "name": "牛客",
+    "url": "https://www.nowcoder.com/",
+    "oldLogo": "https://www.nowcoder.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://static.nowcoder.com/fe/file/images/nowpick/web/www-favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-174.ico",
+    "bytes": 4286,
+    "hash": "d14f15e97547911360444ac04f0c836eb00b5143f2bf33c44b58497d3f039b60",
+    "checkedAt": "2026-10-01T14:43:29.166Z"
+  },
+  {
+    "id": "gift-site-178",
+    "name": "PyPI",
+    "url": "https://pypi.org/",
+    "oldLogo": "https://pypi.org/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://pypi.org/static/images/favicon.35549fe8.ico",
+    "asset": "assets/site-icons/welcome-gift-site-178.ico",
+    "bytes": 4022,
+    "hash": "e1ac4fd303110a6002276947b833592cb9d390c3248cd87d9bcb9fe275b4a580",
+    "checkedAt": "2026-10-01T14:43:29.465Z"
+  },
+  {
+    "id": "gift-site-175",
+    "name": "CodePen",
+    "url": "https://codepen.io/",
+    "oldLogo": "https://codepen.io/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://codepen.io/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/codepen.io",
+    "asset": "assets/site-icons/welcome-gift-site-175.png",
+    "bytes": 3602,
+    "hash": "78572699d697854efb154016053e066b9bbb62fd5dda3755fb827b00c4e5ef98",
+    "checkedAt": "2026-10-01T14:44:37.250Z"
+  },
+  {
+    "id": "gift-site-164",
+    "name": "Cloudflare Docs",
+    "url": "https://developers.cloudflare.com/",
+    "oldLogo": "https://developers.cloudflare.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://developers.cloudflare.com/favicon.png",
+    "asset": "assets/site-icons/welcome-gift-site-164.png",
+    "bytes": 1418,
+    "hash": "7d328f438de6c1c1543a133255273320de08ee0f773fd474c12e11b2394d6e26",
+    "checkedAt": "2026-10-01T14:43:29.869Z"
+  },
+  {
+    "id": "gift-site-181",
+    "name": "中国大学MOOC",
+    "url": "https://www.icourse163.org/",
+    "oldLogo": "https://www.icourse163.org/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://edu-image.nosdn.127.net/32a8dd2a-b9aa-4ec9-abd5-66cd8751befb.png?imageView&quality=100",
+    "asset": "assets/site-icons/welcome-gift-site-181.png",
+    "bytes": 977,
+    "hash": "8a02807f7beb17846491496db0f1e1f875a2e0eb59f64277c71cad89c6953c46",
+    "checkedAt": "2026-10-01T14:43:30.149Z"
+  },
+  {
+    "id": "gift-site-182",
+    "name": "学堂在线",
+    "url": "https://www.xuetangx.com/",
+    "oldLogo": "https://www.xuetangx.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://proxt-cdn.xuetangx.com/fe-proxtassets/xuetangX/0329/logo.ico",
+    "asset": "assets/site-icons/welcome-gift-site-182.ico",
+    "bytes": 4286,
+    "hash": "4bc35ed1aa490be18377633cee4fb146f4ee67e34826fcbf792a91355bdcc363",
+    "checkedAt": "2026-10-01T14:43:30.284Z"
+  },
+  {
+    "id": "gift-site-176",
+    "name": "CodeSandbox",
+    "url": "https://codesandbox.io/",
+    "oldLogo": "https://codesandbox.io/favicon.ico",
+    "status": "verified",
+    "pageError": "",
+    "errors": [
+      {
+        "url": "https://codesandbox.io/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/codesandbox.io",
+    "asset": "assets/site-icons/welcome-gift-site-176.png",
+    "bytes": 176,
+    "hash": "0c900c59831f858b0c2d4315920a0c696c255ff8d9aa801f07b4072d8a6c6b53",
+    "checkedAt": "2026-10-01T14:44:37.148Z"
+  },
+  {
+    "id": "gift-site-183",
+    "name": "网易公开课",
+    "url": "https://open.163.com/",
+    "oldLogo": "https://open.163.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://c.open.163.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-183.ico",
+    "bytes": 4286,
+    "hash": "11810d3b15e633972d5f02e55a145aedc338d7910c1432a734608ea65ae6569e",
+    "checkedAt": "2026-10-01T14:43:30.528Z"
+  },
+  {
+    "id": "gift-site-177",
+    "name": "npm",
+    "url": "https://www.npmjs.com/",
+    "oldLogo": "https://www.npmjs.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.npmjs.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.npmjs.com",
+    "asset": "assets/site-icons/welcome-gift-site-177.png",
+    "bytes": 716,
+    "hash": "502707d5907b7ab68579f8135a4b62d4ceb9e00303d13d3a1a99f98b6db96dd4",
+    "checkedAt": "2026-10-01T14:44:37.077Z"
+  },
+  {
+    "id": "gift-site-172",
+    "name": "Vercel",
+    "url": "https://vercel.com/",
+    "oldLogo": "https://vercel.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://assets.vercel.com/image/upload/q_auto/front/favicon/vercel/apple-touch-icon-256x256.png",
+    "asset": "assets/site-icons/welcome-gift-site-172.png",
+    "bytes": 964,
+    "hash": "bf359490ca798ade935a62388c223f4d5a1d38fc7b3d4833a052f3d6174d7bf9",
+    "checkedAt": "2026-10-01T14:43:30.694Z"
+  },
+  {
+    "id": "gift-site-179",
+    "name": "JetBrains",
+    "url": "https://www.jetbrains.com/",
+    "oldLogo": "https://www.jetbrains.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.jetbrains.com/favicon.ico?r=1234",
+    "asset": "assets/site-icons/welcome-gift-site-179.ico",
+    "bytes": 21238,
+    "hash": "f4c6f47172404b2f797a85f0e598fa6948c728dd3f65760f5bee10c1d8767395",
+    "checkedAt": "2026-10-01T14:43:30.933Z"
+  },
+  {
+    "id": "gift-site-145",
+    "name": "Hugging Face",
+    "url": "https://huggingface.co/",
+    "oldLogo": "https://huggingface.co/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://huggingface.co/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/huggingface.co",
+    "asset": "assets/site-icons/welcome-gift-site-145.ico",
+    "bytes": 205556,
+    "hash": "7266292a5073388702cfca169d26766460cb90ba978bacc95c914ad7a5c611cb",
+    "checkedAt": "2026-10-01T14:44:38.363Z"
+  },
+  {
+    "id": "gift-site-187",
+    "name": "MIT OpenCourseWare",
+    "url": "https://ocw.mit.edu/",
+    "oldLogo": "https://ocw.mit.edu/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://ocw.mit.edu/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-187.ico",
+    "bytes": 5558,
+    "hash": "6d27d37a515c3498aa71f8265d21cadc50ca63eb321e223386d48fe87ec7c552",
+    "checkedAt": "2026-10-01T14:43:31.125Z"
+  },
+  {
+    "id": "gift-site-148",
+    "name": "Suno",
+    "url": "https://suno.com/",
+    "oldLogo": "https://suno.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://suno.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/suno.com",
+    "asset": "assets/site-icons/welcome-gift-site-148.png",
+    "bytes": 23692,
+    "hash": "0f10be3c73e7c91be76df2579e7639567c5de809497dfdb1d2655ef89144574e",
+    "checkedAt": "2026-10-01T14:44:37.553Z"
+  },
+  {
+    "id": "gift-site-191",
+    "name": "国家中小学智慧教育平台",
+    "url": "https://basic.smartedu.cn/",
+    "oldLogo": "https://basic.smartedu.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://basic.smartedu.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-191.ico",
+    "bytes": 1150,
+    "hash": "b63234f18285813e298529fd8242acc84c0612879177a99209d3c40fba013a56",
+    "checkedAt": "2026-10-01T14:43:31.702Z"
+  },
+  {
+    "id": "gift-site-190",
+    "name": "Udacity",
+    "url": "https://www.udacity.com/",
+    "oldLogo": "https://www.udacity.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.udacity.com/favicon/apple-touch-icon.png",
+    "asset": "assets/site-icons/welcome-gift-site-190.png",
+    "bytes": 5726,
+    "hash": "3a15c3670303d8d6437cdfad20a4d4927fa7b5251e75bf8522b9fe7656923931",
+    "checkedAt": "2026-10-01T14:43:31.892Z"
+  },
+  {
+    "id": "gift-site-186",
+    "name": "Udemy",
+    "url": "https://www.udemy.com/",
+    "oldLogo": "https://www.udemy.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.udemy.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.udemy.com",
+    "asset": "assets/site-icons/welcome-gift-site-186.png",
+    "bytes": 1441,
+    "hash": "b28865af80e52789d599218e7ea94a4f3320e38591f8e8dc3e59f7f21d0b4770",
+    "checkedAt": "2026-10-01T14:44:37.450Z"
+  },
+  {
+    "id": "gift-site-193",
+    "name": "超星学习通",
+    "url": "https://i.chaoxing.com/",
+    "oldLogo": "https://i.chaoxing.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://passport2.chaoxing.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-193.png",
+    "bytes": 588,
+    "hash": "c06100b91263189c9a6d354fe3117f2b6b3f3274bd1ee1cb1fee4f7034751937",
+    "checkedAt": "2026-10-01T14:43:32.085Z"
+  },
+  {
+    "id": "gift-site-192",
+    "name": "国家高等教育智慧教育平台",
+    "url": "https://higher.smartedu.cn/",
+    "oldLogo": "https://higher.smartedu.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://higher.smartedu.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-192.ico",
+    "bytes": 4286,
+    "hash": "41355856b57aa86aa8f6bd8d36d0bd422252d0f2a0551b6ef592ac9b628cd479",
+    "checkedAt": "2026-10-01T14:43:32.123Z"
+  },
+  {
+    "id": "gift-site-150",
+    "name": "Gamma",
+    "url": "https://gamma.app/",
+    "oldLogo": "https://gamma.app/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://gamma.app/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/gamma.app",
+    "asset": "assets/site-icons/welcome-gift-site-150.png",
+    "bytes": 15814,
+    "hash": "fcfb77f93cfb8a06de82bfc7722e2e6258faa89ca9ffc39a9a5252823897702e",
+    "checkedAt": "2026-10-01T14:44:37.912Z"
+  },
+  {
+    "id": "gift-site-196",
+    "name": "沪江网校",
+    "url": "https://class.hujiang.com/",
+    "oldLogo": "https://class.hujiang.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://res.hjfile.cn/classec/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-196.ico",
+    "bytes": 1150,
+    "hash": "f2c81a27fc8a285e7bd7a6062b73292b2536792e8f7466169a620e802618f16b",
+    "checkedAt": "2026-10-01T14:43:32.311Z"
+  },
+  {
+    "id": "gift-site-180",
+    "name": "VS Code",
+    "url": "https://code.visualstudio.com/",
+    "oldLogo": "https://code.visualstudio.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://code.visualstudio.com/assets/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-180.ico",
+    "bytes": 113128,
+    "hash": "1782aac747e92a3334fb1c9b5ca275ef30af5aa35b1208eba9d207aa6889a49a",
+    "checkedAt": "2026-10-01T14:43:32.439Z"
+  },
+  {
+    "id": "gift-site-199",
+    "name": "新东方在线",
+    "url": "https://www.koolearn.com/",
+    "oldLogo": "https://www.koolearn.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.koolearn.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-199.ico",
+    "bytes": 4286,
+    "hash": "a64203313b0918b15e929a1a145c4ce5347656f0be24d99aae7fe5bca7e6f636",
+    "checkedAt": "2026-10-01T14:43:32.494Z"
+  },
+  {
+    "id": "gift-site-198",
+    "name": "百词斩",
+    "url": "https://www.baicizhan.com/",
+    "oldLogo": "https://www.baicizhan.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://7n.bczcdn.com/static/favicon.2b3bc9cf.png",
+    "asset": "assets/site-icons/welcome-gift-site-198.png",
+    "bytes": 641,
+    "hash": "32c44ddb652655f779ed21d2b24453b47607be8aa99f4c80e4b427b3f1fa288d",
+    "checkedAt": "2026-10-01T14:43:32.531Z"
+  },
+  {
+    "id": "gift-site-194",
+    "name": "Khan Academy",
+    "url": "https://www.khanacademy.org/",
+    "oldLogo": "https://www.khanacademy.org/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.khanacademy.org/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-194.ico",
+    "bytes": 4286,
+    "hash": "64228aa99b47c8bfde9cf95cb15b8a13c2221bad3766d8d523b327877947b508",
+    "checkedAt": "2026-10-01T14:43:32.597Z"
+  },
+  {
+    "id": "gift-site-202",
+    "name": "作业帮",
+    "url": "https://www.zuoyebang.com/",
+    "oldLogo": "https://www.zuoyebang.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://xfe.cdnjtzy.com/static_cdn/yy/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-202.ico",
+    "bytes": 4286,
+    "hash": "56e305eaba5d5d4a98ca9053286708eed7f55dac05eb39d69aca6ae7c11c49d6",
+    "checkedAt": "2026-10-01T14:43:32.709Z"
+  },
+  {
+    "id": "gift-site-197",
+    "name": "扇贝",
+    "url": "https://www.shanbay.com/",
+    "oldLogo": "https://www.shanbay.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://assets0.baydn.com/static/img/shanbay_favicon.png",
+    "asset": "assets/site-icons/welcome-gift-site-197.png",
+    "bytes": 3163,
+    "hash": "b9f178711139ec7ea2d8030c75cf0eb53e4fcc52b98bfad52776455420320e74",
+    "checkedAt": "2026-10-01T14:43:32.844Z"
+  },
+  {
+    "id": "gift-site-203",
+    "name": "猿辅导",
+    "url": "https://www.yuanfudao.com/",
+    "oldLogo": "https://www.yuanfudao.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://yfdpc.fbcontent.cn/s/favicon-73be9d0a91.ico",
+    "asset": "assets/site-icons/welcome-gift-site-203.ico",
+    "bytes": 5430,
+    "hash": "44724495a3f27891c9634847bcd519bb00f457db38da40131a9d3272570d0c42",
+    "checkedAt": "2026-10-01T14:43:32.906Z"
+  },
+  {
+    "id": "gift-site-204",
+    "name": "中国教育考试网",
+    "url": "https://www.neea.edu.cn/",
+    "oldLogo": "https://www.neea.edu.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.neea.edu.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-204.ico",
+    "bytes": 4286,
+    "hash": "faaf598037778d17e390b9cbb3caa30e9fc7f521339a22b48e2a2ce8ba0e2de1",
+    "checkedAt": "2026-10-01T14:43:33.025Z"
+  },
+  {
+    "id": "gift-site-152",
+    "name": "GitHub",
+    "url": "https://github.com/",
+    "oldLogo": "https://github.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://github.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/github.com",
+    "asset": "assets/site-icons/welcome-gift-site-152.svg",
+    "bytes": 959,
+    "hash": "6a9577cd4f7fa6b75bde1025af85b944e9dd1388373b55ccba6e9f80ac2eae60",
+    "checkedAt": "2026-10-01T14:44:37.561Z"
+  },
+  {
+    "id": "gift-site-184",
+    "name": "Coursera",
+    "url": "https://www.coursera.org/",
+    "oldLogo": "https://www.coursera.org/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://d3njjcbhbojbot.cloudfront.net/web/images/favicons/favicon-v2-194x194.png",
+    "asset": "assets/site-icons/welcome-gift-site-184.png",
+    "bytes": 7825,
+    "hash": "90cd193acf32dfea009f2fa8249b62286c7a2ac12944adc55f9d8b9201e02b66",
+    "checkedAt": "2026-10-01T14:43:33.232Z"
+  },
+  {
+    "id": "gift-site-208",
+    "name": "学习强国",
+    "url": "https://www.xuexi.cn/",
+    "oldLogo": "https://www.xuexi.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.xuexi.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-208.png",
+    "bytes": 868,
+    "hash": "80fb913e9fde76f8f05cdc823000cb7f3a0e2a593d6d326bf247a325867b457e",
+    "checkedAt": "2026-10-01T14:43:33.395Z"
+  },
+  {
+    "id": "gift-site-201",
+    "name": "Memrise",
+    "url": "https://www.memrise.com/",
+    "oldLogo": "https://www.memrise.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.memrise.com/hubfs/memrise-flavicon.png",
+    "asset": "assets/site-icons/welcome-gift-site-201.png",
+    "bytes": 7510,
+    "hash": "c6d719e89590e932b7b3e7a03846db357a40512f629d43c6a322e9cde7f45fdd",
+    "checkedAt": "2026-10-01T14:43:33.442Z"
+  },
+  {
+    "id": "gift-site-209",
+    "name": "中国教育在线",
+    "url": "https://www.eol.cn/",
+    "oldLogo": "https://www.eol.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.eol.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-209.ico",
+    "bytes": 16958,
+    "hash": "947b48264a88d2ccef4a05081f6f2f4fbb9b8eacba5210591dd706af8ad8ca36",
+    "checkedAt": "2026-10-01T14:43:33.483Z"
+  },
+  {
+    "id": "gift-site-185",
+    "name": "edX",
+    "url": "https://www.edx.org/",
+    "oldLogo": "https://www.edx.org/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.edx.org/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-185.ico",
+    "bytes": 26283,
+    "hash": "88665426d245f5d17653192727176c6f55c2b5f9ec5ff04716256ba5895c219d",
+    "checkedAt": "2026-10-01T14:43:33.544Z"
+  },
+  {
+    "id": "gift-site-211",
+    "name": "哔哩哔哩",
+    "url": "https://www.bilibili.com/",
+    "oldLogo": "https://www.bilibili.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://i0.hdslb.com/bfs/static/jinkela/long/images/512.png",
+    "asset": "assets/site-icons/welcome-gift-site-211.png",
+    "bytes": 16388,
+    "hash": "58cd1df37a4832794155a24c323b8ae738311d89482fe58faf43907a3d8e18ff",
+    "checkedAt": "2026-10-01T14:43:33.756Z"
+  },
+  {
+    "id": "gift-site-212",
+    "name": "腾讯视频",
+    "url": "https://v.qq.com/",
+    "oldLogo": "https://v.qq.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://vfiles.gtimg.cn/wuji_dashboard/xy/starter/4ea79867.png",
+    "asset": "assets/site-icons/welcome-gift-site-212.png",
+    "bytes": 6341,
+    "hash": "21c1d0e6152253d8612ab0ccfb52512842bacdf0d0095ada2c4b7ddb3dfdc7af",
+    "checkedAt": "2026-10-01T14:43:33.832Z"
+  },
+  {
+    "id": "gift-site-213",
+    "name": "爱奇艺",
+    "url": "https://www.iqiyi.com/",
+    "oldLogo": "https://www.iqiyi.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.iqiyi.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-213.ico",
+    "bytes": 32038,
+    "hash": "4134a7da324ec4060a2b11843d3bd8d5545b266a27ff72b0b82bddbc3e6a8b39",
+    "checkedAt": "2026-10-01T14:43:33.843Z"
+  },
+  {
+    "id": "gift-site-188",
+    "name": "FutureLearn",
+    "url": "https://www.futurelearn.com/",
+    "oldLogo": "https://www.futurelearn.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://www.futurelearn.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-188.ico",
+    "bytes": 6518,
+    "hash": "d0de2dc6d5e6e49793233434e8a598238f8f8650286dcb19c4cce93323f8ebb9",
+    "checkedAt": "2026-10-01T14:43:33.876Z"
+  },
+  {
+    "id": "gift-site-216",
+    "name": "咪咕视频",
+    "url": "https://www.miguvideo.com/",
+    "oldLogo": "https://www.miguvideo.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.miguvideo.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-216.ico",
+    "bytes": 9662,
+    "hash": "142646a425f31eb39e6667719326fe9aa09ba8fef42774a24121704640916667",
+    "checkedAt": "2026-10-01T14:43:33.972Z"
+  },
+  {
+    "id": "gift-site-215",
+    "name": "芒果TV",
+    "url": "https://www.mgtv.com/",
+    "oldLogo": "https://www.mgtv.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.mgtv.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-215.ico",
+    "bytes": 4286,
+    "hash": "0e450f9f2b26fcdd72a141c309c6eb08dbaca7e51a9efe3209738bdefd22cd5f",
+    "checkedAt": "2026-10-01T14:43:33.983Z"
+  },
+  {
+    "id": "gift-site-195",
+    "name": "Brilliant",
+    "url": "https://brilliant.org/",
+    "oldLogo": "https://brilliant.org/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://brilliant.org/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-195.ico",
+    "bytes": 32038,
+    "hash": "5a344ef33f8a676ff6097991ec44535915d579883092a13ef16715ca1dac6b44",
+    "checkedAt": "2026-10-01T14:43:34.134Z"
+  },
+  {
+    "id": "gift-site-214",
+    "name": "优酷",
+    "url": "https://www.youku.com/",
+    "oldLogo": "https://www.youku.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://img.alicdn.com/imgextra/i2/O1CN01BeAcgL1ywY0G5nSn8_!!6000000006643-2-tps-195-195.png",
+    "asset": "assets/site-icons/welcome-gift-site-214.png",
+    "bytes": 6499,
+    "hash": "81722b87b00c2634ed70bba59229c57459b845d493fc9e679a3faf7cc488c267",
+    "checkedAt": "2026-10-01T14:43:34.373Z"
+  },
+  {
+    "id": "gift-site-200",
+    "name": "Duolingo",
+    "url": "https://www.duolingo.com/",
+    "oldLogo": "https://www.duolingo.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://d35aaqx5ub95lt.cloudfront.net/images/duolingo-touch-icon2.png",
+    "asset": "assets/site-icons/welcome-gift-site-200.png",
+    "bytes": 8577,
+    "hash": "c9929f12ebd9ab19e20a5bc0a7d0c7a681f818b7f486ffc9c8599f4662d42a55",
+    "checkedAt": "2026-10-01T14:43:34.639Z"
+  },
+  {
+    "id": "gift-site-206",
+    "name": "freeCodeCamp",
+    "url": "https://www.freecodecamp.org/",
+    "oldLogo": "https://www.freecodecamp.org/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.freecodecamp.org/icons/icon-512x512.png",
+    "asset": "assets/site-icons/welcome-gift-site-206.png",
+    "bytes": 5964,
+    "hash": "d9aa4b91c5147d21e96929ebfad3a2d646ea0b58f2fe4f28df8b2fe7eb5c85f7",
+    "checkedAt": "2026-10-01T14:43:34.955Z"
+  },
+  {
+    "id": "gift-site-205",
+    "name": "Quizlet",
+    "url": "https://quizlet.com/",
+    "oldLogo": "https://quizlet.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://quizlet.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/quizlet.com",
+    "asset": "assets/site-icons/welcome-gift-site-205.png",
+    "bytes": 1957,
+    "hash": "d12fbedf93c0e0d1ddd9b69cdf1d20a999150f4f1fdbda51f02799e6c9ca90cd",
+    "checkedAt": "2026-10-01T14:44:37.737Z"
+  },
+  {
+    "id": "gift-site-217",
+    "name": "央视频",
+    "url": "https://www.yangshipin.cn/",
+    "oldLogo": "https://www.yangshipin.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://sapi.yangshipin.cn/assets/2022/pcicon/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-217.ico",
+    "bytes": 4951,
+    "hash": "6a05ded93bf675bf710ecb60c25579f72791671bee75a85ca339220fde1166cc",
+    "checkedAt": "2026-10-01T14:43:35.151Z"
+  },
+  {
+    "id": "gift-site-189",
+    "name": "OpenLearn",
+    "url": "https://www.open.edu/openlearn/",
+    "oldLogo": "https://www.open.edu/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.open.edu/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.open.edu",
+    "asset": "assets/site-icons/welcome-gift-site-189.png",
+    "bytes": 1345,
+    "hash": "819ac4f289bbd51a144badac648a1eb0cca7e6392ac50e08bf9e61ff85b3404a",
+    "checkedAt": "2026-10-01T14:44:37.965Z"
+  },
+  {
+    "id": "gift-site-219",
+    "name": "Netflix",
+    "url": "https://www.netflix.com/",
+    "oldLogo": "https://www.netflix.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.netflix.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.netflix.com",
+    "asset": "assets/site-icons/welcome-gift-site-219.png",
+    "bytes": 1519,
+    "hash": "12675cd7f8e0b4cd0e21f945f3d5927a3486032d7fea1830273c2e1b1c207cd3",
+    "checkedAt": "2026-10-01T14:44:37.703Z"
+  },
+  {
+    "id": "gift-site-225",
+    "name": "网易云音乐",
+    "url": "https://music.163.com/",
+    "oldLogo": "https://music.163.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://s1.music.126.net/style/favicon.ico?v20180823",
+    "asset": "assets/site-icons/welcome-gift-site-225.ico",
+    "bytes": 4286,
+    "hash": "90d4c1e2dcc6f2728a2627a6a625879e8305821bf1bb297a1041e6ccca0d13b1",
+    "checkedAt": "2026-10-01T14:43:35.521Z"
+  },
+  {
+    "id": "gift-site-227",
+    "name": "酷狗音乐",
+    "url": "https://www.kugou.com/",
+    "oldLogo": "https://www.kugou.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.kugou.com/root/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-227.ico",
+    "bytes": 1150,
+    "hash": "78339bbc8393aea26d56c4285488b17a16d60ddc4a698e6b2cfc5d753c91ef24",
+    "checkedAt": "2026-10-01T14:43:35.554Z"
+  },
+  {
+    "id": "gift-site-226",
+    "name": "QQ音乐",
+    "url": "https://y.qq.com/",
+    "oldLogo": "https://y.qq.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://y.qq.com/favicon.ico?max_age=2592000",
+    "asset": "assets/site-icons/welcome-gift-site-226.ico",
+    "bytes": 4286,
+    "hash": "4c47f906dbe8c1fb52f2128b91b563b5f3f05ed153ac267f062a5b66e566756b",
+    "checkedAt": "2026-10-01T14:43:35.699Z"
+  },
+  {
+    "id": "gift-site-228",
+    "name": "酷我音乐",
+    "url": "https://www.kuwo.cn/",
+    "oldLogo": "https://www.kuwo.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.kuwo.cn/favicon.ico?v=1",
+    "asset": "assets/site-icons/welcome-gift-site-228.png",
+    "bytes": 1463,
+    "hash": "503aa033f391328366d9bc52094fb90267221cf36a07a03c85be51bf6d326ac8",
+    "checkedAt": "2026-10-01T14:43:35.859Z"
+  },
+  {
+    "id": "gift-site-224",
+    "name": "Crunchyroll",
+    "url": "https://www.crunchyroll.com/",
+    "oldLogo": "https://www.crunchyroll.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.crunchyroll.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.crunchyroll.com",
+    "asset": "assets/site-icons/welcome-gift-site-224.png",
+    "bytes": 1894,
+    "hash": "0d82a025ffeb72ff51272ceac105189d35579127d6ef6f5d5fe82fc9ea39f20b",
+    "checkedAt": "2026-10-01T14:44:38.016Z"
+  },
+  {
+    "id": "gift-site-159",
+    "name": "V2EX",
+    "url": "https://www.v2ex.com/",
+    "oldLogo": "https://www.v2ex.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.v2ex.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.v2ex.com",
+    "asset": "assets/site-icons/welcome-gift-site-159.png",
+    "bytes": 4996,
+    "hash": "e7836343bbc0ef86ca865964cff11950eec877bb022007fa122b2f86af45c2f0",
+    "checkedAt": "2026-10-01T14:44:38.264Z"
+  },
+  {
+    "id": "gift-site-207",
+    "name": "Codecademy",
+    "url": "https://www.codecademy.com/",
+    "oldLogo": "https://www.codecademy.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://www.codecademy.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-207.ico",
+    "bytes": 6518,
+    "hash": "45dc0a5b984927678eb9d391ddd65733c47039e18ce2f32cca88cc9894d7df1a",
+    "checkedAt": "2026-10-01T14:43:36.779Z"
+  },
+  {
+    "id": "gift-site-210",
+    "name": "TED",
+    "url": "https://www.ted.com/",
+    "oldLogo": "https://www.ted.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.ted.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-210.ico",
+    "bytes": 18094,
+    "hash": "7a2ded0f0d33d925c0f615c6fbbac4b2bf49dea19bca3d10e74f2dba5f25a36e",
+    "checkedAt": "2026-10-01T14:43:37.492Z"
+  },
+  {
+    "id": "gift-site-234",
+    "name": "喜马拉雅",
+    "url": "https://www.ximalaya.com/",
+    "oldLogo": "https://www.ximalaya.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.ximalaya.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-234.ico",
+    "bytes": 9662,
+    "hash": "8639eac456f95fb5ef8da146e7908360fd7afd08249d858b2043dc0339db6293",
+    "checkedAt": "2026-10-01T14:43:37.619Z"
+  },
+  {
+    "id": "gift-site-230",
+    "name": "Apple Music",
+    "url": "https://music.apple.com/",
+    "oldLogo": "https://music.apple.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://music.apple.com/assets/favicon/favicon-180.png",
+    "asset": "assets/site-icons/welcome-gift-site-230.png",
+    "bytes": 7567,
+    "hash": "d34ccf173b7f0b44b0691312b0012b6b87a370141af9a72af115a97211079eb0",
+    "checkedAt": "2026-10-01T14:43:37.911Z"
+  },
+  {
+    "id": "gift-site-235",
+    "name": "蜻蜓FM",
+    "url": "https://www.qingting.fm/",
+    "oldLogo": "https://www.qingting.fm/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://sss.qtfm.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-235.png",
+    "bytes": 765,
+    "hash": "bac7baf7acf3b3afb0cc6680c0f990d9bf76703206894a2ce12a417265ace4e0",
+    "checkedAt": "2026-10-01T14:43:38.091Z"
+  },
+  {
+    "id": "gift-site-237",
+    "name": "猫眼电影",
+    "url": "https://www.maoyan.com/",
+    "oldLogo": "https://www.maoyan.com/favicon.ico",
+    "status": "verified",
+    "pageError": "fetch failed",
+    "errors": [
+      {
+        "url": "https://www.maoyan.com/favicon.ico",
+        "error": "fetch failed"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.maoyan.com",
+    "asset": "assets/site-icons/welcome-gift-site-237.png",
+    "bytes": 9456,
+    "hash": "85863eaf48f110d5a0b45bc39af42ded004f1e4c123a872a76077eb88d23cd7d",
+    "checkedAt": "2026-10-01T14:44:38.214Z"
+  },
+  {
+    "id": "gift-site-238",
+    "name": "豆瓣电影",
+    "url": "https://movie.douban.com/",
+    "oldLogo": "https://movie.douban.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://asset.doubanio.com/cuphead/movie-static/pics/apple-touch-icon.png",
+    "asset": "assets/site-icons/welcome-gift-site-238.png",
+    "bytes": 8902,
+    "hash": "8046d10e185d344bb3ed2098b6d52acb6bfd97692fa00a6f2a44c7f2c7d810ac",
+    "checkedAt": "2026-10-01T14:43:40.076Z"
+  },
+  {
+    "id": "gift-site-220",
+    "name": "Disney+",
+    "url": "https://www.disneyplus.com/",
+    "oldLogo": "https://www.disneyplus.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://static-assets.bamgrid.com/product/disneyplus/favicons/disPlus-favicon-180x180.7d56f648dc95f591721935193bc827cb.png",
+    "asset": "assets/site-icons/welcome-gift-site-220.png",
+    "bytes": 23609,
+    "hash": "2c057c6873f5d924ec676ad0917f3f674a2b3e633214093d2c8a3f4c4ceda8d4",
+    "checkedAt": "2026-10-01T14:43:40.486Z"
+  },
+  {
+    "id": "gift-site-221",
+    "name": "Prime Video",
+    "url": "https://www.primevideo.com/",
+    "oldLogo": "https://www.primevideo.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.primevideo.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-221.ico",
+    "bytes": 1150,
+    "hash": "be49c84879168dead59c66fa0777e1307bd2ab889a9600c497f64c7428bc3c81",
+    "checkedAt": "2026-10-01T14:43:40.588Z"
+  },
+  {
+    "id": "gift-site-241",
+    "name": "淘宝",
+    "url": "https://www.taobao.com/",
+    "oldLogo": "https://www.taobao.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://img.alicdn.com/tps/i3/T1OjaVFl4dXXa.JOZB-114-114.png",
+    "asset": "assets/site-icons/welcome-gift-site-241.png",
+    "bytes": 3944,
+    "hash": "37e1043186bc3f6fd516b000dea66674d54f661c9710b719c3c00e4984cbaa68",
+    "checkedAt": "2026-10-01T14:43:40.733Z"
+  },
+  {
+    "id": "gift-site-242",
+    "name": "京东",
+    "url": "https://www.jd.com/",
+    "oldLogo": "https://www.jd.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://storage.360buyimg.com/retail-mall/mall-common-component/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-242.ico",
+    "bytes": 2817,
+    "hash": "d71bcae7214e3401d42af8b8f4a288da25fdc72601e7592586e5596e45f481ba",
+    "checkedAt": "2026-10-01T14:43:40.802Z"
+  },
+  {
+    "id": "gift-site-243",
+    "name": "拼多多",
+    "url": "https://www.pinduoduo.com/",
+    "oldLogo": "https://www.pinduoduo.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.pinduoduo.com/favicon.png",
+    "asset": "assets/site-icons/welcome-gift-site-243.png",
+    "bytes": 2204,
+    "hash": "f756389105f5fd8eb51263c981a8f450c92eed8def300ff26270cffa7a6b3428",
+    "checkedAt": "2026-10-01T14:43:40.970Z"
+  },
+  {
+    "id": "gift-site-244",
+    "name": "闲鱼",
+    "url": "https://www.goofish.com/",
+    "oldLogo": "https://www.goofish.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://img.alicdn.com/tfs/TB19WObTNv1gK0jSZFFXXb0sXXa-144-144.png",
+    "asset": "assets/site-icons/welcome-gift-site-244.png",
+    "bytes": 6946,
+    "hash": "2f865c0d3268a66f4da7077ed6e01ce48e5730756ed3d2e9d3882385ab77c198",
+    "checkedAt": "2026-10-01T14:43:41.078Z"
+  },
+  {
+    "id": "gift-site-171",
+    "name": "Docker Hub",
+    "url": "https://hub.docker.com/",
+    "oldLogo": "https://hub.docker.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://hub.docker.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/hub.docker.com",
+    "asset": "assets/site-icons/welcome-gift-site-171.png",
+    "bytes": 995,
+    "hash": "f27adbbd412411e7c53140ee7ae14aaa92c0ef3b95af0dc2fed44060a204abe4",
+    "checkedAt": "2026-10-01T14:44:38.635Z"
+  },
+  {
+    "id": "gift-site-236",
+    "name": "Audible",
+    "url": "https://www.audible.com/",
+    "oldLogo": "https://www.audible.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://m.media-amazon.com/images/G/01/seo/creative/Audible_Google_Favicon_192px.png",
+    "asset": "assets/site-icons/welcome-gift-site-236.png",
+    "bytes": 3753,
+    "hash": "5628c7a901ec93b7156806a9bba4f67f13c307e0dd504627df991a651973d94a",
+    "checkedAt": "2026-10-01T14:43:41.592Z"
+  },
+  {
+    "id": "gift-site-245",
+    "name": "Amazon",
+    "url": "https://www.amazon.com/",
+    "oldLogo": "https://www.amazon.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.amazon.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-245.ico",
+    "bytes": 15086,
+    "hash": "5866636f18764cd66366ae6eb682e972b4eae1771512cd76b304b6dd3c0f1d2d",
+    "checkedAt": "2026-10-01T14:43:42.431Z"
+  },
+  {
+    "id": "gift-site-248",
+    "name": "IKEA",
+    "url": "https://www.ikea.com/",
+    "oldLogo": "https://www.ikea.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://www.ikea.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-248.ico",
+    "bytes": 894,
+    "hash": "1a9811320041ae6312bb91f434e0870be08549a3e2438c8889a7d2f3837c37c4",
+    "checkedAt": "2026-10-01T14:43:43.004Z"
+  },
+  {
+    "id": "gift-site-249",
+    "name": "美团",
+    "url": "https://www.meituan.com/",
+    "oldLogo": "https://www.meituan.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://s3plus.meituan.net/v1/mss_e2821d7f0cfe4ac1bf9202ecf9590e67/cdn-prod/file:1040877d/favicon-mt.ico",
+    "asset": "assets/site-icons/welcome-gift-site-249.ico",
+    "bytes": 15086,
+    "hash": "a6f4dd99edf8c49563be4c90ed0b509adb6b890d1a3c35caaa6d799a21c022de",
+    "checkedAt": "2026-10-01T14:43:43.174Z"
+  },
+  {
+    "id": "gift-site-250",
+    "name": "大众点评",
+    "url": "https://www.dianping.com/",
+    "oldLogo": "https://www.dianping.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://verify.meituan.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-250.png",
+    "bytes": 550,
+    "hash": "49b2f8f3054058396e358bb508c1ce5b23b6c65ded38bd6b4fa4cb3a533713a6",
+    "checkedAt": "2026-10-01T14:43:43.426Z"
+  },
+  {
+    "id": "gift-site-251",
+    "name": "支付宝",
+    "url": "https://www.alipay.com/",
+    "oldLogo": "https://www.alipay.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://img.alicdn.com/tfs/TB1qEwuzrj1gK0jSZFOXXc7GpXa-32-32.ico",
+    "asset": "assets/site-icons/welcome-gift-site-251.ico",
+    "bytes": 4286,
+    "hash": "b662de58b15b34d1bf4d2a8bc546f7062a3faaa22acd2ecbbbad70f1e7f37a39",
+    "checkedAt": "2026-10-01T14:49:28.597Z"
+  },
+  {
+    "id": "gift-site-239",
+    "name": "IMDb",
+    "url": "https://www.imdb.com/",
+    "oldLogo": "https://www.imdb.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://m.media-amazon.com/images/G/01/imdb/images-ANDW73HA/favicon_desktop_32x32._CB1582158068_.png",
+    "asset": "assets/site-icons/welcome-gift-site-239.png",
+    "bytes": 528,
+    "hash": "57a6a2b01e4b6a172d3742a782ef47e9b9cdc93414b5b12db81cd78cd078637e",
+    "checkedAt": "2026-10-01T14:43:43.625Z"
+  },
+  {
+    "id": "gift-site-240",
+    "name": "Letterboxd",
+    "url": "https://letterboxd.com/",
+    "oldLogo": "https://letterboxd.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://letterboxd.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-240.ico",
+    "bytes": 22382,
+    "hash": "279dd0d75d205747dde13bbca1877b69bf5a1d6840977ef2c61e7cc44738bbbd",
+    "checkedAt": "2026-10-01T14:43:43.651Z"
+  },
+  {
+    "id": "gift-site-254",
+    "name": "饿了么",
+    "url": "https://www.ele.me/",
+    "oldLogo": "https://www.ele.me/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://img.alicdn.com/imgextra/i4/O1CN010Mtffn24QO3fOPxlq_!!6000000007385-2-tps-96-96.png",
+    "asset": "assets/site-icons/welcome-gift-site-254.png",
+    "bytes": 2229,
+    "hash": "8fbb795bd7436d71aa754ecdf83b82c084b8352554149f490fa7f7e3eb290326",
+    "checkedAt": "2026-10-01T14:43:43.798Z"
+  },
+  {
+    "id": "gift-site-252",
+    "name": "Yelp",
+    "url": "https://www.yelp.com/",
+    "oldLogo": "https://www.yelp.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.yelp.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.yelp.com",
+    "asset": "assets/site-icons/welcome-gift-site-252.png",
+    "bytes": 3924,
+    "hash": "6c24ab72097660f9aa6b7e52f8dc7d195e86652ef865ff834e414e2b623b3f71",
+    "checkedAt": "2026-10-01T14:44:38.331Z"
+  },
+  {
+    "id": "gift-site-247",
+    "name": "Walmart",
+    "url": "https://www.walmart.com/",
+    "oldLogo": "https://www.walmart.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.walmart.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-247.ico",
+    "bytes": 15086,
+    "hash": "f1b33bcf89cc6bd1250bff866ff90189ac7fa52eda7d0ed3a9a4ed041a6a1260",
+    "checkedAt": "2026-10-01T14:43:44.126Z"
+  },
+  {
+    "id": "gift-site-255",
+    "name": "DoorDash",
+    "url": "https://www.doordash.com/",
+    "oldLogo": "https://www.doordash.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.doordash.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.doordash.com",
+    "asset": "assets/site-icons/welcome-gift-site-255.png",
+    "bytes": 369,
+    "hash": "712929fcb3fb55ef89cc5440954ecdc72ce42d9ca2be159439448b3f328fe9da",
+    "checkedAt": "2026-10-01T14:44:39.106Z"
+  },
+  {
+    "id": "gift-site-258",
+    "name": "携程",
+    "url": "https://www.ctrip.com/",
+    "oldLogo": "https://www.ctrip.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.ctrip.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-258.ico",
+    "bytes": 1150,
+    "hash": "77c041422eac0aeeb1f7506cfc67cccfb9afd062ebabd6790e79117ebeeb6d47",
+    "checkedAt": "2026-10-01T14:43:44.712Z"
+  },
+  {
+    "id": "gift-site-259",
+    "name": "去哪儿",
+    "url": "https://www.qunar.com/",
+    "oldLogo": "https://www.qunar.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.qunar.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-259.ico",
+    "bytes": 1086,
+    "hash": "180c6155b520857928881c663f0e552dc36475961e32873239ed431ce956b5e7",
+    "checkedAt": "2026-10-01T14:43:44.816Z"
+  },
+  {
+    "id": "gift-site-260",
+    "name": "飞猪",
+    "url": "https://www.fliggy.com/",
+    "oldLogo": "https://www.fliggy.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://img.alicdn.com/imgextra/i1/O1CN01XslwqW1rp2BOz0lt4_!!6000000005679-73-tps-64-64.ico",
+    "asset": "assets/site-icons/welcome-gift-site-260.ico",
+    "bytes": 16958,
+    "hash": "dcb4748c0c8adc1140c0220ff301393b97432841e15106a8b092467d3ba34503",
+    "checkedAt": "2026-10-01T14:43:44.860Z"
+  },
+  {
+    "id": "gift-site-256",
+    "name": "Instacart",
+    "url": "https://www.instacart.com/",
+    "oldLogo": "https://www.instacart.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.instacart.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.instacart.com",
+    "asset": "assets/site-icons/welcome-gift-site-256.png",
+    "bytes": 3487,
+    "hash": "8f920a162e5c7927c9819808937d225cf54ff160c25730370fe7e1a2db747a67",
+    "checkedAt": "2026-10-01T14:44:38.544Z"
+  },
+  {
+    "id": "gift-site-218",
+    "name": "YouTube",
+    "url": "https://www.youtube.com/",
+    "oldLogo": "https://www.youtube.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.youtube.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.youtube.com",
+    "asset": "assets/site-icons/welcome-gift-site-218.png",
+    "bytes": 3675,
+    "hash": "67f52e544c0b13864094185769504b1b37ced7072930056e033e6fafeba9852d",
+    "checkedAt": "2026-10-01T14:44:39.074Z"
+  },
+  {
+    "id": "gift-site-246",
+    "name": "eBay",
+    "url": "https://www.ebay.com/",
+    "oldLogo": "https://www.ebay.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://www.ebay.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-246.ico",
+    "bytes": 1150,
+    "hash": "042bedf532330f2d71bf73a973d3852eebc9e523645f11130e3c2dada8e61f28",
+    "checkedAt": "2026-10-01T14:43:47.783Z"
+  },
+  {
+    "id": "gift-site-222",
+    "name": "Twitch",
+    "url": "https://www.twitch.tv/",
+    "oldLogo": "https://www.twitch.tv/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.twitch.tv/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.twitch.tv",
+    "asset": "assets/site-icons/welcome-gift-site-222.png",
+    "bytes": 287,
+    "hash": "5b84f5aa837edfde54950bcbe6bc367af1323c9454dc72aa101868dea492f2fd",
+    "checkedAt": "2026-10-01T14:44:38.542Z"
+  },
+  {
+    "id": "gift-site-265",
+    "name": "12306",
+    "url": "https://www.12306.cn/",
+    "oldLogo": "https://www.12306.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.12306.cn/index/images/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-265.ico",
+    "bytes": 25214,
+    "hash": "fb8f0b4b3217544b3acbaa852a994383411c696e047af8e3be2461780d10029e",
+    "checkedAt": "2026-10-01T14:43:48.014Z"
+  },
+  {
+    "id": "gift-site-223",
+    "name": "Vimeo",
+    "url": "https://vimeo.com/",
+    "oldLogo": "https://vimeo.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://vimeo.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/vimeo.com",
+    "asset": "assets/site-icons/welcome-gift-site-223.svg",
+    "bytes": 232,
+    "hash": "1abbbbff46bece88d9f3bb2ccfed4bd3c4d74022627acea0022238f94d1ae123",
+    "checkedAt": "2026-10-01T14:44:38.618Z"
+  },
+  {
+    "id": "gift-site-266",
+    "name": "滴滴出行",
+    "url": "https://www.didiglobal.com/download",
+    "oldLogo": "https://www.didiglobal.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://website.didiglobal.com/DDlogo.ico",
+    "asset": "assets/site-icons/welcome-gift-site-266.ico",
+    "bytes": 8158,
+    "hash": "c948f3e8c878fb3505d4327b1b32342641a20015e96ff70437b3921930031ad1",
+    "checkedAt": "2026-10-01T14:43:48.193Z"
+  },
+  {
+    "id": "gift-site-268",
+    "name": "高德地图",
+    "url": "https://www.amap.com/",
+    "oldLogo": "https://www.amap.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://a.amap.com/pc/static/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-268.ico",
+    "bytes": 16958,
+    "hash": "d219abdca9f32fbe1b2bf870ee38860efc7307c35863f344e88c120ad54f53cd",
+    "checkedAt": "2026-10-01T14:43:48.391Z"
+  },
+  {
+    "id": "gift-site-263",
+    "name": "Tripadvisor",
+    "url": "https://www.tripadvisor.com/",
+    "oldLogo": "https://www.tripadvisor.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://www.tripadvisor.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-263.ico",
+    "bytes": 15406,
+    "hash": "3baa02490bb2a848f596b757dd8ef70cc81b529051bf8d4a0efa4adfbae2e457",
+    "checkedAt": "2026-10-01T14:43:48.494Z"
+  },
+  {
+    "id": "gift-site-270",
+    "name": "Google Maps",
+    "url": "https://www.google.com/maps",
+    "oldLogo": "https://www.google.com/favicon.ico",
+    "status": "verified",
+    "pageError": "fetch failed",
+    "errors": [
+      {
+        "url": "https://www.google.com/favicon.ico",
+        "error": "fetch failed"
+      }
+    ],
+    "source": "official-static",
+    "logo": "https://www.gstatic.com/images/branding/product/2x/maps_96dp.png",
+    "asset": "assets/site-icons/welcome-gift-site-270.png",
+    "bytes": 6943,
+    "hash": "5c285f0af081edd7e606a3df989dde52d218f8d4a55a66f2b87f1a5b1688b7f5",
+    "checkedAt": "2026-10-01T14:49:28.380Z"
+  },
+  {
+    "id": "gift-site-269",
+    "name": "百度地图",
+    "url": "https://map.baidu.com/",
+    "oldLogo": "https://map.baidu.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://map.baidu.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-269.ico",
+    "bytes": 15086,
+    "hash": "b3b389733317d067a37252461c7fbd65c21a6955b6f4cbbf6b96c2d3487e7adb",
+    "checkedAt": "2026-10-01T14:43:48.665Z"
+  },
+  {
+    "id": "gift-site-271",
+    "name": "企查查",
+    "url": "https://www.qcc.com/",
+    "oldLogo": "https://www.qcc.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://qcc-static.qcc.com/resources/web/omaterial/favicon.png",
+    "asset": "assets/site-icons/welcome-gift-site-271.png",
+    "bytes": 3549,
+    "hash": "3d7e7bbfa31eb7786abd40ce5f38f58f239d7b41b64f0ec0fdce6405bd33075d",
+    "checkedAt": "2026-10-01T14:43:48.702Z"
+  },
+  {
+    "id": "gift-site-229",
+    "name": "Spotify",
+    "url": "https://open.spotify.com/",
+    "oldLogo": "https://open.spotify.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://open.spotify.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/open.spotify.com",
+    "asset": "assets/site-icons/welcome-gift-site-229.png",
+    "bytes": 1248,
+    "hash": "72f361322ac9b870834a5198038b5d9ced074e5d8a1655c882035353c794ad67",
+    "checkedAt": "2026-10-01T14:44:39.251Z"
+  },
+  {
+    "id": "gift-site-262",
+    "name": "Booking.com",
+    "url": "https://www.booking.com/",
+    "oldLogo": "https://www.booking.com/favicon.ico",
+    "status": "verified",
+    "pageError": "",
+    "errors": [
+      {
+        "url": "https://www.booking.com/favicon.ico",
+        "error": "Input Buffer is empty"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.booking.com",
+    "asset": "assets/site-icons/welcome-gift-site-262.png",
+    "bytes": 1828,
+    "hash": "0590ecc0698858d8ef0c758de654583ea4c83ff4901e7d2ce1f2a3b114e993d2",
+    "checkedAt": "2026-10-01T14:44:39.461Z"
+  },
+  {
+    "id": "gift-site-274",
+    "name": "国家企业信用信息公示系统",
+    "url": "https://www.gsxt.gov.cn/",
+    "oldLogo": "https://www.gsxt.gov.cn/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 521",
+    "errors": [
+      {
+        "url": "https://www.gsxt.gov.cn/favicon.ico",
+        "error": "HTTP 521"
+      },
+      {
+        "url": "https://favicon.im/www.gsxt.gov.cn",
+        "error": "generic placeholder"
+      }
+    ],
+    "source": "directory-logo",
+    "logo": "https://pic.chinadas.com/web/01/397.gif",
+    "asset": "assets/site-icons/welcome-gift-site-274.png",
+    "bytes": 5422,
+    "hash": "33ecda492ce3f8f549e1b0368a122f69fe169cf862af7cb137359a935b89c814",
+    "checkedAt": "2026-10-01T14:49:28.568Z"
+  },
+  {
+    "id": "gift-site-272",
+    "name": "天眼查",
+    "url": "https://www.tianyancha.com/",
+    "oldLogo": "https://www.tianyancha.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cdn.tianyancha.com/wap/images/icon-hires-192x192.png",
+    "asset": "assets/site-icons/welcome-gift-site-272.png",
+    "bytes": 9710,
+    "hash": "01c9e299a3ac1ffb45fc20d68c91f2341700be38048a6e05ce86d833881b9807",
+    "checkedAt": "2026-10-01T14:43:48.818Z"
+  },
+  {
+    "id": "gift-site-277",
+    "name": "BOSS直聘",
+    "url": "https://www.zhipin.com/",
+    "oldLogo": "https://www.zhipin.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://static.zhipin.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-277.ico",
+    "bytes": 1150,
+    "hash": "3410ab623a5f025a6a042690c16bb7b6f1cb6a7033f80f935d8a4be9514357aa",
+    "checkedAt": "2026-10-01T14:43:48.998Z"
+  },
+  {
+    "id": "gift-site-273",
+    "name": "爱企查",
+    "url": "https://aiqicha.baidu.com/",
+    "oldLogo": "https://aiqicha.baidu.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://xinpub.cdn.bcebos.com/static/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-273.ico",
+    "bytes": 16958,
+    "hash": "5201cb20e0a4100f7bc1873f339248233e1c40fc095daab097921ade5ce64497",
+    "checkedAt": "2026-10-01T14:43:49.057Z"
+  },
+  {
+    "id": "gift-site-278",
+    "name": "智联招聘",
+    "url": "https://www.zhaopin.com/",
+    "oldLogo": "https://www.zhaopin.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://common-bucket.zhaopin.cn/img/zhilian-ico/zhilian-ico-1.0.0.png",
+    "asset": "assets/site-icons/welcome-gift-site-278.ico",
+    "bytes": 9662,
+    "hash": "4105ff2ffd01cc404f669b67fd4c38ea30a8a171dc1a4ddee3d2c302b1b419c5",
+    "checkedAt": "2026-10-01T14:43:49.214Z"
+  },
+  {
+    "id": "gift-site-231",
+    "name": "SoundCloud",
+    "url": "https://soundcloud.com/",
+    "oldLogo": "https://soundcloud.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://soundcloud.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/soundcloud.com",
+    "asset": "assets/site-icons/welcome-gift-site-231.png",
+    "bytes": 17851,
+    "hash": "36362f8319bfdd4d1d4af35dd48d9a81ee82b7c315ed4d9b3b404249241c9f53",
+    "checkedAt": "2026-10-01T14:44:39.314Z"
+  },
+  {
+    "id": "gift-site-280",
+    "name": "脉脉",
+    "url": "https://maimai.cn/",
+    "oldLogo": "https://maimai.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://maimai.cn/n/platform/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-280.ico",
+    "bytes": 16958,
+    "hash": "dce926de0fef1b65db8a061e2b27ca6e235e53baf995e3462d58385b3ed9ab14",
+    "checkedAt": "2026-10-01T14:43:49.311Z"
+  },
+  {
+    "id": "gift-site-279",
+    "name": "前程无忧",
+    "url": "https://www.51job.com/",
+    "oldLogo": "https://www.51job.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://fecdn.51jobcdn.com/fe/public/icons/favicon51.ico",
+    "asset": "assets/site-icons/welcome-gift-site-279.png",
+    "bytes": 13239,
+    "hash": "fef924260d2d84e49a0db3d67bc694d2c4ca1be5391bb4acc13f252d99935262",
+    "checkedAt": "2026-10-01T14:43:49.349Z"
+  },
+  {
+    "id": "gift-site-232",
+    "name": "Bandcamp",
+    "url": "https://bandcamp.com/",
+    "oldLogo": "https://bandcamp.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://bandcamp.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/bandcamp.com",
+    "asset": "assets/site-icons/welcome-gift-site-232.svg",
+    "bytes": 1104,
+    "hash": "6f26dc008f832fd764849860c639c572e35a9f3fe7abd09e9ac1c7670dfbb963",
+    "checkedAt": "2026-10-01T14:44:39.027Z"
+  },
+  {
+    "id": "gift-site-284",
+    "name": "东方财富",
+    "url": "https://www.eastmoney.com/",
+    "oldLogo": "https://www.eastmoney.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://g1.dfcfw.com/g1/special/Apple_ico.png",
+    "asset": "assets/site-icons/welcome-gift-site-284.png",
+    "bytes": 13423,
+    "hash": "187f4895f19661afd66a1242aa2f14553b89cd2b6884202595eb7f05d14bbf64",
+    "checkedAt": "2026-10-01T14:43:49.671Z"
+  },
+  {
+    "id": "gift-site-233",
+    "name": "Deezer",
+    "url": "https://www.deezer.com/",
+    "oldLogo": "https://www.deezer.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.deezer.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.deezer.com",
+    "asset": "assets/site-icons/welcome-gift-site-233.png",
+    "bytes": 4973,
+    "hash": "236506642a14a289fffa46f96f409ae8c925a3c21f92fbc0799b8d71b5b9ea46",
+    "checkedAt": "2026-10-01T14:44:39.800Z"
+  },
+  {
+    "id": "gift-site-257",
+    "name": "Uber Eats",
+    "url": "https://www.ubereats.com/",
+    "oldLogo": "https://www.ubereats.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.ubereats.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.ubereats.com",
+    "asset": "assets/site-icons/welcome-gift-site-257.png",
+    "bytes": 3548,
+    "hash": "1128fde63b19d3566982379497b07d1c5daa8881e3e52694509cf245eb88b49a",
+    "checkedAt": "2026-10-01T14:44:39.409Z"
+  },
+  {
+    "id": "gift-site-285",
+    "name": "雪球",
+    "url": "https://xueqiu.com/",
+    "oldLogo": "https://xueqiu.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.xueqiu.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-285.ico",
+    "bytes": 15086,
+    "hash": "ff4429fe455c379dd697defcedbc6074c1708180b60e9f0fda18faf4e5454ba4",
+    "checkedAt": "2026-10-01T14:43:49.976Z"
+  },
+  {
+    "id": "gift-site-283",
+    "name": "Glassdoor",
+    "url": "https://www.glassdoor.com/",
+    "oldLogo": "https://www.glassdoor.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.glassdoor.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.glassdoor.com",
+    "asset": "assets/site-icons/welcome-gift-site-283.png",
+    "bytes": 878,
+    "hash": "53c6e6f5862360c3ed3b11682d890d14f2f872342024614d10fc4644cb96b961",
+    "checkedAt": "2026-10-01T14:44:39.668Z"
+  },
+  {
+    "id": "gift-site-286",
+    "name": "财联社",
+    "url": "https://www.cls.cn/",
+    "oldLogo": "https://www.cls.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cdnjs.cls.cn/www/20200601/image/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-286.ico",
+    "bytes": 1150,
+    "hash": "b753d45acfe779c9b9ad3c722d8898fb957f5585265b672997b96dcf959c9184",
+    "checkedAt": "2026-10-01T14:43:50.123Z"
+  },
+  {
+    "id": "gift-site-261",
+    "name": "Airbnb",
+    "url": "https://www.airbnb.com/",
+    "oldLogo": "https://www.airbnb.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://a0.muscache.com/im/pictures/AirbnbPlatformAssets/AirbnbPlatformAssets-Favicons/original/d1fcc0b3-865f-485a-b28b-43ca0bf7c891.png?im_w=240",
+    "asset": "assets/site-icons/welcome-gift-site-261.png",
+    "bytes": 7188,
+    "hash": "6bad2acc6eaf7f8c1d0cf91275e25350a4d8d2a24c1a4a8677f4ee46f0bfa102",
+    "checkedAt": "2026-10-01T14:43:50.227Z"
+  },
+  {
+    "id": "gift-site-289",
+    "name": "同花顺",
+    "url": "https://www.10jqka.com.cn/",
+    "oldLogo": "https://www.10jqka.com.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.10jqka.com.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-289.ico",
+    "bytes": 2550,
+    "hash": "7a310536f32f728db56af609e3739bddfd1309608aedbedcc666244264cd79dd",
+    "checkedAt": "2026-10-01T14:43:50.281Z"
+  },
+  {
+    "id": "gift-site-267",
+    "name": "Uber",
+    "url": "https://www.uber.com/",
+    "oldLogo": "https://www.uber.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://www.uber.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-267.ico",
+    "bytes": 9662,
+    "hash": "7cb6d23120c81b92824829b8a760b982664b646f915d8ac4d2635e8c34becf96",
+    "checkedAt": "2026-10-01T14:43:50.465Z"
+  },
+  {
+    "id": "gift-site-276",
+    "name": "Crunchbase",
+    "url": "https://www.crunchbase.com/",
+    "oldLogo": "https://www.crunchbase.com/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.crunchbase.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-276.ico",
+    "bytes": 15406,
+    "hash": "d87623753c805ff33405f33655f11d83b86da428556f0013cbd9c9f822ae8938",
+    "checkedAt": "2026-10-01T14:43:50.522Z"
+  },
+  {
+    "id": "gift-site-294",
+    "name": "中国工商银行",
+    "url": "https://www.icbc.com.cn/",
+    "oldLogo": "https://www.icbc.com.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.icbc.com.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-294.png",
+    "bytes": 1960,
+    "hash": "10a0321ed07c6c1c893b5b099847950de2686fe8f93bcf7a4cf5b0e53f1737a5",
+    "checkedAt": "2026-10-01T14:43:50.597Z"
+  },
+  {
+    "id": "gift-site-293",
+    "name": "招商银行",
+    "url": "https://www.cmbchina.com/",
+    "oldLogo": "https://www.cmbchina.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.cmbchina.com/cmb.ico",
+    "asset": "assets/site-icons/welcome-gift-site-293.ico",
+    "bytes": 17542,
+    "hash": "8d60fe71baaa288eaab43c76caf2354c475040b38d3858f99a0cb3a17ea6207b",
+    "checkedAt": "2026-10-01T14:43:50.672Z"
+  },
+  {
+    "id": "gift-site-295",
+    "name": "中国银行",
+    "url": "https://www.boc.cn/",
+    "oldLogo": "https://www.boc.cn/favicon.ico",
+    "status": "verified",
+    "source": "official-fallback",
+    "logo": "https://www.boc.cn/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-295.ico",
+    "bytes": 1150,
+    "hash": "d943ce00fb62c37509cbb07959cb941b6f85f9e6bfe7ce2f478c5317ed220467",
+    "checkedAt": "2026-10-01T14:43:50.972Z"
+  },
+  {
+    "id": "gift-site-291",
+    "name": "Investing.com",
+    "url": "https://www.investing.com/",
+    "oldLogo": "https://www.investing.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.investing.com/favicon.ico",
+        "error": "HTTP 403"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.investing.com",
+    "asset": "assets/site-icons/welcome-gift-site-291.png",
+    "bytes": 3233,
+    "hash": "470208b90f600e9cc02d5fe4294939cac11245edc449c986a8da47efce505edf",
+    "checkedAt": "2026-10-01T14:44:39.459Z"
+  },
+  {
+    "id": "gift-site-282",
+    "name": "Indeed",
+    "url": "https://www.indeed.com/",
+    "oldLogo": "https://www.indeed.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://www.indeed.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-282.ico",
+    "bytes": 11383,
+    "hash": "5dd908b160254ccd9f846828e850aa86002eb2b945e23edc71cb19fc5e02f7e3",
+    "checkedAt": "2026-10-01T14:43:51.363Z"
+  },
+  {
+    "id": "gift-site-281",
+    "name": "LinkedIn",
+    "url": "https://www.linkedin.com/",
+    "oldLogo": "https://www.linkedin.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://static.licdn.com/sc/h/eahiplrwoq61f4uan012ia17i",
+    "asset": "assets/site-icons/welcome-gift-site-281.png",
+    "bytes": 2676,
+    "hash": "43d36e9e4373eeef0863079b7ca2030e54663f399de85603ca4c7aef8b814499",
+    "checkedAt": "2026-10-01T14:43:51.420Z"
+  },
+  {
+    "id": "gift-site-296",
+    "name": "PayPal",
+    "url": "https://www.paypal.com/",
+    "oldLogo": "https://www.paypal.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.paypalobjects.com/en_US/i/icon/pp_favicon_x.ico",
+    "asset": "assets/site-icons/welcome-gift-site-296.ico",
+    "bytes": 5430,
+    "hash": "1690c4e20869c3763b7fc111e2f94035b0a7ee830311dd680ac91421daad3667",
+    "checkedAt": "2026-10-01T14:43:51.773Z"
+  },
+  {
+    "id": "gift-site-299",
+    "name": "World Bank",
+    "url": "https://www.worldbank.org/",
+    "oldLogo": "https://www.worldbank.org/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://www.worldbank.org/content/dam/wbr-redesign/logos/wbg-favicon.png",
+    "asset": "assets/site-icons/welcome-gift-site-299.png",
+    "bytes": 6443,
+    "hash": "45e071ba1e59c2afd427116d38b4f015a501cb6430969be89fd76808a0ae3bc7",
+    "checkedAt": "2026-10-01T14:43:52.030Z"
+  },
+  {
+    "id": "gift-site-298",
+    "name": "Wise",
+    "url": "https://wise.com/",
+    "oldLogo": "https://wise.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://wise.com/public-resources/assets/icons/wise-personal/apple_touch_icon.png",
+    "asset": "assets/site-icons/welcome-gift-site-298.png",
+    "bytes": 5142,
+    "hash": "8c7544793c991eec556b1b5b97645d6ce649ca9d44f58fea7f6cf68ac4e9781e",
+    "checkedAt": "2026-10-01T14:43:52.091Z"
+  },
+  {
+    "id": "gift-site-253",
+    "name": "OpenTable",
+    "url": "https://www.opentable.com/",
+    "oldLogo": "https://www.opentable.com/favicon.ico",
+    "status": "verified",
+    "pageError": "HTTP 403",
+    "errors": [
+      {
+        "url": "https://www.opentable.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.opentable.com",
+    "asset": "assets/site-icons/welcome-gift-site-253.ico",
+    "bytes": 32988,
+    "hash": "68011c6bcf44187e5b33a3d7e0dca3dd74f5be006f6613cc9eb7273398926d37",
+    "checkedAt": "2026-10-01T14:44:39.999Z"
+  },
+  {
+    "id": "gift-site-264",
+    "name": "Expedia",
+    "url": "https://www.expedia.com/",
+    "oldLogo": "https://www.expedia.com/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://www.expedia.com/favicon.ico",
+    "asset": "assets/site-icons/welcome-gift-site-264.ico",
+    "bytes": 15086,
+    "hash": "39c5ac0c0fc5052a4ca22e986d1e444bb4ca4daf021f366e19a585c3a32ac811",
+    "checkedAt": "2026-10-01T14:43:52.125Z"
+  },
+  {
+    "id": "gift-site-275",
+    "name": "Shopify",
+    "url": "https://www.shopify.com/",
+    "oldLogo": "https://www.shopify.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://cdn.shopify.com/b/shopify-brochure2-assets/c97c60ca19c64a8b5378d9f9e971f7bd.png",
+    "asset": "assets/site-icons/welcome-gift-site-275.png",
+    "bytes": 2379,
+    "hash": "c1e3969d9ed72e31d9b0d8655f45c35306c200c791567a03cb22e91fe68e8ca6",
+    "checkedAt": "2026-10-01T14:43:53.048Z"
+  },
+  {
+    "id": "gift-site-297",
+    "name": "Stripe",
+    "url": "https://stripe.com/",
+    "oldLogo": "https://stripe.com/favicon.ico",
+    "status": "verified",
+    "source": "official-page",
+    "logo": "https://images.stripeassets.com/fzn2n1nzq965/4vVgZi0ZMoEzOhkcv7EVwK/8cce6fdcf2733b2ec8e99548908847ed/favicon.png?w=180&h=180",
+    "asset": "assets/site-icons/welcome-gift-site-297.png",
+    "bytes": 3300,
+    "hash": "be3e025be1f22aadaf4fdbcf16fcc2ac4fa3f8bfbc833231ed38f124d7669eb6",
+    "checkedAt": "2026-10-01T14:43:53.192Z"
+  },
+  {
+    "id": "gift-site-300",
+    "name": "OECD",
+    "url": "https://www.oecd.org/",
+    "oldLogo": "https://www.oecd.org/favicon.ico",
+    "status": "verified",
+    "source": "previous",
+    "logo": "https://www.oecd.org/etc.clientlibs/oecd/clientlibs/clientlib-base/resources/icon-192x192.png",
+    "asset": "assets/site-icons/welcome-gift-site-300.png",
+    "bytes": 4537,
+    "hash": "0b4d77c279e07caeadc8f8b3544bd551037edb2ce78e66a6fe2790915a25a920",
+    "checkedAt": "2026-10-01T14:43:53.360Z"
+  },
+  {
+    "id": "gift-site-287",
+    "name": "Bloomberg",
+    "url": "https://www.bloomberg.com/",
+    "oldLogo": "https://www.bloomberg.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.bloomberg.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.bloomberg.com",
+    "asset": "assets/site-icons/welcome-gift-site-287.ico",
+    "bytes": 15406,
+    "hash": "fd1ace0f3033ff036069e86ffec8806531ed3465ccb7d16d27dea0f6d368cbbb",
+    "checkedAt": "2026-10-01T14:44:40.083Z"
+  },
+  {
+    "id": "gift-site-288",
+    "name": "Yahoo Finance",
+    "url": "https://finance.yahoo.com/",
+    "oldLogo": "https://finance.yahoo.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://finance.yahoo.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/finance.yahoo.com",
+    "asset": "assets/site-icons/welcome-gift-site-288.ico",
+    "bytes": 2238,
+    "hash": "c6f7ee2cadae2e121342a8c4245141175bfe887776206deb17149d46cf3aa827",
+    "checkedAt": "2026-10-01T14:44:39.763Z"
+  },
+  {
+    "id": "gift-site-290",
+    "name": "TradingView",
+    "url": "https://www.tradingview.com/",
+    "oldLogo": "https://www.tradingview.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.tradingview.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.tradingview.com",
+    "asset": "assets/site-icons/welcome-gift-site-290.png",
+    "bytes": 4127,
+    "hash": "592ef16476e57f15aca8a691e0775d9a5e45e720addf01186f40027405791205",
+    "checkedAt": "2026-10-01T14:44:40.012Z"
+  },
+  {
+    "id": "gift-site-292",
+    "name": "Coinbase",
+    "url": "https://www.coinbase.com/",
+    "oldLogo": "https://www.coinbase.com/favicon.ico",
+    "status": "verified",
+    "pageError": "The operation was aborted due to timeout",
+    "errors": [
+      {
+        "url": "https://www.coinbase.com/favicon.ico",
+        "error": "The operation was aborted due to timeout"
+      }
+    ],
+    "source": "icon-cache",
+    "logo": "https://a.favicon.im/www.coinbase.com",
+    "asset": "assets/site-icons/welcome-gift-site-292.png",
+    "bytes": 603,
+    "hash": "54a021df248c2f5772e7d3454e0b9539499fa3615a01581e1ba69d7535b666db",
+    "checkedAt": "2026-10-01T14:44:39.869Z"
+  }
+]

@@ -1,0 +1,51 @@
+{
+  "geometryUnchanged": true,
+  "focusAndReturn": true,
+  "textures": [
+    {
+      "id": "mercury",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "venus",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "earth",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "mars",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "jupiter",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "saturn",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "uranus",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "neptune",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "moon",
+      "width": 1024,
+      "height": 512
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "depth": "flat",
+    "samples": [
+      {
+        "seconds": 30,
+        "count": 265,
+        "local": 231,
+        "ratio": 0.8716981132075472,
+        "merged": 943,
+        "shattered": 466
+      },
+      {
+        "seconds": 60,
+        "count": 143,
+        "local": 94,
+        "ratio": 0.6573426573426573,
+        "merged": 1297,
+        "shattered": 664
+      },
+      {
+        "seconds": 180,
+        "count": 60,
+        "local": 30,
+        "ratio": 0.5,
+        "merged": 1437,
+        "shattered": 718
+      }
+    ],
+    "msPerStep1200": 10.415000000596047
+  },
+  {
+    "depth": "depth",
+    "samples": [
+      {
+        "seconds": 30,
+        "count": 373,
+        "local": 214,
+        "ratio": 0.5737265415549598,
+        "merged": 642,
+        "shattered": 315
+      },
+      {
+        "seconds": 60,
+        "count": 280,
+        "local": 98,
+        "ratio": 0.35,
+        "merged": 816,
+        "shattered": 389
+      },
+      {
+        "seconds": 180,
+        "count": 260,
+        "local": 64,
+        "ratio": 0.24615384615384617,
+        "merged": 853,
+        "shattered": 405
+      }
+    ],
+    "msPerStep1200": 9.728333333134652
+  }
+]

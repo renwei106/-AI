@@ -1,0 +1,12 @@
+{
+  "savedParametersAndHold": true,
+  "integrated3dScenes": true,
+  "backendPolicy": true,
+  "sharedSearch": true,
+  "cleanup": true,
+  "baseRegression": true,
+  "sharedThemePicker": true,
+  "responsive": true,
+  "accessEnforced": true,
+  "missingConfigFailsClosed": true
+}

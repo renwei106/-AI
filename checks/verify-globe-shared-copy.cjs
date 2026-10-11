@@ -1,0 +1,26 @@
+const {fixture}=require('./verify-desktop-pet.cjs');
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const assert=require('node:assert/strict');
+(async()=>{
+ const browser=await chromium.launch({channel:'msedge',headless:true}),f=await fixture(browser),p=f.page;
+ await p.evaluate(()=>{prefs.theme='globe';prefs.sharedHomeCopy={mode:'default'};render();settingsTab='copy';renderSettings();show('#settings');});
+ assert.equal(await p.locator('.globe-copy h1').textContent(),'世界很大，沿着喜欢，慢慢抵达。');
+ await p.locator('[data-shared-copy-mode="custom"]').click();
+ assert.equal(await p.locator('[data-shared-copy-field="title"]').inputValue(),'世界很大，\n沿着喜欢，慢慢抵达。');
+ await p.locator('[data-shared-copy-field="title"]').fill('属于你的星海\n从这里出发');
+ await p.locator('[data-shared-copy-field="intro"]').fill('把喜欢留在身边');
+ assert.deepEqual(await p.locator('.globe-copy h1 span').allTextContents(),['属于你的星海','从这里出发']);
+ assert.equal(await p.locator('.globe-copy>p').textContent(),'把喜欢留在身边');
+ const canvas=await p.locator('#earth-theme-canvas').evaluate(node=>{window.__copyCanvas=node;return !!node;});assert(canvas);
+ await p.locator('[data-shared-copy-field="title"]').fill('<星海>\n继续出发');
+ assert(await p.evaluate(()=>window.__copyCanvas===document.querySelector('#earth-theme-canvas')));
+ assert.equal(await p.locator('.globe-copy h1 span').first().textContent(),'<星海>');
+ await p.reload({waitUntil:'networkidle'});
+ assert.deepEqual(await p.locator('.globe-copy h1 span').allTextContents(),['<星海>','继续出发']);
+ await p.evaluate(()=>{settingsTab='copy';renderSettings();show('#settings');});await p.locator('[data-shared-copy-mode="default"]').click();
+ assert.deepEqual(await p.locator('.globe-copy h1 span').allTextContents(),['世界很大，','沿着喜欢，慢慢抵达。']);
+ assert.equal(await p.locator('.globe-copy>p').textContent(),'愿每一次凝望，都离喜欢更近一点。');
+ await p.evaluate(()=>{prefs.sharedHomeCopy={mode:'custom',title:'跨主题文案',intro:'同一套简介'};prefs.theme='base';render();prefs.theme='globe';render();});
+ assert.equal(await p.locator('.globe-copy h1').textContent(),'跨主题文案');
+ assert.deepEqual(f.errors,[]);await browser.close();console.log('PASS globe shared copy: live edits, lines, escaping, stable canvas, reload, defaults, theme switch');
+})().catch(error=>{console.error(error);process.exit(1)});

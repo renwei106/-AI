@@ -1,0 +1,319 @@
+diff --git a/payments/invitation-model.mjs b/payments/invitation-model.mjs
+index e6fcba9..a5d61f6 100644
+--- a/payments/invitation-model.mjs
++++ b/payments/invitation-model.mjs
+@@ -47,7 +47,7 @@ export function calculateRewards(campaigns, users, existing, now = Date.now()) {
+         if (!(registered >= timestamp(c.start) && registered < end && registered <= now))
+             continue;
+         candidates.push({ c, inviter, user, at: registered, type: '注册奖励' });
+-        const firstPaid = user.memberEvents.filter(e => e.type === '付费' && e.amount > 0).sort((a, b) => timestamp(a.time) - timestamp(b.time))[0];
++        const firstPaid = user.memberEvents.filter(e => e.type === '付费' && e.amount > 0 && e.invitationEligible !== false).sort((a, b) => timestamp(a.time) - timestamp(b.time))[0];
+         if (firstPaid) {
+             const at = timestamp(firstPaid.time);
+             if (at >= registered && at < end && at <= now && at <= registered + c.purchaseWithinDays * DAY)
+diff --git a/payments/membership.cjs b/payments/membership.cjs
+index e745761..4ee825f 100644
+--- a/payments/membership.cjs
++++ b/payments/membership.cjs
+@@ -96,7 +96,7 @@ function createMembershipService(options = {}) {
+       expires: cancel ? '已取消' : end(after), operator: input.operator || (source === 'admin' ? '管理员' : '系统'),
+       orderId: input.orderId, rewardId: input.rewardId, planId: after.planId, planName: after.planName, planVersion: after.planVersion,
+       beforeExpiresAt: end(before), afterExpiresAt: end(after), beforePermanent: before.permanent, afterPermanent: after.permanent,
+-      remark: input.remark || '', ...(source === 'payment' ? { provider: input.provider } : {}) };
++      remark: input.remark || '', ...(source === 'payment' ? { provider: input.provider, invitationEligible: input.invitationEligible !== false, activityId: input.activityId } : {}) };
+     user.membership = after;
+     user.member = after.member;
+     user.memberExpiresAt = end(after);
+@@ -131,10 +131,11 @@ function createMembershipService(options = {}) {
+     if (changed) writeUsers(users);
+     return store;
+   }
+-  function applyPayment(order) {
++  function applyPayment(order, activity = {}) {
+     const planSnapshot = order.plan_snapshot ? JSON.parse(order.plan_snapshot) : null;
+     const result = mutate(order.user_id, { id: `PAY:${order.id}`, source: 'payment', orderId: order.id, planId: order.plan_id,
+-      planSnapshot, days: order.days, amount: order.amount / 100, provider: order.provider, occurredAt: order.paid_at });
++      planSnapshot, days: order.days, amount: order.amount / 100, provider: order.provider, occurredAt: order.paid_at,
++      invitationEligible: activity.invitationEligible, activityId: activity.activityId, remark: activity.bonusDays ? `含活动额外赠送 ${activity.bonusDays} 天` : '' });
+     settleInvitations();
+     return result;
+   }
+diff --git a/payments/providers.cjs b/payments/providers.cjs
+index e17b6f0..a5f40fe 100644
+--- a/payments/providers.cjs
++++ b/payments/providers.cjs
+@@ -66,6 +66,9 @@ class WechatProvider {
+     const QRCode = require('qrcode');
+     return { kind: 'qr', image: await QRCode.toDataURL(data.code_url, { width: 264, margin: 2, errorCorrectionLevel: 'M' }) };
+   }
++  async close(order) {
++    await this.request('POST', '/v3/pay/transactions/out-trade-no/' + encodeURIComponent(order.id) + '/close', { mchid: this.config.mchId });
++  }
+   normalize(data) {
+     return { orderId: data.out_trade_no, transactionId: data.transaction_id, appId: data.appid, merchantId: data.mchid,
+       amount: data.amount?.total, currency: data.amount?.currency, status: data.trade_state === 'SUCCESS' ? 'paid' : ['CLOSED', 'REVOKED', 'PAYERROR'].includes(data.trade_state) ? 'closed' : 'pending',
+@@ -116,7 +119,7 @@ class AlipayProvider {
+     const url = this.sdk.pageExec('alipay.trade.page.pay', 'GET', {
+       notifyUrl: base + '/api/shiyu/payments/notify/alipay', returnUrl: base + '/?page=membership&paymentOrder=' + order.id,
+       bizContent: { outTradeNo: order.id, totalAmount: (order.amount / 100).toFixed(2), subject: '拾隅 · ' + order.plan_name,
+-        productCode: 'FAST_INSTANT_TRADE_PAY', timeoutExpress: '30m', qrPayMode: '4', qrcodeWidth: '264' },
++        productCode: 'FAST_INSTANT_TRADE_PAY', timeExpire: new Date(order.expires_at + 8 * 3600000).toISOString().slice(0,19).replace('T',' '), timeoutExpress: '30m', qrPayMode: '4', qrcodeWidth: '264' },
+     });
+     const parsed = new URL(url);
+     if (parsed.protocol !== 'https:' || parsed.hostname !== 'openapi.alipay.com') fail('支付宝收银台地址无效', 'INVALID_RESPONSE', 502);
+@@ -133,6 +136,10 @@ class AlipayProvider {
+       status: ['TRADE_SUCCESS', 'TRADE_FINISHED'].includes(data.tradeStatus) ? 'paid' : data.tradeStatus === 'TRADE_CLOSED' ? 'closed' : 'pending',
+       paidAt: data.sendPayDate ? parseAlipayDate(data.sendPayDate) : Date.now() };
+   }
++  async close(order) {
++    const data = await this.sdk.exec('alipay.trade.close', { bizContent: { outTradeNo: order.id } }, { validateSign: true });
++    if (data.code !== '10000') throw new PaymentError('支付宝关单尚未确认', 'CLOSE_UNCONFIRMED');
++  }
+   notification(_headers, raw) {
+     const params = new URLSearchParams(raw), data = {};
+     for (const [key, value] of params) {
+diff --git a/payments/server.cjs b/payments/server.cjs
+index f8c76ca..06e4d42 100644
+--- a/payments/server.cjs
++++ b/payments/server.cjs
+@@ -77,7 +77,7 @@ function createPaymentHandler(options = {}) {
+     try {
+       reloadConfig();
+       if (url.pathname === PREFIX + '/status' && req.method === 'GET') { json(res, 200, publicStatus()); return true; }
+-      if (!config.enabled) throw new PaymentError('支付服务暂未开放', 'PAYMENTS_DISABLED', 503);
++      if (!config.enabled && !(url.pathname === PREFIX + '/quote' || url.pathname === PREFIX + '/orders' && req.method === 'POST')) throw new PaymentError('支付服务暂未开放', 'PAYMENTS_DISABLED', 503);
+       const notification = url.pathname.match(/^\/api\/shiyu\/payments\/notify\/(wechat|alipay)$/);
+       if (notification) {
+         if (req.method !== 'POST') throw new PaymentError('请求方法不支持', 'METHOD_NOT_ALLOWED', 405);
+@@ -99,6 +99,9 @@ function createPaymentHandler(options = {}) {
+       }
+       const user = await authenticate(req);
+       if (!user?.id) throw new PaymentError('请登录后再购买', 'UNAUTHENTICATED', 401);
++      if (url.pathname === PREFIX + '/quote' && req.method === 'GET') {
++        json(res, 200, { quote: await service.quote(user, { planId: url.searchParams.get('planId'), quantity: Number(url.searchParams.get('quantity') || 1) }) }); return true;
++      }
+       if (url.pathname === PREFIX + '/account' && req.method === 'GET') {
+         const current = memberships.readUsers().find(item => item.id === user.id);
+         const state = memberships.stateFor(current || null);
+@@ -132,7 +135,7 @@ function createPaymentHandler(options = {}) {
+     return true;
+   }
+   store.expirePending();
+-  const recovery = setInterval(() => { store.expirePending(); service.retryFulfillment(); }, 30000); recovery.unref();
++  const recovery = setInterval(() => { store.expirePending(); service.retryFulfillment(); void service.reconcileActivities().catch(() => {}); }, 30000); recovery.unref();
+   handler.close = () => { clearInterval(recovery); store.close(); };
+   handler.service = service;
+   return handler;
+diff --git a/payments/service.cjs b/payments/service.cjs
+index 6e55f3d..7f5e36b 100644
+--- a/payments/service.cjs
++++ b/payments/service.cjs
+@@ -1,5 +1,6 @@
+ 'use strict';
+ const { PaymentError, moneyToCents } = require('./providers.cjs');
++const { ActivityEngine } = require('./activities.cjs');
+ function reject(message, code, status = 400) { throw new PaymentError(message, code, status); }
+ function publicOrder(o) {
+   return { id: o.id, provider: o.provider, planId: o.plan_id, planName: o.plan_name, quantity: o.quantity || 1, amount: o.amount, days: o.days,
+@@ -7,35 +8,34 @@ function publicOrder(o) {
+     memberExpiresAt: o.member_expires_at, fulfillment: o.fulfillment_state, checkout: o.checkout && o.status !== 'paid' && o.expires_at > Date.now() ? JSON.parse(o.checkout) : null };
+ }
+ class PaymentService {
+-  constructor({ config, store, providers, getPlans, memberships }) { Object.assign(this, { config, store, providers, getPlans, memberships }); this.creating = new Map(); this.creatingIntent = new Map(); this.querying = new Map(); }
++  constructor({ config, store, providers, getPlans, memberships }) { Object.assign(this, { config, store, providers, getPlans, memberships }); this.activities = new ActivityEngine(store); this.creating = new Map(); this.querying = new Map(); }
++  async quote(user, input) {
++    const plans = await this.getPlans(), plan = plans.find(p => p.id === input.planId && p.enabled === true && p.id !== 'free' && !p.autoRenew);
++    if (!plan || !Number.isInteger(plan.days) || plan.days < 1) reject('该套餐当前不可购买', 'PLAN_UNAVAILABLE');
++    return this.activities.quote(user, plan, input.quantity ?? 1);
++  }
+   provider(name) { if (!this.providers[name]) reject('该支付方式尚未配置完成，请稍后重试', 'NOT_CONFIGURED', 503); return this.providers[name]; }
+   async create(user, input) {
+     input = { ...input, quantity: input?.quantity ?? 1 };
+     if (!input || input.accepted !== true) reject('请先阅读并同意会员服务协议', 'AGREEMENT_REQUIRED');
+     if (!['alipay', 'wechat'].includes(input.provider)) reject('请选择支付方式', 'INVALID_PROVIDER');
+     if (!/^[A-Za-z0-9_-]{16,80}$/.test(input.requestId || '') || typeof input.planId !== 'string' || !Number.isInteger(input.quantity) || input.quantity < 1) reject('下单参数无效', 'INVALID_INPUT');
+-    if (this.config[input.provider]?.enabled === false) reject('该支付方式已关闭，请选择其他方式', 'PROVIDER_DISABLED', 409);
+-    const key = user.id + ':' + input.requestId, intent = user.id + ':' + input.provider + ':' + input.planId + ':' + input.quantity;
++    const key = user.id + ':' + input.requestId;
+     if (this.creating.has(key)) { await this.creating.get(key); return this.existing(user, input); }
+-    if (this.creatingIntent.has(intent)) {
+-      await this.creatingIntent.get(intent);
+-      return this.existing(user, input) || publicOrder(this.store.active(user.id, input.provider, input.planId, input.quantity));
+-    }
+     const promise = this.createOnce(user, input);
+-    this.creating.set(key, promise); this.creatingIntent.set(intent, promise);
+-    try { return await promise; } finally { this.creating.delete(key); if (this.creatingIntent.get(intent) === promise) this.creatingIntent.delete(intent); }
++    this.creating.set(key, promise);
++    try { return await promise; } finally { this.creating.delete(key); }
+   }
+   existing(user, input) {
+     const old = this.store.find(user.id, input.requestId);
+-    if (old && (old.provider !== input.provider || old.plan_id !== input.planId || old.quantity !== input.quantity)) reject('同一请求不能更换套餐、数量或支付方式', 'REQUEST_CONFLICT', 409);
++    if (old && (old.provider !== input.provider && old.provider !== 'free' || old.plan_id !== input.planId || old.quantity !== input.quantity)) reject('同一请求不能更换套餐、数量或支付方式', 'REQUEST_CONFLICT', 409);
+     return old ? publicOrder(old) : null;
+   }
+   async createOnce(user, input) {
+     const existing = this.existing(user, input);
+-    if (existing) return this.upgradeCheckout(existing);
+-    const active = this.store.active(user.id, input.provider, input.planId, input.quantity);
++    if (existing) return existing.provider === 'free' ? this.completeFree(this.store.get(existing.id)) : this.upgradeCheckout(existing);
++    const active = !input.quoteToken && this.store.active(user.id, input.provider, input.planId, input.quantity);
+     if (active) return this.upgradeCheckout(publicOrder(active));
+-    const provider = this.provider(input.provider);
+     if (!this.store.rate('create:' + user.id, 10, 60_000) || !this.store.rate('daily:' + user.id, 100, 86_400_000)) reject('操作过于频繁，请稍后再试', 'RATE_LIMITED', 429);
+     const plans = await this.getPlans();
+     const plan = plans.find(p => p.id === input.planId && p.enabled === true);
+@@ -45,12 +45,29 @@ class PaymentService {
+     if (unitAmount < 1 || !Number.isInteger(plan.days) || plan.days < 1 || plan.days > 3660) reject('套餐金额或时长配置无效', 'PLAN_INVALID');
+     const maxQuantity = Math.floor(3660 / plan.days);
+     if (input.quantity > maxQuantity) reject(`该套餐单次最多购买 ${maxQuantity} 份`, 'QUANTITY_EXCEEDED');
+-    const amount = unitAmount * input.quantity, days = plan.days * input.quantity;
++    const amount = unitAmount * input.quantity;
+     if (!Number.isSafeInteger(amount) || amount > 10_000_000) reject('订单金额超出单次支付范围', 'AMOUNT_EXCEEDED');
+     const baseExpiry = typeof user.memberExpiresAt === 'number' ? user.memberExpiresAt : Date.parse(user.memberExpiresAt || '') || 0;
+-    const order = this.store.create({ userId: user.id, requestId: input.requestId, provider: input.provider, plan, quantity: input.quantity, amount, days, baseExpiry });
+-    try { return publicOrder(this.store.checkout(order.id, await provider.create(order, this.config.publicBaseUrl))); }
+-    catch (error) { this.store.unknown(order.id); error.orderId = order.id; throw error; }
++    const preview = this.activities.quote(user, plan, input.quantity);
++    if (preview.amount > 0) {
++      if (this.config.enabled === false) reject('支付服务暂未开放', 'PAYMENTS_DISABLED', 503);
++      if (this.config[input.provider]?.enabled === false) reject('该支付方式已关闭，请选择其他方式', 'PROVIDER_DISABLED', 409);
++      this.provider(input.provider);
++    }
++    let reservation;
++    try { reservation = this.activities.reserve(user, input, plan, baseExpiry); }
++    catch (error) { this.activities.audit('rejected', { userId: user.id, reason: error.message, details: { code: error.code, planId: plan.id, quantity: input.quantity } }); throw error; }
++    const { order } = reservation;
++    if (order.provider === 'free') return this.completeFree(order);
++    if (reservation.existing) return this.upgradeCheckout(publicOrder(order));
++    try { return publicOrder(this.store.checkout(order.id, await this.provider(input.provider).create(order, this.config.publicBaseUrl))); }
++    catch (error) { this.store.unknown(order.id); if (this.activities.participation(order.id)) this.activities.issue(order.id, 'CHECKOUT_UNKNOWN', '支付创建结果未确认，保留名额等待核查'); error.orderId = order.id; throw error; }
++  }
++  completeFree(order) {
++    if (order.provider !== 'free' || order.amount !== 0 || !this.activities.participation(order.id)) reject('无效的零元订单', 'INVALID_FREE_ORDER');
++    const paid = this.store.paid(order.id, `FREE:${order.id}`, order.created_at);
++    if (order.status !== 'paid') this.activities.audit('free_complete', { orderId: order.id, userId: order.user_id, reason: '零元领取完成，未调用支付渠道' });
++    try { return publicOrder(this.fulfill(paid)); } catch (error) { error.orderId = order.id; throw error; }
+   }
+   async upgradeCheckout(order) {
+     if (order.provider !== 'alipay' || order.checkout?.kind !== 'redirect' || order.status === 'paid' || order.status === 'closed') return order;
+@@ -65,6 +82,7 @@ class PaymentService {
+   }
+   async query(user, id) {
+     let order = this.owned(user, id);
++    if (order.provider === 'free') return this.completeFree(order);
+     if (order.provider === 'alipay' && order.checkout && JSON.parse(order.checkout).kind === 'redirect' && !['paid','closed'].includes(order.status) && order.expires_at > Date.now()) {
+       await this.upgradeCheckout(publicOrder(order));
+       order = this.owned(user, id);
+@@ -88,16 +106,60 @@ class PaymentService {
+     if (result.status === 'pending') return order;
+     const config = this.config[provider], merchant = provider === 'wechat' ? config.mchId : config.sellerId;
+     if (result.appId !== config.appId || result.merchantId !== merchant || result.amount !== order.amount || result.currency !== 'CNY') reject('支付通知的应用、商户或金额不匹配', 'PAYMENT_MISMATCH');
+-    if (result.status === 'closed') return this.store.closed(order.id);
++    if (result.status === 'closed') {
++      const closed = this.store.closed(order.id);
++      if (closed.status === 'closed' && order.status !== 'closed' && this.activities.participation(order.id)) this.activities.audit('release', { orderId: order.id, reason: '支付渠道确认关闭，释放优惠名额' });
++      return closed;
++    }
+     if (!result.transactionId || !Number.isFinite(result.paidAt) || result.paidAt < order.created_at - 300_000 || result.paidAt > Date.now() + 300_000) reject('支付成功通知缺少有效交易信息', 'INVALID_PAYMENT');
+     const currentUser = this.memberships?.readUsers().find(user => user.id === order.user_id);
+     const expiry = this.memberships ? this.memberships.stateFor(currentUser || null).expiresAt : undefined;
+-    return this.fulfill(this.store.paid(order.id, result.transactionId, result.paidAt, expiry));
++    const participation = this.activities.participation(order.id);
++    const paid = this.store.paid(order.id, result.transactionId, result.paidAt, expiry);
++    if (participation && order.status !== 'paid') {
++      this.activities.audit('paid', { activityId: participation.activity_id, orderId: order.id, userId: order.user_id });
++      if (result.paidAt >= order.expires_at || order.status === 'closed') {
++        this.store.db.prepare("UPDATE orders SET fulfillment_state='review' WHERE id=?").run(order.id);
++        this.activities.issue(order.id, 'PAYMENT_REVIEW', '付款超出有效期限或发生于已释放名额的订单，需核查后处理');
++        return this.store.get(order.id);
++      }
++    }
++    return this.fulfill(paid);
+   }
+   fulfill(order) {
+     if (!this.memberships || order.fulfillment_state !== 'pending' || order.user_id === 'payment-integration') return order;
+-    const result = this.memberships.applyPayment(order);
+-    return this.store.fulfilled(order.id, result.event.afterPermanent ? null : Date.parse(result.event.afterExpiresAt) || null);
++    const participation = this.activities.participation(order.id);
++    try {
++      const rules = participation && this.activities.rules(participation.activity_id, participation.version);
++      const result = this.memberships.applyPayment(order, { invitationEligible: !rules || rules.allowInvitation, activityId: participation?.activity_id, bonusDays: participation?.bonus_days || 0 });
++      const complete = this.store.fulfilled(order.id, result.event.afterPermanent ? null : Date.parse(result.event.afterExpiresAt) || null);
++      if (participation) {
++        this.activities.audit('fulfilled', { activityId: participation.activity_id, orderId: order.id, userId: order.user_id, details: { eventId: result.event.id } });
++        this.store.db.prepare('UPDATE activity_issues SET resolved_at=? WHERE order_id=? AND code IN (\'FULFILLMENT_FAILED\',\'CHECKOUT_UNKNOWN\',\'RECONCILE_FAILED\') AND resolved_at IS NULL').run(Date.now(),order.id);
++      }
++      return complete;
++    } catch (error) { if (participation) this.activities.issue(order.id, 'FULFILLMENT_FAILED', '订单已完成，会员到账失败，可安全重试补发'); throw error; }
++  }
++  async reconcileActivities() {
++    if (this.reconciling) return;
++    this.reconciling = true;
++    try {
++      const rows = this.store.db.prepare("SELECT o.* FROM orders o JOIN activity_participations p ON p.order_id=o.id WHERE o.status NOT IN ('paid','closed') AND (o.provider='free' OR o.expires_at<=?) ORDER BY o.created_at LIMIT 50").all(Date.now());
++      for (const order of rows) {
++        try {
++          if (order.provider === 'free') { this.completeFree(order); continue; }
++          const provider = this.provider(order.provider), result = await provider.query(order);
++          if (result.orderId !== order.id) reject('核查订单不匹配', 'ORDER_MISMATCH');
++          if (result.status !== 'pending') this.apply(order.provider,result);
++          else {
++            await provider.close(order);
++            const closed = this.store.closed(order.id);
++            if (closed.status === 'closed') this.activities.audit('release', { orderId: order.id, reason: '超时订单已向支付渠道关单，释放名额' });
++          }
++          this.store.db.prepare("UPDATE activity_issues SET resolved_at=? WHERE order_id=? AND code IN ('RECONCILE_FAILED','CHECKOUT_UNKNOWN') AND resolved_at IS NULL").run(Date.now(),order.id);
++        } catch { this.activities.issue(order.id, 'RECONCILE_FAILED', '渠道核查或关单失败，名额继续保留，系统将重试'); }
++      }
++    } finally { this.reconciling = false; }
+   }
+   retryFulfillment() { for (const order of this.store.pendingFulfillment()) { try { this.fulfill(order); } catch { /* durable pending order retries without duplicate grants */ } } }
+   notification(provider, headers, raw) { return this.apply(provider, this.provider(provider).notification(headers, raw)); }
+diff --git a/payments/store.cjs b/payments/store.cjs
+index b7b9d8e..2b4abb6 100644
+--- a/payments/store.cjs
++++ b/payments/store.cjs
+@@ -12,7 +12,7 @@ class PaymentStore {
+       CREATE TABLE IF NOT EXISTS orders (
+         id TEXT PRIMARY KEY, user_id TEXT NOT NULL, request_id TEXT NOT NULL,
+         provider TEXT NOT NULL, plan_id TEXT NOT NULL, plan_name TEXT NOT NULL,
+-        quantity INTEGER NOT NULL DEFAULT 1 CHECK(quantity>0), amount INTEGER NOT NULL CHECK(amount>0), days INTEGER NOT NULL CHECK(days>0),
++quantity INTEGER NOT NULL DEFAULT 1 CHECK(quantity>0), amount INTEGER NOT NULL CHECK(amount>=0), days INTEGER NOT NULL CHECK(days>0),
+         status TEXT NOT NULL, created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL,
+         paid_at INTEGER, transaction_id TEXT, checkout TEXT, last_checked_at INTEGER NOT NULL DEFAULT 0,
+         base_expiry INTEGER NOT NULL DEFAULT 0, member_expires_at INTEGER,
+@@ -26,6 +26,20 @@ class PaymentStore {
+     if (!columns.has('quantity')) this.db.exec('ALTER TABLE orders ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1');
+     if (!columns.has('plan_snapshot')) this.db.exec('ALTER TABLE orders ADD COLUMN plan_snapshot TEXT');
+     if (!columns.has('fulfillment_state')) this.db.exec("ALTER TABLE orders ADD COLUMN fulfillment_state TEXT NOT NULL DEFAULT 'legacy'");
++    // SQLite cannot alter a CHECK constraint. Preserve all columns, indexes and FK targets.
++    const schema = this.db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='orders'").get().sql;
++    if (/CHECK\s*\(\s*amount\s*>\s*0\s*\)/i.test(schema)) {
++      const indexes = this.db.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND tbl_name='orders' AND sql IS NOT NULL").all();
++      this.db.exec('PRAGMA foreign_keys=OFF; BEGIN IMMEDIATE');
++      try {
++        this.db.exec(schema.replace(/CREATE TABLE\s+(?:"orders"|orders)/i, 'CREATE TABLE orders_zero_migration').replace(/CHECK\s*\(\s*amount\s*>\s*0\s*\)/i, 'CHECK(amount>=0)'));
++        this.db.exec('INSERT INTO orders_zero_migration SELECT * FROM orders; DROP TABLE orders; ALTER TABLE orders_zero_migration RENAME TO orders;');
++        for (const index of indexes) this.db.exec(index.sql);
++        if (this.db.prepare('PRAGMA foreign_key_check').all().length) throw Error('订单迁移关联校验失败');
++        this.db.exec('COMMIT');
++      } catch (error) { this.db.exec('ROLLBACK'); throw error; }
++      finally { this.db.exec('PRAGMA foreign_keys=ON'); }
++    }
+   }
+   expirePending(now = Date.now()) { this.db.prepare("UPDATE orders SET status='expired' WHERE status IN ('created','pending','unknown') AND expires_at<=?").run(now); }
+   get(id) { return this.db.prepare('SELECT * FROM orders WHERE id=?').get(id); }
+@@ -35,10 +49,10 @@ class PaymentStore {
+       .get(userId, provider, planId, quantity, now);
+   }
+   list(userId) { return this.db.prepare("SELECT * FROM orders WHERE user_id=? AND status='paid' ORDER BY paid_at DESC LIMIT 100").all(userId); }
+-  create({ userId, requestId, provider, plan, quantity = 1, amount, days = plan.days, baseExpiry = 0 }) {
++  create({ userId, requestId, provider, plan, quantity = 1, amount, days = plan.days, baseExpiry = 0, expiresAt }) {
+     const id = 'SY' + crypto.randomBytes(14).toString('hex'), now = Date.now();
+     this.db.prepare(`INSERT INTO orders (id,user_id,request_id,provider,plan_id,plan_name,quantity,amount,days,status,created_at,expires_at,base_expiry,plan_snapshot,fulfillment_state) VALUES (?,?,?,?,?,?,?,?,?,'created',?,?,?,?,'pending')`)
+-      .run(id, userId, requestId, provider, plan.id, plan.name, quantity, amount, days, now, now + 30 * 60_000, baseExpiry, JSON.stringify(plan));
++      .run(id, userId, requestId, provider, plan.id, plan.name, quantity, amount, days, now, expiresAt ?? now + 30 * 60_000, baseExpiry, JSON.stringify(plan));
+     return this.get(id);
+   }
+   checkout(id, data) { this.db.prepare("UPDATE orders SET checkout=?,status='pending' WHERE id=? AND status IN ('created','unknown','pending')").run(JSON.stringify(data), id); return this.get(id); }

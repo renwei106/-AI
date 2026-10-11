@@ -1,0 +1,19 @@
+{
+  "version": "V1.1.0",
+  "frontend": "a8c513ccee36db949e16f355a0d3d15b972141c5",
+  "backend": "98cbf1362db6a1c07e34dfeb390da703983d5a10",
+  "tools": "7aa22dc47ca6b70c189e3d6441ec07b061bb2ff8",
+  "excluded": [
+    "独立产品：涌现自由生长的风景",
+    "星体和引力场景",
+    "未跟踪的截图、基线与旧插件包",
+    "后台未上线的英文初始化和平台 Logo 改动"
+  ],
+  "checks": [
+    "TypeScript build",
+    "Vite production build",
+    "5 backend tests",
+    "desktop/mobile cosmos settings",
+    "theme startup allowed/denied"
+  ]
+}

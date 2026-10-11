@@ -1,0 +1,543 @@
+[
+  {
+    "id": "birds",
+    "name": "群游",
+    "basic": [
+      {
+        "key": "speed",
+        "label": "运行速度",
+        "type": "range",
+        "min": 0.25,
+        "max": 2,
+        "step": 0.05,
+        "value": 0.8,
+        "unit": "×",
+        "hint": ""
+      },
+      {
+        "key": "count",
+        "label": "群体数量",
+        "type": "range",
+        "min": 40,
+        "max": 900,
+        "step": 20,
+        "value": 420,
+        "unit": "个",
+        "hint": ""
+      },
+      {
+        "key": "predators",
+        "label": "捕食者",
+        "type": "range",
+        "min": 0,
+        "max": 4,
+        "step": 1,
+        "value": 1,
+        "unit": "只",
+        "hint": "靠近时避让，接触时捕获。"
+      },
+      {
+        "key": "shape",
+        "label": "个体形状",
+        "type": "choice",
+        "options": [
+          [
+            "bird",
+            "鸟形"
+          ],
+          [
+            "fish",
+            "鱼形"
+          ],
+          [
+            "triangle",
+            "三角"
+          ],
+          [
+            "line",
+            "短线"
+          ],
+          [
+            "dot",
+            "圆点"
+          ]
+        ],
+        "value": "triangle"
+      },
+      {
+        "key": "pointer",
+        "label": "鼠标互动",
+        "type": "choice",
+        "options": [
+          [
+            "none",
+            "无"
+          ],
+          [
+            "repel",
+            "驱散"
+          ],
+          [
+            "attract",
+            "吸引"
+          ],
+          [
+            "magnify",
+            "放大镜"
+          ]
+        ],
+        "value": "repel"
+      },
+      {
+        "key": "depth",
+        "label": "显示维度",
+        "type": "choice",
+        "options": [
+          [
+            "flat",
+            "2D"
+          ],
+          [
+            "depth",
+            "3D"
+          ]
+        ],
+        "value": "flat"
+      },
+      {
+        "key": "edgeWrap",
+        "label": "边缘穿透",
+        "type": "choice",
+        "options": [
+          [
+            "no",
+            "不穿透"
+          ],
+          [
+            "yes",
+            "穿透"
+          ]
+        ],
+        "value": "no"
+      }
+    ],
+    "advanced": [
+      {
+        "key": "current",
+        "label": "水流强度",
+        "type": "range",
+        "min": 0,
+        "max": 1.5,
+        "step": 0.05,
+        "value": 0.55,
+        "unit": "",
+        "hint": "鱼形时生效。"
+      },
+      {
+        "key": "separation",
+        "label": "保持距离",
+        "type": "range",
+        "min": 0.5,
+        "max": 2,
+        "step": 0.05,
+        "value": 1.25,
+        "unit": "",
+        "hint": ""
+      },
+      {
+        "key": "alignment",
+        "label": "方向默契",
+        "type": "range",
+        "min": 0.2,
+        "max": 2,
+        "step": 0.05,
+        "value": 1.1,
+        "unit": "",
+        "hint": ""
+      },
+      {
+        "key": "cohesion",
+        "label": "靠拢倾向",
+        "type": "range",
+        "min": 0.2,
+        "max": 2,
+        "step": 0.05,
+        "value": 0.75,
+        "unit": "",
+        "hint": ""
+      },
+      {
+        "key": "perception",
+        "label": "感知范围",
+        "type": "range",
+        "min": 35,
+        "max": 110,
+        "step": 5,
+        "value": 70,
+        "unit": "",
+        "hint": ""
+      },
+      {
+        "key": "replenish",
+        "label": "捕获后补充",
+        "type": "choice",
+        "options": [
+          [
+            "yes",
+            "自动补充"
+          ],
+          [
+            "no",
+            "自然减少"
+          ]
+        ],
+        "value": "yes"
+      }
+    ],
+    "lifecycle": [
+      {
+        "title": "群体繁衍",
+        "fields": [
+          {
+            "key": "breeding",
+            "label": "定期繁衍",
+            "type": "choice",
+            "options": [
+              [
+                "yes",
+                "开启"
+              ],
+              [
+                "no",
+                "关闭"
+              ]
+            ],
+            "value": "yes"
+          },
+          {
+            "key": "birthInterval",
+            "label": "繁衍间隔",
+            "type": "range",
+            "min": 10,
+            "max": 60,
+            "step": 5,
+            "value": 20,
+            "unit": "秒",
+            "hint": ""
+          },
+          {
+            "key": "birthBatch",
+            "label": "每次新增",
+            "type": "range",
+            "min": 1,
+            "max": 10,
+            "step": 1,
+            "value": 3,
+            "unit": "个",
+            "hint": ""
+          },
+          {
+            "key": "populationCap",
+            "label": "群体数量上限",
+            "type": "range",
+            "min": 40,
+            "max": 900,
+            "step": 20,
+            "value": 900,
+            "unit": "个",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "title": "捕食规则",
+        "fields": [
+          {
+            "key": "huntSpeed",
+            "label": "追逐速度",
+            "type": "range",
+            "min": 0.6,
+            "max": 1.4,
+            "step": 0.05,
+            "value": 1,
+            "unit": "×",
+            "hint": "相对于捕食者默认速度。"
+          },
+          {
+            "key": "captureRadius",
+            "label": "捕获距离",
+            "type": "range",
+            "min": 6,
+            "max": 16,
+            "step": 1,
+            "value": 10,
+            "unit": "",
+            "hint": ""
+          },
+          {
+            "key": "huntRest",
+            "label": "进食后休息",
+            "type": "range",
+            "min": 2,
+            "max": 20,
+            "step": 1,
+            "value": 4,
+            "unit": "秒",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "title": "捕食者繁衍",
+        "fields": [
+          {
+            "key": "predatorBreeding",
+            "label": "缓慢繁衍",
+            "type": "choice",
+            "options": [
+              [
+                "yes",
+                "开启"
+              ],
+              [
+                "no",
+                "关闭"
+              ]
+            ],
+            "value": "yes"
+          },
+          {
+            "key": "predatorBirthInterval",
+            "label": "最短繁衍间隔",
+            "type": "range",
+            "min": 180,
+            "max": 900,
+            "step": 60,
+            "value": 300,
+            "unit": "秒",
+            "hint": "整个捕食者群体每轮最多新增 1 只。"
+          },
+          {
+            "key": "birthMeals",
+            "label": "亲代所需进食",
+            "type": "range",
+            "min": 3,
+            "max": 12,
+            "step": 1,
+            "value": 5,
+            "unit": "次",
+            "hint": "满足时间与进食条件后才会繁衍。"
+          },
+          {
+            "key": "predatorCap",
+            "label": "捕食者数量上限",
+            "type": "range",
+            "min": 1,
+            "max": 6,
+            "step": 1,
+            "value": 4,
+            "unit": "只",
+            "hint": ""
+          }
+        ]
+      }
+    ],
+    "physics": []
+  },
+  {
+    "id": "cosmos",
+    "name": "宇宙",
+    "basic": [
+      {
+        "key": "speed",
+        "label": "运行速度",
+        "type": "range",
+        "min": 0.25,
+        "max": 2,
+        "step": 0.05,
+        "value": 0.8,
+        "unit": "×",
+        "hint": ""
+      },
+      {
+        "key": "count",
+        "label": "初始星体数量",
+        "type": "range",
+        "min": 100,
+        "max": 1200,
+        "step": 50,
+        "value": 650,
+        "unit": "颗",
+        "hint": "调整数量会重新生成星体；碰撞会改变当前数量。"
+      },
+      {
+        "key": "pointer",
+        "label": "鼠标互动",
+        "type": "choice",
+        "options": [
+          [
+            "none",
+            "无"
+          ],
+          [
+            "repel",
+            "推开"
+          ],
+          [
+            "attract",
+            "牵引"
+          ],
+          [
+            "magnify",
+            "放大镜"
+          ]
+        ],
+        "value": "none"
+      },
+      {
+        "key": "depth",
+        "label": "显示维度",
+        "type": "choice",
+        "options": [
+          [
+            "flat",
+            "2D"
+          ],
+          [
+            "depth",
+            "3D"
+          ]
+        ],
+        "value": "flat"
+      },
+      {
+        "key": "edgeWrap",
+        "label": "边缘穿透",
+        "type": "choice",
+        "options": [
+          [
+            "no",
+            "不穿透"
+          ],
+          [
+            "yes",
+            "穿透"
+          ]
+        ],
+        "value": "no"
+      }
+    ],
+    "advanced": [
+      {
+        "key": "orbit",
+        "label": "初始运动速度",
+        "type": "range",
+        "min": 0.5,
+        "max": 1.4,
+        "step": 0.05,
+        "value": 1,
+        "unit": "×",
+        "hint": "调整后重新播种，查看新的轨道。"
+      },
+      {
+        "key": "trail",
+        "label": "轨迹长度",
+        "type": "range",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "value": 10,
+        "unit": "",
+        "hint": ""
+      }
+    ],
+    "lifecycle": [],
+    "physics": [
+      {
+        "title": "星体引力",
+        "fields": [
+          {
+            "key": "mutualGravity",
+            "label": "星体间引力",
+            "type": "range",
+            "min": 0,
+            "max": 2,
+            "step": 0.05,
+            "value": 0.7,
+            "unit": "×",
+            "hint": "质量越大，吸引越强；合并后颜色更浓、更亮，尺寸平滑微增，最多增大 20%。设为 0 关闭相互引力。"
+          }
+        ]
+      },
+      {
+        "title": "碰撞演化",
+        "fields": [
+          {
+            "key": "collisions",
+            "label": "碰撞规则",
+            "type": "choice",
+            "options": [
+              [
+                "auto",
+                "自动判断"
+              ],
+              [
+                "merge",
+                "仅正碰合并"
+              ],
+              [
+                "off",
+                "关闭"
+              ]
+            ],
+            "value": "auto"
+          },
+          {
+            "key": "mergeOverlap",
+            "label": "合并所需深入程度",
+            "type": "range",
+            "min": 30,
+            "max": 90,
+            "step": 5,
+            "value": 65,
+            "unit": "%",
+            "hint": "控制整体融合所需的正碰程度；自动判断下，擦边相撞会部分融合并甩出碎片。"
+          },
+          {
+            "key": "mergeCooldown",
+            "label": "再次合并间隔",
+            "type": "range",
+            "min": 1,
+            "max": 10,
+            "step": 0.5,
+            "value": 3,
+            "unit": "秒",
+            "hint": "碰撞后的星体短暂保持各自轨迹，避免连续吞并，不作弹性反弹。"
+          },
+          {
+            "key": "fragmentSpeed",
+            "label": "碎裂门槛",
+            "type": "range",
+            "min": 0.5,
+            "max": 4,
+            "step": 0.1,
+            "value": 1.8,
+            "unit": "",
+            "hint": "越低越容易甩出更多质量；撞击速度和正面程度共同决定主体与碎片的质量比例。"
+          },
+          {
+            "key": "fragmentGrace",
+            "label": "碎片冷却",
+            "type": "range",
+            "min": 1,
+            "max": 6,
+            "step": 0.5,
+            "value": 2,
+            "unit": "秒",
+            "hint": "碎片短暂免碰撞；最多保留 1200 颗，达到上限时减少碎片数量，总质量不变。"
+          }
+        ]
+      }
+    ]
+  }
+]

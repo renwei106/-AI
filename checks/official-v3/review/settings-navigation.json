@@ -1,0 +1,7 @@
+{
+  "url": "http://127.0.0.1:4320/official/v3/index.html",
+  "messages": [
+    "Not allowed to load local resource: edge://settings/startHomeNTP"
+  ],
+  "status": "若未打开，请在地址栏手动输入上方设置地址；然后回到这里复制主页链接。"
+}

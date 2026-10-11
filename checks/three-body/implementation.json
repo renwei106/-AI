@@ -1,0 +1,42 @@
+{
+  "theme": "threeBody",
+  "upstream": {
+    "repository": "https://github.com/DrA1ex/JS_ParticleSystem",
+    "archiveBytes": 10035597,
+    "unpackedBytes": 24500806,
+    "nBodyJavaScriptBytes": 626209,
+    "physicsTreeCollisionJavaScriptBytes": 62726
+  },
+  "implementation": {
+    "engine": "Independent exact pairwise Newtonian gravity; velocity Verlet; adaptive substeps; softening 0.01; 2D; no external runtime or upstream code copied",
+    "initial": "Figure-eight equal-mass initial conditions",
+    "frontendBytes": 17085,
+    "frontendGzipBytes": 6811,
+    "physicsBytes": 2495,
+    "files": [
+      "dist/assets/three-body/physics.js",
+      "dist/three-body-theme.js",
+      "dist/three-body-theme.css",
+      "dist/assets/three-body/cover.svg"
+    ]
+  },
+  "configuration": {
+    "catalog": "/api/shiyu/themes",
+    "access": "/api/shiyu/theme-access",
+    "defaults": "/api/shiyu/operations -> threeBodyContent",
+    "allowedControls": [
+      "body 1 mass",
+      "body 2 mass",
+      "body 3 mass",
+      "gravity",
+      "time speed"
+    ],
+    "persistence": "Backend defaults and customization lock persist with operations; user parameters are localStorage per owner; no cross-device user parameter sync"
+  },
+  "scope": {
+    "productionChanged": false,
+    "existingUserChangesPreserved": true,
+    "frontendBaseline": "baselines/three-body-before-20261004",
+    "backendBaseline": "../聚合管理后台/baselines/three-body-before-20261004"
+  }
+}

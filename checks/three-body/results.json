@@ -1,0 +1,23 @@
+{
+  "energyDrift": 4.2466481442460235e-8,
+  "momentum": [
+    -2.3092638912203256e-14,
+    -1.992850329202156e-14
+  ],
+  "tests": [
+    "numerical stability",
+    "mass perturbation",
+    "close encounter",
+    "desktop",
+    "mobile",
+    "pause",
+    "reset",
+    "push",
+    "persistence",
+    "cleanup",
+    "backend disabled",
+    "customization locked",
+    "reduced motion"
+  ],
+  "errors": []
+}

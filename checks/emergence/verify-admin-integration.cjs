@@ -1,0 +1,24 @@
+const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const fs=require('node:fs'),assert=require('node:assert/strict');
+(async()=>{const browser=await chromium.launch({channel:'msedge',headless:true});try{
+ const context=await browser.newContext({viewport:{width:1440,height:1000}}),origin='http://127.0.0.1:5175';
+ const login=await context.request.post(origin+'/api/platform/login',{data:{account:'admin',password:'123456'}});assert.equal(login.status(),200);
+ const original=await context.request.get(origin+'/api/shiyu/operations').then(r=>r.json());assert(original.personalization.themes.options.emergence);
+ let payload;
+ await context.route('**/api/shiyu/operations',async r=>{if(r.request().method()!=='PUT')return r.continue();payload=r.request().postDataJSON();return r.fulfill({json:{...original,...payload,personalization:{...original.personalization,...payload.personalization}}})});
+ const p=await context.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(origin+'/apps/shiyu/personalization/themes');
+ const card=p.locator('[data-resource-id="emergence"]');await card.scrollIntoViewIfNeeded();await card.hover();await card.getByRole('button',{name:/设置/}).click();const drawer=p.getByRole('dialog');await drawer.getByText('涌现场景',{exact:true}).waitFor();
+ await drawer.getByRole('switch',{name:'开放宇宙',exact:true}).click();await drawer.getByRole('switch',{name:'允许用户调整参数',exact:true}).click();
+ await drawer.locator('.ant-collapse-header').filter({hasText:'群游'}).click();await drawer.getByRole('slider',{name:'birds 运行速度',exact:true}).press('ArrowRight');await p.waitForTimeout(400);await p.screenshot({path:'checks/emergence/admin-emergence-drawer.png'});
+ await drawer.getByRole('combobox',{name:'birds 显示维度',exact:true}).click();await p.getByTitle('3D',{exact:true}).click();
+ await drawer.getByRole('button',{name:'应用到列表'}).click();await p.getByRole('button',{name:'保存并同步前台',exact:true}).click();await p.waitForTimeout(300);
+ assert.equal(payload.emergenceContent.scenes.cosmos.enabled,false);assert.equal(payload.emergenceContent.defaultScene,'birds');assert.equal(payload.emergenceContent.allowCustomize,false);
+ assert.equal(payload.emergenceContent.scenes.birds.defaults.speed,.85);
+ assert.equal(payload.emergenceContent.scenes.birds.defaults.depth,'depth');
+ assert.deepEqual(payload.forestContent,original.forestContent);assert.deepEqual(payload.personalization.themes.options.base,original.personalization.themes.options.base);
+ await card.hover();await card.getByRole('button',{name:/设置/}).click();assert.equal(await drawer.getByRole('switch',{name:'开放宇宙',exact:true}).getAttribute('aria-checked'),'false');
+ await drawer.getByRole('switch',{name:'开放宇宙',exact:true}).click();await drawer.getByRole('button',{name:/取\s*消/}).click();
+ await card.hover();await card.getByRole('button',{name:/设置/}).click();assert.equal(await drawer.getByRole('switch',{name:'开放宇宙',exact:true}).getAttribute('aria-checked'),'false');
+ const actual=await context.request.get(origin+'/api/shiyu/operations').then(r=>r.json());assert.deepEqual(actual.emergenceContent,original.emergenceContent);assert.deepEqual(errors,[]);
+ fs.writeFileSync('checks/emergence/admin-integration-results.json',JSON.stringify({drawer:true,savePayload:true,sceneFallback:true,cancel:true,unrelatedConfigPreserved:true,liveDataUnchanged:true},null,2));console.log('PASS admin integration');
+}finally{await browser.close()}})().catch(e=>{console.error(e);process.exitCode=1});

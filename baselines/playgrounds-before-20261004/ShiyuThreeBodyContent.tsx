@@ -1,0 +1,6 @@
+import { InputNumber, Space, Switch, Typography } from 'antd'
+import type { ThreeBodyContent } from '../shiyu-three-body-config'
+export function ShiyuThreeBodyContent({value,onChange}:{value:ThreeBodyContent;onChange:(v:ThreeBodyContent)=>void}) {
+ const field=(label:string,current:number,min:number,max:number,change:(v:number)=>void)=><Space key={label} style={{display:'flex',justifyContent:'space-between',margin:'16px 0'}}><span>{label}</span><InputNumber aria-label={label} min={min} max={max} step={.1} value={current} onChange={v=>{if(v!==null)change(Number(v))}}/></Space>
+ return <section style={{marginTop:24}}><Typography.Title level={5}>三体参数</Typography.Title><Typography.Paragraph type="secondary">首次进入采用这些参数。用户可随时恢复八字轨道。</Typography.Paragraph><Space style={{display:'flex',justifyContent:'space-between'}}><span>允许用户调节与轻推</span><Switch checked={value.allowCustomize} onChange={allowCustomize=>onChange({...value,allowCustomize})}/></Space>{value.defaults.bodies.map((b,i)=>field(`天体 ${i+1} · 质量`,b.mass,.2,3,mass=>onChange({...value,defaults:{...value.defaults,bodies:value.defaults.bodies.map((b,j)=>j===i?{...b,mass}:b)}})))}{field('引力强度',value.defaults.gravity,.2,2,gravity=>onChange({...value,defaults:{...value.defaults,gravity}}))}{field('时间速度',value.defaults.speed,.2,2,speed=>onChange({...value,defaults:{...value.defaults,speed}}))}</section>
+}

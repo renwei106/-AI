@@ -91,7 +91,7 @@ http.createServer(async(req,res)=>{
   if(require('./forest-companion-assets.cjs')(req,res))return
   if(/^\/emergence-theme\.(js|css)$/.test(pathname)||/^\/assets\/emergence\/(engine|scenes|shell)\.js$/.test(pathname)||pathname==='/assets/emergence/cover.svg')routes[pathname]=pathname.slice(1)
   if(/^\/assets\/playgrounds\/(catalog|models|stage)\.js$/.test(pathname))routes[pathname]=pathname.slice(1)
-  if(/^\/three-body-theme\.(js|css)$/.test(pathname)||/^\/assets\/three-body\/(physics\.js|cover\.svg)$/.test(pathname))routes[pathname]=pathname.slice(1)
+  if(/^\/three-body-theme\.(js|css)$/.test(pathname)||/^\/assets\/three-body\/(physics\.js|satellites\.mjs|hd-planets\.mjs|satellite-data\.json|textures\/[a-z_]+\.(?:jpg|png)|cover\.svg)$/.test(pathname))routes[pathname]=pathname.slice(1)
   if(pathname==='/forest-companion-theme.js'||pathname==='/forest-companion-theme.css')routes[pathname]=pathname.slice(1)
   if(pathname==='/avatar-catalog.js'||pathname==='/avatar-catalog.css')routes[pathname]=pathname.slice(1)
   const fontAsset=/^\/assets\/fonts\/shiyu-(?:youfeng|qingya-song|wenrun-kai)\/[A-Za-z0-9._-]+\.woff2$/i.test(pathname)?pathname.slice(1):''
@@ -115,7 +115,7 @@ http.createServer(async(req,res)=>{
   res.setHeader('Cache-Control','no-store, max-age=0')
   if(file==='install/shiyu-shortcut.zip'){res.setHeader('Content-Type','application/zip');res.setHeader('Content-Disposition',"attachment; filename=\"Shiyu-shortcut.zip\"; filename*=UTF-8''%E6%8B%BE%E9%9A%85%E6%A1%8C%E9%9D%A2%E5%BF%AB%E6%8D%B7%E6%96%B9%E5%BC%8F.zip");fs.createReadStream(fullPath).pipe(res);return}
   if(/\.(?:fbx|exr)$/.test(file)){res.setHeader('Content-Type','application/octet-stream');fs.createReadStream(fullPath).pipe(res);return}
-  res.setHeader('Content-Type',file.endsWith('.webmanifest')?'application/manifest+json; charset=utf-8':file.endsWith('.svg')?'image/svg+xml':file.endsWith('.xml')?'application/xml; charset=utf-8':file.endsWith('.txt')?'text/plain; charset=utf-8':file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webp')?'image/webp':file.endsWith('.webm')?'video/webm':file.endsWith('.woff2')?'font/woff2':file.endsWith('.css')?'text/css; charset=utf-8':file.endsWith('.js')?'text/javascript; charset=utf-8':'text/html; charset=utf-8')
+  res.setHeader('Content-Type',file.endsWith('.webmanifest')?'application/manifest+json; charset=utf-8':file.endsWith('.svg')?'image/svg+xml':file.endsWith('.xml')?'application/xml; charset=utf-8':file.endsWith('.txt')?'text/plain; charset=utf-8':file.endsWith('.ico')?'image/x-icon':file.endsWith('.png')?'image/png':file.endsWith('.webp')?'image/webp':file.endsWith('.jpg')?'image/jpeg':file.endsWith('.webm')?'video/webm':file.endsWith('.woff2')?'font/woff2':file.endsWith('.css')?'text/css; charset=utf-8':/\.(?:js|mjs)$/.test(file)?'text/javascript; charset=utf-8':file.endsWith('.json')?'application/json; charset=utf-8':'text/html; charset=utf-8')
   const stream=fs.createReadStream(fullPath)
   stream.on('error',()=>{if(!res.headersSent)res.writeHead(404);res.end('Not found')})
   stream.pipe(res)

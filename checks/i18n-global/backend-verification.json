@@ -1,0 +1,11 @@
+{
+  "coverage": {
+    "total": 3251,
+    "translated": 3251,
+    "approved": 3251
+  },
+  "verifiedAt": "2026-09-30T05:13:58.178Z",
+  "origin": "http://127.0.0.1:5175",
+  "preview": "http://127.0.0.1:4318",
+  "productionChanged": false
+}

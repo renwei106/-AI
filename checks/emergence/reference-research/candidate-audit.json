@@ -1,0 +1,300 @@
+[
+  {
+    "depth": "flat",
+    "mode": "birth",
+    "samples": [
+      {
+        "seconds": 0,
+        "count": 0,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "merged": 0,
+        "shattered": 0
+      },
+      {
+        "seconds": 6,
+        "count": 650,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "medianSpeed": 0.9646458341616977,
+        "p95Speed": 1.1554866166745386,
+        "merged": 0,
+        "shattered": 0
+      },
+      {
+        "seconds": 30,
+        "count": 422,
+        "cores": 4,
+        "masses": [
+          98.6,
+          64.5,
+          103.3,
+          37.2
+        ],
+        "localCount": 235,
+        "medianSpeed": 0.8939464585046227,
+        "p95Speed": 3.4891745081627215,
+        "merged": 1070,
+        "shattered": 648
+      },
+      {
+        "seconds": 60,
+        "count": 387,
+        "cores": 5,
+        "masses": [
+          23.1,
+          37,
+          103.5,
+          109.9,
+          71.7
+        ],
+        "localCount": 184,
+        "medianSpeed": 0.7135817858849406,
+        "p95Speed": 3.1359684154144905,
+        "merged": 1778,
+        "shattered": 1193
+      },
+      {
+        "seconds": 180,
+        "count": 214,
+        "cores": 6,
+        "masses": [
+          43.7,
+          32.9,
+          127.9,
+          113.4,
+          31.8,
+          129.1
+        ],
+        "localCount": 115,
+        "medianSpeed": 0.5704714904866782,
+        "p95Speed": 3.001398263182564,
+        "merged": 3805,
+        "shattered": 2817
+      }
+    ]
+  },
+  {
+    "depth": "flat",
+    "mode": "count-change",
+    "samples": [
+      {
+        "seconds": 0,
+        "count": 700,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "medianSpeed": 0.6723188998119644,
+        "p95Speed": 0.7939728343364105,
+        "merged": 0,
+        "shattered": 0
+      },
+      {
+        "seconds": 6,
+        "count": 584,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "medianSpeed": 0.6503289733174603,
+        "p95Speed": 0.8468497993518634,
+        "merged": 170,
+        "shattered": 47
+      },
+      {
+        "seconds": 30,
+        "count": 335,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "medianSpeed": 0.5316800094098622,
+        "p95Speed": 1.0251376059961368,
+        "merged": 697,
+        "shattered": 298
+      },
+      {
+        "seconds": 60,
+        "count": 179,
+        "cores": 9,
+        "masses": [
+          27.7,
+          24.3,
+          20.3,
+          28,
+          26.7,
+          26.9,
+          33.6,
+          24.1,
+          28.8
+        ],
+        "localCount": 80,
+        "medianSpeed": 0.4813556338772359,
+        "p95Speed": 1.4478518575400092,
+        "merged": 1107,
+        "shattered": 513
+      },
+      {
+        "seconds": 180,
+        "count": 70,
+        "cores": 10,
+        "masses": [
+          30,
+          33.8,
+          32.3,
+          27.4,
+          88.3,
+          87.3,
+          135.5,
+          29.9,
+          99.6,
+          25.6
+        ],
+        "localCount": 40,
+        "medianSpeed": 0.5112003399218719,
+        "p95Speed": 1.6764894196484503,
+        "merged": 1508,
+        "shattered": 744
+      }
+    ]
+  },
+  {
+    "depth": "depth",
+    "mode": "birth",
+    "samples": [
+      {
+        "seconds": 0,
+        "count": 0,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "merged": 0,
+        "shattered": 0
+      },
+      {
+        "seconds": 6,
+        "count": 650,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "medianSpeed": 1.3678874858348955,
+        "p95Speed": 1.6325419837071533,
+        "merged": 0,
+        "shattered": 0
+      },
+      {
+        "seconds": 30,
+        "count": 380,
+        "cores": 3,
+        "masses": [
+          102.9,
+          101.7,
+          104.8
+        ],
+        "localCount": 98,
+        "medianSpeed": 0.6378521678223309,
+        "p95Speed": 3.2721769097070985,
+        "merged": 810,
+        "shattered": 403
+      },
+      {
+        "seconds": 60,
+        "count": 344,
+        "cores": 3,
+        "masses": [
+          107.7,
+          105.3,
+          106.5
+        ],
+        "localCount": 78,
+        "medianSpeed": 0.2607726696283672,
+        "p95Speed": 2.774479407473819,
+        "merged": 1240,
+        "shattered": 750
+      },
+      {
+        "seconds": 180,
+        "count": 201,
+        "cores": 3,
+        "masses": [
+          126.3,
+          125,
+          142.1
+        ],
+        "localCount": 6,
+        "medianSpeed": 0.0702224801976852,
+        "p95Speed": 0.24329962884364134,
+        "merged": 1844,
+        "shattered": 1166
+      }
+    ]
+  },
+  {
+    "depth": "depth",
+    "mode": "count-change",
+    "samples": [
+      {
+        "seconds": 0,
+        "count": 700,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "medianSpeed": 0.6756387950546692,
+        "p95Speed": 0.8158816627662878,
+        "merged": 0,
+        "shattered": 0
+      },
+      {
+        "seconds": 6,
+        "count": 699,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "medianSpeed": 0.5653050062594305,
+        "p95Speed": 0.7905779110479887,
+        "merged": 28,
+        "shattered": 19
+      },
+      {
+        "seconds": 30,
+        "count": 557,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "medianSpeed": 0.21487070556803287,
+        "p95Speed": 0.5306665231217336,
+        "merged": 327,
+        "shattered": 171
+      },
+      {
+        "seconds": 60,
+        "count": 431,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "medianSpeed": 0.15845784704734453,
+        "p95Speed": 0.43244878626213845,
+        "merged": 554,
+        "shattered": 269
+      },
+      {
+        "seconds": 180,
+        "count": 220,
+        "cores": 6,
+        "masses": [
+          25.9,
+          30.9,
+          48,
+          33.5,
+          24.1,
+          29.6
+        ],
+        "localCount": 12,
+        "medianSpeed": 0.059148619005768954,
+        "p95Speed": 0.17232498982671282,
+        "merged": 875,
+        "shattered": 374
+      }
+    ]
+  }
+]

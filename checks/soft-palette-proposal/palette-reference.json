@@ -1,0 +1,82 @@
+{
+  "status": "proposal-only-not-published",
+  "version": 2,
+  "method": "Custom higher-chroma, mid-lightness palette; inspired by solid accent color roles, not copied Radix tokens.",
+  "documentation": "https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale",
+  "preview": {
+    "dayTint": 0.32,
+    "nightTint": 0.23
+  },
+  "choices": [
+    {
+      "id": "#48614c",
+      "name": "翡翠绿",
+      "value": "#199b7b",
+      "reference": "custom-jewel-palette-v2",
+      "previous": {
+        "name": "薄荷青绿",
+        "value": "#7ecfbd"
+      }
+    },
+    {
+      "id": "#45433c",
+      "name": "碧潭青",
+      "value": "#168fa3",
+      "reference": "custom-jewel-palette-v2",
+      "previous": {
+        "name": "云雾浅灰",
+        "value": "#b8bcba"
+      }
+    },
+    {
+      "id": "#bd9055",
+      "name": "琥珀金",
+      "value": "#ce961f",
+      "reference": "custom-jewel-palette-v2",
+      "previous": {
+        "name": "奶油暖黄",
+        "value": "#e9c162"
+      }
+    },
+    {
+      "id": "#467ea5",
+      "name": "澄海蓝",
+      "value": "#3578d4",
+      "reference": "custom-jewel-palette-v2",
+      "previous": {
+        "name": "晴空雾蓝",
+        "value": "#8dcae3"
+      }
+    },
+    {
+      "id": "#8b83d1",
+      "name": "鸢尾紫",
+      "value": "#8755c7",
+      "reference": "custom-jewel-palette-v2",
+      "previous": {
+        "name": "柔雾浅紫",
+        "value": "#b8baf8"
+      }
+    },
+    {
+      "id": "#ba794f",
+      "name": "日光橙",
+      "value": "#e27642",
+      "reference": "custom-jewel-palette-v2",
+      "previous": {
+        "name": "蜜桃暖橙",
+        "value": "#f5ae73"
+      }
+    },
+    {
+      "id": "#a95e76",
+      "name": "莓果红",
+      "value": "#cc527a",
+      "reference": "custom-jewel-palette-v2",
+      "previous": {
+        "name": "樱花柔粉",
+        "value": "#e7acd0"
+      }
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "font": "youfeng",
+  "themes": {
+    "base": {
+      "enabled": true,
+      "name": "留白日常"
+    },
+    "poly": {
+      "enabled": true,
+      "name": "棱光拾景"
+    },
+    "music": {
+      "enabled": true,
+      "name": "黑胶时光"
+    },
+    "cosmos": {
+      "enabled": true,
+      "name": "星际漫游"
+    },
+    "flow": {
+      "enabled": true,
+      "name": "灵感流体"
+    },
+    "flip": {
+      "enabled": true,
+      "name": "翻页光阴"
+    },
+    "rain": {
+      "enabled": true,
+      "name": "时间之雨"
+    },
+    "cinema": {
+      "enabled": true,
+      "name": "人生影院"
+    },
+    "paper": {
+      "enabled": true,
+      "name": "拾隅日报"
+    },
+    "globe": {
+      "enabled": true,
+      "name": "星海行旅"
+    }
+  },
+  "creators": 109,
+  "categories": [
+    "财经",
+    "商业",
+    "历史",
+    "科普",
+    "AI"
+  ],
+  "resources": 18,
+  "collections": [
+    "从好奇开始，认识 AI",
+    "给创作，添一点灵感",
+    "一个人，也能把事做好",
+    "给生活，留一点未知"
+  ],
+  "routes": [
+    "AI 入门，从会问到会用",
+    "从想法走向一个小项目",
+    "做出你的第一张网页"
+  ],
+  "projects": [
+    "一起整理 AI 入门地图",
+    "共建一份创作素材清单"
+  ],
+  "worldEnabled": false
+}

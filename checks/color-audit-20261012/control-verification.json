@@ -1,0 +1,149 @@
+{
+  "rows": [
+    {
+      "name": "浅米",
+      "mode": "light",
+      "buttonRatio": 5.158482587710062,
+      "controlRatio": 5.034353747814354,
+      "raw": "#fff2cc",
+      "control": "#736d5c",
+      "bg": "color(srgb 1 0.989804 0.96)"
+    },
+    {
+      "name": "浅米",
+      "mode": "dark",
+      "buttonRatio": 14.953797335741388,
+      "controlRatio": 11.337838323076438,
+      "raw": "#fff2cc",
+      "control": "#fff2cc",
+      "bg": "color(srgb 0.198235 0.201843 0.196118)"
+    },
+    {
+      "name": "浅蓝",
+      "mode": "light",
+      "buttonRatio": 5.1553137106898195,
+      "controlRatio": 4.967307719049618,
+      "raw": "#dbeafe",
+      "control": "#676e77",
+      "bg": "color(srgb 0.971765 0.983529 0.999216)"
+    },
+    {
+      "name": "浅蓝",
+      "mode": "dark",
+      "buttonRatio": 13.672890234579645,
+      "controlRatio": 10.55003946737574,
+      "raw": "#dbeafe",
+      "control": "#dbeafe",
+      "bg": "color(srgb 0.179882 0.197765 0.221608)"
+    },
+    {
+      "name": "明黄",
+      "mode": "light",
+      "buttonRatio": 5.3996670781696485,
+      "controlRatio": 5.027061081119709,
+      "raw": "#ffdd00",
+      "control": "#7a6a00",
+      "bg": "color(srgb 1 0.973333 0.8)"
+    },
+    {
+      "name": "明黄",
+      "mode": "dark",
+      "buttonRatio": 12.38783190192107,
+      "controlRatio": 9.792767758279076,
+      "raw": "#ffdd00",
+      "control": "#ffdd00",
+      "bg": "color(srgb 0.198235 0.191137 0.0921176)"
+    },
+    {
+      "name": "深蓝",
+      "mode": "light",
+      "buttonRatio": 15.332844237916378,
+      "controlRatio": 10.217282030621591,
+      "raw": "#10234d",
+      "control": "#10234d",
+      "bg": "color(srgb 0.812549 0.827451 0.860392)"
+    },
+    {
+      "name": "深蓝",
+      "mode": "dark",
+      "buttonRatio": 6.647642384780896,
+      "controlRatio": 5.58700365436391,
+      "raw": "#10234d",
+      "control": "#8891a6",
+      "bg": "color(srgb 0.0763922 0.0963137 0.131373)"
+    },
+    {
+      "name": "深绿",
+      "mode": "light",
+      "buttonRatio": 12.313129451483665,
+      "controlRatio": 8.475548748989606,
+      "raw": "#123c2a",
+      "control": "#123c2a",
+      "bg": "color(srgb 0.814118 0.847059 0.832941)"
+    },
+    {
+      "name": "深绿",
+      "mode": "dark",
+      "buttonRatio": 7.006070465937693,
+      "controlRatio": 5.773023492447534,
+      "raw": "#123c2a",
+      "control": "#849a90",
+      "bg": "color(srgb 0.0774118 0.109059 0.113529)"
+    },
+    {
+      "name": "亮绿",
+      "mode": "light",
+      "buttonRatio": 5.880524980846434,
+      "controlRatio": 4.912090732544407,
+      "raw": "#00c389",
+      "control": "#007351",
+      "bg": "color(srgb 0.8 0.952941 0.907451)"
+    },
+    {
+      "name": "亮绿",
+      "mode": "dark",
+      "buttonRatio": 10.438415529668141,
+      "controlRatio": 7.2934318854159566,
+      "raw": "#00c389",
+      "control": "#2ece9e",
+      "bg": "color(srgb 0.0682353 0.177882 0.161961)"
+    },
+    {
+      "name": "黑白",
+      "mode": "light",
+      "buttonRatio": 21,
+      "controlRatio": 21,
+      "raw": "#000000",
+      "control": "#000000",
+      "bg": "color(srgb 1 1 1)"
+    },
+    {
+      "name": "黑白",
+      "mode": "dark",
+      "buttonRatio": 16.681722786390218,
+      "controlRatio": 18.481541649078224,
+      "raw": "#ffffff",
+      "control": "#ffffff",
+      "bg": "color(srgb 0.0682353 0.0784706 0.0921176)"
+    },
+    {
+      "name": "双色渐变",
+      "mode": "light",
+      "buttonRatio": 6.9078892572484625,
+      "controlRatio": 6.7416643519491455,
+      "raw": "#fff2cc",
+      "control": "#5e5a4b",
+      "bg": "color(srgb 1 0.989804 0.96)"
+    },
+    {
+      "name": "双色渐变",
+      "mode": "dark",
+      "buttonRatio": 14.953797335741388,
+      "controlRatio": 11.337838323076438,
+      "raw": "#fff2cc",
+      "control": "#fff2cc",
+      "bg": "color(srgb 0.198235 0.201843 0.196118)"
+    }
+  ],
+  "errors": []
+}

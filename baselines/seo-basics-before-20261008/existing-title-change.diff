@@ -1,0 +1,13 @@
+diff --git a/dist/official/v3/index.html b/dist/official/v3/index.html
+index d2fb395..3bd9786 100644
+--- a/dist/official/v3/index.html
++++ b/dist/official/v3/index.html
+@@ -5,7 +5,7 @@
+   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+   <meta name="theme-color" content="#101713">
+   <meta name="description" content="拾隅，基于网址收藏的个人上网入口。用空间整理链接，用主题定义首页，在世界发现资源，用浏览器插件随手收藏。">
+-  <title>拾隅 · 收藏网址，连接世界</title>
++  <title>拾隅官网｜个性化起始页，网址收藏与导航</title>
+   <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
+   <link rel="preload" href="./assets/current/ShiyuYoufeng-Preview-Regular.woff2" as="font" type="font/woff2" crossorigin>
+   <link rel="stylesheet" href="./official.css">

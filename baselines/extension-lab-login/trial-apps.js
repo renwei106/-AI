@@ -1,0 +1,22 @@
+const host=document.querySelector('#trial-placeholder');
+const key='shiyu-extension-lab-records-v1';
+const today=()=>new Date().toLocaleDateString('sv-SE');
+let data;try{data=JSON.parse(localStorage.getItem(key))}catch{}
+if(!data?.memos||!data?.tasks)data={memos:[{id:'sample-note',content:'遇到喜欢的设计，记下打动自己的细节。\n下次创作时，回来翻一翻。',updated:Date.now()}],tasks:[{id:'sample-task',title:'整理今天收藏的灵感',date:today(),priority:'普通',done:false}]};
+let app='memo',filter='all',query='',editing=null;
+const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text)n.textContent=text;if(cls)n.className=cls;return n};
+function save(){try{localStorage.setItem(key,JSON.stringify(data));status.textContent='已保存在本机试用版'}catch{status.textContent='本机存储不可用，请勿关闭页面，记录尚未保存。'}}
+const status=el('p','','record-status');status.setAttribute('role','status');
+function render(){host.replaceChildren();host.className='record-panel';const memo=app==='memo';
+ const heading=el('div',null,'record-heading');heading.append(el('h2',memo?'我的小记':'我的待办'),el('p',memo?'把一闪而过的灵感，轻轻留下。':'把要做的事，放在眼前。'));host.append(heading);
+ host.append(el('p','独立试用 · 示例与新增记录仅存本机，未同步账号','record-notice'));
+ const form=el('form',null,'record-compose');const input=el(memo?'textarea':'input');input.placeholder=memo?'此刻想记下什么？':'添加一件要做的事';input.setAttribute('aria-label',memo?'小记内容':'待办内容');input.required=true;input.maxLength=memo?5000:200;if(memo)input.rows=3;
+ const current=(memo?data.memos:data.tasks).find(x=>x.id===editing);input.value=current?.content||current?.title||'';form.append(input);
+ const controls=el('div',null,'record-controls');let date,priority;
+ if(!memo){date=el('input');date.type='date';date.setAttribute('aria-label','安排日期');date.value=current?.date||'';priority=el('select');priority.setAttribute('aria-label','优先级');['普通','低优先级','中优先级','高优先级'].forEach(s=>priority.add(new Option(s,s)));priority.value=current?.priority||'普通';controls.append(date,priority)}
+ if(editing){const cancel=el('button','取消');cancel.type='button';cancel.onclick=()=>{editing=null;render()};controls.append(cancel)}
+ const submit=el('button',editing?'保存修改':memo?'记下来':'添加待办','record-primary');submit.type='submit';controls.append(submit);form.append(controls);form.onsubmit=e=>{e.preventDefault();const value=input.value.trim();if(!value)return;const item=current||{id:crypto.randomUUID()};if(memo)Object.assign(item,{content:value,updated:Date.now()});else Object.assign(item,{title:value,date:date.value,priority:priority.value,done:current?.done||false});if(!current)(memo?data.memos:data.tasks).unshift(item);editing=null;filter='all';query='';save();render()};host.append(form);
+ const search=el('input',null,'record-search');search.type='search';search.placeholder=memo?'搜索小记':'搜索待办';search.setAttribute('aria-label',search.placeholder);search.value=query;host.append(search);
+ const tabs=el('div',null,'record-tabs');if(!memo){[['all','全部'],['inbox','收集箱'],['today','今天'],['done','已完成']].forEach(([id,name])=>{const b=el('button',name);b.setAttribute('aria-pressed',String(filter===id));b.onclick=()=>{filter=id;render()};tabs.append(b)});host.append(tabs)}
+ const list=el('div',null,'record-list');host.append(list,status);function results(){list.replaceChildren();const items=(memo?data.memos:data.tasks).filter(x=>(x.content||x.title).toLowerCase().includes(query.toLowerCase())&&(memo||filter==='all'||filter==='inbox'&&!x.date&&!x.done||filter==='today'&&x.date===today()&&!x.done||filter==='done'&&x.done));if(!items.length)list.append(el('p','这里暂时没有记录。','record-empty'));items.forEach(x=>{const card=el('article',null,'record-card'+(x.done?' is-done':''));if(!memo){const checkbox=el('input');checkbox.type='checkbox';checkbox.checked=x.done;checkbox.setAttribute('aria-label',`${x.done?'恢复':'完成'} ${x.title}`);checkbox.onchange=()=>{x.done=checkbox.checked;save();results()};card.append(checkbox)}const body=el('div',null,'record-body');body.append(el('p',x.content||x.title));body.append(el('small',memo?new Date(x.updated).toLocaleString('zh-CN',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):`${x.date||'收集箱'} · ${x.priority}`));const edit=el('button','编辑','record-edit');edit.onclick=()=>{editing=x.id;render();host.querySelector('textarea,input').focus()};body.append(edit);card.append(body);list.append(card)})}search.oninput=()=>{query=search.value;results()};results();}
+for(const b of document.querySelectorAll('[data-app]'))b.addEventListener('click',()=>{app=b.dataset.app;filter='all';query='';editing=null;status.textContent='';render()});

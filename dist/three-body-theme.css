@@ -1,12 +1,12 @@
-body[data-theme=threeBody][data-view=home] .home-threeBody{position:relative;isolation:isolate;min-height:calc(100svh - 100px);padding:40px 6vw 140px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;text-align:left;pointer-events:none;}
+body:is([data-theme=threeBody],[data-theme=cosmos])[data-view=home] .home-threeBody{position:relative;isolation:isolate;min-height:calc(100svh - 100px);padding:40px 6vw 140px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;text-align:left;pointer-events:none;}
 .home-threeBody .three-body-canvas{position:fixed;inset:0;width:100vw;height:100svh;z-index:-1;pointer-events:none;}
 .home-threeBody .three-body-copy{position:relative;width:auto;max-width:380px;margin:0;pointer-events:none;text-align:left;}
 .three-body-copy h1{font-size:clamp(30px,3.2vw,54px);line-height:1.5;white-space:pre-line;letter-spacing:.06em;}
 .three-body-copy .intro{line-height:1.9;width:max-content;max-width:88vw;white-space:normal;}
 .home-threeBody .scroll-invitation{pointer-events:auto;}
-.home-threeBody .three-body-open{position:fixed;z-index:2;right:24px;top:calc(50% - 20px);width:40px;height:40px;display:grid;place-items:center;border:0;border-radius:50%;color:var(--muted);background:color-mix(in srgb,var(--bg) 75%,transparent);backdrop-filter:blur(16px);pointer-events:auto;cursor:pointer;}
+:is(.home-threeBody,.home-cosmos) .three-body-open{position:fixed;z-index:2;right:24px;top:calc(50% - 20px);width:40px;height:40px;display:grid;place-items:center;border:0;border-radius:50%;color:var(--muted);background:color-mix(in srgb,var(--bg) 75%,transparent);backdrop-filter:blur(16px);pointer-events:auto;cursor:pointer;}
 .three-body-open svg{width:19px;height:19px;}
-body[data-theme=threeBody] .three-body-panel{position:fixed;z-index:10001;inset:0 0 0 auto;width:min(352px,calc(100vw - 32px));display:flex;flex-direction:column;background:color-mix(in srgb,var(--bg) 58%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-radius:0;box-shadow:-10px 0 32px #00000012;color:var(--ink);pointer-events:auto;text-align:left;}
+body:is([data-theme=threeBody],[data-theme=cosmos]) .three-body-panel{position:fixed;z-index:10001;inset:0 0 0 auto;width:min(352px,calc(100vw - 32px));display:flex;flex-direction:column;background:color-mix(in srgb,var(--bg) 58%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-radius:0;box-shadow:-10px 0 32px #00000012;color:var(--ink);pointer-events:auto;text-align:left;}
 .three-body-backdrop{position:fixed;inset:0;z-index:10000;background:transparent;}
 .three-body-panel[hidden],.three-body-backdrop[hidden]{display:none!important;}
 body.three-body-panel-open :is(.mode-pull-cord,.color-pull-cord,.account-menu-wrap,.desktop-pet,.utility-search){visibility:hidden!important;pointer-events:none!important;}
@@ -45,7 +45,7 @@ body.global-chrome-idle .three-body-toolbelt{opacity:0;pointer-events:none;}
 .three-body-actions button{border:0;background:transparent;color:var(--muted);font:12px inherit;cursor:pointer;padding:10px 0;}
 .three-body-status{position:fixed;right:6vw;bottom:104px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;}
 body.global-chrome-idle .home-threeBody .three-body-open,body.global-chrome-idle .home-threeBody .three-body-actions,body.global-chrome-idle .home-threeBody .three-body-status{opacity:0;pointer-events:none;}
-@media(max-width:600px){body[data-theme=threeBody][data-view=home] .home-threeBody{align-items:flex-start;padding-top:80px;}.three-body-copy h1{font-size:30px;}.three-body-copy .intro{font-size:12px;max-width:88vw;}.three-body-status{bottom:148px;left:6vw;right:auto;}}
+@media(max-width:600px){body:is([data-theme=threeBody],[data-theme=cosmos])[data-view=home] .home-threeBody{align-items:flex-start;padding-top:80px;}.three-body-copy h1{font-size:30px;}.three-body-copy .intro{font-size:12px;max-width:88vw;}.three-body-status{bottom:148px;left:6vw;right:auto;}}
 
 .three-body-animal-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;}
 .three-body-field select{font:12px system-ui;color:var(--ink);background:var(--bg);border:1px solid color-mix(in srgb,var(--accent) 20%,transparent);border-radius:8px;padding:7px 9px;}
@@ -76,3 +76,18 @@ body.global-chrome-idle .home-emergence .emergence-shortcuts,body.global-chrome-
 .home-threeBody .theme-music-control{cursor:default;}
 .home-threeBody .theme-music-control button{display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:0;background:transparent;color:inherit;font:inherit;cursor:pointer;}
 .home-threeBody .theme-music-control button:hover,.home-threeBody .theme-music-control button[aria-pressed=true]{color:var(--accent);}
+/* Keep the binary title on its two intentional lines. */
+.home-threeBody[data-three-scene="binarySystem"] .three-body-copy h1{width:max-content;max-width:none;white-space:pre;}
+
+/* Make the active mouse half readable in multi-body shortcut hints. */
+.home-threeBody[data-three-scene="multiBody"] .three-body-actions .emergence-mouse-key{width:15px;height:20px;stroke:var(--ink);stroke-width:1.7;}
+.home-threeBody[data-three-scene="multiBody"] .three-body-actions .emergence-mouse-key path[fill="currentColor"]{fill:var(--ink);fill-opacity:1;}
+
+
+/* Preserve the star-orbit canvas backdrop inside the shared cosmos theme. */
+body[data-theme=cosmos][data-view=home]{background-color:var(--bg);background-image:none!important;background-size:auto;}
+
+/* Shared palette backdrop for the orbital home only. */
+body:is([data-theme=threeBody],[data-theme=cosmos])[data-view=home]{background:var(--theme-art-background,var(--bg))!important}
+
+body:is([data-theme=threeBody],[data-theme=cosmos])[data-view=home]{--ink:var(--theme-art-ink);--muted:var(--theme-art-muted)}

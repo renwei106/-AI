@@ -1,0 +1,142 @@
+[
+  {
+    "name": "moon",
+    "license": "CelestiaContent LICENSE.md and README",
+    "file": "satellite_moon.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/moon.jpg",
+    "sourcePath": "textures/hires/moon.jpg"
+  },
+  {
+    "name": "phobos",
+    "license": "satellite_phobos.jpg.license",
+    "file": "satellite_phobos.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/phobos.jpg",
+    "sourcePath": "textures/hires/phobos.jpg"
+  },
+  {
+    "name": "deimos",
+    "license": "satellite_deimos.jpg.license",
+    "file": "satellite_deimos.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/deimos.jpg",
+    "sourcePath": "textures/hires/deimos.jpg"
+  },
+  {
+    "name": "io",
+    "license": "satellite_io.png.license",
+    "file": "satellite_io.png",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/io.png",
+    "sourcePath": "textures/hires/io.png"
+  },
+  {
+    "name": "europa",
+    "license": "CelestiaContent LICENSE.md and README",
+    "file": "satellite_europa.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/europa.jpg",
+    "sourcePath": "textures/hires/europa.jpg"
+  },
+  {
+    "name": "ganymede",
+    "license": "satellite_ganymede.jpg.license",
+    "file": "satellite_ganymede.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/ganymede.jpg",
+    "sourcePath": "textures/hires/ganymede.jpg"
+  },
+  {
+    "name": "callisto",
+    "license": "CelestiaContent LICENSE.md and README",
+    "file": "satellite_callisto.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/callisto.jpg",
+    "sourcePath": "textures/hires/callisto.jpg"
+  },
+  {
+    "name": "enceladus",
+    "license": "CelestiaContent LICENSE.md and README",
+    "file": "satellite_enceladus.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/enceladus.jpg",
+    "sourcePath": "textures/hires/enceladus.jpg"
+  },
+  {
+    "name": "tethys",
+    "license": "CelestiaContent LICENSE.md and README",
+    "file": "satellite_tethys.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/tethys.jpg",
+    "sourcePath": "textures/hires/tethys.jpg"
+  },
+  {
+    "name": "dione",
+    "license": "CelestiaContent LICENSE.md and README",
+    "file": "satellite_dione.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/dione.jpg",
+    "sourcePath": "textures/hires/dione.jpg"
+  },
+  {
+    "name": "rhea",
+    "license": "CelestiaContent LICENSE.md and README",
+    "file": "satellite_rhea.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/rhea.jpg",
+    "sourcePath": "textures/hires/rhea.jpg"
+  },
+  {
+    "name": "titan",
+    "license": "satellite_titan.png.license",
+    "file": "satellite_titan.png",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/titan.png",
+    "sourcePath": "textures/hires/titan.png"
+  },
+  {
+    "name": "iapetus",
+    "license": "CelestiaContent LICENSE.md and README",
+    "file": "satellite_iapetus.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/iapetus.jpg",
+    "sourcePath": "textures/hires/iapetus.jpg"
+  },
+  {
+    "name": "miranda",
+    "license": "satellite_miranda.jpg.license",
+    "file": "satellite_miranda.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/miranda.jpg",
+    "sourcePath": "textures/hires/miranda.jpg"
+  },
+  {
+    "name": "ariel",
+    "license": "satellite_ariel.jpg.license",
+    "file": "satellite_ariel.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/ariel.jpg",
+    "sourcePath": "textures/hires/ariel.jpg"
+  },
+  {
+    "name": "umbriel",
+    "license": "satellite_umbriel.jpg.license",
+    "file": "satellite_umbriel.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/medres/umbriel.jpg",
+    "sourcePath": "textures/medres/umbriel.jpg"
+  },
+  {
+    "name": "titania",
+    "license": "satellite_titania.jpg.license",
+    "file": "satellite_titania.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/medres/titania.jpg",
+    "sourcePath": "textures/medres/titania.jpg"
+  },
+  {
+    "name": "oberon",
+    "license": "satellite_oberon.jpg.license",
+    "file": "satellite_oberon.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/medres/oberon.jpg",
+    "sourcePath": "textures/medres/oberon.jpg"
+  },
+  {
+    "name": "triton",
+    "license": "satellite_triton.jpg.license",
+    "file": "satellite_triton.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/hires/triton.jpg",
+    "sourcePath": "textures/hires/triton.jpg"
+  },
+  {
+    "name": "proteus",
+    "license": "CelestiaContent LICENSE.md and README",
+    "file": "satellite_proteus.jpg",
+    "source": "https://raw.githubusercontent.com/CelestiaProject/CelestiaContent/60316cf1c7df289b44b3c99711913bdbf1daea2e/textures/lores/proteus.jpg",
+    "sourcePath": "textures/lores/proteus.jpg"
+  }
+]

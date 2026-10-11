@@ -1,0 +1,212 @@
+{
+  "checks": [
+    "Paused simulation stays still; keyboard sliders, count, shape and predator controls affect the engine immediately.",
+    "Merged flock preferences survive reload; resetting cosmos does not reset flock.",
+    "Actual contact captures one prey; automatic replenishment restores the target; natural reduction does not silently respawn.",
+    "Pointer influence stops over the panel; open, close and Escape preserve keyboard focus and hide inactive controls.",
+    "Both scenes remain finite through 60 simulated seconds and min/max parameter runs; corrupted values are sanitized.",
+    "Light/dark appearances, expanded advanced controls, desktop/tablet/mobile panel layouts and scrolling are usable without horizontal overflow.",
+    "Reduced-motion preference starts paused; mobile starts with the panel closed; unavailable storage is reported without blocking interaction.",
+    "No page JavaScript errors and no write requests to any service."
+  ],
+  "errors": [],
+  "stability": [
+    {
+      "id": "birds",
+      "mode": "60 simulation seconds",
+      "ms": 1030,
+      "dimension": "2d",
+      "camera": {
+        "yaw": -0.25,
+        "pitch": 0.15
+      },
+      "scene": "birds",
+      "model": "flock",
+      "world": {
+        "width": 1363.6363636363635,
+        "height": 909.090909090909,
+        "depth": 772.7272727272726
+      },
+      "boundary": "periodic",
+      "count": 149,
+      "target": 140,
+      "populationLimit": 900,
+      "predators": 0,
+      "predatorLimit": 4,
+      "born": 9,
+      "predatorBorn": 0,
+      "birthClock": 0,
+      "predatorBirthClock": 0,
+      "captured": 0,
+      "pending": 0,
+      "time": 59.999999999997875,
+      "paused": true,
+      "finite": true
+    },
+    {
+      "id": "birds",
+      "mode": "maximum parameters",
+      "dimension": "2d",
+      "camera": {
+        "yaw": -0.25,
+        "pitch": 0.15
+      },
+      "scene": "birds",
+      "model": "flock",
+      "world": {
+        "width": 1363.6363636363635,
+        "height": 909.090909090909,
+        "depth": 772.7272727272726
+      },
+      "boundary": "periodic",
+      "count": 900,
+      "target": 900,
+      "populationLimit": 900,
+      "predators": 4,
+      "predatorLimit": 6,
+      "born": 0,
+      "predatorBorn": 0,
+      "birthClock": 4.999999999999988,
+      "predatorBirthClock": 4.999999999999988,
+      "captured": 3,
+      "pending": 0,
+      "time": 4.999999999999988,
+      "paused": true,
+      "finite": true
+    },
+    {
+      "id": "birds",
+      "mode": "minimum parameters",
+      "dimension": "2d",
+      "camera": {
+        "yaw": -0.25,
+        "pitch": 0.15
+      },
+      "scene": "birds",
+      "model": "flock",
+      "world": {
+        "width": 1363.6363636363635,
+        "height": 909.090909090909,
+        "depth": 772.7272727272726
+      },
+      "boundary": "periodic",
+      "count": 40,
+      "target": 40,
+      "populationLimit": 40,
+      "predators": 0,
+      "predatorLimit": 1,
+      "born": 0,
+      "predatorBorn": 0,
+      "birthClock": 4.999999999999988,
+      "predatorBirthClock": 0,
+      "captured": 0,
+      "pending": 0,
+      "time": 4.999999999999988,
+      "paused": true,
+      "finite": true
+    },
+    {
+      "id": "cosmos",
+      "mode": "60 simulation seconds",
+      "ms": 67.5,
+      "dimension": "2d",
+      "camera": {
+        "yaw": -0.25,
+        "pitch": 0.15
+      },
+      "scene": "cosmos",
+      "model": "gravity",
+      "world": {
+        "width": 1363.6363636363635,
+        "height": 909.090909090909,
+        "depth": 772.7272727272726
+      },
+      "boundary": "periodic",
+      "count": 150,
+      "target": 150,
+      "populationLimit": 150,
+      "predators": 0,
+      "predatorLimit": 0,
+      "born": 0,
+      "predatorBorn": 0,
+      "birthClock": 0,
+      "predatorBirthClock": 0,
+      "captured": 0,
+      "pending": 0,
+      "time": 59.999999999997875,
+      "paused": true,
+      "finite": true
+    },
+    {
+      "id": "cosmos",
+      "mode": "maximum parameters",
+      "dimension": "2d",
+      "camera": {
+        "yaw": -0.25,
+        "pitch": 0.15
+      },
+      "scene": "cosmos",
+      "model": "gravity",
+      "world": {
+        "width": 1363.6363636363635,
+        "height": 909.090909090909,
+        "depth": 772.7272727272726
+      },
+      "boundary": "periodic",
+      "count": 1200,
+      "target": 1200,
+      "populationLimit": 1200,
+      "predators": 0,
+      "predatorLimit": 0,
+      "born": 0,
+      "predatorBorn": 0,
+      "birthClock": 0,
+      "predatorBirthClock": 0,
+      "captured": 0,
+      "pending": 0,
+      "time": 4.999999999999988,
+      "paused": true,
+      "finite": true
+    },
+    {
+      "id": "cosmos",
+      "mode": "minimum parameters",
+      "dimension": "2d",
+      "camera": {
+        "yaw": -0.25,
+        "pitch": 0.15
+      },
+      "scene": "cosmos",
+      "model": "gravity",
+      "world": {
+        "width": 1363.6363636363635,
+        "height": 909.090909090909,
+        "depth": 772.7272727272726
+      },
+      "boundary": "periodic",
+      "count": 100,
+      "target": 100,
+      "populationLimit": 100,
+      "predators": 0,
+      "predatorLimit": 0,
+      "born": 0,
+      "predatorBorn": 0,
+      "birthClock": 0,
+      "predatorBirthClock": 0,
+      "captured": 0,
+      "pending": 0,
+      "time": 4.999999999999988,
+      "paused": true,
+      "finite": true
+    }
+  ],
+  "screenshots": [
+    "birds-light-desktop.png",
+    "cosmos-light-desktop.png",
+    "cosmos-dark-desktop.png",
+    "birds-dark-advanced.png",
+    "birds-light-1280.png",
+    "birds-mobile-closed.png",
+    "birds-mobile-panel.png"
+  ]
+}

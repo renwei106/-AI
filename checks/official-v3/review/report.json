@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:4320/official/v3/index.html",
+  "results": [
+    "six screens, product entries, desktop screenshot review",
+    "all themes, actual images, arrow/Home/End keyboard navigation",
+    "space view transitions preserve collection and selected tab",
+    "world resources change by topic",
+    "extension collection demo and destination changes",
+    "pet expands, switches tools, collapses with Escape; todo demo works",
+    "real clipboard uses product URL; browser guidance; desktop shortcut; dialog focus restoration",
+    "denied clipboard exposes manual copying and never claims success",
+    "responsive content bounds 2560×1440",
+    "responsive content bounds 1920×1080",
+    "responsive content bounds 1366×768",
+    "responsive content bounds 1024×768",
+    "responsive content bounds 768×1024",
+    "responsive content bounds 390×844",
+    "responsive content bounds 320×568",
+    "mobile theme images, no script/resource errors, no account or production data access",
+    "native wheel and PageDown move between full-screen chapters",
+    "iOS provides home-screen instructions, no Windows shortcut",
+    "reduced motion, chapter navigation, no-JavaScript product access",
+    "old official page and preexisting desktop-pet changes are byte-for-byte unchanged"
+  ],
+  "errors": [],
+  "failed": [],
+  "screens": [
+    "intro",
+    "themes",
+    "space",
+    "world",
+    "extension",
+    "tools"
+  ],
+  "generatedAt": "2026-09-28T08:40:34.804Z"
+}

@@ -1,0 +1,73 @@
+{
+  "covered": [
+    {
+      "index": 0,
+      "keys": [
+        "editionMasthead0",
+        "tagline",
+        "strip",
+        "leadLabel",
+        "title",
+        "intro",
+        "dailyLabel",
+        "dailyTitle0",
+        "dailyBody0",
+        "dailyTitle1",
+        "dailyBody1",
+        "dailyTitle2",
+        "dailyBody2",
+        "dailyTitle3",
+        "dailyBody3",
+        "quote",
+        "sideLabel",
+        "sideTitle0",
+        "sideBody0",
+        "sideTitle1",
+        "sideBody1",
+        "sideTitle2",
+        "sideBody2"
+      ]
+    },
+    {
+      "index": 1,
+      "keys": [
+        "editionMasthead1",
+        "tagline",
+        "strip",
+        "dailyLabel",
+        "dailyTitle0",
+        "dailyBody0",
+        "dailyTitle1",
+        "dailyBody1",
+        "dailyTitle2",
+        "dailyBody2",
+        "dailyTitle3",
+        "dailyBody3",
+        "quote"
+      ]
+    },
+    {
+      "index": 2,
+      "keys": [
+        "editionMasthead2",
+        "tagline",
+        "strip",
+        "sideLabel",
+        "sideTitle0",
+        "sideBody0",
+        "sideTitle1",
+        "sideBody1",
+        "sideTitle2",
+        "sideBody2",
+        "quote"
+      ]
+    }
+  ],
+  "coverFields": [
+    "masthead",
+    "strip",
+    "title",
+    "intro"
+  ],
+  "layoutsCompared": 6
+}

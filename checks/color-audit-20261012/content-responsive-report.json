@@ -1,0 +1,254 @@
+[
+  {
+    "width": 1033,
+    "path": "onboarding",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 925
+  },
+  {
+    "width": 1033,
+    "path": "personalization/themes",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 929
+  },
+  {
+    "width": 1033,
+    "path": "personalization/colors",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 929
+  },
+  {
+    "width": 1033,
+    "path": "personalization/fonts",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 929
+  },
+  {
+    "width": 1033,
+    "path": "personalization/pet",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 929
+  },
+  {
+    "width": 1033,
+    "path": "music",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901
+  },
+  {
+    "width": 1033,
+    "path": "avatars",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901
+  },
+  {
+    "width": 1033,
+    "path": "library",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901
+  },
+  {
+    "width": 1033,
+    "path": "link-styles",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 941
+  },
+  {
+    "width": 1033,
+    "path": "world/discover",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 925
+  },
+  {
+    "width": 1033,
+    "path": "world/resources",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 925
+  },
+  {
+    "width": 1033,
+    "path": "world/learning",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 925
+  },
+  {
+    "width": 1033,
+    "path": "world/materials",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 925
+  },
+  {
+    "width": 1033,
+    "path": "world/creators",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 925
+  },
+  {
+    "width": 1033,
+    "path": "world/collaboration",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 925
+  },
+  {
+    "width": 1033,
+    "path": "tools",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 941
+  },
+  {
+    "width": 1033,
+    "path": "page-colors/colors",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 929
+  },
+  {
+    "width": 1033,
+    "path": "page-colors/fonts",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 929
+  },
+  {
+    "width": 600,
+    "path": "onboarding",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 492
+  },
+  {
+    "width": 600,
+    "path": "personalization/themes",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 512
+  },
+  {
+    "width": 600,
+    "path": "personalization/colors",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 512
+  },
+  {
+    "width": 600,
+    "path": "personalization/fonts",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 512
+  },
+  {
+    "width": 600,
+    "path": "personalization/pet",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 512
+  },
+  {
+    "width": 600,
+    "path": "music",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 500
+  },
+  {
+    "width": 600,
+    "path": "avatars",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 500
+  },
+  {
+    "width": 600,
+    "path": "library",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 500
+  },
+  {
+    "width": 600,
+    "path": "link-styles",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 508
+  },
+  {
+    "width": 600,
+    "path": "world/discover",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 492
+  },
+  {
+    "width": 600,
+    "path": "world/resources",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 492
+  },
+  {
+    "width": 600,
+    "path": "world/learning",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 492
+  },
+  {
+    "width": 600,
+    "path": "world/materials",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 492
+  },
+  {
+    "width": 600,
+    "path": "world/creators",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 492
+  },
+  {
+    "width": 600,
+    "path": "world/collaboration",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 492
+  },
+  {
+    "width": 600,
+    "path": "tools",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 508
+  },
+  {
+    "width": 600,
+    "path": "page-colors/colors",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 512
+  },
+  {
+    "width": 600,
+    "path": "page-colors/fonts",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 512
+  }
+]

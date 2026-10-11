@@ -1,0 +1,3077 @@
+{
+  "id": "welcome-sites-v1",
+  "name": "精选网址",
+  "version": 1,
+  "scenes": [
+    {
+      "id": "gift-scene-01",
+      "name": "信息搜索",
+      "description": "",
+      "groups": [
+        {
+          "id": "gift-scene-01-group-01",
+          "name": "搜索引擎",
+          "items": [
+            {
+              "id": "gift-site-001",
+              "name": "百度",
+              "url": "https://www.baidu.com/",
+              "description": "综合网页搜索与信息检索",
+              "region": "国内",
+              "logo": "https://www.baidu.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-002",
+              "name": "必应中国",
+              "url": "https://cn.bing.com/",
+              "description": "网页、图片与资讯搜索",
+              "region": "国内",
+              "logo": "https://cn.bing.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-003",
+              "name": "搜狗搜索",
+              "url": "https://www.sogou.com/",
+              "description": "网页与中文内容搜索",
+              "region": "国内",
+              "logo": "https://www.sogou.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-004",
+              "name": "360搜索",
+              "url": "https://www.so.com/",
+              "description": "网页、新闻与图片搜索",
+              "region": "国内",
+              "logo": "https://www.so.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-005",
+              "name": "夸克",
+              "url": "https://www.quark.cn/",
+              "description": "搜索、浏览与资料查询",
+              "region": "国内",
+              "logo": "https://www.quark.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-006",
+              "name": "秘塔搜索",
+              "url": "https://metaso.cn/",
+              "description": "AI辅助搜索与资料整理",
+              "region": "国内",
+              "logo": "https://metaso.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-007",
+              "name": "Google",
+              "url": "https://www.google.com/",
+              "description": "全球网页与多媒体搜索",
+              "region": "国外",
+              "logo": "https://www.google.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-008",
+              "name": "DuckDuckGo",
+              "url": "https://duckduckgo.com/",
+              "description": "注重隐私的网页搜索",
+              "region": "国外",
+              "logo": "https://duckduckgo.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-009",
+              "name": "Yahoo Search",
+              "url": "https://search.yahoo.com/",
+              "description": "网页与新闻搜索",
+              "region": "国外",
+              "logo": "https://search.yahoo.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-01-group-02",
+          "name": "社区热点",
+          "items": [
+            {
+              "id": "gift-site-010",
+              "name": "知乎",
+              "url": "https://www.zhihu.com/",
+              "description": "问答、经验与专业观点",
+              "region": "国内",
+              "logo": "https://www.zhihu.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-011",
+              "name": "微博",
+              "url": "https://weibo.com/",
+              "description": "热点事件与实时讨论",
+              "region": "国内",
+              "logo": "https://weibo.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-012",
+              "name": "Reddit",
+              "url": "https://www.reddit.com/",
+              "description": "社区讨论与兴趣资讯",
+              "region": "国外",
+              "logo": "https://www.reddit.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-013",
+              "name": "Quora",
+              "url": "https://www.quora.com/",
+              "description": "问题解答与经验分享",
+              "region": "国外",
+              "logo": "https://www.quora.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-01-group-03",
+          "name": "新闻资讯",
+          "items": [
+            {
+              "id": "gift-site-014",
+              "name": "今日头条",
+              "url": "https://www.toutiao.com/",
+              "description": "个性化新闻与资讯",
+              "region": "国内",
+              "logo": "https://www.toutiao.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-015",
+              "name": "澎湃新闻",
+              "url": "https://www.thepaper.cn/",
+              "description": "时政、社会与深度报道",
+              "region": "国内",
+              "logo": "https://www.thepaper.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-016",
+              "name": "央视新闻",
+              "url": "https://news.cctv.com/",
+              "description": "中央广播电视总台新闻",
+              "region": "国内",
+              "logo": "https://news.cctv.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-017",
+              "name": "新华网",
+              "url": "https://www.xinhuanet.com/",
+              "description": "权威新闻与政策资讯",
+              "region": "国内",
+              "logo": "https://www.xinhuanet.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-018",
+              "name": "人民网",
+              "url": "https://www.people.com.cn/",
+              "description": "时政新闻与民生资讯",
+              "region": "国内",
+              "logo": "https://www.people.com.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-019",
+              "name": "腾讯新闻",
+              "url": "https://news.qq.com/",
+              "description": "综合新闻与热点报道",
+              "region": "国内",
+              "logo": "https://news.qq.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-020",
+              "name": "网易新闻",
+              "url": "https://news.163.com/",
+              "description": "综合新闻与专题报道",
+              "region": "国内",
+              "logo": "https://news.163.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-021",
+              "name": "Google News",
+              "url": "https://news.google.com/",
+              "description": "聚合多来源新闻",
+              "region": "国外",
+              "logo": "https://news.google.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-022",
+              "name": "Reuters",
+              "url": "https://www.reuters.com/",
+              "description": "国际财经与时事新闻",
+              "region": "国外",
+              "logo": "https://www.reuters.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-023",
+              "name": "AP News",
+              "url": "https://apnews.com/",
+              "description": "国际新闻与现场报道",
+              "region": "国外",
+              "logo": "https://apnews.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-024",
+              "name": "BBC News",
+              "url": "https://www.bbc.com/news",
+              "description": "国际新闻与专题报道",
+              "region": "国外",
+              "logo": "https://www.bbc.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-025",
+              "name": "CNN",
+              "url": "https://www.cnn.com/",
+              "description": "国际即时新闻",
+              "region": "国外",
+              "logo": "https://www.cnn.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-026",
+              "name": "The Guardian",
+              "url": "https://www.theguardian.com/",
+              "description": "新闻、评论与调查报道",
+              "region": "国外",
+              "logo": "https://www.theguardian.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-027",
+              "name": "Feedly",
+              "url": "https://feedly.com/",
+              "description": "订阅并聚合资讯来源",
+              "region": "国外",
+              "logo": "https://feedly.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-01-group-04",
+          "name": "百科资料",
+          "items": [
+            {
+              "id": "gift-site-028",
+              "name": "Wikipedia",
+              "url": "https://www.wikipedia.org/",
+              "description": "开放式百科知识查询",
+              "region": "国外",
+              "logo": "https://www.wikipedia.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-029",
+              "name": "Internet Archive",
+              "url": "https://archive.org/",
+              "description": "网页存档与数字资料",
+              "region": "国外",
+              "logo": "https://archive.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-030",
+              "name": "WolframAlpha",
+              "url": "https://www.wolframalpha.com/",
+              "description": "知识计算与事实查询",
+              "region": "国外",
+              "logo": "https://www.wolframalpha.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gift-scene-02",
+      "name": "办公协作",
+      "description": "",
+      "groups": [
+        {
+          "id": "gift-scene-02-group-01",
+          "name": "文档办公",
+          "items": [
+            {
+              "id": "gift-site-031",
+              "name": "WPS Office",
+              "url": "https://www.wps.cn/",
+              "description": "文档、表格与演示制作",
+              "region": "国内",
+              "logo": "https://www.wps.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-032",
+              "name": "腾讯文档",
+              "url": "https://docs.qq.com/",
+              "description": "在线文档与多人协作",
+              "region": "国内",
+              "logo": "https://docs.qq.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-033",
+              "name": "石墨文档",
+              "url": "https://shimo.im/",
+              "description": "实时协作文档与表格",
+              "region": "国内",
+              "logo": "https://shimo.im/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-034",
+              "name": "语雀",
+              "url": "https://www.yuque.com/",
+              "description": "团队知识库与文档协作",
+              "region": "国内",
+              "logo": "https://www.yuque.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-035",
+              "name": "金山文档",
+              "url": "https://www.kdocs.cn/",
+              "description": "在线文档与协作编辑",
+              "region": "国内",
+              "logo": "https://www.kdocs.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-036",
+              "name": "Microsoft 365",
+              "url": "https://www.microsoft.com/microsoft-365",
+              "description": "办公套件与团队协作",
+              "region": "国外",
+              "logo": "https://www.microsoft.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-037",
+              "name": "Google Workspace",
+              "url": "https://workspace.google.com/",
+              "description": "邮件、文档与团队协作",
+              "region": "国外",
+              "logo": "https://workspace.google.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-038",
+              "name": "Notion",
+              "url": "https://www.notion.so/",
+              "description": "文档、知识库与项目管理",
+              "region": "国外",
+              "logo": "https://www.notion.so/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-039",
+              "name": "Airtable",
+              "url": "https://www.airtable.com/",
+              "description": "数据库式表格协作",
+              "region": "国外",
+              "logo": "https://www.airtable.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-02-group-02",
+          "name": "沟通会议",
+          "items": [
+            {
+              "id": "gift-site-040",
+              "name": "飞书",
+              "url": "https://www.feishu.cn/",
+              "description": "文档、会议与团队协作",
+              "region": "国内",
+              "logo": "https://www.feishu.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-041",
+              "name": "钉钉",
+              "url": "https://www.dingtalk.com/",
+              "description": "企业沟通与协同办公",
+              "region": "国内",
+              "logo": "https://www.dingtalk.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-042",
+              "name": "企业微信",
+              "url": "https://work.weixin.qq.com/",
+              "description": "企业沟通与客户连接",
+              "region": "国内",
+              "logo": "https://work.weixin.qq.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-043",
+              "name": "腾讯会议",
+              "url": "https://meeting.tencent.com/",
+              "description": "在线会议与屏幕共享",
+              "region": "国内",
+              "logo": "https://meeting.tencent.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-044",
+              "name": "网易邮箱",
+              "url": "https://mail.163.com/",
+              "description": "电子邮件收发与管理",
+              "region": "国内",
+              "logo": "https://mail.163.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-045",
+              "name": "QQ邮箱",
+              "url": "https://mail.qq.com/",
+              "description": "电子邮件收发与管理",
+              "region": "国内",
+              "logo": "https://mail.qq.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-046",
+              "name": "Slack",
+              "url": "https://slack.com/",
+              "description": "团队消息与工作流协作",
+              "region": "国外",
+              "logo": "https://slack.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-047",
+              "name": "Zoom",
+              "url": "https://zoom.us/",
+              "description": "视频会议与线上沟通",
+              "region": "国外",
+              "logo": "https://zoom.us/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-048",
+              "name": "Calendly",
+              "url": "https://calendly.com/",
+              "description": "预约日程与会议安排",
+              "region": "国外",
+              "logo": "https://calendly.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-02-group-03",
+          "name": "项目协作",
+          "items": [
+            {
+              "id": "gift-site-049",
+              "name": "Teambition",
+              "url": "https://www.teambition.com/",
+              "description": "项目任务与进度协作",
+              "region": "国内",
+              "logo": "https://www.teambition.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-050",
+              "name": "蓝湖",
+              "url": "https://lanhuapp.com/",
+              "description": "设计交付与团队协作",
+              "region": "国内",
+              "logo": "https://lanhuapp.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-051",
+              "name": "Asana",
+              "url": "https://asana.com/",
+              "description": "项目计划与任务跟踪",
+              "region": "国外",
+              "logo": "https://asana.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-052",
+              "name": "Trello",
+              "url": "https://trello.com/",
+              "description": "看板式任务管理",
+              "region": "国外",
+              "logo": "https://trello.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-053",
+              "name": "monday.com",
+              "url": "https://monday.com/",
+              "description": "团队项目与流程管理",
+              "region": "国外",
+              "logo": "https://monday.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-054",
+              "name": "ClickUp",
+              "url": "https://clickup.com/",
+              "description": "任务、文档与项目管理",
+              "region": "国外",
+              "logo": "https://clickup.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-055",
+              "name": "Miro",
+              "url": "https://miro.com/",
+              "description": "在线白板与团队共创",
+              "region": "国外",
+              "logo": "https://miro.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-02-group-04",
+          "name": "云盘存储",
+          "items": [
+            {
+              "id": "gift-site-056",
+              "name": "百度网盘",
+              "url": "https://pan.baidu.com/",
+              "description": "文件存储与分享",
+              "region": "国内",
+              "logo": "https://pan.baidu.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-057",
+              "name": "阿里云盘",
+              "url": "https://www.alipan.com/",
+              "description": "云端文件存储与分享",
+              "region": "国内",
+              "logo": "https://www.alipan.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-058",
+              "name": "Dropbox",
+              "url": "https://www.dropbox.com/",
+              "description": "云文件存储与共享",
+              "region": "国外",
+              "logo": "https://www.dropbox.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-059",
+              "name": "OneDrive",
+              "url": "https://onedrive.live.com/",
+              "description": "微软云文件存储",
+              "region": "国外",
+              "logo": "https://onedrive.live.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-060",
+              "name": "Box",
+              "url": "https://www.box.com/",
+              "description": "企业文件管理与协作",
+              "region": "国外",
+              "logo": "https://www.box.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gift-scene-03",
+      "name": "知识阅读",
+      "description": "",
+      "groups": [
+        {
+          "id": "gift-scene-03-group-01",
+          "name": "阅读平台",
+          "items": [
+            {
+              "id": "gift-site-061",
+              "name": "微信读书",
+              "url": "https://weread.qq.com/",
+              "description": "电子书阅读与书单发现",
+              "region": "国内",
+              "logo": "https://weread.qq.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-062",
+              "name": "得到",
+              "url": "https://www.dedao.cn/",
+              "description": "知识课程与电子书",
+              "region": "国内",
+              "logo": "https://www.dedao.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-063",
+              "name": "豆瓣读书",
+              "url": "https://book.douban.com/",
+              "description": "图书评价与阅读发现",
+              "region": "国内",
+              "logo": "https://book.douban.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-064",
+              "name": "番茄小说",
+              "url": "https://fanqienovel.com/",
+              "description": "网络小说阅读与书单发现",
+              "region": "国内",
+              "logo": "https://fanqienovel.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-065",
+              "name": "Project Gutenberg",
+              "url": "https://www.gutenberg.org/",
+              "description": "公版电子书阅读下载",
+              "region": "国外",
+              "logo": "https://www.gutenberg.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-066",
+              "name": "Open Library",
+              "url": "https://openlibrary.org/",
+              "description": "图书目录与电子借阅",
+              "region": "国外",
+              "logo": "https://openlibrary.org/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-03-group-02",
+          "name": "学术文献",
+          "items": [
+            {
+              "id": "gift-site-067",
+              "name": "中国知网",
+              "url": "https://www.cnki.net/",
+              "description": "中文学术文献检索",
+              "region": "国内",
+              "logo": "https://www.cnki.net/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-068",
+              "name": "万方数据",
+              "url": "https://www.wanfangdata.com.cn/",
+              "description": "学术论文与研究资料",
+              "region": "国内",
+              "logo": "https://www.wanfangdata.com.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-069",
+              "name": "维普网",
+              "url": "https://www.cqvip.com/",
+              "description": "中文期刊与论文检索",
+              "region": "国内",
+              "logo": "https://www.cqvip.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-070",
+              "name": "Google Scholar",
+              "url": "https://scholar.google.com/",
+              "description": "学术论文与引用检索",
+              "region": "国外",
+              "logo": "https://scholar.google.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-071",
+              "name": "Semantic Scholar",
+              "url": "https://www.semanticscholar.org/",
+              "description": "AI辅助学术文献发现",
+              "region": "国外",
+              "logo": "https://www.semanticscholar.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-072",
+              "name": "arXiv",
+              "url": "https://arxiv.org/",
+              "description": "科研预印本查阅",
+              "region": "国外",
+              "logo": "https://arxiv.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-073",
+              "name": "JSTOR",
+              "url": "https://www.jstor.org/",
+              "description": "学术期刊与电子书",
+              "region": "国外",
+              "logo": "https://www.jstor.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-074",
+              "name": "PubMed",
+              "url": "https://pubmed.ncbi.nlm.nih.gov/",
+              "description": "生物医学论文检索",
+              "region": "国外",
+              "logo": "https://pubmed.ncbi.nlm.nih.gov/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-075",
+              "name": "Zotero",
+              "url": "https://www.zotero.org/",
+              "description": "文献收集与引用管理",
+              "region": "国外",
+              "logo": "https://www.zotero.org/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-03-group-03",
+          "name": "知识资料",
+          "items": [
+            {
+              "id": "gift-site-076",
+              "name": "百度文库",
+              "url": "https://wenku.baidu.com/",
+              "description": "文档资料检索与阅读",
+              "region": "国内",
+              "logo": "https://wenku.baidu.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-077",
+              "name": "国家图书馆",
+              "url": "https://www.nlc.cn/",
+              "description": "馆藏目录与数字资源",
+              "region": "国内",
+              "logo": "https://www.nlc.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-078",
+              "name": "国家哲社文献中心",
+              "url": "https://www.ncpssd.cn/",
+              "description": "哲学社科文献检索",
+              "region": "国内",
+              "logo": "https://www.ncpssd.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-079",
+              "name": "Britannica",
+              "url": "https://www.britannica.com/",
+              "description": "编辑型百科知识查询",
+              "region": "国外",
+              "logo": "https://www.britannica.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-080",
+              "name": "The Conversation",
+              "url": "https://theconversation.com/",
+              "description": "学者撰写的知识解读",
+              "region": "国外",
+              "logo": "https://theconversation.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-03-group-04",
+          "name": "笔记工具",
+          "items": [
+            {
+              "id": "gift-site-081",
+              "name": "印象笔记",
+              "url": "https://www.yinxiang.com/",
+              "description": "笔记整理与资料收藏",
+              "region": "国内",
+              "logo": "https://www.yinxiang.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-082",
+              "name": "有道云笔记",
+              "url": "https://note.youdao.com/",
+              "description": "云笔记与资料管理",
+              "region": "国内",
+              "logo": "https://note.youdao.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-083",
+              "name": "flomo",
+              "url": "https://flomoapp.com/",
+              "description": "碎片想法记录与回顾",
+              "region": "国内",
+              "logo": "https://flomoapp.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-084",
+              "name": "幕布",
+              "url": "https://mubu.com/",
+              "description": "大纲笔记与思维整理",
+              "region": "国内",
+              "logo": "https://mubu.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-085",
+              "name": "Evernote",
+              "url": "https://evernote.com/",
+              "description": "笔记整理与资料同步",
+              "region": "国外",
+              "logo": "https://evernote.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-086",
+              "name": "Obsidian",
+              "url": "https://obsidian.md/",
+              "description": "本地知识库与双链笔记",
+              "region": "国外",
+              "logo": "https://obsidian.md/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-087",
+              "name": "Readwise",
+              "url": "https://readwise.io/",
+              "description": "阅读高亮整理与回顾",
+              "region": "国外",
+              "logo": "https://readwise.io/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-03-group-05",
+          "name": "内容专栏",
+          "items": [
+            {
+              "id": "gift-site-088",
+              "name": "少数派",
+              "url": "https://sspai.com/",
+              "description": "数字工具与效率内容",
+              "region": "国内",
+              "logo": "https://sspai.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-089",
+              "name": "Substack",
+              "url": "https://substack.com/",
+              "description": "订阅作者文章与通讯",
+              "region": "国外",
+              "logo": "https://substack.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-090",
+              "name": "Medium",
+              "url": "https://medium.com/",
+              "description": "阅读专题文章与观点",
+              "region": "国外",
+              "logo": "https://medium.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gift-scene-04",
+      "name": "设计创意",
+      "description": "",
+      "groups": [
+        {
+          "id": "gift-scene-04-group-01",
+          "name": "作品社区",
+          "items": [
+            {
+              "id": "gift-site-091",
+              "name": "站酷",
+              "url": "https://www.zcool.com.cn/",
+              "description": "设计作品展示与交流",
+              "region": "国内",
+              "logo": "https://www.zcool.com.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-092",
+              "name": "UI中国",
+              "url": "https://www.ui.cn/",
+              "description": "界面设计作品与交流",
+              "region": "国内",
+              "logo": "https://www.ui.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-093",
+              "name": "Behance",
+              "url": "https://www.behance.net/",
+              "description": "创意作品展示与发现",
+              "region": "国外",
+              "logo": "https://www.behance.net/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-094",
+              "name": "Dribbble",
+              "url": "https://dribbble.com/",
+              "description": "界面与视觉设计灵感",
+              "region": "国外",
+              "logo": "https://dribbble.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-04-group-02",
+          "name": "灵感案例",
+          "items": [
+            {
+              "id": "gift-site-095",
+              "name": "花瓣",
+              "url": "https://huaban.com/",
+              "description": "视觉灵感收集与发现",
+              "region": "国内",
+              "logo": "https://huaban.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-096",
+              "name": "优设",
+              "url": "https://www.uisdc.com/",
+              "description": "设计教程与行业资讯",
+              "region": "国内",
+              "logo": "https://www.uisdc.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-097",
+              "name": "优设导航",
+              "url": "https://hao.uisdc.com/",
+              "description": "设计资源与工具导航",
+              "region": "国内",
+              "logo": "https://hao.uisdc.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-098",
+              "name": "Pinterest",
+              "url": "https://www.pinterest.com/",
+              "description": "图片灵感搜索与收藏",
+              "region": "国外",
+              "logo": "https://www.pinterest.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-099",
+              "name": "Awwwards",
+              "url": "https://www.awwwards.com/",
+              "description": "优秀网站设计案例",
+              "region": "国外",
+              "logo": "https://www.awwwards.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-100",
+              "name": "Mobbin",
+              "url": "https://mobbin.com/",
+              "description": "产品界面案例检索",
+              "region": "国外",
+              "logo": "https://mobbin.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-101",
+              "name": "Product Hunt",
+              "url": "https://www.producthunt.com/",
+              "description": "新产品与创意工具发现",
+              "region": "国外",
+              "logo": "https://www.producthunt.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-04-group-03",
+          "name": "设计工具",
+          "items": [
+            {
+              "id": "gift-site-102",
+              "name": "即时设计",
+              "url": "https://js.design/",
+              "description": "在线界面设计与协作",
+              "region": "国内",
+              "logo": "https://js.design/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-103",
+              "name": "MasterGo",
+              "url": "https://mastergo.com/",
+              "description": "界面设计与团队协作",
+              "region": "国内",
+              "logo": "https://mastergo.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-104",
+              "name": "Canva可画",
+              "url": "https://www.canva.cn/",
+              "description": "模板化平面设计",
+              "region": "国内",
+              "logo": "https://www.canva.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-105",
+              "name": "稿定设计",
+              "url": "https://www.gaoding.com/",
+              "description": "图片与营销素材制作",
+              "region": "国内",
+              "logo": "https://www.gaoding.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-106",
+              "name": "创客贴",
+              "url": "https://www.chuangkit.com/",
+              "description": "海报与社媒图片设计",
+              "region": "国内",
+              "logo": "https://www.chuangkit.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-107",
+              "name": "Figma",
+              "url": "https://www.figma.com/",
+              "description": "界面设计与原型协作",
+              "region": "国外",
+              "logo": "https://www.figma.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-108",
+              "name": "Adobe Creative Cloud",
+              "url": "https://www.adobe.com/creativecloud.html",
+              "description": "专业设计与创作软件",
+              "region": "国外",
+              "logo": "https://www.adobe.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-109",
+              "name": "Canva",
+              "url": "https://www.canva.com/",
+              "description": "在线模板设计与编辑",
+              "region": "国外",
+              "logo": "https://www.canva.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-110",
+              "name": "Framer",
+              "url": "https://www.framer.com/",
+              "description": "交互网站设计与发布",
+              "region": "国外",
+              "logo": "https://www.framer.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-111",
+              "name": "Webflow",
+              "url": "https://webflow.com/",
+              "description": "可视化网站设计与搭建",
+              "region": "国外",
+              "logo": "https://webflow.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-04-group-04",
+          "name": "素材图库",
+          "items": [
+            {
+              "id": "gift-site-112",
+              "name": "包图网",
+              "url": "https://ibaotu.com/",
+              "description": "设计模板与素材下载",
+              "region": "国内",
+              "logo": "https://ibaotu.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-113",
+              "name": "摄图网",
+              "url": "https://699pic.com/",
+              "description": "图片与设计素材",
+              "region": "国内",
+              "logo": "https://699pic.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-114",
+              "name": "觅知网",
+              "url": "https://www.51miz.com/",
+              "description": "办公与设计模板素材",
+              "region": "国内",
+              "logo": "https://www.51miz.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-115",
+              "name": "Unsplash",
+              "url": "https://unsplash.com/",
+              "description": "免费摄影图片查找",
+              "region": "国外",
+              "logo": "https://unsplash.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-116",
+              "name": "Pexels",
+              "url": "https://www.pexels.com/",
+              "description": "免费图片与视频素材",
+              "region": "国外",
+              "logo": "https://www.pexels.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-04-group-05",
+          "name": "字体配色",
+          "items": [
+            {
+              "id": "gift-site-117",
+              "name": "字由",
+              "url": "https://www.hellofont.cn/",
+              "description": "字体管理与选字",
+              "region": "国内",
+              "logo": "https://www.hellofont.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-118",
+              "name": "阿里图标库",
+              "url": "https://www.iconfont.cn/",
+              "description": "图标搜索与下载",
+              "region": "国内",
+              "logo": "https://www.iconfont.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-119",
+              "name": "Google Fonts",
+              "url": "https://fonts.google.com/",
+              "description": "开源字体查找与使用",
+              "region": "国外",
+              "logo": "https://fonts.google.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-120",
+              "name": "Coolors",
+              "url": "https://coolors.co/",
+              "description": "配色方案生成与探索",
+              "region": "国外",
+              "logo": "https://coolors.co/favicon.ico",
+              "status": "published"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gift-scene-05",
+      "name": "智能工具",
+      "description": "",
+      "groups": [
+        {
+          "id": "gift-scene-05-group-01",
+          "name": "AI对话",
+          "items": [
+            {
+              "id": "gift-site-121",
+              "name": "DeepSeek",
+              "url": "https://chat.deepseek.com/",
+              "description": "通用AI对话与推理",
+              "region": "国内",
+              "logo": "https://chat.deepseek.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-122",
+              "name": "豆包",
+              "url": "https://www.doubao.com/",
+              "description": "AI对话、写作与搜索",
+              "region": "国内",
+              "logo": "https://www.doubao.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-123",
+              "name": "Kimi",
+              "url": "https://www.kimi.com/",
+              "description": "长文阅读与AI问答",
+              "region": "国内",
+              "logo": "https://www.kimi.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-124",
+              "name": "千问",
+              "url": "https://www.qianwen.com/",
+              "description": "AI对话与内容生成",
+              "region": "国内",
+              "logo": "https://www.qianwen.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-125",
+              "name": "文心助手",
+              "url": "https://wenxin.baidu.com/",
+              "description": "AI对话与内容创作",
+              "region": "国内",
+              "logo": "https://wenxin.baidu.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-126",
+              "name": "智谱清言",
+              "url": "https://chatglm.cn/",
+              "description": "AI问答与写作辅助",
+              "region": "国内",
+              "logo": "https://chatglm.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-127",
+              "name": "讯飞星火",
+              "url": "https://xinghuo.xfyun.cn/",
+              "description": "AI对话与办公辅助",
+              "region": "国内",
+              "logo": "https://xinghuo.xfyun.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-128",
+              "name": "腾讯元宝",
+              "url": "https://yuanbao.tencent.com/",
+              "description": "AI搜索与内容生成",
+              "region": "国内",
+              "logo": "https://yuanbao.tencent.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-129",
+              "name": "天工AI",
+              "url": "https://www.tiangong.cn/",
+              "description": "AI对话与资料处理",
+              "region": "国内",
+              "logo": "https://www.tiangong.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-130",
+              "name": "ChatGPT",
+              "url": "https://chatgpt.com/",
+              "description": "通用AI对话与创作",
+              "region": "国外",
+              "logo": "https://chatgpt.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-131",
+              "name": "Claude",
+              "url": "https://claude.ai/",
+              "description": "AI写作、分析与编程",
+              "region": "国外",
+              "logo": "https://claude.ai/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-132",
+              "name": "Gemini",
+              "url": "https://gemini.google.com/",
+              "description": "Google AI对话与辅助",
+              "region": "国外",
+              "logo": "https://gemini.google.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-133",
+              "name": "Perplexity",
+              "url": "https://www.perplexity.ai/",
+              "description": "带来源的AI搜索问答",
+              "region": "国外",
+              "logo": "https://www.perplexity.ai/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-134",
+              "name": "Microsoft Copilot",
+              "url": "https://copilot.microsoft.com/",
+              "description": "AI搜索与办公辅助",
+              "region": "国外",
+              "logo": "https://copilot.microsoft.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-135",
+              "name": "Poe",
+              "url": "https://poe.com/",
+              "description": "多模型AI对话入口",
+              "region": "国外",
+              "logo": "https://poe.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-05-group-02",
+          "name": "视觉创作",
+          "items": [
+            {
+              "id": "gift-site-136",
+              "name": "即梦AI",
+              "url": "https://jimeng.jianying.com/",
+              "description": "AI图像与视频生成",
+              "region": "国内",
+              "logo": "https://jimeng.jianying.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-137",
+              "name": "可灵AI",
+              "url": "https://klingai.com/",
+              "description": "AI视频与图像生成",
+              "region": "国内",
+              "logo": "https://klingai.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-138",
+              "name": "海螺AI",
+              "url": "https://hailuoai.com/",
+              "description": "AI视频生成与创作",
+              "region": "国内",
+              "logo": "https://hailuoai.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-139",
+              "name": "通义万相",
+              "url": "https://tongyi.aliyun.com/wanxiang/",
+              "description": "AI图像与视频创作",
+              "region": "国内",
+              "logo": "https://tongyi.aliyun.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-140",
+              "name": "Midjourney",
+              "url": "https://www.midjourney.com/",
+              "description": "AI图像生成与探索",
+              "region": "国外",
+              "logo": "https://www.midjourney.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-141",
+              "name": "Runway",
+              "url": "https://runwayml.com/",
+              "description": "AI视频生成与编辑",
+              "region": "国外",
+              "logo": "https://runwayml.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-142",
+              "name": "Stability AI",
+              "url": "https://stability.ai/",
+              "description": "生成式AI模型与工具",
+              "region": "国外",
+              "logo": "https://stability.ai/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-05-group-03",
+          "name": "智能开发",
+          "items": [
+            {
+              "id": "gift-site-143",
+              "name": "扣子",
+              "url": "https://www.coze.cn/",
+              "description": "AI智能体创建与发布",
+              "region": "国内",
+              "logo": "https://www.coze.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-144",
+              "name": "TRAE",
+              "url": "https://www.trae.cn/",
+              "description": "AI辅助编程与开发",
+              "region": "国内",
+              "logo": "https://www.trae.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-145",
+              "name": "Hugging Face",
+              "url": "https://huggingface.co/",
+              "description": "AI模型与应用社区",
+              "region": "国外",
+              "logo": "https://huggingface.co/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-146",
+              "name": "Cursor",
+              "url": "https://cursor.com/",
+              "description": "AI辅助代码编辑",
+              "region": "国外",
+              "logo": "https://cursor.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-147",
+              "name": "Replit",
+              "url": "https://replit.com/",
+              "description": "在线编程与AI开发",
+              "region": "国外",
+              "logo": "https://replit.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-05-group-04",
+          "name": "音频演示",
+          "items": [
+            {
+              "id": "gift-site-148",
+              "name": "Suno",
+              "url": "https://suno.com/",
+              "description": "AI音乐生成",
+              "region": "国外",
+              "logo": "https://suno.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-149",
+              "name": "ElevenLabs",
+              "url": "https://elevenlabs.io/",
+              "description": "AI语音合成与配音",
+              "region": "国外",
+              "logo": "https://elevenlabs.io/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-150",
+              "name": "Gamma",
+              "url": "https://gamma.app/",
+              "description": "AI演示文稿与网页制作",
+              "region": "国外",
+              "logo": "https://gamma.app/favicon.ico",
+              "status": "published"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gift-scene-06",
+      "name": "开发技术",
+      "description": "",
+      "groups": [
+        {
+          "id": "gift-scene-06-group-01",
+          "name": "代码托管",
+          "items": [
+            {
+              "id": "gift-site-151",
+              "name": "Gitee",
+              "url": "https://gitee.com/",
+              "description": "代码托管与团队协作",
+              "region": "国内",
+              "logo": "https://gitee.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-152",
+              "name": "GitHub",
+              "url": "https://github.com/",
+              "description": "开源代码托管与协作",
+              "region": "国外",
+              "logo": "https://github.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-153",
+              "name": "GitLab",
+              "url": "https://gitlab.com/",
+              "description": "代码托管与DevOps协作",
+              "region": "国外",
+              "logo": "https://gitlab.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-06-group-02",
+          "name": "开发社区",
+          "items": [
+            {
+              "id": "gift-site-154",
+              "name": "稀土掘金",
+              "url": "https://juejin.cn/",
+              "description": "开发文章与技术交流",
+              "region": "国内",
+              "logo": "https://juejin.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-155",
+              "name": "CSDN",
+              "url": "https://www.csdn.net/",
+              "description": "开发知识与技术社区",
+              "region": "国内",
+              "logo": "https://www.csdn.net/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-156",
+              "name": "开源中国",
+              "url": "https://www.oschina.net/",
+              "description": "开源资讯与开发社区",
+              "region": "国内",
+              "logo": "https://www.oschina.net/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-157",
+              "name": "SegmentFault",
+              "url": "https://segmentfault.com/",
+              "description": "技术问答与开发文章",
+              "region": "国内",
+              "logo": "https://segmentfault.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-158",
+              "name": "博客园",
+              "url": "https://www.cnblogs.com/",
+              "description": "开发者博客与技术文章",
+              "region": "国内",
+              "logo": "https://www.cnblogs.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-159",
+              "name": "V2EX",
+              "url": "https://www.v2ex.com/",
+              "description": "开发者话题与产品交流",
+              "region": "国内",
+              "logo": "https://www.v2ex.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-160",
+              "name": "Stack Overflow",
+              "url": "https://stackoverflow.com/",
+              "description": "程序开发问答社区",
+              "region": "国外",
+              "logo": "https://stackoverflow.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-06-group-03",
+          "name": "开发文档",
+          "items": [
+            {
+              "id": "gift-site-161",
+              "name": "菜鸟教程",
+              "url": "https://www.runoob.com/",
+              "description": "编程入门教程与示例",
+              "region": "国内",
+              "logo": "https://www.runoob.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-162",
+              "name": "MDN Web Docs",
+              "url": "https://developer.mozilla.org/",
+              "description": "Web技术文档与示例",
+              "region": "国外",
+              "logo": "https://developer.mozilla.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-163",
+              "name": "Kubernetes",
+              "url": "https://kubernetes.io/",
+              "description": "容器编排官方文档",
+              "region": "国外",
+              "logo": "https://kubernetes.io/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-164",
+              "name": "Cloudflare Docs",
+              "url": "https://developers.cloudflare.com/",
+              "description": "网络与开发平台文档",
+              "region": "国外",
+              "logo": "https://developers.cloudflare.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-165",
+              "name": "W3C",
+              "url": "https://www.w3.org/",
+              "description": "Web标准与规范资料",
+              "region": "国外",
+              "logo": "https://www.w3.org/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-06-group-04",
+          "name": "云端平台",
+          "items": [
+            {
+              "id": "gift-site-166",
+              "name": "腾讯云开发者",
+              "url": "https://cloud.tencent.com/developer",
+              "description": "云计算与开发教程",
+              "region": "国内",
+              "logo": "https://cloud.tencent.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-167",
+              "name": "阿里云开发者",
+              "url": "https://developer.aliyun.com/",
+              "description": "云技术文章与实践",
+              "region": "国内",
+              "logo": "https://developer.aliyun.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-168",
+              "name": "华为开发者联盟",
+              "url": "https://developer.huawei.com/",
+              "description": "平台开发文档与工具",
+              "region": "国内",
+              "logo": "https://developer.huawei.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-169",
+              "name": "微信开放平台",
+              "url": "https://open.weixin.qq.com/",
+              "description": "微信生态开发接入",
+              "region": "国内",
+              "logo": "https://open.weixin.qq.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-170",
+              "name": "百度智能云",
+              "url": "https://cloud.baidu.com/",
+              "description": "云服务与AI开发平台",
+              "region": "国内",
+              "logo": "https://cloud.baidu.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-171",
+              "name": "Docker Hub",
+              "url": "https://hub.docker.com/",
+              "description": "容器镜像查找与发布",
+              "region": "国外",
+              "logo": "https://hub.docker.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-172",
+              "name": "Vercel",
+              "url": "https://vercel.com/",
+              "description": "前端应用部署与托管",
+              "region": "国外",
+              "logo": "https://vercel.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-06-group-05",
+          "name": "编程练习",
+          "items": [
+            {
+              "id": "gift-site-173",
+              "name": "力扣中国",
+              "url": "https://leetcode.cn/",
+              "description": "算法练习与面试准备",
+              "region": "国内",
+              "logo": "https://leetcode.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-174",
+              "name": "牛客",
+              "url": "https://www.nowcoder.com/",
+              "description": "编程题库与求职练习",
+              "region": "国内",
+              "logo": "https://www.nowcoder.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-175",
+              "name": "CodePen",
+              "url": "https://codepen.io/",
+              "description": "前端代码在线演示",
+              "region": "国外",
+              "logo": "https://codepen.io/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-176",
+              "name": "CodeSandbox",
+              "url": "https://codesandbox.io/",
+              "description": "在线开发与项目预览",
+              "region": "国外",
+              "logo": "https://codesandbox.io/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-06-group-06",
+          "name": "开发工具",
+          "items": [
+            {
+              "id": "gift-site-177",
+              "name": "npm",
+              "url": "https://www.npmjs.com/",
+              "description": "JavaScript软件包检索",
+              "region": "国外",
+              "logo": "https://www.npmjs.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-178",
+              "name": "PyPI",
+              "url": "https://pypi.org/",
+              "description": "Python软件包检索",
+              "region": "国外",
+              "logo": "https://pypi.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-179",
+              "name": "JetBrains",
+              "url": "https://www.jetbrains.com/",
+              "description": "开发工具与IDE",
+              "region": "国外",
+              "logo": "https://www.jetbrains.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-180",
+              "name": "VS Code",
+              "url": "https://code.visualstudio.com/",
+              "description": "代码编辑器下载与文档",
+              "region": "国外",
+              "logo": "https://code.visualstudio.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gift-scene-07",
+      "name": "学习教育",
+      "description": "",
+      "groups": [
+        {
+          "id": "gift-scene-07-group-01",
+          "name": "综合课程",
+          "items": [
+            {
+              "id": "gift-site-181",
+              "name": "中国大学MOOC",
+              "url": "https://www.icourse163.org/",
+              "description": "高校在线课程学习",
+              "region": "国内",
+              "logo": "https://www.icourse163.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-182",
+              "name": "学堂在线",
+              "url": "https://www.xuetangx.com/",
+              "description": "大学课程与职业学习",
+              "region": "国内",
+              "logo": "https://www.xuetangx.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-183",
+              "name": "网易公开课",
+              "url": "https://open.163.com/",
+              "description": "公开课程与知识视频",
+              "region": "国内",
+              "logo": "https://open.163.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-184",
+              "name": "Coursera",
+              "url": "https://www.coursera.org/",
+              "description": "大学与机构在线课程",
+              "region": "国外",
+              "logo": "https://www.coursera.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-185",
+              "name": "edX",
+              "url": "https://www.edx.org/",
+              "description": "大学在线课程与证书",
+              "region": "国外",
+              "logo": "https://www.edx.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-186",
+              "name": "Udemy",
+              "url": "https://www.udemy.com/",
+              "description": "技能课程与自主学习",
+              "region": "国外",
+              "logo": "https://www.udemy.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-187",
+              "name": "MIT OpenCourseWare",
+              "url": "https://ocw.mit.edu/",
+              "description": "麻省理工开放课程",
+              "region": "国外",
+              "logo": "https://ocw.mit.edu/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-188",
+              "name": "FutureLearn",
+              "url": "https://www.futurelearn.com/",
+              "description": "大学与职业在线课程",
+              "region": "国外",
+              "logo": "https://www.futurelearn.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-189",
+              "name": "OpenLearn",
+              "url": "https://www.open.edu/openlearn/",
+              "description": "开放大学免费课程",
+              "region": "国外",
+              "logo": "https://www.open.edu/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-190",
+              "name": "Udacity",
+              "url": "https://www.udacity.com/",
+              "description": "技术与职业技能课程",
+              "region": "国外",
+              "logo": "https://www.udacity.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-07-group-02",
+          "name": "校园学习",
+          "items": [
+            {
+              "id": "gift-site-191",
+              "name": "国家中小学智慧教育平台",
+              "url": "https://basic.smartedu.cn/",
+              "description": "中小学课程与教学资源",
+              "region": "国内",
+              "logo": "https://basic.smartedu.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-192",
+              "name": "国家高等教育智慧教育平台",
+              "url": "https://higher.smartedu.cn/",
+              "description": "高等教育课程资源",
+              "region": "国内",
+              "logo": "https://higher.smartedu.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-193",
+              "name": "超星学习通",
+              "url": "https://i.chaoxing.com/",
+              "description": "高校课程学习与教学",
+              "region": "国内",
+              "logo": "https://i.chaoxing.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-194",
+              "name": "Khan Academy",
+              "url": "https://www.khanacademy.org/",
+              "description": "免费基础教育课程",
+              "region": "国外",
+              "logo": "https://www.khanacademy.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-195",
+              "name": "Brilliant",
+              "url": "https://brilliant.org/",
+              "description": "互动数学与科学学习",
+              "region": "国外",
+              "logo": "https://brilliant.org/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-07-group-03",
+          "name": "语言学习",
+          "items": [
+            {
+              "id": "gift-site-196",
+              "name": "沪江网校",
+              "url": "https://class.hujiang.com/",
+              "description": "语言与职业课程",
+              "region": "国内",
+              "logo": "https://class.hujiang.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-197",
+              "name": "扇贝",
+              "url": "https://www.shanbay.com/",
+              "description": "英语词汇与阅读学习",
+              "region": "国内",
+              "logo": "https://www.shanbay.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-198",
+              "name": "百词斩",
+              "url": "https://www.baicizhan.com/",
+              "description": "英语单词记忆",
+              "region": "国内",
+              "logo": "https://www.baicizhan.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-199",
+              "name": "新东方在线",
+              "url": "https://www.koolearn.com/",
+              "description": "语言与考试培训",
+              "region": "国内",
+              "logo": "https://www.koolearn.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-200",
+              "name": "Duolingo",
+              "url": "https://www.duolingo.com/",
+              "description": "游戏化语言学习",
+              "region": "国外",
+              "logo": "https://www.duolingo.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-201",
+              "name": "Memrise",
+              "url": "https://www.memrise.com/",
+              "description": "语言词汇与听说练习",
+              "region": "国外",
+              "logo": "https://www.memrise.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-07-group-04",
+          "name": "考试辅导",
+          "items": [
+            {
+              "id": "gift-site-202",
+              "name": "作业帮",
+              "url": "https://www.zuoyebang.com/",
+              "description": "中小学学习与辅导",
+              "region": "国内",
+              "logo": "https://www.zuoyebang.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-203",
+              "name": "猿辅导",
+              "url": "https://www.yuanfudao.com/",
+              "description": "中小学课程辅导",
+              "region": "国内",
+              "logo": "https://www.yuanfudao.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-204",
+              "name": "中国教育考试网",
+              "url": "https://www.neea.edu.cn/",
+              "description": "国家教育考试信息查询",
+              "region": "国内",
+              "logo": "https://www.neea.edu.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-205",
+              "name": "Quizlet",
+              "url": "https://quizlet.com/",
+              "description": "学习卡片与自测",
+              "region": "国外",
+              "logo": "https://quizlet.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-07-group-05",
+          "name": "编程学习",
+          "items": [
+            {
+              "id": "gift-site-206",
+              "name": "freeCodeCamp",
+              "url": "https://www.freecodecamp.org/",
+              "description": "免费编程课程与练习",
+              "region": "国外",
+              "logo": "https://www.freecodecamp.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-207",
+              "name": "Codecademy",
+              "url": "https://www.codecademy.com/",
+              "description": "交互式编程学习",
+              "region": "国外",
+              "logo": "https://www.codecademy.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-07-group-06",
+          "name": "知识公开",
+          "items": [
+            {
+              "id": "gift-site-208",
+              "name": "学习强国",
+              "url": "https://www.xuexi.cn/",
+              "description": "政策知识与综合学习",
+              "region": "国内",
+              "logo": "https://www.xuexi.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-209",
+              "name": "中国教育在线",
+              "url": "https://www.eol.cn/",
+              "description": "升学与教育信息查询",
+              "region": "国内",
+              "logo": "https://www.eol.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-210",
+              "name": "TED",
+              "url": "https://www.ted.com/",
+              "description": "演讲与知识视频",
+              "region": "国外",
+              "logo": "https://www.ted.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gift-scene-08",
+      "name": "影音娱乐",
+      "description": "",
+      "groups": [
+        {
+          "id": "gift-scene-08-group-01",
+          "name": "视频平台",
+          "items": [
+            {
+              "id": "gift-site-211",
+              "name": "哔哩哔哩",
+              "url": "https://www.bilibili.com/",
+              "description": "视频社区与内容观看",
+              "region": "国内",
+              "logo": "https://www.bilibili.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-212",
+              "name": "腾讯视频",
+              "url": "https://v.qq.com/",
+              "description": "影视剧与综艺观看",
+              "region": "国内",
+              "logo": "https://v.qq.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-213",
+              "name": "爱奇艺",
+              "url": "https://www.iqiyi.com/",
+              "description": "影视剧与综艺观看",
+              "region": "国内",
+              "logo": "https://www.iqiyi.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-214",
+              "name": "优酷",
+              "url": "https://www.youku.com/",
+              "description": "影视剧与视频观看",
+              "region": "国内",
+              "logo": "https://www.youku.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-215",
+              "name": "芒果TV",
+              "url": "https://www.mgtv.com/",
+              "description": "综艺与影视内容观看",
+              "region": "国内",
+              "logo": "https://www.mgtv.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-216",
+              "name": "咪咕视频",
+              "url": "https://www.miguvideo.com/",
+              "description": "体育赛事与视频内容",
+              "region": "国内",
+              "logo": "https://www.miguvideo.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-217",
+              "name": "央视频",
+              "url": "https://www.yangshipin.cn/",
+              "description": "央视节目与直播",
+              "region": "国内",
+              "logo": "https://www.yangshipin.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-218",
+              "name": "YouTube",
+              "url": "https://www.youtube.com/",
+              "description": "视频观看与频道订阅",
+              "region": "国外",
+              "logo": "https://www.youtube.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-219",
+              "name": "Netflix",
+              "url": "https://www.netflix.com/",
+              "description": "影视剧流媒体播放",
+              "region": "国外",
+              "logo": "https://www.netflix.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-220",
+              "name": "Disney+",
+              "url": "https://www.disneyplus.com/",
+              "description": "迪士尼影视流媒体",
+              "region": "国外",
+              "logo": "https://www.disneyplus.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-221",
+              "name": "Prime Video",
+              "url": "https://www.primevideo.com/",
+              "description": "影视剧流媒体播放",
+              "region": "国外",
+              "logo": "https://www.primevideo.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-222",
+              "name": "Twitch",
+              "url": "https://www.twitch.tv/",
+              "description": "游戏与创作者直播",
+              "region": "国外",
+              "logo": "https://www.twitch.tv/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-223",
+              "name": "Vimeo",
+              "url": "https://vimeo.com/",
+              "description": "专业视频展示与观看",
+              "region": "国外",
+              "logo": "https://vimeo.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-224",
+              "name": "Crunchyroll",
+              "url": "https://www.crunchyroll.com/",
+              "description": "动漫流媒体观看",
+              "region": "国外",
+              "logo": "https://www.crunchyroll.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-08-group-02",
+          "name": "音乐平台",
+          "items": [
+            {
+              "id": "gift-site-225",
+              "name": "网易云音乐",
+              "url": "https://music.163.com/",
+              "description": "在线听歌与歌单发现",
+              "region": "国内",
+              "logo": "https://music.163.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-226",
+              "name": "QQ音乐",
+              "url": "https://y.qq.com/",
+              "description": "音乐播放与歌单管理",
+              "region": "国内",
+              "logo": "https://y.qq.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-227",
+              "name": "酷狗音乐",
+              "url": "https://www.kugou.com/",
+              "description": "在线听歌与音乐推荐",
+              "region": "国内",
+              "logo": "https://www.kugou.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-228",
+              "name": "酷我音乐",
+              "url": "https://www.kuwo.cn/",
+              "description": "在线听歌与音乐发现",
+              "region": "国内",
+              "logo": "https://www.kuwo.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-229",
+              "name": "Spotify",
+              "url": "https://open.spotify.com/",
+              "description": "音乐与播客播放",
+              "region": "国外",
+              "logo": "https://open.spotify.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-230",
+              "name": "Apple Music",
+              "url": "https://music.apple.com/",
+              "description": "音乐播放与曲库检索",
+              "region": "国外",
+              "logo": "https://music.apple.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-231",
+              "name": "SoundCloud",
+              "url": "https://soundcloud.com/",
+              "description": "音乐上传与发现",
+              "region": "国外",
+              "logo": "https://soundcloud.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-232",
+              "name": "Bandcamp",
+              "url": "https://bandcamp.com/",
+              "description": "独立音乐发现与购买",
+              "region": "国外",
+              "logo": "https://bandcamp.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-233",
+              "name": "Deezer",
+              "url": "https://www.deezer.com/",
+              "description": "音乐与播客播放",
+              "region": "国外",
+              "logo": "https://www.deezer.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-08-group-03",
+          "name": "音频内容",
+          "items": [
+            {
+              "id": "gift-site-234",
+              "name": "喜马拉雅",
+              "url": "https://www.ximalaya.com/",
+              "description": "播客、有声书与音频",
+              "region": "国内",
+              "logo": "https://www.ximalaya.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-235",
+              "name": "蜻蜓FM",
+              "url": "https://www.qingting.fm/",
+              "description": "广播、播客与有声内容",
+              "region": "国内",
+              "logo": "https://www.qingting.fm/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-236",
+              "name": "Audible",
+              "url": "https://www.audible.com/",
+              "description": "有声书与播客收听",
+              "region": "国外",
+              "logo": "https://www.audible.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-08-group-04",
+          "name": "影视发现",
+          "items": [
+            {
+              "id": "gift-site-237",
+              "name": "猫眼电影",
+              "url": "https://www.maoyan.com/",
+              "description": "电影排片与购票信息",
+              "region": "国内",
+              "logo": "https://www.maoyan.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-238",
+              "name": "豆瓣电影",
+              "url": "https://movie.douban.com/",
+              "description": "电影评分与片单发现",
+              "region": "国内",
+              "logo": "https://movie.douban.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-239",
+              "name": "IMDb",
+              "url": "https://www.imdb.com/",
+              "description": "影视资料与评分查询",
+              "region": "国外",
+              "logo": "https://www.imdb.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-240",
+              "name": "Letterboxd",
+              "url": "https://letterboxd.com/",
+              "description": "电影记录与影评交流",
+              "region": "国外",
+              "logo": "https://letterboxd.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gift-scene-09",
+      "name": "生活服务",
+      "description": "",
+      "groups": [
+        {
+          "id": "gift-scene-09-group-01",
+          "name": "电商购物",
+          "items": [
+            {
+              "id": "gift-site-241",
+              "name": "淘宝",
+              "url": "https://www.taobao.com/",
+              "description": "综合商品购物",
+              "region": "国内",
+              "logo": "https://www.taobao.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-242",
+              "name": "京东",
+              "url": "https://www.jd.com/",
+              "description": "商品购物与配送服务",
+              "region": "国内",
+              "logo": "https://www.jd.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-243",
+              "name": "拼多多",
+              "url": "https://www.pinduoduo.com/",
+              "description": "商品购物与拼单",
+              "region": "国内",
+              "logo": "https://www.pinduoduo.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-244",
+              "name": "闲鱼",
+              "url": "https://www.goofish.com/",
+              "description": "二手商品交易",
+              "region": "国内",
+              "logo": "https://www.goofish.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-245",
+              "name": "Amazon",
+              "url": "https://www.amazon.com/",
+              "description": "综合商品购物",
+              "region": "国外",
+              "logo": "https://www.amazon.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-246",
+              "name": "eBay",
+              "url": "https://www.ebay.com/",
+              "description": "商品交易与二手购物",
+              "region": "国外",
+              "logo": "https://www.ebay.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-247",
+              "name": "Walmart",
+              "url": "https://www.walmart.com/",
+              "description": "百货购物与配送",
+              "region": "国外",
+              "logo": "https://www.walmart.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-248",
+              "name": "IKEA",
+              "url": "https://www.ikea.com/",
+              "description": "家居商品浏览与购买",
+              "region": "国外",
+              "logo": "https://www.ikea.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-09-group-02",
+          "name": "本地生活",
+          "items": [
+            {
+              "id": "gift-site-249",
+              "name": "美团",
+              "url": "https://www.meituan.com/",
+              "description": "外卖、到店与本地服务",
+              "region": "国内",
+              "logo": "https://www.meituan.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-250",
+              "name": "大众点评",
+              "url": "https://www.dianping.com/",
+              "description": "餐饮与本地商家评价",
+              "region": "国内",
+              "logo": "https://www.dianping.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-251",
+              "name": "支付宝",
+              "url": "https://www.alipay.com/",
+              "description": "支付与生活服务入口",
+              "region": "国内",
+              "logo": "https://www.alipay.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-252",
+              "name": "Yelp",
+              "url": "https://www.yelp.com/",
+              "description": "本地商家评价与查找",
+              "region": "国外",
+              "logo": "https://www.yelp.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-253",
+              "name": "OpenTable",
+              "url": "https://www.opentable.com/",
+              "description": "餐厅发现与订位",
+              "region": "国外",
+              "logo": "https://www.opentable.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-09-group-03",
+          "name": "外卖配送",
+          "items": [
+            {
+              "id": "gift-site-254",
+              "name": "饿了么",
+              "url": "https://www.ele.me/",
+              "description": "外卖与即时配送",
+              "region": "国内",
+              "logo": "https://www.ele.me/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-255",
+              "name": "DoorDash",
+              "url": "https://www.doordash.com/",
+              "description": "外卖与本地配送",
+              "region": "国外",
+              "logo": "https://www.doordash.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-256",
+              "name": "Instacart",
+              "url": "https://www.instacart.com/",
+              "description": "杂货采购与配送",
+              "region": "国外",
+              "logo": "https://www.instacart.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-257",
+              "name": "Uber Eats",
+              "url": "https://www.ubereats.com/",
+              "description": "外卖点餐与配送",
+              "region": "国外",
+              "logo": "https://www.ubereats.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-09-group-04",
+          "name": "旅行预订",
+          "items": [
+            {
+              "id": "gift-site-258",
+              "name": "携程",
+              "url": "https://www.ctrip.com/",
+              "description": "机票、酒店与旅游预订",
+              "region": "国内",
+              "logo": "https://www.ctrip.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-259",
+              "name": "去哪儿",
+              "url": "https://www.qunar.com/",
+              "description": "交通票务与酒店比价",
+              "region": "国内",
+              "logo": "https://www.qunar.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-260",
+              "name": "飞猪",
+              "url": "https://www.fliggy.com/",
+              "description": "旅游产品与出行预订",
+              "region": "国内",
+              "logo": "https://www.fliggy.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-261",
+              "name": "Airbnb",
+              "url": "https://www.airbnb.com/",
+              "description": "民宿与旅行住宿预订",
+              "region": "国外",
+              "logo": "https://www.airbnb.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-262",
+              "name": "Booking.com",
+              "url": "https://www.booking.com/",
+              "description": "住宿与旅行服务预订",
+              "region": "国外",
+              "logo": "https://www.booking.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-263",
+              "name": "Tripadvisor",
+              "url": "https://www.tripadvisor.com/",
+              "description": "旅行评价与行程规划",
+              "region": "国外",
+              "logo": "https://www.tripadvisor.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-264",
+              "name": "Expedia",
+              "url": "https://www.expedia.com/",
+              "description": "机票、酒店与度假预订",
+              "region": "国外",
+              "logo": "https://www.expedia.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-09-group-05",
+          "name": "交通出行",
+          "items": [
+            {
+              "id": "gift-site-265",
+              "name": "12306",
+              "url": "https://www.12306.cn/",
+              "description": "铁路车票查询与购买",
+              "region": "国内",
+              "logo": "https://www.12306.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-266",
+              "name": "滴滴出行",
+              "url": "https://www.didiglobal.com/download",
+              "description": "出行服务与应用下载",
+              "region": "国内",
+              "logo": "https://www.didiglobal.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-267",
+              "name": "Uber",
+              "url": "https://www.uber.com/",
+              "description": "网约车与出行服务",
+              "region": "国外",
+              "logo": "https://www.uber.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-09-group-06",
+          "name": "地图导航",
+          "items": [
+            {
+              "id": "gift-site-268",
+              "name": "高德地图",
+              "url": "https://www.amap.com/",
+              "description": "地图导航与地点查找",
+              "region": "国内",
+              "logo": "https://www.amap.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-269",
+              "name": "百度地图",
+              "url": "https://map.baidu.com/",
+              "description": "地图导航与路线规划",
+              "region": "国内",
+              "logo": "https://map.baidu.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-270",
+              "name": "Google Maps",
+              "url": "https://www.google.com/maps",
+              "description": "地图、导航与地点评价",
+              "region": "国外",
+              "logo": "https://www.google.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gift-scene-10",
+      "name": "商业金融",
+      "description": "",
+      "groups": [
+        {
+          "id": "gift-scene-10-group-01",
+          "name": "企业服务",
+          "items": [
+            {
+              "id": "gift-site-271",
+              "name": "企查查",
+              "url": "https://www.qcc.com/",
+              "description": "企业信息与工商查询",
+              "region": "国内",
+              "logo": "https://www.qcc.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-272",
+              "name": "天眼查",
+              "url": "https://www.tianyancha.com/",
+              "description": "企业关系与工商信息",
+              "region": "国内",
+              "logo": "https://www.tianyancha.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-273",
+              "name": "爱企查",
+              "url": "https://aiqicha.baidu.com/",
+              "description": "企业信用与工商查询",
+              "region": "国内",
+              "logo": "https://aiqicha.baidu.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-274",
+              "name": "国家企业信用信息公示系统",
+              "url": "https://www.gsxt.gov.cn/",
+              "description": "企业登记与信用公示",
+              "region": "国内",
+              "logo": "https://www.gsxt.gov.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-275",
+              "name": "Shopify",
+              "url": "https://www.shopify.com/",
+              "description": "电商店铺搭建与管理",
+              "region": "国外",
+              "logo": "https://www.shopify.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-276",
+              "name": "Crunchbase",
+              "url": "https://www.crunchbase.com/",
+              "description": "公司与投融资信息",
+              "region": "国外",
+              "logo": "https://www.crunchbase.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-10-group-02",
+          "name": "招聘职场",
+          "items": [
+            {
+              "id": "gift-site-277",
+              "name": "BOSS直聘",
+              "url": "https://www.zhipin.com/",
+              "description": "职位搜索与招聘沟通",
+              "region": "国内",
+              "logo": "https://www.zhipin.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-278",
+              "name": "智联招聘",
+              "url": "https://www.zhaopin.com/",
+              "description": "招聘岗位与求职服务",
+              "region": "国内",
+              "logo": "https://www.zhaopin.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-279",
+              "name": "前程无忧",
+              "url": "https://www.51job.com/",
+              "description": "招聘岗位与职业服务",
+              "region": "国内",
+              "logo": "https://www.51job.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-280",
+              "name": "脉脉",
+              "url": "https://maimai.cn/",
+              "description": "职场人脉与职业信息",
+              "region": "国内",
+              "logo": "https://maimai.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-281",
+              "name": "LinkedIn",
+              "url": "https://www.linkedin.com/",
+              "description": "职业资料与招聘网络",
+              "region": "国外",
+              "logo": "https://www.linkedin.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-282",
+              "name": "Indeed",
+              "url": "https://www.indeed.com/",
+              "description": "职位搜索与招聘信息",
+              "region": "国外",
+              "logo": "https://www.indeed.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-283",
+              "name": "Glassdoor",
+              "url": "https://www.glassdoor.com/",
+              "description": "公司评价与薪酬信息",
+              "region": "国外",
+              "logo": "https://www.glassdoor.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-10-group-03",
+          "name": "财经资讯",
+          "items": [
+            {
+              "id": "gift-site-284",
+              "name": "东方财富",
+              "url": "https://www.eastmoney.com/",
+              "description": "财经资讯与市场数据",
+              "region": "国内",
+              "logo": "https://www.eastmoney.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-285",
+              "name": "雪球",
+              "url": "https://xueqiu.com/",
+              "description": "投资讨论与行情信息",
+              "region": "国内",
+              "logo": "https://xueqiu.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-286",
+              "name": "财联社",
+              "url": "https://www.cls.cn/",
+              "description": "财经快讯与市场资讯",
+              "region": "国内",
+              "logo": "https://www.cls.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-287",
+              "name": "Bloomberg",
+              "url": "https://www.bloomberg.com/",
+              "description": "全球财经新闻与数据",
+              "region": "国外",
+              "logo": "https://www.bloomberg.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-288",
+              "name": "Yahoo Finance",
+              "url": "https://finance.yahoo.com/",
+              "description": "股票行情与财经资讯",
+              "region": "国外",
+              "logo": "https://finance.yahoo.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-10-group-04",
+          "name": "行情分析",
+          "items": [
+            {
+              "id": "gift-site-289",
+              "name": "同花顺",
+              "url": "https://www.10jqka.com.cn/",
+              "description": "股票行情与财经资讯",
+              "region": "国内",
+              "logo": "https://www.10jqka.com.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-290",
+              "name": "TradingView",
+              "url": "https://www.tradingview.com/",
+              "description": "金融图表与市场分析",
+              "region": "国外",
+              "logo": "https://www.tradingview.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-291",
+              "name": "Investing.com",
+              "url": "https://www.investing.com/",
+              "description": "全球市场行情与资讯",
+              "region": "国外",
+              "logo": "https://www.investing.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-292",
+              "name": "Coinbase",
+              "url": "https://www.coinbase.com/",
+              "description": "数字资产交易与管理",
+              "region": "国外",
+              "logo": "https://www.coinbase.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-10-group-05",
+          "name": "银行支付",
+          "items": [
+            {
+              "id": "gift-site-293",
+              "name": "招商银行",
+              "url": "https://www.cmbchina.com/",
+              "description": "个人与企业银行服务",
+              "region": "国内",
+              "logo": "https://www.cmbchina.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-294",
+              "name": "中国工商银行",
+              "url": "https://www.icbc.com.cn/",
+              "description": "个人与企业银行服务",
+              "region": "国内",
+              "logo": "https://www.icbc.com.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-295",
+              "name": "中国银行",
+              "url": "https://www.boc.cn/",
+              "description": "个人与企业银行服务",
+              "region": "国内",
+              "logo": "https://www.boc.cn/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-296",
+              "name": "PayPal",
+              "url": "https://www.paypal.com/",
+              "description": "线上支付与收款",
+              "region": "国外",
+              "logo": "https://www.paypal.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-297",
+              "name": "Stripe",
+              "url": "https://stripe.com/",
+              "description": "在线支付与企业收款",
+              "region": "国外",
+              "logo": "https://stripe.com/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-298",
+              "name": "Wise",
+              "url": "https://wise.com/",
+              "description": "跨境汇款与货币兑换",
+              "region": "国外",
+              "logo": "https://wise.com/favicon.ico",
+              "status": "published"
+            }
+          ]
+        },
+        {
+          "id": "gift-scene-10-group-06",
+          "name": "经济数据",
+          "items": [
+            {
+              "id": "gift-site-299",
+              "name": "World Bank",
+              "url": "https://www.worldbank.org/",
+              "description": "全球发展数据与报告",
+              "region": "国外",
+              "logo": "https://www.worldbank.org/favicon.ico",
+              "status": "published"
+            },
+            {
+              "id": "gift-site-300",
+              "name": "OECD",
+              "url": "https://www.oecd.org/",
+              "description": "经济政策与统计资料",
+              "region": "国外",
+              "logo": "https://www.oecd.org/favicon.ico",
+              "status": "published"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

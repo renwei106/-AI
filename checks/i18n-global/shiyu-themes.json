@@ -1,0 +1,49 @@
+{
+  "items": [
+    {
+      "id": "base",
+      "enabled": true
+    },
+    {
+      "id": "poly",
+      "enabled": true
+    },
+    {
+      "id": "music",
+      "enabled": true
+    },
+    {
+      "id": "cosmos",
+      "enabled": true
+    },
+    {
+      "id": "flow",
+      "enabled": true
+    },
+    {
+      "id": "flip",
+      "enabled": true
+    },
+    {
+      "id": "rain",
+      "enabled": true
+    },
+    {
+      "id": "cinema",
+      "enabled": true
+    },
+    {
+      "id": "paper",
+      "enabled": true
+    },
+    {
+      "id": "globe",
+      "enabled": true
+    }
+  ],
+  "trial": {
+    "mode": "total",
+    "value": 3
+  },
+  "updatedAt": "2026-09-23T18:49:49.153Z"
+}

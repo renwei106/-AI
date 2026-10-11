@@ -1,0 +1,1035 @@
+[
+  {
+    "id": "birds",
+    "name": "群游",
+    "basic": [
+      {
+        "key": "speed",
+        "label": "运行速度",
+        "type": "range",
+        "min": 0.25,
+        "max": 2,
+        "step": 0.05,
+        "value": 0.8,
+        "unit": "×",
+        "hint": ""
+      },
+      {
+        "key": "count",
+        "label": "群体数量",
+        "type": "range",
+        "min": 40,
+        "max": 900,
+        "step": 20,
+        "value": 420,
+        "unit": "个",
+        "hint": ""
+      },
+      {
+        "key": "predators",
+        "label": "捕食者",
+        "type": "range",
+        "min": 0,
+        "max": 4,
+        "step": 1,
+        "value": 1,
+        "unit": "只",
+        "hint": "靠近时避让，接触时捕获。"
+      },
+      {
+        "key": "shape",
+        "label": "个体形状",
+        "type": "choice",
+        "options": [
+          [
+            "bird",
+            "鸟形"
+          ],
+          [
+            "fish",
+            "鱼形"
+          ],
+          [
+            "triangle",
+            "三角"
+          ],
+          [
+            "line",
+            "短线"
+          ],
+          [
+            "dot",
+            "圆点"
+          ]
+        ],
+        "value": "triangle"
+      },
+      {
+        "key": "pointer",
+        "label": "鼠标互动",
+        "type": "choice",
+        "options": [
+          [
+            "none",
+            "无"
+          ],
+          [
+            "repel",
+            "驱散"
+          ],
+          [
+            "attract",
+            "吸引"
+          ],
+          [
+            "magnify",
+            "放大镜"
+          ]
+        ],
+        "value": "repel"
+      },
+      {
+        "key": "depth",
+        "label": "显示维度",
+        "type": "choice",
+        "options": [
+          [
+            "flat",
+            "2D"
+          ],
+          [
+            "depth",
+            "3D"
+          ]
+        ],
+        "value": "flat"
+      },
+      {
+        "key": "edgeWrap",
+        "label": "边缘穿透",
+        "type": "choice",
+        "options": [
+          [
+            "no",
+            "不穿透"
+          ],
+          [
+            "yes",
+            "穿透"
+          ]
+        ],
+        "value": "no"
+      }
+    ],
+    "advanced": [
+      {
+        "key": "current",
+        "label": "水流强度",
+        "type": "range",
+        "min": 0,
+        "max": 1.5,
+        "step": 0.05,
+        "value": 0.55,
+        "unit": "",
+        "hint": "鱼形时生效。"
+      },
+      {
+        "key": "separation",
+        "label": "保持距离",
+        "type": "range",
+        "min": 0.5,
+        "max": 2,
+        "step": 0.05,
+        "value": 1.25,
+        "unit": "",
+        "hint": ""
+      },
+      {
+        "key": "alignment",
+        "label": "方向默契",
+        "type": "range",
+        "min": 0.2,
+        "max": 2,
+        "step": 0.05,
+        "value": 1.1,
+        "unit": "",
+        "hint": ""
+      },
+      {
+        "key": "cohesion",
+        "label": "靠拢倾向",
+        "type": "range",
+        "min": 0.2,
+        "max": 2,
+        "step": 0.05,
+        "value": 0.75,
+        "unit": "",
+        "hint": ""
+      },
+      {
+        "key": "perception",
+        "label": "感知范围",
+        "type": "range",
+        "min": 35,
+        "max": 110,
+        "step": 5,
+        "value": 70,
+        "unit": "",
+        "hint": ""
+      },
+      {
+        "key": "replenish",
+        "label": "捕获后补充",
+        "type": "choice",
+        "options": [
+          [
+            "yes",
+            "自动补充"
+          ],
+          [
+            "no",
+            "自然减少"
+          ]
+        ],
+        "value": "yes"
+      }
+    ],
+    "lifecycle": [
+      {
+        "title": "群体繁衍",
+        "fields": [
+          {
+            "key": "breeding",
+            "label": "定期繁衍",
+            "type": "choice",
+            "options": [
+              [
+                "yes",
+                "开启"
+              ],
+              [
+                "no",
+                "关闭"
+              ]
+            ],
+            "value": "yes"
+          },
+          {
+            "key": "birthInterval",
+            "label": "繁衍间隔",
+            "type": "range",
+            "min": 10,
+            "max": 60,
+            "step": 5,
+            "value": 20,
+            "unit": "秒",
+            "hint": ""
+          },
+          {
+            "key": "birthBatch",
+            "label": "每次新增",
+            "type": "range",
+            "min": 1,
+            "max": 10,
+            "step": 1,
+            "value": 3,
+            "unit": "个",
+            "hint": ""
+          },
+          {
+            "key": "populationCap",
+            "label": "群体数量上限",
+            "type": "range",
+            "min": 40,
+            "max": 900,
+            "step": 20,
+            "value": 900,
+            "unit": "个",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "title": "捕食规则",
+        "fields": [
+          {
+            "key": "huntSpeed",
+            "label": "追逐速度",
+            "type": "range",
+            "min": 0.6,
+            "max": 1.4,
+            "step": 0.05,
+            "value": 1,
+            "unit": "×",
+            "hint": "相对于捕食者默认速度。"
+          },
+          {
+            "key": "captureRadius",
+            "label": "捕获距离",
+            "type": "range",
+            "min": 6,
+            "max": 16,
+            "step": 1,
+            "value": 10,
+            "unit": "",
+            "hint": ""
+          },
+          {
+            "key": "huntRest",
+            "label": "进食后休息",
+            "type": "range",
+            "min": 2,
+            "max": 20,
+            "step": 1,
+            "value": 4,
+            "unit": "秒",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "title": "捕食者繁衍",
+        "fields": [
+          {
+            "key": "predatorBreeding",
+            "label": "缓慢繁衍",
+            "type": "choice",
+            "options": [
+              [
+                "yes",
+                "开启"
+              ],
+              [
+                "no",
+                "关闭"
+              ]
+            ],
+            "value": "yes"
+          },
+          {
+            "key": "predatorBirthInterval",
+            "label": "最短繁衍间隔",
+            "type": "range",
+            "min": 180,
+            "max": 900,
+            "step": 60,
+            "value": 300,
+            "unit": "秒",
+            "hint": "整个捕食者群体每轮最多新增 1 只。"
+          },
+          {
+            "key": "birthMeals",
+            "label": "亲代所需进食",
+            "type": "range",
+            "min": 3,
+            "max": 12,
+            "step": 1,
+            "value": 5,
+            "unit": "次",
+            "hint": "满足时间与进食条件后才会繁衍。"
+          },
+          {
+            "key": "predatorCap",
+            "label": "捕食者数量上限",
+            "type": "range",
+            "min": 1,
+            "max": 6,
+            "step": 1,
+            "value": 4,
+            "unit": "只",
+            "hint": ""
+          }
+        ]
+      }
+    ],
+    "physics": []
+  },
+  {
+    "id": "cosmos",
+    "name": "宇宙",
+    "basic": [
+      {
+        "key": "speed",
+        "label": "运行速度",
+        "type": "range",
+        "min": 0.025,
+        "max": 10,
+        "step": 0.005,
+        "value": 1,
+        "unit": "×",
+        "hint": "1× 为标准演化节奏，可慢放或加快；长按临时加倍。"
+      },
+      {
+        "key": "count",
+        "label": "初始星体数量",
+        "type": "range",
+        "min": 100,
+        "max": 4000,
+        "step": 50,
+        "value": 2500,
+        "unit": "颗",
+        "hint": "调整数量会重新生成星体；碰撞会改变当前数量。"
+      },
+      {
+        "key": "pointer",
+        "label": "鼠标互动",
+        "type": "choice",
+        "options": [
+          [
+            "none",
+            "无"
+          ],
+          [
+            "repel",
+            "推开"
+          ],
+          [
+            "attract",
+            "牵引"
+          ],
+          [
+            "magnify",
+            "放大镜"
+          ]
+        ],
+        "value": "none"
+      },
+      {
+        "key": "depth",
+        "label": "显示维度",
+        "type": "choice",
+        "options": [
+          [
+            "flat",
+            "2D"
+          ],
+          [
+            "depth",
+            "3D"
+          ]
+        ],
+        "value": "flat"
+      },
+      {
+        "key": "edgeWrap",
+        "label": "边缘穿透",
+        "type": "choice",
+        "options": [
+          [
+            "no",
+            "不穿透"
+          ],
+          [
+            "yes",
+            "穿透"
+          ]
+        ],
+        "value": "no"
+      }
+    ],
+    "advanced": [
+      {
+        "key": "orbit",
+        "label": "初始运动速度",
+        "type": "range",
+        "min": 0.5,
+        "max": 1.4,
+        "step": 0.05,
+        "value": 1,
+        "unit": "×",
+        "hint": "画面宽度为 100 m（3D 以中心平面为准），质量单位为 kg。1× 基准初速为 0.15 m/s，粒子速度有随机差异。运行速度控制时间播放倍率。调整后重新开始生效。"
+      },
+      {
+        "key": "trail",
+        "label": "轨迹长度",
+        "type": "range",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "value": 10,
+        "unit": "",
+        "hint": ""
+      }
+    ],
+    "lifecycle": [],
+    "physics": [
+      {
+        "title": "星体引力",
+        "fields": [
+          {
+            "key": "mutualGravity",
+            "label": "星体间引力",
+            "type": "range",
+            "min": 0,
+            "max": 2,
+            "step": 0.05,
+            "value": 0.7,
+            "unit": "×",
+            "hint": "质量越大，牵引越强、范围越大；普通星体范围最多 8 m，黑洞最多 12 m；以质量的立方根增长；尘埃与碎片仅在内侧三分之一范围直接吸附。"
+          },
+          {
+            "key": "blackHoles",
+            "label": "黑洞演化",
+            "type": "choice",
+            "options": [
+              [
+                "yes",
+                "开启"
+              ],
+              [
+                "no",
+                "关闭"
+              ]
+            ],
+            "value": "yes"
+          }
+        ]
+      },
+      {
+        "title": "质量等级",
+        "fields": [
+          {
+            "key": "fragmentMass",
+            "label": "碎片",
+            "type": "range",
+            "min": 2,
+            "max": 4,
+            "step": 1,
+            "value": 2,
+            "unit": "kg",
+            "hint": ""
+          },
+          {
+            "key": "rockMass",
+            "label": "碎石",
+            "type": "range",
+            "min": 8,
+            "max": 16,
+            "step": 1,
+            "value": 8,
+            "unit": "kg",
+            "hint": ""
+          },
+          {
+            "key": "satelliteMass",
+            "label": "小行星",
+            "type": "range",
+            "min": 32,
+            "max": 64,
+            "step": 1,
+            "value": 32,
+            "unit": "kg",
+            "hint": ""
+          },
+          {
+            "key": "planetMass",
+            "label": "行星",
+            "type": "range",
+            "min": 128,
+            "max": 256,
+            "step": 1,
+            "value": 128,
+            "unit": "kg",
+            "hint": ""
+          },
+          {
+            "key": "sourceMass",
+            "label": "星系源",
+            "type": "range",
+            "min": 4096,
+            "max": 32768,
+            "step": 1024,
+            "value": 4096,
+            "unit": "kg",
+            "hint": ""
+          },
+          {
+            "key": "blackHoleMass",
+            "label": "黑洞",
+            "type": "range",
+            "min": 65536,
+            "max": 524288,
+            "step": 16384,
+            "value": 65536,
+            "unit": "kg",
+            "hint": "低于碎片门槛为尘埃；达到门槛晋级，颜色和尺寸随等级变化。"
+          }
+        ]
+      },
+      {
+        "title": "碰撞演化",
+        "fields": [
+          {
+            "key": "collisions",
+            "label": "碰撞融合",
+            "type": "choice",
+            "options": [
+              [
+                "auto",
+                "开启"
+              ],
+              [
+                "off",
+                "关闭"
+              ]
+            ],
+            "value": "auto"
+          }
+        ]
+      },
+      {
+        "title": "星尘补给",
+        "fields": [
+          {
+            "key": "influx",
+            "label": "外来星尘",
+            "type": "choice",
+            "options": [
+              [
+                "yes",
+                "开启"
+              ],
+              [
+                "no",
+                "关闭"
+              ]
+            ],
+            "value": "yes"
+          },
+          {
+            "key": "influxInterval",
+            "label": "补给周期",
+            "type": "range",
+            "min": 1,
+            "max": 30,
+            "step": 1,
+            "value": 3,
+            "unit": "秒",
+            "hint": ""
+          },
+          {
+            "key": "influxBatch",
+            "label": "每周期星尘",
+            "type": "range",
+            "min": 1,
+            "max": 120,
+            "step": 1,
+            "value": 24,
+            "unit": "颗",
+            "hint": "开场释放完成后持续补给，以背景渐显为主，少量从四周流入；达到初始数量时暂停补给，最多保留 4000 颗。"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "stars",
+    "name": "星体",
+    "basic": [
+      {
+        "key": "speed",
+        "label": "运行速度",
+        "type": "range",
+        "min": 0.25,
+        "max": 10,
+        "step": 0.25,
+        "value": 1,
+        "unit": "×",
+        "hint": ""
+      },
+      {
+        "key": "count",
+        "label": "初始尘埃",
+        "type": "range",
+        "min": 100,
+        "max": 1200,
+        "step": 50,
+        "value": 600,
+        "unit": "颗",
+        "hint": ""
+      },
+      {
+        "key": "pointer",
+        "label": "鼠标互动",
+        "type": "choice",
+        "options": [
+          [
+            "none",
+            "无"
+          ],
+          [
+            "magnify",
+            "放大镜"
+          ]
+        ],
+        "value": "none"
+      },
+      {
+        "key": "edgeWrap",
+        "label": "边缘穿透",
+        "type": "choice",
+        "options": [
+          [
+            "no",
+            "不穿透"
+          ],
+          [
+            "yes",
+            "穿透"
+          ]
+        ],
+        "value": "no"
+      }
+    ],
+    "advanced": [
+      {
+        "key": "initialSpeed",
+        "label": "初始漂移",
+        "type": "range",
+        "min": 0.25,
+        "max": 2,
+        "step": 0.05,
+        "value": 1,
+        "unit": "×",
+        "hint": "调整后重新开始生效。"
+      },
+      {
+        "key": "trail",
+        "label": "轨迹长度",
+        "type": "range",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "value": 10,
+        "unit": "",
+        "hint": ""
+      }
+    ],
+    "lifecycle": [],
+    "physics": [
+      {
+        "title": "引力与融合",
+        "fields": [
+          {
+            "key": "gravity",
+            "label": "引力强度",
+            "type": "range",
+            "min": 0.1,
+            "max": 2,
+            "step": 0.1,
+            "value": 1,
+            "unit": "×",
+            "hint": ""
+          },
+          {
+            "key": "collisions",
+            "label": "碰撞融合",
+            "type": "choice",
+            "options": [
+              [
+                "auto",
+                "开启"
+              ],
+              [
+                "off",
+                "关闭"
+              ]
+            ],
+            "value": "auto"
+          }
+        ]
+      },
+      {
+        "title": "尘埃储备",
+        "fields": [
+          {
+            "key": "influx",
+            "label": "释放储备",
+            "type": "choice",
+            "options": [
+              [
+                "yes",
+                "开启"
+              ],
+              [
+                "no",
+                "关闭"
+              ]
+            ],
+            "value": "yes"
+          },
+          {
+            "key": "dustReserve",
+            "label": "后续尘埃储备",
+            "type": "range",
+            "min": 0,
+            "max": 1200,
+            "step": 50,
+            "value": 400,
+            "unit": "颗",
+            "hint": "有限储备，耗尽后停止生成；重新开始时重置。"
+          },
+          {
+            "key": "influxBatch",
+            "label": "每次释放",
+            "type": "range",
+            "min": 1,
+            "max": 30,
+            "step": 1,
+            "value": 8,
+            "unit": "颗",
+            "hint": ""
+          },
+          {
+            "key": "influxInterval",
+            "label": "释放间隔",
+            "type": "range",
+            "min": 1,
+            "max": 20,
+            "step": 1,
+            "value": 3,
+            "unit": "秒",
+            "hint": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gravity",
+    "name": "引力",
+    "basic": [
+      {
+        "key": "speed",
+        "label": "运行速度",
+        "type": "range",
+        "min": 0.25,
+        "max": 10,
+        "step": 0.25,
+        "value": 1,
+        "unit": "×",
+        "hint": ""
+      },
+      {
+        "key": "count",
+        "label": "爆发尘埃数量",
+        "type": "range",
+        "min": 100,
+        "max": 1000,
+        "step": 50,
+        "value": 400,
+        "unit": "颗",
+        "hint": ""
+      },
+      {
+        "key": "pointer",
+        "label": "鼠标互动",
+        "type": "choice",
+        "options": [
+          [
+            "create",
+            "拖动添加"
+          ]
+        ],
+        "value": "create"
+      },
+      {
+        "key": "addMass",
+        "label": "添加天体质量",
+        "type": "range",
+        "min": 0.25,
+        "max": 200,
+        "step": 0.25,
+        "value": 10,
+        "unit": "",
+        "hint": "按住画布拖动，松开添加；拖动方向与距离决定初速度。Ctrl + 拖动平移，滚轮缩放。"
+      }
+    ],
+    "advanced": [
+      {
+        "key": "gravityStrength",
+        "label": "引力强度",
+        "type": "range",
+        "min": 0.1,
+        "max": 2,
+        "step": 0.1,
+        "value": 1,
+        "unit": "×",
+        "hint": ""
+      },
+      {
+        "key": "initialSpeed",
+        "label": "爆发初速度",
+        "type": "range",
+        "min": 0.25,
+        "max": 2,
+        "step": 0.05,
+        "value": 1,
+        "unit": "×",
+        "hint": "重新开始生效；爆发后保留惯性，速度由原模型引力与融合计算。"
+      }
+    ],
+    "lifecycle": [],
+    "physics": [
+      {
+        "title": "轨迹与方向",
+        "fields": [
+          {
+            "key": "trails",
+            "label": "运动轨迹",
+            "type": "choice",
+            "options": [
+              [
+                "yes",
+                "显示"
+              ],
+              [
+                "no",
+                "隐藏"
+              ]
+            ],
+            "value": "yes"
+          },
+          {
+            "key": "trailLength",
+            "label": "轨迹长度",
+            "type": "range",
+            "min": 10,
+            "max": 200,
+            "step": 10,
+            "value": 60,
+            "unit": "",
+            "hint": ""
+          },
+          {
+            "key": "forceVectors",
+            "label": "引力受力方向",
+            "type": "choice",
+            "options": [
+              [
+                "yes",
+                "显示"
+              ],
+              [
+                "no",
+                "隐藏"
+              ]
+            ],
+            "value": "yes"
+          },
+          {
+            "key": "velocityVectors",
+            "label": "速度方向",
+            "type": "choice",
+            "options": [
+              [
+                "yes",
+                "显示"
+              ],
+              [
+                "no",
+                "隐藏"
+              ]
+            ],
+            "value": "yes"
+          },
+          {
+            "key": "arrowSize",
+            "label": "箭头大小",
+            "type": "range",
+            "min": 0.15,
+            "max": 1.5,
+            "step": 0.05,
+            "value": 0.35,
+            "unit": "×",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "title": "引力场",
+        "fields": [
+          {
+            "key": "field",
+            "label": "场的展示",
+            "type": "choice",
+            "options": [
+              [
+                "gradient",
+                "梯度箭头"
+              ],
+              [
+                "adaptive",
+                "近处加密"
+              ],
+              [
+                "uniform",
+                "均匀箭头"
+              ],
+              [
+                "streamlines",
+                "引力流线"
+              ],
+              [
+                "contours",
+                "等势线"
+              ],
+              [
+                "heightmap",
+                "势能热图"
+              ],
+              [
+                "off",
+                "隐藏"
+              ]
+            ],
+            "value": "streamlines"
+          },
+          {
+            "key": "fieldSpacing",
+            "label": "采样间距",
+            "type": "range",
+            "min": 25,
+            "max": 100,
+            "step": 5,
+            "value": 60,
+            "unit": "",
+            "hint": ""
+          }
+        ]
+      },
+      {
+        "title": "天体显示",
+        "fields": [
+          {
+            "key": "bodySize",
+            "label": "显示大小",
+            "type": "range",
+            "min": 0.25,
+            "max": 2,
+            "step": 0.05,
+            "value": 1,
+            "unit": "×",
+            "hint": ""
+          },
+          {
+            "key": "massLabels",
+            "label": "质量数值",
+            "type": "choice",
+            "options": [
+              [
+                "yes",
+                "显示"
+              ],
+              [
+                "no",
+                "隐藏"
+              ]
+            ],
+            "value": "yes"
+          }
+        ]
+      }
+    ]
+  }
+]

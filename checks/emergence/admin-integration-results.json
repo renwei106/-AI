@@ -1,0 +1,8 @@
+{
+  "drawer": true,
+  "savePayload": true,
+  "sceneFallback": true,
+  "cancel": true,
+  "unrelatedConfigPreserved": true,
+  "liveDataUnchanged": true
+}

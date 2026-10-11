@@ -1,0 +1,21 @@
+{
+  "tool": "Built-in image_gen (imagegen skill), new images; no source photos",
+  "webPackaging": "Full image dimensions retained; WebP quality 82, with original PNGs preserved alongside this manifest.",
+  "images": [
+    {
+      "name": "山间薄雾",
+      "asset": "D:/系统文件/文档/ChatGPT/导航站/dist/assets/site-icons/paper-photo-mist-v1.webp",
+      "prompt": "Create one beautiful wide horizontal editorial photograph, aspect ratio 3:2, for a quiet personal daily newspaper web page. Scene: tranquil layers of rolling hills and a small lake in soft morning mist, a slender branch of leaves in the near foreground at far left, fine atmospheric depth. Restrained desaturated sage green, mist gray, muted sand, soft natural daylight, delicate analog film grain, sophisticated Japanese lifestyle magazine photography, believable natural detail, calm and spacious. All important elements in middle vertical 55% so it can crop gracefully to a wide newspaper banner. Gentle midtone exposure, avoid any large pure white or heavy black fields, no dramatic contrast, no typography, no logos, no border, no collage. This is the actual photographic asset, not a website screenshot or mockup."
+    },
+    {
+      "name": "窗边阅读",
+      "asset": "D:/系统文件/文档/ChatGPT/导航站/dist/assets/site-icons/paper-photo-reading-v1.webp",
+      "prompt": "Create one beautiful horizontal 3:2 editorial photograph for a calm personal daily newspaper. An open unbranded book with softly out-of-focus indistinct print and a simple pale sage ceramic tea cup on an aged light oak windowsill, a small glass vase holding a single olive branch, soft hazy daylight from the window, muted distant trees. Restrained desaturated sage, linen beige and gray, gentle midtone exposure, delicate analog film grain, sophisticated Japanese lifestyle magazine photography, candid lived-in realism, simple and spacious composition. Keep the main cup and book inside middle vertical 55 percent so a wide banner crop works. No bright pure white fields, no heavy black areas, no high contrast, no prominent text, no logo, no borders, no collage, actual photo asset only."
+    },
+    {
+      "name": "清晨餐桌",
+      "asset": "D:/系统文件/文档/ChatGPT/导航站/dist/assets/site-icons/paper-photo-breakfast-v1.webp",
+      "prompt": "Create one beautiful horizontal 3:2 editorial photograph for a calm personal daily newspaper. A quiet everyday breakfast on a light weathered wooden table: a handmade warm gray ceramic plate with two slices of rustic toast, a small bowl of pears, a simple sage green tea cup, a folded linen napkin. Shot at a gently elevated angle, soft diffuse morning light, subtle natural shadows, a candid authentic still life with breathing space, sophisticated lifestyle magazine composition. Restrained desaturated sage, pale oat, soft sand and gray, delicate analog film grain, believable texture, no glossy advertising appearance. Place the main objects in middle vertical 55 percent to support a wide banner crop. Avoid large pure white or very dark solid areas, no people, no words, no logos, no borders, no collage, actual photographic asset only."
+    }
+  ]
+}

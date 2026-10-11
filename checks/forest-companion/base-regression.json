@@ -1,0 +1,158 @@
+[
+  {
+    "mode": "light",
+    "unchanged": true,
+    "snapshot": {
+      "body": {
+        "rect": [
+          0,
+          0,
+          1440,
+          900
+        ],
+        "color": "rgb(45, 51, 45)",
+        "background": "color(srgb 0.819608 0.921569 0.896471)",
+        "font": "\"Shiyu Youfeng Preview\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px"
+      },
+      "header": {
+        "rect": [
+          0,
+          0,
+          1440,
+          86
+        ],
+        "color": "rgb(45, 51, 45)",
+        "background": "rgba(0, 0, 0, 0)",
+        "font": "\"Shiyu Youfeng Preview\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px"
+      },
+      ".base-composition": {
+        "rect": [
+          32,
+          247,
+          1376,
+          277
+        ],
+        "color": "rgb(45, 51, 45)",
+        "background": "rgba(0, 0, 0, 0)",
+        "font": "\"Shiyu Youfeng Preview\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px"
+      },
+      "#search-form": {
+        "rect": [
+          400,
+          459,
+          640,
+          65
+        ],
+        "color": "rgb(45, 51, 45)",
+        "background": "color(srgb 0.954902 0.980392 0.974118)",
+        "font": "\"Shiyu Youfeng Preview\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px"
+      },
+      ".base-composition h1": {
+        "rect": [
+          32,
+          284,
+          1376,
+          63
+        ],
+        "color": "rgb(45, 51, 45)",
+        "background": "rgba(0, 0, 0, 0)",
+        "font": "\"Shiyu Youfeng Preview\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "46px"
+      },
+      ".intro": {
+        "rect": [
+          32,
+          363,
+          1376,
+          17
+        ],
+        "color": "rgb(114, 120, 111)",
+        "background": "rgba(0, 0, 0, 0)",
+        "font": "\"Shiyu Youfeng Preview\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "13px"
+      }
+    }
+  },
+  {
+    "mode": "dark",
+    "unchanged": true,
+    "snapshot": {
+      "body": {
+        "rect": [
+          0,
+          0,
+          1440,
+          900
+        ],
+        "color": "rgb(238, 238, 229)",
+        "background": "color(srgb 0.0809804 0.15749 0.154824)",
+        "font": "\"Shiyu Youfeng Preview\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px"
+      },
+      "header": {
+        "rect": [
+          0,
+          0,
+          1440,
+          86
+        ],
+        "color": "rgb(238, 238, 229)",
+        "background": "rgba(0, 0, 0, 0)",
+        "font": "\"Shiyu Youfeng Preview\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px"
+      },
+      ".base-composition": {
+        "rect": [
+          32,
+          247,
+          1376,
+          277
+        ],
+        "color": "rgb(238, 238, 229)",
+        "background": "rgba(0, 0, 0, 0)",
+        "font": "\"Shiyu Youfeng Preview\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px"
+      },
+      "#search-form": {
+        "rect": [
+          400,
+          459,
+          640,
+          65
+        ],
+        "color": "rgb(238, 238, 229)",
+        "background": "color(srgb 0.120549 0.225176 0.221882)",
+        "font": "\"Shiyu Youfeng Preview\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "14px"
+      },
+      ".base-composition h1": {
+        "rect": [
+          32,
+          284,
+          1376,
+          63
+        ],
+        "color": "rgb(238, 238, 229)",
+        "background": "rgba(0, 0, 0, 0)",
+        "font": "\"Shiyu Youfeng Preview\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "46px"
+      },
+      ".intro": {
+        "rect": [
+          32,
+          363,
+          1376,
+          17
+        ],
+        "color": "rgb(164, 170, 154)",
+        "background": "rgba(0, 0, 0, 0)",
+        "font": "\"Shiyu Youfeng Preview\", \"Microsoft YaHei\", sans-serif",
+        "fontSize": "13px"
+      }
+    }
+  }
+]

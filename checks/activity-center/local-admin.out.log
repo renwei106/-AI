@@ -1,0 +1,46 @@
+
+  VITE v7.3.6  ready in 1478 ms
+
+  ➜  Local:   http://127.0.0.1:5175/
+  ➜  press h + enter to show help
+11:57:20 [vite] shiyu-onboarding.ts changed, restarting server...
+11:57:27 [vite] server restarted.
+12:11:02 [vite] shiyu-onboarding.ts changed, restarting server...
+12:11:03 [vite] server restarted.
+12:17:21 [vite] (client) hmr update /src/shiyu-activities.css
+12:35:16 [vite] (client) hmr update /src/InvitationManager.tsx
+12:35:16 [vite] (client) hmr update /src/invitations.css
+12:49:17 [vite] ../导航站/payments/invitation-model.mjs changed, restarting server...
+12:49:18 [vite] server restarted.
+12:49:48 [vite] shiyu-invitation-plugin.ts changed, restarting server...
+12:49:48 [vite] server restarted.
+12:50:04 [vite] shiyu-user-plugin.ts changed, restarting server...
+12:50:05 [vite] server restarted.
+12:50:35 [vite] shiyu-user-plugin.ts changed, restarting server...
+12:50:36 [vite] server restarted.
+12:51:04 [vite] (client) hmr update /src/InvitationManager.tsx
+12:51:04 [vite] (client) hmr update /src/App.tsx
+12:51:04 [vite] (client) hmr update /src/ShiyuAdminPage.tsx
+13:00:52 [vite] (client) hmr update /src/RegistrationRewards.tsx
+13:00:52 [vite] (client) hmr update /src/InvitationManager.tsx
+13:00:52 [vite] (client) hmr update /src/ShiyuActivityCenter.tsx
+13:01:09 [vite] ../导航站/payments/invitation-model.mjs changed, restarting server...
+13:01:10 [vite] server restarted.
+13:05:50 [vite] feedback-admin-plugin.ts changed, restarting server...
+13:05:50 [vite] (client) hmr update /src/FeedbackPage.tsx
+13:05:52 [vite] server restarted.
+13:08:08 [vite] shiyu-user-plugin.ts changed, restarting server...
+13:08:09 [vite] server restarted.
+13:08:42 [vite] shiyu-user-plugin.ts changed, restarting server...
+13:08:43 [vite] server restarted.
+16:59:02 [vite] shiyu-user-plugin.ts changed, restarting server...
+16:59:03 [vite] server restarted.
+17:01:00 [vite] shiyu-user-plugin.ts changed, restarting server...
+17:01:01 [vite] server restarted.
+17:01:25 [vite] (client) hmr update /src/PlanMatrix.tsx
+17:01:25 [vite] shiyu-user-plugin.ts changed, restarting server...
+17:01:26 [vite] server restarted.
+17:05:39 [vite] shiyu-user-plugin.ts changed, restarting server...
+17:05:39 [vite] server restarted.
+19:06:21 [vite] (client) hmr update /src/PlanMatrix.tsx
+19:06:48 [vite] (client) hmr update /src/PlanMatrix.tsx

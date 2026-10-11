@@ -1,0 +1,42 @@
+[
+  {
+    "path": "personalization/colors",
+    "scroll": 600,
+    "top": 92
+  },
+  {
+    "path": "personalization/themes",
+    "scroll": 521,
+    "top": 92
+  },
+  {
+    "path": "personalization/fonts",
+    "scroll": 109,
+    "top": 92
+  },
+  {
+    "path": "personalization/pet",
+    "scroll": 167,
+    "top": 92
+  },
+  {
+    "path": "page-colors/colors",
+    "scroll": 600,
+    "top": 92
+  },
+  {
+    "path": "page-colors/fonts",
+    "scroll": 0,
+    "top": 92
+  },
+  {
+    "path": "link-styles",
+    "scroll": 600,
+    "top": 80
+  },
+  {
+    "path": "tools",
+    "scroll": 0,
+    "top": 80
+  }
+]

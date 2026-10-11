@@ -1,0 +1,345 @@
+[
+  {
+    "depth": "flat",
+    "mode": "birth",
+    "samples": [
+      {
+        "seconds": 0,
+        "count": 0,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "merged": 0,
+        "shattered": 0
+      },
+      {
+        "seconds": 6,
+        "count": 650,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "medianSpeed": 1.3629988905102712,
+        "p95Speed": 1.4327428494223613,
+        "merged": 0,
+        "shattered": 0
+      },
+      {
+        "seconds": 30,
+        "count": 261,
+        "cores": 3,
+        "masses": [
+          98.1,
+          95.5,
+          96.7
+        ],
+        "localCount": 119,
+        "medianSpeed": 0.7006314490134742,
+        "p95Speed": 1.7191324325898194,
+        "merged": 802,
+        "shattered": 356
+      },
+      {
+        "seconds": 60,
+        "count": 182,
+        "cores": 4,
+        "masses": [
+          22.8,
+          101.8,
+          113.9,
+          98.5
+        ],
+        "localCount": 49,
+        "medianSpeed": 0.47296217553450615,
+        "p95Speed": 1.4884454413384491,
+        "merged": 1013,
+        "shattered": 473
+      },
+      {
+        "seconds": 180,
+        "count": 74,
+        "cores": 10,
+        "masses": [
+          115.4,
+          24.9,
+          25.2,
+          21.8,
+          34,
+          23.9,
+          25.1,
+          120.4,
+          25.5,
+          113.5
+        ],
+        "localCount": 26,
+        "medianSpeed": 0.33928293621104744,
+        "p95Speed": 1.692623676947447,
+        "merged": 1250,
+        "shattered": 593
+      }
+    ]
+  },
+  {
+    "depth": "flat",
+    "mode": "count-change",
+    "samples": [
+      {
+        "seconds": 0,
+        "count": 418,
+        "cores": 9,
+        "masses": [
+          34.7,
+          34.7,
+          34.7,
+          34.7,
+          34.7,
+          34.7,
+          26.7,
+          26.4,
+          26.2
+        ],
+        "localCount": 418,
+        "medianSpeed": 1.3023711513136358,
+        "p95Speed": 1.930109633932844,
+        "merged": 280,
+        "shattered": 45
+      },
+      {
+        "seconds": 6,
+        "count": 358,
+        "cores": 4,
+        "masses": [
+          34.6,
+          96,
+          90.3,
+          61.2
+        ],
+        "localCount": 309,
+        "medianSpeed": 0.8663742302630643,
+        "p95Speed": 1.7891846309512967,
+        "merged": 527,
+        "shattered": 200
+      },
+      {
+        "seconds": 30,
+        "count": 241,
+        "cores": 3,
+        "masses": [
+          102.5,
+          99.8,
+          96.9
+        ],
+        "localCount": 97,
+        "medianSpeed": 0.679756042941044,
+        "p95Speed": 1.9634823404908708,
+        "merged": 857,
+        "shattered": 386
+      },
+      {
+        "seconds": 60,
+        "count": 169,
+        "cores": 5,
+        "masses": [
+          22.8,
+          98.5,
+          101.9,
+          20.3,
+          113.9
+        ],
+        "localCount": 52,
+        "medianSpeed": 0.4268572837132673,
+        "p95Speed": 1.5154732003916886,
+        "merged": 1042,
+        "shattered": 487
+      },
+      {
+        "seconds": 180,
+        "count": 73,
+        "cores": 10,
+        "masses": [
+          115.4,
+          24.9,
+          25.2,
+          21.8,
+          34,
+          23.9,
+          25.1,
+          25.5,
+          113.5,
+          120.7
+        ],
+        "localCount": 25,
+        "medianSpeed": 0.27835678745652365,
+        "p95Speed": 1.7534691821882398,
+        "merged": 1252,
+        "shattered": 594
+      }
+    ]
+  },
+  {
+    "depth": "depth",
+    "mode": "birth",
+    "samples": [
+      {
+        "seconds": 0,
+        "count": 0,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "merged": 0,
+        "shattered": 0
+      },
+      {
+        "seconds": 6,
+        "count": 650,
+        "cores": 0,
+        "masses": [],
+        "localCount": 0,
+        "medianSpeed": 1.9275996678318041,
+        "p95Speed": 2.023746105321906,
+        "merged": 0,
+        "shattered": 0
+      },
+      {
+        "seconds": 30,
+        "count": 213,
+        "cores": 3,
+        "masses": [
+          95,
+          162.7,
+          20.8
+        ],
+        "localCount": 14,
+        "medianSpeed": 0.3956210087727141,
+        "p95Speed": 1.4310691733723762,
+        "merged": 671,
+        "shattered": 211
+      },
+      {
+        "seconds": 60,
+        "count": 178,
+        "cores": 3,
+        "masses": [
+          20.8,
+          163.6,
+          109.8
+        ],
+        "localCount": 12,
+        "medianSpeed": 0.19818120293096247,
+        "p95Speed": 1.0400420833043604,
+        "merged": 748,
+        "shattered": 249
+      },
+      {
+        "seconds": 180,
+        "count": 94,
+        "cores": 6,
+        "masses": [
+          39.6,
+          140.3,
+          22.7,
+          20.7,
+          189,
+          32.7
+        ],
+        "localCount": 9,
+        "medianSpeed": 0.0818532394297688,
+        "p95Speed": 0.7679938138198049,
+        "merged": 875,
+        "shattered": 290
+      }
+    ]
+  },
+  {
+    "depth": "depth",
+    "mode": "count-change",
+    "samples": [
+      {
+        "seconds": 0,
+        "count": 396,
+        "cores": 9,
+        "masses": [
+          34.7,
+          34.7,
+          34.7,
+          34.7,
+          34.7,
+          34.7,
+          26.9,
+          26.4,
+          26.2
+        ],
+        "localCount": 380,
+        "medianSpeed": 1.4657834621321018,
+        "p95Speed": 2.1808299411639296,
+        "merged": 307,
+        "shattered": 50
+      },
+      {
+        "seconds": 6,
+        "count": 293,
+        "cores": 6,
+        "masses": [
+          26.3,
+          69.3,
+          68.8,
+          60.4,
+          35.2,
+          29.9
+        ],
+        "localCount": 46,
+        "medianSpeed": 1.1991975251546467,
+        "p95Speed": 2.068089063543973,
+        "merged": 536,
+        "shattered": 159
+      },
+      {
+        "seconds": 30,
+        "count": 203,
+        "cores": 3,
+        "masses": [
+          162.7,
+          20.8,
+          97.8
+        ],
+        "localCount": 16,
+        "medianSpeed": 0.31178929041655423,
+        "p95Speed": 1.0407443836341423,
+        "merged": 692,
+        "shattered": 221
+      },
+      {
+        "seconds": 60,
+        "count": 167,
+        "cores": 3,
+        "masses": [
+          20.8,
+          163.6,
+          114.6
+        ],
+        "localCount": 11,
+        "medianSpeed": 0.17843181738022618,
+        "p95Speed": 0.8005290961497944,
+        "merged": 763,
+        "shattered": 253
+      },
+      {
+        "seconds": 180,
+        "count": 92,
+        "cores": 6,
+        "masses": [
+          39.6,
+          140.3,
+          22.7,
+          20.7,
+          189,
+          32.7
+        ],
+        "localCount": 10,
+        "medianSpeed": 0.07918789456605348,
+        "p95Speed": 0.4762204103952222,
+        "merged": 878,
+        "shattered": 291
+      }
+    ]
+  }
+]

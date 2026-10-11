@@ -1,0 +1,55 @@
+{
+  "enabled": true,
+  "order": [
+    "#48614c",
+    "#45433c",
+    "#bd9055",
+    "#467ea5",
+    "#8b83d1",
+    "#ba794f",
+    "#a95e76",
+    "custom"
+  ],
+  "options": {
+    "#48614c": {
+      "enabled": true,
+      "name": "青禾绿",
+      "value": "#6f947f"
+    },
+    "#45433c": {
+      "enabled": true,
+      "name": "云山灰",
+      "value": "#88939f"
+    },
+    "#bd9055": {
+      "enabled": true,
+      "name": "燕麦金",
+      "value": "#b59a6d"
+    },
+    "#467ea5": {
+      "enabled": true,
+      "name": "晴岚蓝",
+      "value": "#6d95b5"
+    },
+    "#8b83d1": {
+      "enabled": true,
+      "name": "木槿紫",
+      "value": "#9a89b5"
+    },
+    "#ba794f": {
+      "enabled": true,
+      "name": "杏陶橙",
+      "value": "#c28d71"
+    },
+    "#a95e76": {
+      "enabled": true,
+      "name": "海棠粉",
+      "value": "#ba8598"
+    },
+    "custom": {
+      "enabled": true,
+      "name": "自定义配色",
+      "value": ""
+    }
+  }
+}

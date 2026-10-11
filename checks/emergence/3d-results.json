@@ -1,0 +1,13 @@
+{
+  "birds": 420,
+  "cosmos": 763,
+  "depthCapture": true,
+  "depthBreeding": true,
+  "depthBoundary": true,
+  "depthNeighbors": true,
+  "orbitWhilePaused": true,
+  "fullTurn": true,
+  "dragDoesNotBoost": true,
+  "blurCleanup": true,
+  "restored2dHold": true
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "baseline": true,
+    "texture": [
+      8192,
+      4096
+    ],
+    "colorSpace": "srgb",
+    "anisotropy": 8,
+    "ratio": 1,
+    "buffer": [
+      1772,
+      1015
+    ],
+    "rotation": -0.0006374183906699285,
+    "visible": true,
+    "autoRotate": true,
+    "zoom": false
+  },
+  {
+    "baseline": false,
+    "texture": [
+      8192,
+      4096
+    ],
+    "colorSpace": "srgb",
+    "anisotropy": 8,
+    "ratio": 1,
+    "buffer": [
+      1772,
+      1015
+    ],
+    "rotation": -0.0004642090008938104,
+    "visible": true,
+    "autoRotate": true,
+    "zoom": false
+  }
+]

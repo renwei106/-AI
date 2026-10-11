@@ -2,7 +2,7 @@
 .space-atlas-entry{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;padding:9px 12px;border-radius:22px;font-size:12px;color:var(--muted)}
 .space-atlas-entry:hover{color:var(--ink);background:var(--soft)}
 .space-atlas-entry svg{width:17px;height:17px}
-#space-atlas{--at-accent:var(--accent);--at-parent:color-mix(in srgb,var(--at-accent) 72%,var(--ink));position:fixed;inset:0;margin:0;width:100%;height:100dvh;max-width:none;max-height:none;padding:0;border:0;border-radius:0;background:var(--bg);color:var(--ink);overflow:hidden;box-shadow:none;font-family:var(--font);overscroll-behavior:contain;z-index:35;opacity:0;transition:opacity .1s ease}
+#space-atlas{--at-accent:var(--accent);--at-parent:color-mix(in srgb,var(--at-accent) 72%,var(--ink));position:fixed;inset:0;margin:0;width:100%;height:100dvh;max-width:none;max-height:none;padding:0;border:0;border-radius:0;background:var(--page-background,var(--bg));color:var(--ink);overflow:hidden;box-shadow:none;font-family:var(--font);overscroll-behavior:contain;z-index:35;opacity:0;transition:opacity .1s ease}
 #space-atlas.atlas-ready{opacity:1}
 #space-atlas.atlas-direct-entry{transition:none}
 #space-atlas::backdrop{background:#0003;backdrop-filter:blur(8px)}
@@ -176,7 +176,7 @@ body.atlas-active[data-dark=true] #space-mode-menu{--ink:#efefea;--muted:#b0b0b8
 #space-atlas .at-mode-host{position:absolute;z-index:80;font-size:20px;font-weight:500;max-width:230px}
 #space-atlas .at-mode-host button{font:inherit}
 #space-atlas .at-header-actions{position:absolute;z-index:80;display:flex;align-items:center;gap:10px}
-#space-atlas .at-header-actions>.primary{height:38px;padding:8px 15px;background:var(--accent);color:#fff;font-size:12px}
+#space-atlas .at-header-actions>.primary{--selection-contrast:var(--control-contrast);height:38px;padding:8px 15px;background:var(--control-fill,var(--control-accent,var(--accent)));color:var(--control-contrast,#fff);font-size:12px}
 #space-atlas .at-header-actions .space-share,#space-atlas .at-header-actions .display-scope-button{position:static;display:grid;place-items:center;width:34px;height:34px;padding:7px;margin:0;color:var(--muted)}
 #space-atlas .at-header-actions button:hover{filter:brightness(1.08)}
 #space-atlas .at-context{position:absolute;left:var(--chrome-left,40px);top:100px;z-index:75;max-width:min(500px,45vw);pointer-events:none}

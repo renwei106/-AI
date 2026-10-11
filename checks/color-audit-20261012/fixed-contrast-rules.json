@@ -1,0 +1,58 @@
+[
+  {
+    "file": "avatar-catalog.css",
+    "rules": [
+      ".avatar-selected-mark{position:absolute;right:3px;top:18px;border-radius:50%;background:var(--accent);color:#fff;width:25px;height:25px;display:grid;place-items:center;border:2px solid var(--surface);z-index:3}"
+    ]
+  },
+  {
+    "file": "desktop-pet.css",
+    "rules": [
+      "\r\n.desktop-pet .pet-shortcut[data-selected=true] .pet-shortcut-label{background:var(--pet-accent);color:#fff;box-shadow:0 2px 8px #20322226}"
+    ]
+  },
+  {
+    "file": "member-payment.css",
+    "rules": [
+      "\n#member-center.member-polished .member-plans > button[data-published-plan][aria-pressed=true] { background: color-mix(in srgb, var(--accent) 85%, #000); color: #fff; border: 0; box-shadow: none; }"
+    ]
+  },
+  {
+    "file": "memo-paper.css",
+    "rules": [
+      "\n.memo-paper-app .memo-write{display:flex;align-items:center;gap:8px;border:0;border-radius:30px;background:var(--accent);color:white;padding:12px 22px;font-size:13px}"
+    ]
+  },
+  {
+    "file": "paper-edition.css",
+    "rules": [
+      "\n\r\n\r\n/* Make the existing edition editor discoverable without changing its flow. */\n.paper-reader-active .newspaper [data-paper-edit]{display:inline-flex;align-items:center;gap:6px;background:var(--accent)!important;color:#fff!important;border:1px solid color-mix(in srgb,var(--accent) 75%,#000)!important;border-radius:5px;padding:8px 14px!important;font-size:14px!important;font-weight:700;line-height:1.4;opacity:1!important;box-shadow:0 2px 5px #0002;white-space:nowrap}",
+      "\r\n.paper-reader-active .edition-cover-edit{position:absolute;right:24px;bottom:24px;z-index:2;pointer-events:auto;background:var(--accent);color:#fff;padding:12px 18px;border-radius:5px;font-weight:700;font-size:14px;box-shadow:0 3px 12px #0003}",
+      "#edition-editor button[type=submit]{background:var(--accent);color:white;padding:12px;border-radius:6px}"
+    ]
+  },
+  {
+    "file": "space-atlas.css",
+    "rules": [
+      "\r\n#space-atlas [data-mode=\"3d\"] .at-orb{background:radial-gradient(circle at 28% 22%,color-mix(in srgb,var(--at-accent) 12%,white) 0%,color-mix(in srgb,var(--at-accent) 52%,var(--surface)) 42%,color-mix(in srgb,var(--at-accent) 88%,#17241c) 100%);color:white;box-shadow:inset -5px -6px 13px #0002,inset 2px 2px 5px #fff6,5px 9px 17px color-mix(in srgb,var(--at-accent) 15%,transparent)}",
+      "\r\n#space-atlas .at-header-actions>.primary{height:38px;padding:8px 15px;background:var(--accent);color:#fff;font-size:12px}",
+      "\r\n#space-atlas [data-mode=\"3d\"] .at-node[data-level=\"0\"] .at-orb{filter:none;background:radial-gradient(circle at 28% 22%,color-mix(in srgb,var(--at-accent) 12%,white),color-mix(in srgb,var(--at-accent) 52%,var(--surface)) 42%,color-mix(in srgb,var(--at-accent) 88%,#17241c));color:#fff;box-shadow:inset -5px -6px 13px #0002,inset 2px 2px 5px #fff6,0 0 30px color-mix(in srgb,var(--at-accent) 15%,transparent)}"
+    ]
+  },
+  {
+    "file": "style.css",
+    "rules": [
+      ".search-box .submit{background:var(--accent);color:white;border-radius:11px;width:38px;height:38px;font-size:20px}",
+      ".primary{background:var(--accent);color:#fff;border-radius:10px;padding:12px 20px;font-size:12px;white-space:nowrap}",
+      ".player-controls .play-toggle{width:49px;height:49px;border-radius:50%;background:var(--accent);color:#fff;font-size:17px!important}"
+    ]
+  },
+  {
+    "file": "v4.css",
+    "rules": [
+      ".dialog-done button{background:var(--accent);color:#fff;padding:10px 28px;border-radius:9px;font-size:12px}",
+      "\r\n.header-membership-badge{position:absolute;right:-4px;bottom:-3px;display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--member-accent);color:#fff;pointer-events:none}",
+      "\n\r\n/* Account cancellation */\r\n#account-center:has(.profile-view-list)>[data-account-signout]{display:block;width:100%;min-height:42px;margin-top:24px;border-radius:8px;background:var(--accent);color:#fff;text-align:center}"
+    ]
+  }
+]

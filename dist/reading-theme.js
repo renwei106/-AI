@@ -130,19 +130,19 @@
     const books=[...cards.querySelectorAll(':scope>.bookmark:not(.page-hidden)')],add=cards.querySelector(':scope>.shelf-add');
     const cols=cards.closest('[data-stream-group]')?Number(cards.style.getPropertyValue('--group-columns'))||columnFit().count:columnFit().count;
     cards.style.setProperty('--shelf-columns',cols);
-    const count=books.length+(add?1:0),banks=Math.max(1,Math.ceil(count/(cols*4)));
+    const count=books.length+(add?1:0),rowsPerBank=prefs.groupBrowseMode!=='tabs'?Math.max(1,Math.ceil(count/cols)):4,banks=Math.max(1,Math.ceil(count/(cols*rowsPerBank)));
     cards.style.gridTemplateRows=Array.from({length:banks},(_,i)=>{
-      // Fill each row from left to right, with up to four rows above a plank.
-      const rows=Math.min(4,Math.ceil((count-i*cols*4)/cols));
+      // Continuous groups share one bottom plank; tabbed groups retain four-row shelves.
+      const rows=Math.min(rowsPerBank,Math.ceil((count-i*cols*rowsPerBank)/cols));
       return `${Array(Math.max(1,rows)).fill('70px').join(' ')} 32px`;
     }).join(' ');
     cards.querySelectorAll(':scope>.shelf-plank').forEach(el=>el.remove());
     [...books,...(add?[add]:[])].forEach((el,i)=>{
-      const bank=Math.floor(i/(cols*4)),within=i%(cols*4),column=within%cols,row=Math.floor(within/cols);
-      el.style.gridColumn=String(column+1);el.style.gridRow=String(bank*5+row+1);
-      el.style.setProperty('--shelf-inset',[0,6,3,9][row]+'px');
+      const bank=Math.floor(i/(cols*rowsPerBank)),within=i%(cols*rowsPerBank),column=within%cols,row=Math.floor(within/cols);
+      el.style.gridColumn=String(column+1);el.style.gridRow=String(bank*(rowsPerBank+1)+row+1);
+      el.style.setProperty('--shelf-inset',[0,6,3,9][row%4]+'px');
     });
-    for(let i=0;i<banks;i++){const plank=document.createElement('i');plank.className='shelf-plank';plank.setAttribute('aria-hidden','true');plank.style.gridColumn='1 / -1';plank.style.gridRow=String(i*5+Math.min(4,Math.ceil((count-i*cols*4)/cols))+1);cards.append(plank);}
+    for(let i=0;i<banks;i++){const plank=document.createElement('i');plank.className='shelf-plank';plank.setAttribute('aria-hidden','true');plank.style.gridColumn='1 / -1';plank.style.gridRow=String(i*(rowsPerBank+1)+Math.min(rowsPerBank,Math.ceil((count-i*cols*rowsPerBank)/cols))+1);cards.append(plank);}
   }
   function dressShelves(cards){
     if(!cards||cards.dataset.display!=='shelf')return;

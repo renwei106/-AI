@@ -1,0 +1,74 @@
+{
+  "initial": {
+    "scale": 1,
+    "target": 1,
+    "stars": 900,
+    "starSize": 3,
+    "view": "home",
+    "scroll": 0,
+    "armed": 0,
+    "background": "radial-gradient(circle at 50% 48%, color(srgb 0.0812549 0.163451 0.182745), color(srgb 0.0664706 0.106275 0.131176) 62%)"
+  },
+  "smaller": {
+    "scale": 0.7506869397675711,
+    "target": 0.7497615922390413,
+    "stars": 1606,
+    "starSize": 3.6232826505810722,
+    "view": "home",
+    "scroll": 0,
+    "armed": 0,
+    "background": "radial-gradient(circle at 50% 48%, color(srgb 0.0812549 0.163451 0.182745), color(srgb 0.0664706 0.106275 0.131176) 62%)"
+  },
+  "small": {
+    "scale": 0.40081241384011984,
+    "target": 0.4,
+    "stars": 2598,
+    "starSize": 4.4979689653997,
+    "view": "home",
+    "scroll": 0,
+    "armed": 0,
+    "background": "radial-gradient(circle at 50% 48%, color(srgb 0.0812549 0.163451 0.182745), color(srgb 0.0664706 0.106275 0.131176) 62%)"
+  },
+  "large": {
+    "scale": 1.219176666460273,
+    "target": 1.22,
+    "stars": 352,
+    "starSize": 2.4022454551083463,
+    "view": "home",
+    "scroll": 0,
+    "armed": 0,
+    "background": "radial-gradient(circle at 50% 48%, color(srgb 0.0812549 0.163451 0.182745), color(srgb 0.0664706 0.106275 0.131176) 62%)"
+  },
+  "backgrounds": [
+    {
+      "color": "#237c76",
+      "mode": "light",
+      "background": "radial-gradient(circle at 50% 48%, color(srgb 0.0812549 0.163451 0.182745), color(srgb 0.0664706 0.106275 0.131176) 62%)"
+    },
+    {
+      "color": "#237c76",
+      "mode": "dark",
+      "background": "radial-gradient(circle at 50% 48%, color(srgb 0.0812549 0.163451 0.182745), color(srgb 0.0664706 0.106275 0.131176) 62%)"
+    },
+    {
+      "color": "#ffffff",
+      "mode": "light",
+      "background": "radial-gradient(circle at 50% 48%, color(srgb 0.219294 0.245647 0.268706), color(srgb 0.109608 0.131961 0.158039) 62%)"
+    },
+    {
+      "color": "#ffffff",
+      "mode": "dark",
+      "background": "radial-gradient(circle at 50% 48%, color(srgb 0.219294 0.245647 0.268706), color(srgb 0.109608 0.131961 0.158039) 62%)"
+    },
+    {
+      "color": "#ffdd88",
+      "mode": "light",
+      "background": "radial-gradient(circle at 50% 48%, color(srgb 0.219294 0.224314 0.194039), color(srgb 0.109608 0.125294 0.134706) 62%)"
+    },
+    {
+      "color": "#ffdd88",
+      "mode": "dark",
+      "background": "radial-gradient(circle at 50% 48%, color(srgb 0.219294 0.224314 0.194039), color(srgb 0.109608 0.125294 0.134706) 62%)"
+    }
+  ]
+}

@@ -1,0 +1,558 @@
+{
+  "themes": [
+    {
+      "id": "base",
+      "name": "留白日常",
+      "englishName": "ESSENTIAL",
+      "description": "留白之间，轻松开始。",
+      "accent": "#48614c",
+      "tone": "light",
+      "enabled": true
+    },
+    {
+      "id": "music",
+      "name": "黑胶时光",
+      "englishName": "SIDE A",
+      "description": "让每一刻，都有自己的节奏。",
+      "accent": "#bd9055",
+      "tone": "dark",
+      "enabled": true
+    },
+    {
+      "id": "flow",
+      "name": "灵感流体",
+      "englishName": "IDEAS IN FLOW",
+      "description": "在浮游与涌流之间，让灵感自在变化。",
+      "accent": "#4d60d6",
+      "tone": "light",
+      "enabled": true
+    },
+    {
+      "id": "poly",
+      "name": "棱光拾景",
+      "englishName": "FACETS OF LIFE",
+      "description": "以三角切面，收藏一片自己的风景。",
+      "accent": "#648b83",
+      "tone": "light",
+      "enabled": true
+    },
+    {
+      "id": "cosmos",
+      "name": "星际漫游",
+      "englishName": "ORBIT",
+      "description": "在浩瀚里，找到自己的坐标。",
+      "accent": "#8b83d1",
+      "tone": "dark",
+      "enabled": true
+    },
+    {
+      "id": "globe",
+      "name": "星海行旅",
+      "englishName": "CELESTIAL VOYAGE",
+      "description": "让一颗蓝色星球，在掌心缓缓自转。",
+      "accent": "#5f82bd",
+      "tone": "dark",
+      "enabled": true
+    },
+    {
+      "id": "flip",
+      "name": "翻页光阴",
+      "englishName": "SLOW HOURS",
+      "description": "看时间翻过，也让心慢下来。",
+      "accent": "#8295ac",
+      "tone": "dark",
+      "enabled": true
+    },
+    {
+      "id": "rain",
+      "name": "时间之雨",
+      "englishName": "FALLING TIME",
+      "description": "让流动的时间，落在眼前。",
+      "accent": "#73a396",
+      "tone": "dark",
+      "enabled": true
+    },
+    {
+      "id": "cinema",
+      "name": "人生拾影",
+      "englishName": "A LIFE IN FRAMES",
+      "description": "今天这部电影，由你主演。",
+      "accent": "#ba794f",
+      "tone": "dark",
+      "enabled": true
+    },
+    {
+      "id": "paper",
+      "name": "拾光日报",
+      "englishName": "THE DAILY",
+      "description": "把日常的小事，编成自己的头条。",
+      "accent": "#45433c",
+      "tone": "light",
+      "enabled": true
+    },
+    {
+      "id": "avatarGirl",
+      "name": "阿织 · 3D",
+      "englishName": "AZHI 3D",
+      "description": "实时注视、转身与呼吸。",
+      "accent": "#4f806a",
+      "tone": "light",
+      "enabled": false
+    },
+    {
+      "id": "avatarVideo",
+      "name": "阿织 · 影像",
+      "englishName": "AZHI VIDEO",
+      "description": "预先渲染的循环影像。",
+      "accent": "#4f806a",
+      "tone": "light",
+      "enabled": false
+    },
+    {
+      "id": "avatarScrub",
+      "name": "阿织 · 时间轴",
+      "englishName": "AZHI TIMELINE",
+      "description": "鼠标纵向位置直接控制动作进度。",
+      "accent": "#4f806a",
+      "tone": "light",
+      "enabled": false
+    },
+    {
+      "id": "forestCompanion",
+      "name": "森间绒伴",
+      "englishName": "FOREST COMPANION",
+      "description": "轻移鼠标，和林间的小伙伴对上目光。",
+      "accent": "#48614c",
+      "tone": "light",
+      "enabled": true
+    },
+    {
+      "id": "emergence",
+      "name": "涌现",
+      "englishName": "EMERGENCE",
+      "description": "从简单的规则，生长出自然的秩序。",
+      "accent": "#48614c",
+      "tone": "light",
+      "enabled": true
+    }
+  ],
+  "fonts": [
+    {
+      "id": "youfeng",
+      "name": "拾隅游风",
+      "enabled": true,
+      "preview": {
+        "kind": "font",
+        "family": "'Shiyu Youfeng Preview', 'Microsoft YaHei', sans-serif",
+        "sample": "拾起喜欢",
+        "url": "/api/shiyu/plans/font/youfeng",
+        "file": "assets/fonts/shiyu-youfeng/ShiyuYoufeng-Preview-Regular.woff2"
+      }
+    },
+    {
+      "id": "qingya",
+      "name": "拾隅清雅宋",
+      "enabled": true,
+      "preview": {
+        "kind": "font",
+        "family": "'Shiyu Qingya Song Preview', 'Songti SC', serif",
+        "sample": "拾起喜欢",
+        "url": "/api/shiyu/plans/font/qingya",
+        "file": "assets/fonts/shiyu-qingya-song/ShiyuQingyaSong-Preview-Regular.woff2"
+      }
+    },
+    {
+      "id": "wenrun",
+      "name": "拾隅温润楷",
+      "enabled": true,
+      "preview": {
+        "kind": "font",
+        "family": "'Shiyu Wenrun Kai Preview', 'KaiTi', serif",
+        "sample": "拾起喜欢",
+        "url": "/api/shiyu/plans/font/wenrun",
+        "file": "assets/fonts/shiyu-wenrun-kai/ShiyuWenrunKai-Preview-Regular.woff2"
+      }
+    },
+    {
+      "id": "sans",
+      "name": "清晰黑体",
+      "enabled": true,
+      "preview": {
+        "kind": "font",
+        "family": "'Microsoft YaHei', 'PingFang SC', sans-serif",
+        "sample": "清晰，简练"
+      }
+    },
+    {
+      "id": "serif",
+      "name": "经典宋体",
+      "enabled": true,
+      "preview": {
+        "kind": "font",
+        "family": "'SimSun', 'Songti SC', serif",
+        "sample": "字里行间"
+      }
+    },
+    {
+      "id": "kai",
+      "name": "温润楷体",
+      "enabled": true,
+      "preview": {
+        "kind": "font",
+        "family": "'KaiTi', 'STKaiti', serif",
+        "sample": "从容书写"
+      }
+    },
+    {
+      "id": "fang",
+      "name": "雅致仿宋",
+      "enabled": true,
+      "preview": {
+        "kind": "font",
+        "family": "'FangSong', 'STFangsong', serif",
+        "sample": "旧纸新意"
+      }
+    },
+    {
+      "id": "hei",
+      "name": "几何黑体",
+      "enabled": true,
+      "preview": {
+        "kind": "font",
+        "family": "'SimHei', 'Heiti SC', sans-serif",
+        "sample": "简洁有力"
+      }
+    },
+    {
+      "id": "mono",
+      "name": "等宽科技",
+      "enabled": true,
+      "preview": {
+        "kind": "font",
+        "family": "'Cascadia Mono', Consolas, 'Microsoft YaHei', monospace",
+        "sample": "Time / 09:41"
+      }
+    }
+  ],
+  "colors": [
+    {
+      "id": "#48614c",
+      "name": "苔径青绿",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#48614c"
+      }
+    },
+    {
+      "id": "#45433c",
+      "name": "山岩石墨",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#45433c"
+      }
+    },
+    {
+      "id": "#bd9055",
+      "name": "麦田暖金",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#bd9055"
+      }
+    },
+    {
+      "id": "#467ea5",
+      "name": "远山雾蓝",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#467ea5"
+      }
+    },
+    {
+      "id": "#8b83d1",
+      "name": "暮色浅紫",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#8b83d1"
+      }
+    },
+    {
+      "id": "#ba794f",
+      "name": "陶土暖橙",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#ba794f"
+      }
+    },
+    {
+      "id": "#a95e76",
+      "name": "干枯玫瑰",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#a95e76"
+      }
+    }
+  ],
+  "layouts": [
+    {
+      "id": "safe",
+      "name": "舒适留白",
+      "enabled": true,
+      "preview": {
+        "kind": "layout",
+        "columns": 3
+      }
+    },
+    {
+      "id": "wide",
+      "name": "横向铺开",
+      "enabled": true,
+      "preview": {
+        "kind": "layout",
+        "columns": 5
+      }
+    }
+  ],
+  "styles": [
+    {
+      "id": "follow",
+      "name": "跟随主题",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 3,
+        "styleId": "follow"
+      }
+    },
+    {
+      "id": "cards",
+      "name": "卡片",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 3,
+        "styleId": "cards"
+      }
+    },
+    {
+      "id": "poker",
+      "name": "扑克牌",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 4,
+        "styleId": "poker"
+      }
+    },
+    {
+      "id": "paper",
+      "name": "报纸",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 3,
+        "styleId": "paper"
+      }
+    },
+    {
+      "id": "record",
+      "name": "唱片",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 4,
+        "styleId": "record"
+      }
+    },
+    {
+      "id": "film",
+      "name": "电影",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 4,
+        "styleId": "film"
+      }
+    },
+    {
+      "id": "planet",
+      "name": "星球",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 4,
+        "styleId": "planet"
+      }
+    },
+    {
+      "id": "calendar",
+      "name": "日历",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 4,
+        "styleId": "calendar"
+      }
+    },
+    {
+      "id": "book",
+      "name": "书籍",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 4,
+        "styleId": "book"
+      }
+    },
+    {
+      "id": "note",
+      "name": "便签",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 4,
+        "styleId": "note"
+      }
+    },
+    {
+      "id": "icons",
+      "name": "图标",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 6,
+        "styleId": "icons"
+      }
+    },
+    {
+      "id": "poly",
+      "name": "棱光拾景",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 3,
+        "styleId": "poly"
+      }
+    },
+    {
+      "id": "shelf",
+      "name": "藏书架",
+      "enabled": true,
+      "preview": {
+        "kind": "style",
+        "columns": 2,
+        "styleId": "shelf"
+      }
+    }
+  ],
+  "cornerColors": [
+    {
+      "id": "theme",
+      "name": "跟随主题",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#48614c"
+      }
+    },
+    {
+      "id": "sage",
+      "name": "松绿",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#587b64"
+      },
+      "light": "#e7efe9",
+      "dark": "#243c34",
+      "ink": "#243e32",
+      "night": "#ebf4ef",
+      "accent": "#587b64"
+    },
+    {
+      "id": "blue",
+      "name": "雾蓝",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#597da6"
+      },
+      "light": "#e6edf6",
+      "dark": "#26394f",
+      "ink": "#283e57",
+      "night": "#edf3fc",
+      "accent": "#597da6"
+    },
+    {
+      "id": "rose",
+      "name": "蔷薇",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#aa6a83"
+      },
+      "light": "#f5e7eb",
+      "dark": "#4b303d",
+      "ink": "#573440",
+      "night": "#fceef3",
+      "accent": "#aa6a83"
+    },
+    {
+      "id": "sand",
+      "name": "麦色",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#9c8350"
+      },
+      "light": "#f4eddc",
+      "dark": "#433c2c",
+      "ink": "#51452c",
+      "night": "#f8f1df",
+      "accent": "#9c8350"
+    },
+    {
+      "id": "violet",
+      "name": "浅紫",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#8770ab"
+      },
+      "light": "#ede9f6",
+      "dark": "#39334e",
+      "ink": "#413653",
+      "night": "#f3effc",
+      "accent": "#8770ab"
+    },
+    {
+      "id": "slate",
+      "name": "石墨",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "#687f8c"
+      },
+      "light": "#e9edef",
+      "dark": "#303a40",
+      "ink": "#303d45",
+      "night": "#edf3f6",
+      "accent": "#687f8c"
+    },
+    {
+      "id": "custom",
+      "name": "自定义配色",
+      "enabled": true,
+      "preview": {
+        "kind": "color",
+        "color": "custom"
+      }
+    }
+  ]
+}

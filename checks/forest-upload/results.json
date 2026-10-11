@@ -1,0 +1,15 @@
+{
+  "linearAndBurst": true,
+  "rapidSwitch": true,
+  "sharedSearch": true,
+  "localOnly": true,
+  "persistence": true,
+  "limits": true,
+  "accountIsolation": true,
+  "accountRestore": true,
+  "adminSwitch": true,
+  "remove": true,
+  "reducedMotion": true,
+  "guestRequiresLogin": true,
+  "mobileStatic": true
+}

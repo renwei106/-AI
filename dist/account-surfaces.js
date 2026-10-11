@@ -9,7 +9,7 @@
  function place(){
   let wrap=document.querySelector('.account-menu-wrap');if(!wrap){if(header()){previous();wrap=document.querySelector('.account-menu-wrap')}if(!wrap)return;}
   const host=embedded?document.body:document.body.classList.contains('world-active')?document.querySelector('#world-page .world-header'):document.querySelector('#space-atlas[open] .at-header-actions')||(view==='space'?document.querySelector('.workspace .space-top-actions'):header());
-  if(host&&wrap.parentElement!==host)host.append(wrap);
+  if(host&&(wrap.parentElement!==host||(host.matches('.workspace .space-top-actions')&&wrap!==host.lastElementChild)))host.append(wrap);
  }
  const previous=updateHeader;updateHeader=function(){const wrap=document.querySelector('.account-menu-wrap'),h=header();if(wrap&&h&&wrap.parentElement!==h)h.append(wrap);previous();place()};
  let pending=false;new MutationObserver(()=>{if(pending)return;pending=true;queueMicrotask(()=>{pending=false;place();if(embedded)report()})}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','open']});

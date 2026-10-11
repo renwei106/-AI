@@ -1,0 +1,1166 @@
+import { initialOnboarding, updateOnboarding, type OnboardingState } from './shiyu-onboarding'
+import { createRequire } from 'node:module'
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from 'node:crypto'
+import type { IncomingMessage, ServerResponse } from 'node:http'
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import type { Plugin } from 'vite'
+import { getPlatformSession } from './platform-access-plugin'
+import { observeAnalyticsLogin } from './analytics/runtime'
+import { assignSignupReward, signupPreview, invitationCodeFor, settleInvitations } from './shiyu-invitation-plugin'
+import { librarySpace, normalizeSiteUrl, readLibrary, recognizeSite, writeLibrary, type LibrarySite } from './shiyu-library'
+
+type ExperienceRecord = { enabled: boolean; values: { membership?: string; login?: string }; events?: { gift?: { requestedAt: string; acknowledgedAt?: string } } }
+const experienceStore = createRequire(import.meta.url)('./experience-test/store.cjs') as {
+  get: (appId: string, userId: string) => ExperienceRecord
+  save: (record: ExperienceRecord & { appId: string; userId: string }) => ExperienceRecord
+}
+
+const themeSessions = createRequire(import.meta.url)('../导航站/theme-access/store.cjs') as { issueSession:(id:string)=>string; session:(req:IncomingMessage)=>string|null; logout:(req:IncomingMessage)=>void }
+const toolQuotas = createRequire(import.meta.url)('../导航站/payments/tool-quotas.cjs')
+type MembershipState = { member: boolean; permanent: boolean; expiresAt: number | null; planId: string | null; planVersion: number; entitlements: unknown[] }
+const memberships = createRequire(import.meta.url)('../导航站/payments/membership.cjs').createMembershipService() as {
+  stateFor: (user: ShiyuUser | null) => MembershipState
+  present: (user: ShiyuUser, includeEvents?: boolean, testView?: boolean) => Record<string, unknown> & { memberExpiresAt: string | null }
+  applyToUser: (user: ShiyuUser, input: Record<string, unknown>) => unknown
+  records: (user: ShiyuUser) => unknown[]
+  checkQuota: (user: ShiyuUser, next: ShiyuAccountData) => void
+  readInvitations: () => { campaigns: { id: string; name: string; start: string; end: string; stoppedAt?: string; newUserDays: number; purchaseWithinDays: number; inviterDays: number; weeklyCap: number | null; monthlyCap: number | null }[]; rewards: { inviterId: string; inviteeId: string; inviterDays: number; inviteeDays: number; [key: string]: unknown }[] }
+}
+export type ShiyuMemberEvent = {
+  id: string
+  time: string
+  title: string
+  type: string
+  amount: number
+  duration: string
+  expires: string
+}
+
+export type ShiyuBookmark = [string, string, string, string]
+export type ShiyuAccountGroup = { id: string; name: string; items: ShiyuBookmark[] }
+export type ShiyuAccountScene = { id: string; name: string; description: string; groups: ShiyuAccountGroup[] }
+export type ShiyuAccountSpace = { id: string; name: string; icon: string; scenes: ShiyuAccountScene[] }
+export type ShiyuAccountData = ShiyuAccountSpace[]
+
+export type ShiyuUser = {
+  id: string
+  name: string
+  phone: string
+  email?: string
+  signupGiftAcknowledgedAt?: string
+  registrationReward?: unknown
+  invitation?: { campaignId: string; inviterId: string }
+  password: string
+  registeredAt: string
+  lastLoginAt: string
+  source: string
+  spaces: number
+  status: 'active' | 'silent'
+  currentTheme: string
+  member: boolean
+  memberExpiresAt: string | null
+  blacklisted: boolean
+  memberEvents: ShiyuMemberEvent[]
+  toolData?: Record<string, { revision: number; data: Record<string, unknown> }>
+  toolUsage?: Record<string, unknown>
+  accountData?: ShiyuAccountData
+  newspaper?: { cover: Record<string, string>; edition: Record<string, string>; editions?: Record<string, string>[] }
+  accountInitializedAt?: string
+  onboarding?: OnboardingState
+  cornerUiHints?: { closeGuideAcknowledgedAt?: string }
+  welcomeGift?: { version: number; grantedAt: string; acknowledgedAt?: string }
+  wechatAppId?: string
+  wechatOpenId?: string
+  wechatUnionId?: string
+  wechatNickname?: string
+}
+
+const root = resolve(fileURLToPath(new URL('.', import.meta.url)))
+const storeFile = process.env.SHIYU_USERS_FILE || resolve(root, '.local/shiyu-users.json')
+const loginMethodsFile = resolve(root, '.local/shiyu-login-methods.json')
+const smsConfigFile = resolve(root, '.local/shiyu-sms-config.json')
+const smsCodesFile = resolve(root, '.local/shiyu-sms-codes.json')
+const emailCodesFile = resolve(root, '.local/shiyu-email-codes.json')
+const wechatConfigFile = resolve(root, '.local/shiyu-wechat-config.json')
+const mockPhone = '13800138000'
+const mockPassword = '123456'
+// Code-registered legacy accounts received a demo placeholder, not a user-chosen password.
+function hasAccountPassword(user: ShiyuUser) {
+  return Boolean(user.password) && !(user.source === '前台验证码注册' && user.password === mockPassword)
+}
+type ShiyuLoginMethod = 'phone' | 'email' | 'password' | 'wechat'
+type ShiyuLoginMethods = { phone: boolean; email: boolean; password: boolean; wechat: boolean; order: ShiyuLoginMethod[] }
+const loginMethodIds: ShiyuLoginMethod[] = ['phone', 'email', 'password', 'wechat']
+const defaultLoginMethods: ShiyuLoginMethods = { phone: true, email: true, password: true, wechat: true, order: [...loginMethodIds] }
+const smsCodes = new Map<string, { code: string; expiresAt: number; sentAt: number }>()
+const emailCodes = new Map<string, { code: string; expiresAt: number; sentAt: number }>()
+const smsResendCooldownMs = 60 * 1000
+const emailResendCooldownMs = 60 * 1000
+const codeSendsInFlight = new Set<string>()
+type ShiyuSmsConfig = { enabled: boolean; accessKeyId: string; accessKeySecret: string; signName: string; templateCode: string; codeTtlSeconds: number; codeLength: number }
+const defaultSmsConfig: ShiyuSmsConfig = { enabled: false, accessKeyId: '', accessKeySecret: '', signName: '', templateCode: 'SMS_338715137', codeTtlSeconds: 600, codeLength: 6 }
+type ShiyuEmailConfig = { enabled: boolean; accountName: string; fromAlias: string; codeTtlSeconds: number; codeLength: number }
+const defaultEmailConfig: ShiyuEmailConfig = { enabled: true, accountName: 'account-code@mail.shiyubox.com', fromAlias: '拾隅', codeTtlSeconds: 600, codeLength: 6 }
+type ShiyuWechatConfig = { enabled: boolean; appId: string; appSecret: string; originalId: string; token: string; encodingAesKey: string }
+const defaultWechatConfig: ShiyuWechatConfig = { enabled: true, appId: '', appSecret: '', originalId: '', token: '', encodingAesKey: '' }
+type WechatPendingLogin = { scene: string; browserToken: string; expiresAt: number; status: 'pending' | 'needs-binding' | 'authenticated'; openId?: string; unionId?: string; nickname?: string; userId?: string; delivered?: boolean; bindingUserId?: string }
+const wechatPendingLogins = new Map<string, WechatPendingLogin>()
+let wechatAccessToken: { value: string; expiresAt: number } | null = null
+
+function readWechatConfig(): ShiyuWechatConfig {
+  let file: Partial<ShiyuWechatConfig> = {}
+  try { file = JSON.parse(readFileSync(wechatConfigFile, 'utf8')) as Partial<ShiyuWechatConfig> } catch { /* configured by environment or later */ }
+  const value = { ...defaultWechatConfig, ...file }
+  return {
+    enabled: value.enabled !== false,
+    appId: String(process.env.SHIYU_WECHAT_APP_ID || value.appId || '').trim(),
+    appSecret: String(process.env.SHIYU_WECHAT_APP_SECRET || value.appSecret || '').trim(),
+    originalId: String(process.env.SHIYU_WECHAT_ORIGINAL_ID || value.originalId || '').trim(),
+    token: String(process.env.SHIYU_WECHAT_TOKEN || value.token || '').trim(),
+    encodingAesKey: String(process.env.SHIYU_WECHAT_ENCODING_AES_KEY || value.encodingAesKey || '').trim(),
+  }
+}
+
+function wechatReady(config = readWechatConfig()) {
+  return config.enabled && Boolean(config.appId && config.appSecret && config.token)
+}
+
+function verifyWechatSignature(config: ShiyuWechatConfig, query: URLSearchParams) {
+  const signature = query.get('signature') || ''
+  const timestamp = query.get('timestamp') || ''
+  const nonce = query.get('nonce') || ''
+  if (!signature || !timestamp || !nonce || !config.token) return false
+  const expected = createHash('sha1').update([config.token, timestamp, nonce].sort().join('')).digest('hex')
+  return expected === signature
+}
+
+function wechatAesKey(config: ShiyuWechatConfig) {
+  if (!/^[A-Za-z0-9+/]{43}$/.test(config.encodingAesKey)) return null
+  return Buffer.from(`${config.encodingAesKey}=`, 'base64')
+}
+
+function verifyWechatEncryptedSignature(config: ShiyuWechatConfig, query: URLSearchParams, encrypted: string) {
+  const signature = query.get('msg_signature') || ''
+  const timestamp = query.get('timestamp') || ''
+  const nonce = query.get('nonce') || ''
+  if (!signature || !timestamp || !nonce || !encrypted || !config.token) return false
+  const expected = createHash('sha1').update([config.token, timestamp, nonce, encrypted].sort().join('')).digest('hex')
+  return expected === signature
+}
+
+function decryptWechatEncryptedText(config: ShiyuWechatConfig, query: URLSearchParams, encrypted: string) {
+  const key = wechatAesKey(config)
+  if (!key || !verifyWechatEncryptedSignature(config, query, encrypted)) throw new Error('微信加密回调签名校验失败')
+  const decipher = createDecipheriv('aes-256-cbc', key, key.subarray(0, 16))
+  decipher.setAutoPadding(false)
+  const padded = Buffer.concat([decipher.update(Buffer.from(encrypted, 'base64')), decipher.final()])
+  const pad = padded[padded.length - 1]
+  if (!pad || pad > 32 || pad > padded.length) throw new Error('微信加密回调格式无效')
+  const body = padded.subarray(0, padded.length - pad)
+  if (body.length < 20) throw new Error('微信加密回调内容无效')
+  const length = body.readUInt32BE(16)
+  const text = body.subarray(20, 20 + length).toString('utf8')
+  const appId = body.subarray(20 + length).toString('utf8')
+  if (config.appId && appId && appId !== config.appId) throw new Error('微信回调账号不匹配')
+  return text
+}
+
+function decryptWechatXml(config: ShiyuWechatConfig, query: URLSearchParams, raw: string) {
+  const encrypted = xmlValue(raw, 'Encrypt')
+  if (!encrypted) {
+    if (!verifyWechatSignature(config, query)) throw new Error('微信回调签名校验失败')
+    return { xml: raw, encrypted: false }
+  }
+  const xml = decryptWechatEncryptedText(config, query, encrypted)
+  return { xml, encrypted: true }
+}
+
+function encryptWechatText(config: ShiyuWechatConfig, query: URLSearchParams, text: string) {
+  const key = wechatAesKey(config)
+  if (!key) return 'success'
+  const random = randomBytes(16)
+  const length = Buffer.alloc(4)
+  length.writeUInt32BE(Buffer.byteLength(text), 0)
+  const payload = Buffer.concat([random, length, Buffer.from(text), Buffer.from(config.appId || config.originalId || '')])
+  const pad = 32 - (payload.length % 32)
+  const padded = Buffer.concat([payload, Buffer.alloc(pad, pad)])
+  const cipher = createCipheriv('aes-256-cbc', key, key.subarray(0, 16))
+  cipher.setAutoPadding(false)
+  const encrypted = Buffer.concat([cipher.update(padded), cipher.final()]).toString('base64')
+  const timestamp = query.get('timestamp') || String(Math.floor(Date.now() / 1000))
+  const nonce = query.get('nonce') || randomBytes(8).toString('hex')
+  const signature = createHash('sha1').update([config.token, timestamp, nonce, encrypted].sort().join('')).digest('hex')
+  return `<xml><Encrypt><![CDATA[${encrypted}]]></Encrypt><MsgSignature><![CDATA[${signature}]]></MsgSignature><TimeStamp>${timestamp}</TimeStamp><Nonce><![CDATA[${nonce}]]></Nonce></xml>`
+}
+
+function finishWechatCallback(response: ServerResponse, config: ShiyuWechatConfig, query: URLSearchParams, encrypted: boolean) {
+  response.statusCode = 200
+  response.setHeader('Content-Type', encrypted ? 'application/xml; charset=utf-8' : 'text/plain; charset=utf-8')
+  response.end(encrypted ? encryptWechatText(config, query, 'success') : 'success')
+}
+
+function xmlValue(xml: string, name: string) {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = xml.match(new RegExp(`<${escaped}>(?:<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>|([\\s\\S]*?))</${escaped}>`))
+  return (match?.[1] ?? match?.[2] ?? '').trim()
+}
+
+async function readTextBody(request: IncomingMessage, maxLength = 100_000) {
+  let body = ''
+  for await (const chunk of request) {
+    body += chunk
+    if (body.length > maxLength) throw new Error('请求内容过大')
+  }
+  return body
+}
+
+function requestCookie(request: IncomingMessage, name: string) {
+  const source = request.headers.cookie || ''
+  const match = source.match(new RegExp(`(?:^|;\\s*)${name.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}=([^;]*)`))
+  return match ? decodeURIComponent(match[1]) : ''
+}
+
+function clearWechatLoginCookie(response: ServerResponse) {
+  const existing = response.getHeader('Set-Cookie')
+  const values = Array.isArray(existing) ? existing.map(String) : existing ? [String(existing)] : []
+  values.push('shiyu_wechat_login=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0')
+  response.setHeader('Set-Cookie', values)
+}
+
+async function getWechatAccessToken(config: ShiyuWechatConfig) {
+  if (!wechatReady(config)) throw new Error('微信服务号尚未完成服务器端配置')
+  if (wechatAccessToken && wechatAccessToken.expiresAt > Date.now() + 60_000) return wechatAccessToken.value
+  // WeChat recommends stable_token for server-to-server access. The legacy
+  // token endpoint can return a token that is invalidated by another process.
+  const response = await fetch('https://api.weixin.qq.com/cgi-bin/stable_token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ grant_type: 'client_credential', appid: config.appId, secret: config.appSecret, force_refresh: false }),
+    signal: AbortSignal.timeout(10_000),
+  })
+  const result = await response.json() as { access_token?: string; expires_in?: number; errcode?: number; errmsg?: string }
+  if (!response.ok || !result.access_token) throw new Error(result.errmsg || '微信接口暂时不可用')
+  wechatAccessToken = { value: result.access_token, expiresAt: Date.now() + Math.max(60, Number(result.expires_in || 7200)) * 1000 }
+  return result.access_token
+}
+
+async function createWechatQr(config: ShiyuWechatConfig, scene: string) {
+  const accessToken = await getWechatAccessToken(config)
+  const response = await fetch(`https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=${encodeURIComponent(accessToken)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ expire_seconds: 300, action_name: 'QR_STR_SCENE', action_info: { scene: { scene_str: scene } } }),
+    signal: AbortSignal.timeout(10_000),
+  })
+  const result = await response.json() as { ticket?: string; errcode?: number; errmsg?: string }
+  if (!response.ok || !result.ticket) throw new Error(result.errmsg || '微信二维码生成失败')
+  return `https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=${encodeURIComponent(result.ticket)}`
+}
+function loadSmsCodes() {
+  try {
+    const value = JSON.parse(readFileSync(smsCodesFile, 'utf8')) as Record<string, { code: string; expiresAt: number; sentAt: number }>
+    Object.entries(value).forEach(([phone, item]) => { if (item.expiresAt > Date.now()) smsCodes.set(phone, item) })
+  } catch { /* no persisted codes yet */ }
+}
+function persistSmsCodes() {
+  mkdirSync(resolve(root, '.local'), { recursive: true })
+  const value = Object.fromEntries([...smsCodes].filter(([, item]) => item.expiresAt > Date.now()))
+  writeFileSync(`${smsCodesFile}.tmp`, `${JSON.stringify(value)}\n`, 'utf8')
+  renameSync(`${smsCodesFile}.tmp`, smsCodesFile)
+}
+loadSmsCodes()
+function loadEmailCodes() {
+  try {
+    const value = JSON.parse(readFileSync(emailCodesFile, 'utf8')) as Record<string, { code: string; expiresAt: number; sentAt: number }>
+    Object.entries(value).forEach(([email, item]) => { if (item.expiresAt > Date.now()) emailCodes.set(email, item) })
+  } catch { /* no persisted codes yet */ }
+}
+function persistEmailCodes() {
+  mkdirSync(resolve(root, '.local'), { recursive: true })
+  const value = Object.fromEntries([...emailCodes].filter(([, item]) => item.expiresAt > Date.now()))
+  writeFileSync(`${emailCodesFile}.tmp`, `${JSON.stringify(value)}\n`, 'utf8')
+  renameSync(`${emailCodesFile}.tmp`, emailCodesFile)
+}
+loadEmailCodes()
+function readSmsConfig(): ShiyuSmsConfig {
+  try {
+    const value = JSON.parse(readFileSync(smsConfigFile, 'utf8')) as Partial<ShiyuSmsConfig>
+    const codeTtlSeconds = Number(value.codeTtlSeconds)
+    const codeLength = Number(value.codeLength)
+    return { ...defaultSmsConfig, ...value, codeTtlSeconds: Number.isInteger(codeTtlSeconds) && codeTtlSeconds >= 60 && codeTtlSeconds <= 1800 ? codeTtlSeconds : defaultSmsConfig.codeTtlSeconds, codeLength: Number.isInteger(codeLength) && codeLength >= 4 && codeLength <= 8 ? codeLength : defaultSmsConfig.codeLength }
+  } catch { return { ...defaultSmsConfig, accessKeyId: process.env.ALIBABA_CLOUD_ACCESS_KEY_ID || '', accessKeySecret: process.env.ALIBABA_CLOUD_ACCESS_KEY_SECRET || '', signName: process.env.ALIBABA_CLOUD_SMS_SIGN_NAME || '' } }
+}
+
+function readEmailConfig(): ShiyuEmailConfig {
+  try {
+    const value = JSON.parse(readFileSync(resolve(root, '.local/shiyu-email-config.json'), 'utf8')) as Partial<ShiyuEmailConfig>
+    const codeTtlSeconds = Number(value.codeTtlSeconds)
+    const codeLength = Number(value.codeLength)
+    return { ...defaultEmailConfig, ...value, accountName: String(value.accountName || defaultEmailConfig.accountName).trim(), fromAlias: String(value.fromAlias || defaultEmailConfig.fromAlias).trim(), codeTtlSeconds: Number.isInteger(codeTtlSeconds) && codeTtlSeconds >= 60 && codeTtlSeconds <= 1800 ? codeTtlSeconds : defaultEmailConfig.codeTtlSeconds, codeLength: Number.isInteger(codeLength) && codeLength >= 4 && codeLength <= 8 ? codeLength : defaultEmailConfig.codeLength }
+  } catch {
+    return { ...defaultEmailConfig, accountName: process.env.ALIBABA_CLOUD_DM_ACCOUNT_NAME || defaultEmailConfig.accountName, fromAlias: process.env.ALIBABA_CLOUD_DM_FROM_ALIAS || defaultEmailConfig.fromAlias }
+  }
+}
+function writeSmsConfig(value: ShiyuSmsConfig) {
+  mkdirSync(resolve(root, '.local'), { recursive: true })
+  writeFileSync(`${smsConfigFile}.tmp`, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
+  renameSync(`${smsConfigFile}.tmp`, smsConfigFile)
+}
+
+async function sendSmsCode(phone: string, code: string) {
+  const config = readSmsConfig()
+  const { accessKeyId, accessKeySecret, signName, templateCode } = config
+  if (!config.enabled || !accessKeyId || !accessKeySecret || !signName) throw new Error('短信服务尚未在拾隅后台配置完整')
+  const sdk = createRequire(import.meta.url)('@alicloud/dysmsapi20170525/dist/client.js') as { default: new (config: unknown) => { sendSms: (request: unknown) => Promise<{ body?: { code?: string; message?: string } }> }; SendSmsRequest: new (value: unknown) => unknown }
+  const { Config } = createRequire(import.meta.url)('@alicloud/openapi-client') as { Config: new (value: unknown) => unknown }
+  const client = new sdk.default(new Config({ accessKeyId, accessKeySecret, endpoint: 'dysmsapi.aliyuncs.com' }))
+  const request = new sdk.SendSmsRequest({ phoneNumbers: phone, signName, templateCode, templateParam: JSON.stringify({ code }) })
+  const result = await client.sendSms(request)
+  if (result.body?.code !== 'OK') throw new Error(result.body?.message || '短信发送失败')
+}
+
+async function sendEmailCode(email: string, code: string) {
+  const emailConfig = readEmailConfig()
+  const smsConfig = readSmsConfig()
+  const { accessKeyId, accessKeySecret } = smsConfig
+  if (!emailConfig.enabled || !accessKeyId || !accessKeySecret || !emailConfig.accountName) throw new Error('邮箱服务尚未在拾隅后台配置完整')
+  const sdk = createRequire(import.meta.url)('@alicloud/dm20151123/dist/client.js') as { default: new (config: unknown) => { singleSendMail: (request: unknown) => Promise<{ body?: { envId?: string; requestId?: string } }> }; SingleSendMailRequest: new (value: unknown) => unknown }
+  const { Config } = createRequire(import.meta.url)('@alicloud/openapi-client') as { Config: new (value: unknown) => unknown }
+  const client = new sdk.default(new Config({ accessKeyId, accessKeySecret, endpoint: 'dm.aliyuncs.com' }))
+  const request = new sdk.SingleSendMailRequest({ accountName: emailConfig.accountName, addressType: 1, fromAlias: emailConfig.fromAlias, replyToAddress: false, toAddress: email, subject: '拾隅邮箱验证码', textBody: `您的拾隅验证码是 ${code}，${Math.round(emailConfig.codeTtlSeconds / 60)}分钟内有效。如非本人操作，请忽略此邮件。` })
+  const result = await client.singleSendMail(request)
+  if (!result.body?.envId && !result.body?.requestId) throw new Error('邮件发送失败')
+}
+
+const defaults: ShiyuUser[] = [
+  { id: 'U20260916001', name: '任伟', phone: mockPhone, password: mockPassword, registeredAt: '2026-09-16 09:30', lastLoginAt: '2026-09-16 10:24', source: '前台手机号注册', spaces: 2, status: 'active', currentTheme: '留白日常', member: false, memberExpiresAt: null, blacklisted: false, memberEvents: [] },
+  { id: 'U20260914001', name: '林知屿', phone: '13800000621', password: mockPassword, registeredAt: '2026-09-01 09:24', lastLoginAt: '2026-09-16 10:24', source: '网页登录', spaces: 8, status: 'active', currentTheme: '黑胶时光', member: true, memberExpiresAt: '2027-09-14', blacklisted: false, memberEvents: [{ id: 'ME20260914001', time: '2026-09-14 08:42', title: '开通连续包年', type: '付费', amount: 79, duration: '365 天', expires: '2027-09-14' }] },
+  { id: 'U20260912018', name: '周听澜', phone: '18600003197', password: mockPassword, registeredAt: '2026-09-12 21:08', lastLoginAt: '2026-09-15 22:18', source: '邀请注册', spaces: 12, status: 'active', currentTheme: '星际漫游', member: true, memberExpiresAt: '2026-10-10', blacklisted: false, memberEvents: [{ id: 'ME20260910009', time: '2026-09-10 22:15', title: '开通连续包月', type: '付费', amount: 8, duration: '30 天', expires: '2026-10-10' }] },
+  { id: 'U20260830007', name: '陈一禾', phone: '15900008804', password: mockPassword, registeredAt: '2026-08-30 15:32', lastLoginAt: '2026-09-08 15:32', source: '搜索访问', spaces: 3, status: 'silent', currentTheme: '留白日常', member: false, memberExpiresAt: null, blacklisted: false, memberEvents: [{ id: 'ME20260818001', time: '2026-08-18 12:00', title: '活动赠送会员', type: '活动赠送', amount: 0, duration: '7 天', expires: '2026-08-25' }] },
+]
+
+export function readUsers() {
+  if (!existsSync(storeFile)) return defaults
+  try {
+    const value = JSON.parse(readFileSync(storeFile, 'utf8')) as { items?: ShiyuUser[] }
+    return Array.isArray(value.items) ? value.items.map((user) => user.phone === mockPhone && user.name === '拾隅体验用户' ? { ...user, name: '任伟' } : user) : defaults
+  } catch {
+    return defaults
+  }
+}
+
+export function writeUsers(items: ShiyuUser[]) {
+  mkdirSync(resolve(root, '.local'), { recursive: true })
+  writeFileSync(`${storeFile}.tmp`, `${JSON.stringify({ items, updatedAt: new Date().toISOString() }, null, 2)}\n`, 'utf8')
+  renameSync(`${storeFile}.tmp`, storeFile)
+  return items
+}
+
+function readLoginMethods(): ShiyuLoginMethods {
+  if (!existsSync(loginMethodsFile)) return defaultLoginMethods
+  try {
+    const value = JSON.parse(readFileSync(loginMethodsFile, 'utf8')) as Partial<ShiyuLoginMethods>
+    const order = [...new Set([...(Array.isArray(value.order) ? value.order : []), ...loginMethodIds])].filter((item): item is ShiyuLoginMethod => loginMethodIds.includes(item as ShiyuLoginMethod))
+    return { ...defaultLoginMethods, ...value, order }
+  } catch { return defaultLoginMethods }
+}
+
+function writeLoginMethods(value: ShiyuLoginMethods) {
+  mkdirSync(resolve(root, '.local'), { recursive: true })
+  writeFileSync(`${loginMethodsFile}.tmp`, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
+  renameSync(`${loginMethodsFile}.tmp`, loginMethodsFile)
+  return value
+}
+
+function publicUser(user: ShiyuUser, includeEvents = true, testView = false): Record<string, unknown> & { memberExpiresAt?: string | null } {
+  const value = memberships.present(user, includeEvents, testView) as Record<string, unknown>
+  delete value.wechatAppId
+  delete value.wechatOpenId
+  delete value.wechatUnionId
+  return { ...value, hasPassword: hasAccountPassword(user), wechatBound: Boolean(user.wechatOpenId), wechatNickname: user.wechatNickname || '', testAccount: experienceStore.get('shiyu', user.id).enabled }
+}
+
+function welcomeState(user: ShiyuUser) {
+  const test = experienceStore.get('shiyu', user.id)
+  const replay = test.enabled && test.values.login === 'first' && Boolean(test.events?.gift && !test.events.gift.acknowledgedAt)
+  const original = test.enabled && test.values.login === 'returning' ? false : Boolean(user.welcomeGift && !user.welcomeGift.acknowledgedAt)
+  return { pending: replay || original, requiresGuide: replay || original, replayToken: replay ? test.events!.gift!.requestedAt : original ? user.welcomeGift!.grantedAt : '', testLoginMode: test.enabled ? test.values.login || 'actual' : 'actual' }
+}
+
+function establishShiyuSession(response: ServerResponse, user: ShiyuUser, isNewUser = false) {
+  observeAnalyticsLogin(user.id, 'wechat', experienceStore.get('shiyu', user.id).enabled)
+  user.lastLoginAt = nowText()
+  const cookieDomain = process.env.SHIYU_COOKIE_DOMAIN ? `; Domain=${process.env.SHIYU_COOKIE_DOMAIN}; Secure` : ''
+  response.setHeader('Set-Cookie', `shiyu_user_session=${themeSessions.issueSession(user.id)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800${cookieDomain}`)
+  const savedUser = readUsers().find(item => item.id === user.id) || user
+  const welcome = welcomeState(savedUser)
+  return {
+    user: publicUser(savedUser, false, true),
+    accountData: accountDataFor(savedUser),
+    accountInitialized: Boolean(savedUser.accountData),
+    isNewUser,
+    welcomeGiftPending: welcome.pending,
+    welcomeGiftRequiresGuide: welcome.requiresGuide,
+    welcomeGiftReplayToken: welcome.replayToken,
+    testLoginMode: welcome.testLoginMode,
+    invitationCode: invitationCodeFor(savedUser.id),
+  }
+}
+
+function defaultAccountData(): ShiyuAccountData {
+  return [{
+    id: 'personal',
+    name: '我的空间',
+    icon: '▣',
+    scenes: [
+      { id: 'daily', name: '日常收藏', description: '把每天会用到的东西，放在顺手的位置。', groups: [{ id: 'common', name: '常用网址', items: [] }] },
+      { id: 'focus', name: '工作与学习', description: '让资料各就其位，专注眼前的事情。', groups: [{ id: 'resources', name: '资料整理', items: [] }] },
+      {
+        id: 'ai',
+        name: 'AI 探索',
+        description: '收下正在改变工作与生活方式的新工具。',
+        groups: [{
+          id: 'assistants',
+          name: 'AI 工具',
+          items: [
+            ['ChatGPT', 'https://chatgpt.com', '对话、写作与探索新想法', 'C'],
+            ['DeepSeek', 'https://chat.deepseek.com', '换个角度，思考问题', 'D'],
+            ['Kimi', 'https://www.kimi.com', '阅读资料，也聊新想法', 'K'],
+            ['通义千问', 'https://www.qianwen.com', '让灵感更进一步', 'Q'],
+            ['豆包', 'https://www.doubao.com', '随时获得一点帮助', '豆'],
+          ],
+        }],
+      },
+    ],
+  }]
+}
+
+function accountDataFor(user: ShiyuUser) {
+  return user.accountData ? structuredClone(user.accountData) : null
+}
+
+function sessionUser(request: IncomingMessage) {
+  const id = themeSessions.session(request)
+  return readUsers().find((user) => user.id === id && !user.blacklisted) || null
+}
+
+function isAccountData(value: unknown): value is ShiyuAccountData {
+  if (!Array.isArray(value) || value.length > 36500) return false
+  const uniqueIds = (items: { id: string }[]) => items.every(x => x && typeof x.id === 'string') && new Set(items.map(x => x.id)).size === items.length
+  return uniqueIds(value) && value.every((space: ShiyuAccountSpace) => Array.isArray(space.scenes) && uniqueIds(space.scenes) && space.scenes.every(scene => Array.isArray(scene.groups) && uniqueIds(scene.groups) && scene.groups.every(group => Array.isArray(group.items))))
+}
+
+function sendJson(response: ServerResponse, status: number, value: unknown) {
+  response.statusCode = status
+  response.setHeader('Content-Type', 'application/json; charset=utf-8')
+  response.setHeader('Cache-Control', 'no-store')
+  response.setHeader('X-Content-Type-Options', 'nosniff')
+  response.end(JSON.stringify(value))
+}
+
+async function readBody(request: IncomingMessage, limit = 100_000) {
+  let body = ''
+  for await (const chunk of request) {
+    body += chunk
+    if (body.length > limit) throw new Error('请求内容过大')
+  }
+  return JSON.parse(body || '{}') as Record<string, unknown>
+}
+
+function nowText() {
+  return new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false }).replaceAll('/', '-').replace(',', '')
+}
+
+function validPassword(value: string) {
+  if (value.length < 8 || value.length > 64) return false
+  let groups = 0
+  if (/[A-Za-z]/.test(value)) groups++
+  if (/\d/.test(value)) groups++
+  if (/[^A-Za-z\d]/.test(value)) groups++
+  return groups >= 2
+}
+
+function maskPhone(value: string) {
+  return /^1\d{10}$/.test(value) ? `${value.slice(0, 3)}****${value.slice(-4)}` : value
+}
+
+function maskEmail(value?: string) {
+  if (!value) return ''
+  const [name, domain] = value.split('@')
+  if (!domain) return value
+  return `${name.slice(0, 1)}${name.length > 1 ? '***' : ''}@${domain}`
+}
+
+function takeSmsCode(phone: string, credential: string) {
+  loadSmsCodes()
+  const pending = smsCodes.get(phone)
+  if (!pending || pending.expiresAt <= Date.now()) {
+    smsCodes.delete(phone)
+    persistSmsCodes()
+    return '验证码已失效，请重新获取'
+  }
+  if (!new RegExp(`^\\d{${pending.code.length}}$`).test(credential) || pending.code !== credential) return '验证码不正确'
+  smsCodes.delete(phone)
+  persistSmsCodes()
+  return null
+}
+
+function takeEmailCode(email: string, credential: string) {
+  loadEmailCodes()
+  const pending = emailCodes.get(email)
+  if (!pending || pending.expiresAt <= Date.now()) {
+    emailCodes.delete(email)
+    persistEmailCodes()
+    return '验证码已失效，请重新获取'
+  }
+  if (!new RegExp(`^\\d{${pending.code.length}}$`).test(credential) || pending.code !== credential) return '验证码不正确'
+  emailCodes.delete(email)
+  persistEmailCodes()
+  return null
+}
+
+function nextUserId() {
+  const date = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Shanghai' }).replaceAll('-', '')
+  return `U${date}${String(readUsers().length + 1).padStart(3, '0')}`
+}
+
+export function shiyuUserPlugin(): Plugin {
+  return {
+    name: 'shiyu-user-management',
+    configureServer(server) {
+      server.middlewares.use(async (request, response, next) => {
+        const url = new URL(request.url || '/', `http://${request.headers.host || '127.0.0.1'}`)
+        if (!url.pathname.startsWith('/api/shiyu/users') && !url.pathname.startsWith('/api/shiyu/auth/') && !url.pathname.startsWith('/api/shiyu/library') && url.pathname !== '/api/shiyu/login-methods' && url.pathname !== '/api/shiyu/sms-config') return next()
+
+        if (url.pathname === '/api/shiyu/auth/wechat/events') {
+          const config = readWechatConfig()
+          if (!wechatReady(config)) return sendJson(response, 503, { code: 'WECHAT_SETUP_REQUIRED', message: '微信服务号尚未完成服务器端配置' })
+          if (request.method === 'GET') {
+            try {
+              const echostr = url.searchParams.get('echostr') || ''
+              const plaintext = url.searchParams.has('msg_signature')
+                ? decryptWechatEncryptedText(config, url.searchParams, echostr)
+                : (verifyWechatSignature(config, url.searchParams) ? echostr : '')
+              if (!plaintext) throw new Error('微信服务器校验签名失败')
+              response.statusCode = 200
+              response.setHeader('Content-Type', 'text/plain; charset=utf-8')
+              response.end(plaintext)
+            } catch {
+              response.statusCode = 403
+              response.end('invalid signature')
+            }
+            return
+          }
+          if (request.method !== 'POST') return sendJson(response, 405, { message: '不支持该操作' })
+          try {
+            const raw = await readTextBody(request)
+            const decoded = decryptWechatXml(config, url.searchParams, raw)
+            const event = xmlValue(decoded.xml, 'Event').toLowerCase()
+            const openId = xmlValue(decoded.xml, 'FromUserName')
+            const eventKey = xmlValue(decoded.xml, 'EventKey')
+            let scene = eventKey
+            if (event === 'subscribe' && scene.startsWith('qrscene_')) scene = scene.slice('qrscene_'.length)
+            if (openId && scene && (event === 'subscribe' || event === 'scan')) {
+              for (const [key, pending] of wechatPendingLogins) {
+                if (pending.expiresAt <= Date.now()) wechatPendingLogins.delete(key)
+              }
+              const pending = wechatPendingLogins.get(scene)
+              if (pending && pending.expiresAt > Date.now() && !pending.openId) {
+                const user = readUsers().find(item => item.wechatAppId === config.appId && item.wechatOpenId === openId && !item.blacklisted)
+                pending.openId = openId
+                pending.unionId = xmlValue(decoded.xml, 'UnionId') || undefined
+                pending.nickname = xmlValue(decoded.xml, 'Nickname') || undefined
+                pending.userId = user?.id
+                pending.status = user ? 'authenticated' : 'needs-binding'
+              }
+            }
+            finishWechatCallback(response, config, url.searchParams, decoded.encrypted)
+          } catch { response.statusCode = 403; response.end('invalid callback') }
+          return
+        }
+
+        if (url.pathname === '/api/shiyu/auth/wechat/qr' && request.method === 'GET') {
+          const binding = url.searchParams.get('purpose') === 'profile-bind'
+          const owner = binding ? sessionUser(request) : null
+          if (binding && !owner) return sendJson(response, 401, { message: '请先登录' })
+          if (owner?.wechatOpenId) return sendJson(response, 409, { message: '当前账号已绑定微信' })
+          const config = readWechatConfig()
+          if (!wechatReady(config)) return sendJson(response, 503, { code: 'WECHAT_SETUP_REQUIRED', message: '微信服务号尚未完成服务器端配置' })
+          for (const [key, pending] of wechatPendingLogins) if (pending.expiresAt <= Date.now()) wechatPendingLogins.delete(key)
+          const scene = `shiyu_${randomUUID().replaceAll('-', '')}`
+          const browserToken = randomUUID()
+          const expiresIn = 300
+          wechatPendingLogins.set(scene, { scene, browserToken, expiresAt: Date.now() + expiresIn * 1000, status: 'pending', ...(owner ? { bindingUserId: owner.id } : {}) })
+          try {
+            const qrUrl = await createWechatQr(config, scene)
+            response.setHeader('Set-Cookie', `shiyu_wechat_login=${encodeURIComponent(browserToken)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${expiresIn}`)
+            return sendJson(response, 200, { scene, qrUrl, expiresIn })
+          } catch (error) {
+            wechatPendingLogins.delete(scene)
+            return sendJson(response, 502, { code: 'WECHAT_QR_FAILED', message: error instanceof Error ? error.message : '微信二维码生成失败' })
+          }
+        }
+
+        if (url.pathname === '/api/shiyu/auth/wechat/status' && request.method === 'GET') {
+          const scene = String(url.searchParams.get('scene') || '')
+          const pending = wechatPendingLogins.get(scene)
+          if (!pending) return sendJson(response, 404, { message: '登录二维码不存在或已失效' })
+          if (requestCookie(request, 'shiyu_wechat_login') !== pending.browserToken) return sendJson(response, 403, { message: '登录二维码只对当前浏览器有效' })
+          if (pending.expiresAt <= Date.now()) { wechatPendingLogins.delete(scene); return sendJson(response, 410, { message: '登录二维码已过期，请重新生成' }) }
+          // A profile QR must never sign the browser into the scanned WeChat account.
+          if (pending.bindingUserId) {
+            if (sessionUser(request)?.id !== pending.bindingUserId) return sendJson(response, 403, { message: '当前账号已变化，请重新扫码' })
+            return sendJson(response, 200, { status: pending.openId ? 'ready-to-bind' : 'pending', nickname: pending.nickname || '' })
+          }
+          if (pending.status === 'pending') return sendJson(response, 200, { status: 'pending', expiresIn: Math.max(0, Math.ceil((pending.expiresAt - Date.now()) / 1000)) })
+          // Surface the successful scan before binding or logging in.  The next poll
+          // continues the existing flow, so this never grants a session by itself.
+          if (!pending.delivered) { pending.delivered = true; return sendJson(response, 200, { status: 'scanned', scene }) }
+          if (pending.status === 'needs-binding') return sendJson(response, 200, { status: 'needs-binding', scene })
+          const user = readUsers().find(item => item.id === pending.userId && item.wechatOpenId === pending.openId && !item.blacklisted)
+          if (!user) { pending.status = 'needs-binding'; return sendJson(response, 200, { status: 'needs-binding', scene }) }
+          const items = readUsers(), current = items.find(item => item.id === user.id)
+          if (current) { current.lastLoginAt = nowText(); writeUsers(items) }
+          const result = establishShiyuSession(response, current || user)
+          clearWechatLoginCookie(response)
+          return sendJson(response, 200, { status: 'authenticated', ...result })
+        }
+
+        if (url.pathname === '/api/shiyu/auth/wechat/bind' && request.method === 'POST') {
+          try {
+            const config = readWechatConfig()
+            const body = await readBody(request)
+            const scene = String(body.scene || '')
+            const pending = wechatPendingLogins.get(scene)
+            if (pending?.bindingUserId) {
+              const owner = sessionUser(request)
+              if (!owner || owner.id !== pending.bindingUserId || requestCookie(request, 'shiyu_wechat_login') !== pending.browserToken) return sendJson(response, 403, { message: '二维码只对当前账号和浏览器有效' })
+              if (pending.expiresAt <= Date.now() || !pending.openId) return sendJson(response, 400, { message: '微信扫码状态已失效，请重新扫码' })
+              const items = readUsers(), current = items.find(item => item.id === owner.id)
+              if (!current || current.blacklisted) return sendJson(response, 401, { message: '登录状态已失效' })
+              if (current.wechatOpenId) return sendJson(response, 409, { message: '当前账号已绑定微信' })
+              if (items.some(item => item.id !== current.id && ((item.wechatAppId === config.appId && item.wechatOpenId === pending.openId) || (pending.unionId && item.wechatUnionId === pending.unionId)))) return sendJson(response, 409, { message: '该微信已绑定其他账号，请更换微信扫码' })
+              current.wechatAppId = config.appId; current.wechatOpenId = pending.openId
+              if (pending.unionId) current.wechatUnionId = pending.unionId
+              if (pending.nickname) current.wechatNickname = pending.nickname
+              writeUsers(items); wechatPendingLogins.delete(scene); clearWechatLoginCookie(response)
+              return sendJson(response, 200, { ok: true })
+            }
+            if (!pending || pending.expiresAt <= Date.now() || pending.status !== 'needs-binding' || !pending.openId) return sendJson(response, 400, { message: '微信扫码状态已失效，请重新扫码' })
+            if (requestCookie(request, 'shiyu_wechat_login') !== pending.browserToken) return sendJson(response, 403, { message: '登录二维码只对当前浏览器有效' })
+            const account = String(body.account || body.email || body.phone || '').trim().toLowerCase()
+            const code = String(body.code || '').trim()
+            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(account)
+            const isPhone = /^1\d{10}$/.test(account)
+            if (!isEmail && !isPhone) return sendJson(response, 400, { message: '请输入正确的邮箱或手机号' })
+            if (!code) return sendJson(response, 400, { message: '请输入验证码；如暂时不绑定，请点击“暂不设置”' })
+            const codeError = isEmail ? takeEmailCode(account, code) : takeSmsCode(account, code)
+            if (codeError) return sendJson(response, 400, { message: codeError })
+            const items = readUsers()
+            let user = items.find(item => isEmail ? item.email?.toLowerCase() === account : item.phone === account)
+            let isNewUser = false
+            if (user) {
+              if (user.blacklisted) return sendJson(response, 403, { message: '该账号暂时无法登录' })
+              if (user.wechatOpenId && (user.wechatAppId !== config.appId || user.wechatOpenId !== pending.openId)) return sendJson(response, 409, { message: '该账号已绑定其他微信，请解绑后再操作' })
+            } else {
+              const createdAt = nowText()
+              const catalog = readLibrary()
+              user = { id: nextUserId(), name: '一隅拾光', phone: isPhone ? account : '', email: isEmail ? account : undefined, password: '', registeredAt: createdAt, lastLoginAt: createdAt, source: '微信服务号注册', spaces: 2, status: 'active', currentTheme: '留白日常', member: false, memberExpiresAt: null, blacklisted: false, memberEvents: [], accountData: [...defaultAccountData(), librarySpace(catalog)], accountInitializedAt: createdAt, welcomeGift: { version: catalog.version, grantedAt: createdAt }, onboarding: initialOnboarding(true) }
+              assignSignupReward(user, body.invitationCode)
+              items.unshift(user)
+              isNewUser = true
+            }
+            user.wechatAppId = config.appId
+            user.wechatOpenId = pending.openId
+            if (pending.unionId) user.wechatUnionId = pending.unionId
+            if (pending.nickname) user.wechatNickname = pending.nickname
+            pending.userId = user.id
+            pending.status = 'authenticated'
+            writeUsers(items)
+            settleInvitations()
+            const result = establishShiyuSession(response, user, isNewUser)
+            clearWechatLoginCookie(response)
+            return sendJson(response, 200, result)
+          } catch (error) { return sendJson(response, 400, { message: error instanceof Error ? error.message : '微信绑定失败' }) }
+        }
+
+        if (url.pathname === '/api/shiyu/auth/wechat/skip' && request.method === 'POST') {
+          try {
+            const config = readWechatConfig()
+            const body = await readBody(request)
+            const scene = String(body.scene || '')
+            const pending = wechatPendingLogins.get(scene)
+            if (pending?.bindingUserId) return sendJson(response, 400, { message: '请在个人资料中确认绑定' })
+            if (!pending || pending.expiresAt <= Date.now() || pending.status !== 'needs-binding' || !pending.openId) return sendJson(response, 400, { message: '微信扫码状态已失效，请重新扫码' })
+            if (requestCookie(request, 'shiyu_wechat_login') !== pending.browserToken) return sendJson(response, 403, { message: '登录二维码只对当前浏览器有效' })
+            const items = readUsers()
+            let user = items.find(item => item.wechatAppId === config.appId && item.wechatOpenId === pending.openId && !item.blacklisted)
+            let isNewUser = false
+            if (!user) {
+              const createdAt = nowText()
+              const catalog = readLibrary()
+              user = { id: nextUserId(), name: pending.nickname || '一隅拾光', phone: '', email: undefined, password: '', registeredAt: createdAt, lastLoginAt: createdAt, source: '微信服务号注册', spaces: 2, status: 'active', currentTheme: '留白日常', member: false, memberExpiresAt: null, blacklisted: false, memberEvents: [], accountData: [...defaultAccountData(), librarySpace(catalog)], accountInitializedAt: createdAt, welcomeGift: { version: catalog.version, grantedAt: createdAt }, onboarding: initialOnboarding(true) }
+              assignSignupReward(user, body.invitationCode)
+              items.unshift(user)
+              isNewUser = true
+            }
+            user.wechatAppId = config.appId
+            user.wechatOpenId = pending.openId
+            if (pending.unionId) user.wechatUnionId = pending.unionId
+            if (pending.nickname) user.wechatNickname = pending.nickname
+            pending.userId = user.id
+            pending.status = 'authenticated'
+            writeUsers(items)
+            settleInvitations()
+            const result = establishShiyuSession(response, user, isNewUser)
+            clearWechatLoginCookie(response)
+            return sendJson(response, 200, result)
+          } catch (error) { return sendJson(response, 400, { message: error instanceof Error ? error.message : '微信登录失败' }) }
+        }
+
+        if (url.pathname === '/api/shiyu/auth/signup-rewards' && request.method === 'GET') {
+          return sendJson(response,200,sessionUser(request)?{invitation:null,registration:null}:signupPreview(url.searchParams.get('invite')))
+        }
+        if (url.pathname === '/api/shiyu/login-methods' && request.method === 'GET') {
+          return sendJson(response, 200, { loginMethods: readLoginMethods() })
+        }
+
+        if (url.pathname === '/api/shiyu/auth/membership-records' && request.method === 'GET') {
+          const user = sessionUser(request)
+          if (!user) return sendJson(response, 401, { message: '请先登录' })
+          return sendJson(response, 200, { items: memberships.records(user) })
+        }
+        if (url.pathname === '/api/shiyu/auth/invitations' && request.method === 'GET') {
+          const user = sessionUser(request)
+          if (!user) return sendJson(response, 401, { message: '请先登录' })
+          const data = memberships.readInvitations(), now = Date.now()
+          const campaign = data.campaigns.find(item => !item.stoppedAt && Date.parse(item.start) <= now && Date.parse(item.end) > now)
+          const items = data.rewards.filter(item => item.inviterId === user.id || item.inviteeId === user.id).map(item => ({
+            id: item.id, campaignName: item.campaignName, type: item.type, occurredAt: item.occurredAt, settledAt: item.settledAt,
+            days: item.inviterId === user.id ? item.inviterDays : item.inviteeDays, note: item.note,
+            invitedName: item.inviterId === user.id ? String(item.inviteeName || '').slice(0, 1) + '**' : undefined,
+          }))
+          return sendJson(response, 200, { campaign: campaign || null, invitationCode: campaign ? invitationCodeFor(user.id) : null, items })
+        }
+
+        if (url.pathname === '/api/shiyu/auth/newspaper') {
+          const user = sessionUser(request)
+          if (!user) return sendJson(response, 401, { message: '请先登录后编辑报纸' })
+          if (request.method === 'GET') return sendJson(response, 200, { userId: user.id, newspaper: user.newspaper || { cover: {}, edition: {} } })
+          if (request.method !== 'PUT') return sendJson(response, 405, { message: '不支持该操作' })
+          const body = await readBody(request, 4_600_000)
+          if (body.userId !== user.id) return sendJson(response, 409, { message: '登录账号已切换，请重新打开编辑' })
+          if (typeof body.section !== 'string' || !['cover', 'edition'].includes(body.section) || !body.fields || typeof body.fields !== 'object' || Array.isArray(body.fields)) return sendJson(response, 400, { message: '版面数据无效' })
+          if (body.editionIndex !== undefined && (body.section !== 'edition' || typeof body.editionIndex !== 'number' || !Number.isInteger(body.editionIndex) || body.editionIndex < 0 || body.editionIndex > 2)) return sendJson(response, 400, { message: '版面编号无效' })
+          const fields: Record<string, string> = {}
+          for (const [key, value] of Object.entries(body.fields)) {
+            if (!/^(masthead|editionMasthead[0-2]|tagline|leadLabel|strip|title|intro|cover|quote|dailyLabel|sideLabel|dailyTitle[0-3]|dailyBody[0-3]|sideTitle[0-2]|sideBody[0-2])$/.test(key) || typeof value !== 'string' || value.length > (key === 'cover' ? 4500000 : 2000)) return sendJson(response, 400, { message: '版面字段无效或内容过长' })
+            if (key === 'cover' && value && !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(value)) return sendJson(response, 400, { message: '封面图片格式无效' })
+            fields[key] = value
+          }
+          const users = readUsers(), current = users.find(item => item.id === user.id)
+          if (!current) return sendJson(response, 401, { message: '登录状态已失效' })
+          current.newspaper ||= { cover: {}, edition: {} }
+          if (body.section === 'edition' && body.editionIndex !== undefined) {
+            // Snapshot every legacy page before the first independent save. Merge only
+            // the selected page into the latest record, preserving other tabs' saves.
+            current.newspaper.editions = Array.from({ length: 3 }, (_, index) => ({ ...(current.newspaper!.editions?.[index] ?? current.newspaper!.edition) }))
+            Object.assign(current.newspaper.editions[body.editionIndex], fields)
+          } else {
+            current.newspaper[body.section as 'cover' | 'edition'] = fields
+          }
+          writeUsers(users)
+          return sendJson(response, 200, { userId: current.id, newspaper: current.newspaper })
+        }
+
+        if (url.pathname === '/api/shiyu/auth/tool-usage' && request.method === 'GET') {
+          const user = sessionUser(request), rights = memberships.stateFor(user).entitlements
+          return sendJson(response, 200, { userId: user?.id || null, entitlements: rights })
+        }
+        if (url.pathname === '/api/shiyu/auth/tools' || url.pathname === '/api/shiyu/auth/tool-usage') {
+          const user = sessionUser(request)
+          if (!user) return sendJson(response, 401, { message: '请先登录' })
+          const isData = url.pathname.endsWith('/tools')
+          if (request.method === 'GET' && isData) return sendJson(response, 200, { userId: user.id, tools: user.toolData || {} })
+          if (request.method !== 'POST') return sendJson(response, 405, { message: '不支持该操作' })
+          try {
+            const body = await readBody(request, 4_100_000)
+            if (body.userId !== user.id) return sendJson(response, 409, { message: '登录账号已切换，请重新打开' })
+            const users = readUsers(), current = users.find(item => item.id === user.id)
+            if (!current || current.blacklisted) return sendJson(response, 401, { message: '登录状态已失效' })
+            const rights = memberships.stateFor(current).entitlements
+            const result = isData ? toolQuotas.saveTool(current, rights, body) : toolQuotas.daily(current, rights, body)
+            writeUsers(users)
+            return sendJson(response, 200, { userId: current.id, ...result })
+          } catch (error) {
+            const failure = error as Error & { status?: number; code?: string; tool?: string; limit?: number; used?: number; requested?: number }
+            return sendJson(response, failure.status || 400, { message: failure.message || '保存失败，请重试', code: failure.code, tool: failure.tool, limit: failure.limit, used: failure.used, requested: failure.requested })
+          }
+        }
+
+        if (url.pathname === '/api/shiyu/auth/account') {
+          const user = sessionUser(request)
+          if (!user) return sendJson(response, 401, { message: '请先登录' })
+          if (request.method === 'GET') return sendJson(response, 200, { userId: user.id, data: accountDataFor(user), initialized: Boolean(user.accountData) })
+          if (request.method === 'PUT') {
+            try {
+              const body = await readBody(request)
+              if (typeof body.userId !== 'string' || body.userId !== user.id) return sendJson(response, 409, { code: 'ACCOUNT_SESSION_MISMATCH', message: '登录账号已切换，请刷新后重试' })
+              if (!isAccountData(body.data)) return sendJson(response, 400, { message: '账号空间数据格式无效' })
+              const items = readUsers()
+              const current = items.find((item) => item.id === user.id)
+              if (!current) return sendJson(response, 401, { message: '登录状态已失效' })
+              memberships.checkQuota(current, body.data)
+              current.accountData = structuredClone(body.data)
+              current.spaces = current.accountData.length
+              current.accountInitializedAt ||= nowText()
+              writeUsers(items)
+              return sendJson(response, 200, { userId: current.id, data: accountDataFor(current), initialized: true })
+            } catch (error) { return sendJson(response, 400, { message: error instanceof Error ? error.message : '账号空间数据保存失败' }) }
+          }
+          return sendJson(response, 405, { message: '不支持该操作' })
+        }
+
+        if (url.pathname === '/api/shiyu/auth/onboarding') {
+          const user = sessionUser(request)
+          if (!user) return sendJson(response, 401, { message: '请先登录' })
+          if (request.method === 'GET') return sendJson(response, 200, { userId: user.id, onboarding: user.onboarding || initialOnboarding() })
+          if (request.method !== 'POST') return sendJson(response, 405, { message: '不支持该操作' })
+          try {
+            const body = await readBody(request)
+            if (body.userId !== user.id) return sendJson(response, 409, { code: 'ACCOUNT_SESSION_MISMATCH', message: '登录账号已切换，请刷新后重试' })
+            const users = readUsers(), current = users.find(item => item.id === user.id)
+            if (!current) return sendJson(response, 401, { message: '登录状态已失效' })
+            try { current.onboarding = updateOnboarding(current.onboarding || initialOnboarding(), body) }
+            catch (error) { return sendJson(response, 409, { userId: current.id, onboarding: current.onboarding || initialOnboarding(), message: error instanceof Error ? error.message : '引导状态无效' }) }
+            writeUsers(users)
+            return sendJson(response, 200, { userId: current.id, onboarding: current.onboarding })
+          } catch { return sendJson(response, 400, { message: '引导状态保存失败' }) }
+        }
+
+        if (url.pathname === '/api/shiyu/auth/corner-guide') {
+          const user = sessionUser(request)
+          if (!user) return sendJson(response, 401, { message: '请先登录' })
+          if (request.method !== 'POST') return sendJson(response, 405, { message: '不支持该操作' })
+          const body = await readBody(request)
+          if (body?.userId !== user.id) return sendJson(response, 409, { code: 'ACCOUNT_SESSION_MISMATCH', message: '登录账号已切换，请刷新后重试' })
+          const users = readUsers(), current = users.find(item => item.id === user.id)
+          if (!current) return sendJson(response, 401, { message: '登录状态已失效' })
+          current.cornerUiHints ||= {}
+          if (!current.cornerUiHints.closeGuideAcknowledgedAt) {
+            current.cornerUiHints.closeGuideAcknowledgedAt = nowText()
+            writeUsers(users)
+          }
+          return sendJson(response, 200, { userId: current.id, closeGuideAcknowledgedAt: current.cornerUiHints.closeGuideAcknowledgedAt })
+        }
+
+        if (url.pathname === '/api/shiyu/auth/signup-gift') {
+          const user=sessionUser(request);if(!user)return sendJson(response,401,{message:'请先登录'})
+          if(request.method==='POST'){const body=await readBody(request);if(body.userId!==user.id)return sendJson(response,409,{message:'账号已切换'});const users=readUsers(),current=users.find(u=>u.id===user.id);if(!current)return sendJson(response,401,{message:'请先登录'});current.signupGiftAcknowledgedAt ||= nowText();writeUsers(users);return sendJson(response,200,{ok:true})}
+          if(request.method!=='GET')return sendJson(response,405,{message:'不支持该操作'})
+          const fresh=readUsers().find(u=>u.id===user.id)!;let days=0;
+          if(fresh.registrationReward&&!fresh.signupGiftAcknowledgedAt){const events=fresh.memberEvents||[];const ordinary=events.find(e=>e.id==='REG:'+fresh.id);if(ordinary)days=Number.parseInt(String(ordinary.duration),10)||0;else{const rewards=memberships.readInvitations().rewards;const reward=rewards.find(r=>r.inviteeId===fresh.id&&r.type==='注册奖励'&&events.some(e=>e.id==='INV:'+r.id+':'+fresh.id));days=reward?.inviteeDays||0}}
+          return sendJson(response,200,{userId:fresh.id,days,pending:days>0})
+        }
+        if (url.pathname === '/api/shiyu/auth/welcome-gift') {
+          const user = sessionUser(request)
+          if (!user) return sendJson(response, 401, { message: '请先登录' })
+          if (request.method === 'GET') return sendJson(response, 200, { ...welcomeState(user), spaceId: 'gift-welcome-sites-v1', name: '精选网址' })
+          if (request.method === 'POST') {
+            const users = readUsers(), current = users.find(item => item.id === user.id)
+            if (!current) return sendJson(response, 401, { message: '登录状态已失效' })
+            if (current.welcomeGift && !current.welcomeGift.acknowledgedAt) {
+              current.welcomeGift.acknowledgedAt = nowText()
+              writeUsers(users)
+            }
+            const test = experienceStore.get('shiyu', current.id)
+            if (test.enabled && test.events?.gift && !test.events.gift.acknowledgedAt) {
+              experienceStore.save({ ...test, appId: 'shiyu', userId: current.id, events: { ...test.events, gift: { ...test.events.gift, acknowledgedAt: new Date().toISOString() } } })
+            }
+            return sendJson(response, 200, { pending: false, spaceId: 'gift-welcome-sites-v1' })
+          }
+          return sendJson(response, 405, { message: '不支持该操作' })
+        }
+
+        if (url.pathname === '/api/shiyu/auth/security') {
+          const user = sessionUser(request)
+          if (!user) return sendJson(response, 401, { message: '请先登录' })
+          if (request.method === 'GET') {
+            return sendJson(response, 200, { security: { phone: maskPhone(user.phone), email: maskEmail(user.email), hasPassword: hasAccountPassword(user), wechatBound: Boolean(user.wechatOpenId), wechatNickname: user.wechatNickname || '' } })
+          }
+          if (request.method !== 'PUT') return sendJson(response, 405, { message: '不支持该操作' })
+          try {
+            const body = await readBody(request)
+            const items = readUsers()
+            const current = items.find((item) => item.id === user.id)
+            if (!current) return sendJson(response, 401, { message: '登录状态已失效' })
+            const action = String(body.action || '')
+            if (action === 'password') {
+              const currentPassword = String(body.currentPassword || '')
+              const nextPassword = String(body.newPassword || '')
+              if (!validPassword(nextPassword)) return sendJson(response, 400, { message: '新密码需为 8–64 位，并包含字母、数字或符号中的至少两类' })
+              if (nextPassword === current.password) return sendJson(response, 400, { message: '新密码不能与当前密码相同' })
+              if (!hasAccountPassword(current) || body.verification === 'code') {
+                const channel = String(body.channel || ''), code = String(body.code || '').trim()
+                const account = channel === 'email' ? current.email?.trim().toLowerCase() : channel === 'phone' ? current.phone : ''
+                if (!account) return sendJson(response, 400, { message: '请先绑定手机号或邮箱以验证身份' })
+                if (!code) return sendJson(response, 400, { message: '请输入已绑定账号收到的验证码' })
+                const error = channel === 'email' ? takeEmailCode(account, code) : takeSmsCode(account, code)
+                if (error) return sendJson(response, 400, { message: error })
+              } else if (current.password !== currentPassword) return sendJson(response, 400, { message: '当前密码不正确' })
+              current.password = nextPassword
+            } else if (action === 'phone') {
+              const phone = String(body.phone || '').trim()
+              const code = String(body.code || '').trim()
+              if (!/^1\d{10}$/.test(phone)) return sendJson(response, 400, { message: '请输入正确的手机号' })
+              if (items.some((item) => item.id !== current.id && item.phone === phone)) return sendJson(response, 400, { message: '该手机号已绑定其他账号' })
+              const codeError = takeSmsCode(phone, code)
+              if (codeError) return sendJson(response, 400, { message: codeError })
+              current.phone = phone
+            } else if (action === 'email') {
+              const email = String(body.email || '').trim().toLowerCase()
+              const code = String(body.code || '').trim()
+              if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return sendJson(response, 400, { message: '请输入正确的邮箱地址' })
+              if (items.some((item) => item.id !== current.id && item.email?.toLowerCase() === email)) return sendJson(response, 400, { message: '该邮箱已绑定其他账号' })
+              const codeError = takeEmailCode(email, code)
+              if (codeError) return sendJson(response, 400, { message: codeError })
+              current.email = email
+            } else {
+              return sendJson(response, 400, { message: '不支持的安全设置操作' })
+            }
+            writeUsers(items)
+            return sendJson(response, 200, { security: { phone: maskPhone(current.phone), email: maskEmail(current.email), hasPassword: hasAccountPassword(current), wechatBound: Boolean(current.wechatOpenId), wechatNickname: current.wechatNickname || '' } })
+          } catch (error) { return sendJson(response, 400, { message: error instanceof Error ? error.message : '安全设置保存失败' }) }
+        }
+
+        if (url.pathname === '/api/shiyu/auth/reset-password' && request.method === 'POST') {
+          try {
+            const body = await readBody(request)
+            const account = String(body.account || '').trim()
+            const code = String(body.code || '').trim()
+            const nextPassword = String(body.newPassword || '')
+            if (!/^1\d{10}$/.test(account)) return sendJson(response, 400, { message: '密码找回目前仅支持手机号' })
+            if (!validPassword(nextPassword)) return sendJson(response, 400, { message: '新密码需为 8–64 位，并包含字母、数字或符号中的至少两类' })
+            const codeError = takeSmsCode(account, code)
+            if (codeError) return sendJson(response, 400, { message: codeError })
+            const items = readUsers()
+            const current = items.find((item) => item.phone === account)
+            if (!current) return sendJson(response, 404, { message: '当前手机号尚未注册，请先使用验证码登录' })
+            current.password = nextPassword
+            writeUsers(items)
+            return sendJson(response, 200, { ok: true })
+          } catch (error) { return sendJson(response, 400, { message: error instanceof Error ? error.message : '密码重置失败' }) }
+        }
+
+        if (url.pathname === '/api/shiyu/auth/session' && request.method === 'GET') {
+          const id=themeSessions.session(request),user=readUsers().find(u=>u.id===id&&!u.blacklisted)
+          return sendJson(response,200,user?{authenticated:true,user:{id:user.id,name:user.name,phone:user.phone||'',email:user.email||'',cornerUiHints:user.cornerUiHints||{},...memberships.stateFor(user),memberExpiresAt:publicUser(user,false,true).memberExpiresAt}}:{authenticated:false,entitlements:memberships.stateFor(null).entitlements})
+        }
+        if (url.pathname === '/api/shiyu/auth/logout' && request.method === 'POST') {
+          if(!request.headers['content-type']?.startsWith('application/json'))return sendJson(response,415,{message:'需要 JSON 请求'})
+          themeSessions.logout(request);response.setHeader('Set-Cookie',`shiyu_user_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${process.env.SHIYU_COOKIE_DOMAIN?`; Domain=${process.env.SHIYU_COOKIE_DOMAIN}; Secure`:''}`);return sendJson(response,200,{ok:true})
+        }
+        if (url.pathname === '/api/shiyu/auth/check-account' && request.method === 'POST') {
+          try {
+            const data = await readBody(request)
+            const account = String(data.account || '').trim()
+            if (!/^1\d{10}$/.test(account) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(account)) return sendJson(response, 400, { message: '请输入正确的手机号或邮箱' })
+            const user = readUsers().find((item) => item.phone === account || item.email === account)
+            return sendJson(response, 200, { account, registered: Boolean(user) })
+          } catch (error) { return sendJson(response, 400, { message: error instanceof Error ? error.message : '账号校验失败' }) }
+        }
+        if (url.pathname === '/api/shiyu/auth/send-code' && request.method === 'POST') {
+          try {
+            // Keep the in-memory view in sync with the persisted store. This
+            // matters when the dev server reloads the plugin between sending
+            // and verifying a code.
+            loadSmsCodes()
+            const body = await readBody(request)
+            const phone = String(body.phone || '').trim()
+            if (!/^1\d{10}$/.test(phone)) return sendJson(response, 400, { message: '请输入正确的手机号' })
+            if (body.purpose === 'password-verify' && sessionUser(request)?.phone !== phone) return sendJson(response, 403, { message: '请使用当前账号已绑定的手机号' })
+            const previous = smsCodes.get(phone)
+            if (codeSendsInFlight.has(phone) || (previous && Date.now() - previous.sentAt < smsResendCooldownMs)) return sendJson(response, 429, { message: '验证码发送过于频繁，请稍后再试', retryAfter: previous ? Math.max(1, Math.ceil((smsResendCooldownMs - Date.now() + previous.sentAt) / 1000)) : 60 })
+            const config = readSmsConfig()
+            const code = Array.from({ length: config.codeLength }, () => Math.floor(Math.random() * 10)).join('')
+            codeSendsInFlight.add(phone)
+            try {
+              await sendSmsCode(phone, code)
+              smsCodes.set(phone, { code, sentAt: Date.now(), expiresAt: Date.now() + config.codeTtlSeconds * 1000 })
+              persistSmsCodes()
+            } finally { codeSendsInFlight.delete(phone) }
+            return sendJson(response, 200, { expiresIn: config.codeTtlSeconds, codeLength: config.codeLength, resendAfter: 60 })
+          } catch (error) { return sendJson(response, 502, { message: error instanceof Error ? error.message : '短信发送失败' }) }
+        }
+        if (url.pathname === '/api/shiyu/auth/email/send' && request.method === 'POST') {
+          try {
+            loadEmailCodes()
+            const body = await readBody(request)
+            const email = String(body.email || '').trim().toLowerCase()
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return sendJson(response, 400, { message: '请输入正确的邮箱地址' })
+            if (body.purpose === 'password-verify' && sessionUser(request)?.email?.toLowerCase() !== email) return sendJson(response, 403, { message: '请使用当前账号已绑定的邮箱' })
+            const previous = emailCodes.get(email)
+            if (codeSendsInFlight.has(email) || (previous && Date.now() - previous.sentAt < emailResendCooldownMs)) return sendJson(response, 429, { message: '验证码发送过于频繁，请稍后再试', retryAfter: previous ? Math.max(1, Math.ceil((emailResendCooldownMs - Date.now() + previous.sentAt) / 1000)) : 60 })
+            const config = readEmailConfig()
+            const methods = readLoginMethods()
+            if (!methods.email) return sendJson(response, 403, { message: '邮箱验证码登录暂未开放' })
+            const code = Array.from({ length: config.codeLength }, () => Math.floor(Math.random() * 10)).join('')
+            codeSendsInFlight.add(email)
+            try {
+              await sendEmailCode(email, code)
+              emailCodes.set(email, { code, sentAt: Date.now(), expiresAt: Date.now() + config.codeTtlSeconds * 1000 })
+              persistEmailCodes()
+            } finally { codeSendsInFlight.delete(email) }
+            return sendJson(response, 200, { expiresIn: config.codeTtlSeconds, codeLength: config.codeLength, resendAfter: 60 })
+          } catch (error) { return sendJson(response, 502, { message: error instanceof Error ? error.message : '邮件发送失败' }) }
+        }
+        if (url.pathname === '/api/shiyu/auth/login' && request.method === 'POST') {
+          try {
+            loadSmsCodes()
+            const data = await readBody(request)
+            const account = String(data.account || '').trim()
+            const credential = String(data.credential || '')
+            const mode = data.mode === 'code' ? 'code' : 'password'
+            const methods = readLoginMethods()
+            const phoneAccount = /^1\d{10}$/.test(account)
+            const emailAccount = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(account)
+            if (!phoneAccount && !emailAccount) return sendJson(response, 400, { message: '请输入正确的手机号或邮箱' })
+            if (mode === 'password' && !methods.password) return sendJson(response, 403, { message: '密码登录暂未开放' })
+            if (mode === 'code' && ((!phoneAccount || !methods.phone) && (!emailAccount || !methods.email))) return sendJson(response, 403, { message: '该验证码登录方式暂未开放' })
+            if (mode === 'code') {
+              const codeError = phoneAccount ? takeSmsCode(account, credential) : takeEmailCode(account.toLowerCase(), credential)
+              if (codeError) return sendJson(response, 401, { message: codeError })
+            }
+            const items = readUsers()
+            let user = items.find((item) => item.phone === account || item.email === account)
+            let isNewUser = false
+            if (!user && mode === 'code') {
+              const createdAt = nowText()
+              const catalog = readLibrary()
+              user = { id: nextUserId(), name: '一隅拾光', phone: phoneAccount ? account : '', ...(emailAccount ? { email: account } : {}), password: '', registeredAt: createdAt, lastLoginAt: createdAt, source: '前台验证码注册', spaces: 2, status: 'active', currentTheme: '留白日常', member: false, memberExpiresAt: null, blacklisted: false, memberEvents: [], accountData: [...defaultAccountData(), librarySpace(catalog)], accountInitializedAt: createdAt, welcomeGift: { version: catalog.version, grantedAt: createdAt }, onboarding: initialOnboarding(true) }
+              isNewUser = true
+              assignSignupReward(user, data.invitationCode)
+              items.unshift(user)
+            }
+            if (!user && mode === 'password') return sendJson(response, 401, { message: '当前账号未注册' })
+            // A code login has already been authenticated by the one-time
+            // code check above. Only password mode should compare the
+            // credential with the stored password; comparing them for code
+            // mode made every first SMS login fail after consuming the code.
+            if (mode === 'password' && (!user || !hasAccountPassword(user) || user.password !== credential)) return sendJson(response, 401, { message: '账号与密码不匹配' })
+            if (!user) return sendJson(response, 401, { message: '当前账号未注册' })
+            if (user.blacklisted) return sendJson(response, 403, { message: '该账号已被拉黑，暂时无法登录' })
+            const displayName = String(data.name || '').trim()
+            if (displayName && displayName !== '我') user.name = displayName.slice(0, 30)
+            user.lastLoginAt = nowText()
+            writeUsers(items)
+            settleInvitations()
+            response.setHeader('Set-Cookie',`shiyu_user_session=${themeSessions.issueSession(user.id)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800${process.env.SHIYU_COOKIE_DOMAIN?`; Domain=${process.env.SHIYU_COOKIE_DOMAIN}; Secure`:''}`)
+            const savedUser = readUsers().find(item => item.id === user!.id) || user
+            const welcome = welcomeState(savedUser)
+            observeAnalyticsLogin(savedUser.id, mode === 'password' ? 'password' : phoneAccount ? 'phone' : 'email', experienceStore.get('shiyu', savedUser.id).enabled)
+            return sendJson(response, 200, { user: publicUser(savedUser, false, true), accountData: accountDataFor(savedUser), accountInitialized: Boolean(savedUser.accountData), isNewUser, welcomeGiftPending: welcome.pending, welcomeGiftRequiresGuide: welcome.requiresGuide, welcomeGiftReplayToken: welcome.replayToken, testLoginMode: welcome.testLoginMode, invitationCode: invitationCodeFor(user.id) })
+          } catch (error) {
+            return sendJson(response, 400, { message: error instanceof Error ? error.message : '登录信息无效' })
+          }
+        }
+
+        const session = getPlatformSession(request)
+        if (!session || (!session.superadmin && !session.applicationIds.includes('shiyu'))) return sendJson(response, 403, { message: '当前管理员没有拾隅用户管理权限' })
+        if (url.pathname === '/api/shiyu/library' && request.method === 'GET') return sendJson(response, 200, { catalog: readLibrary() })
+        if (url.pathname === '/api/shiyu/library/recognize' && request.method === 'POST') {
+          try {
+            const body = await readBody(request)
+            return sendJson(response, 200, await recognizeSite(String(body.url || '')))
+          } catch (error) { return sendJson(response, 400, { message: error instanceof Error ? error.message : '网站信息识别失败' }) }
+        }
+        if (url.pathname === '/api/shiyu/library/sites' && request.method === 'POST' || /^\/api\/shiyu\/library\/sites\/[^/]+$/.test(url.pathname) && request.method === 'PUT') {
+          try {
+            const body = await readBody(request)
+            const catalog = readLibrary()
+            const scene = catalog.scenes.find(item => item.id === body.sceneId)
+            const group = scene?.groups.find(item => item.id === body.groupId)
+            if (!group) return sendJson(response, 400, { message: '请选择有效的场景和分组' })
+            const site = body.site as Partial<LibrarySite>
+            const name = String(site?.name || '').trim().slice(0, 80)
+            const website = normalizeSiteUrl(String(site?.url || ''))
+            if (!name) return sendJson(response, 400, { message: '请填写网站名称' })
+            const logo = String(site?.logo || '').trim()
+            if (logo && !/^https?:\/\//i.test(logo)) return sendJson(response, 400, { message: 'Logo 地址须为 HTTP 或 HTTPS' })
+            const editingId = request.method === 'PUT' ? decodeURIComponent(url.pathname.split('/').at(-1) || '') : ''
+            const oldGroup = catalog.scenes.flatMap(item => item.groups).find(item => item.items.some(entry => entry.id === editingId))
+            const oldSite = oldGroup?.items.find(entry => entry.id === editingId)
+            if (editingId && !oldSite) return sendJson(response, 404, { message: '网址不存在' })
+            const duplicate = catalog.scenes.some(item => item.groups.some(section => section.items.some(entry => entry.id !== editingId && entry.url === website.href)))
+            if (duplicate) return sendJson(response, 409, { message: '该网址已存在于平台库' })
+            const next: LibrarySite = { id: editingId || `gift-site-${randomUUID()}`, name, url: website.href, description: String(site.description || '').trim().slice(0, 180), region: site.region === '国外' ? '国外' : '国内', logo, status: site.status === 'draft' ? 'draft' : 'published' }
+            if (oldGroup) oldGroup.items = oldGroup.items.filter(entry => entry.id !== editingId)
+            group.items.push(next)
+            catalog.version += 1
+            writeLibrary(catalog)
+            return sendJson(response, 200, { catalog, site: next })
+          } catch (error) { return sendJson(response, 400, { message: error instanceof Error ? error.message : '网址保存失败' }) }
+        }
+        if (url.pathname === '/api/shiyu/sms-config' && request.method === 'GET') {
+          const config = readSmsConfig()
+          return sendJson(response, 200, { smsConfig: { ...config, accessKeySecret: config.accessKeySecret ? '已配置' : '' } })
+        }
+        if (url.pathname === '/api/shiyu/sms-config' && request.method === 'PUT') {
+          try {
+            const body = await readBody(request)
+            const current = readSmsConfig()
+            const codeTtlSeconds = Number(body.codeTtlSeconds)
+            const codeLength = Number(body.codeLength)
+            if (!Number.isInteger(codeTtlSeconds) || codeTtlSeconds < 60 || codeTtlSeconds > 1800) return sendJson(response, 400, { message: '验证码有效期需设置为 60–1800 秒' })
+            if (!Number.isInteger(codeLength) || codeLength < 4 || codeLength > 8) return sendJson(response, 400, { message: '验证码位数需设置为 4–8 位' })
+            const next: ShiyuSmsConfig = { ...current, enabled: Boolean(body.enabled), accessKeyId: String(body.accessKeyId || '').trim(), accessKeySecret: String(body.accessKeySecret || '').trim() || current.accessKeySecret, signName: String(body.signName || '').trim(), templateCode: 'SMS_338715137', codeTtlSeconds, codeLength }
+            if (next.enabled && (!next.accessKeyId || !next.accessKeySecret || !next.signName)) return sendJson(response, 400, { message: '启用短信前请完整填写 AccessKey、签名' })
+            writeSmsConfig(next)
+            return sendJson(response, 200, { smsConfig: { ...next, accessKeySecret: next.accessKeySecret ? '已配置' : '' } })
+          } catch (error) { return sendJson(response, 400, { message: error instanceof Error ? error.message : '短信配置保存失败' }) }
+        }
+        if (url.pathname === '/api/shiyu/login-methods' && request.method === 'PUT') {
+          try {
+            const data = await readBody(request)
+            const order = [...new Set([...(Array.isArray(data.order) ? data.order : []), ...loginMethodIds])].filter((item): item is ShiyuLoginMethod => loginMethodIds.includes(item as ShiyuLoginMethod))
+            const value: ShiyuLoginMethods = { phone: Boolean(data.phone), email: Boolean(data.email), password: Boolean(data.password), wechat: Boolean(data.wechat), order }
+            if (!loginMethodIds.some(key => value[key])) return sendJson(response, 400, { message: '至少保留一种登录方式' })
+            return sendJson(response, 200, { loginMethods: writeLoginMethods(value) })
+          } catch (error) { return sendJson(response, 400, { message: error instanceof Error ? error.message : '登录方式配置无效' }) }
+        }
+        if (url.pathname === '/api/shiyu/users' && request.method === 'GET') return sendJson(response, 200, { items: readUsers().map(user => publicUser(user, true)) })
+
+        const match = url.pathname.match(/^\/api\/shiyu\/users\/([^/]+)$/)
+        if (!match || request.method !== 'PUT') return sendJson(response, 405, { message: '不支持该操作' })
+        try {
+          const data = await readBody(request)
+          const items = readUsers()
+          const user = items.find((item) => item.id === decodeURIComponent(match[1]))
+          if (!user) return sendJson(response, 404, { message: '用户不存在' })
+          if (data.action === 'blacklist') {
+            user.blacklisted = Boolean(data.blacklisted)
+          } else if (data.action === 'member') {
+            const permanent = data.permanent === true
+            const expiresAt = permanent ? '永久' : String(data.expiresAt || '')
+            if (!permanent && !/^\d{4}-\d{2}-\d{2}$/.test(expiresAt)) throw new Error('请选择会员截止日期')
+            const start = new Date()
+            const end = permanent ? null : new Date(`${expiresAt}T23:59:59+08:00`)
+            if (end && (!Number.isFinite(end.getTime()) || end.toISOString().slice(0, 10) !== expiresAt)) throw new Error('请选择有效的会员截止日期')
+            if (end && end.getTime() < start.getTime()) throw new Error('会员截止日期不能早于今天')
+            memberships.applyToUser(user, { source: 'admin', permanent, expiresAt, planId: data.planId, operator: session.admin.name, remark: String(data.remark || '') })
+          } else if (data.action === 'cancel-member') {
+            memberships.applyToUser(user, { source: 'admin', action: 'cancel', operator: session.admin.name, remark: String(data.remark || '') })
+          } else {
+            throw new Error('操作类型无效')
+          }
+          writeUsers(items)
+          return sendJson(response, 200, { user: publicUser(user) })
+        } catch (error) {
+          return sendJson(response, 400, { message: error instanceof Error ? error.message : '用户配置无效' })
+        }
+      })
+    },
+  }
+}

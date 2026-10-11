@@ -1,0 +1,21 @@
+[
+  {
+    "depth": "flat",
+    "count": 1175,
+    "merged": 899,
+    "shattered": 878,
+    "mass": 650.0000000000007,
+    "msPerStep": 7.064833333392938
+  },
+  {
+    "depth": "depth",
+    "count": 777,
+    "merged": 138,
+    "shattered": 137,
+    "mass": 649.9999999999998,
+    "msPerStep": 4.007666666706403
+  },
+  {
+    "maxPopulationMsPerStep": 11.320833333333333
+  }
+]

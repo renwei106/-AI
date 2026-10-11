@@ -1,0 +1,30 @@
+{
+  "before": [
+    {
+      "accent": "#48614c",
+      "background": "color-mix(in srgb, #48614c 20%, #ffffff)",
+      "visible": true,
+      "pending": false
+    },
+    {
+      "accent": "#199b7b",
+      "background": "color-mix(in srgb, #199b7b 20%, #ffffff)",
+      "visible": true,
+      "pending": false
+    }
+  ],
+  "after": [
+    {
+      "accent": "#48614c",
+      "background": "color-mix(in srgb, #48614c 20%, #ffffff)",
+      "visible": false,
+      "pending": true
+    },
+    {
+      "accent": "#199b7b",
+      "background": "color-mix(in srgb, #199b7b 20%, #ffffff)",
+      "visible": true,
+      "pending": false
+    }
+  ]
+}

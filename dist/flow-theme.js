@@ -370,7 +370,7 @@
     }
     function colors(){
       if(disposed||!root.isConnected)return;
-      const color=getComputedStyle(cover).backgroundColor;
+      const style=getComputedStyle(cover),color=style.getPropertyValue('--page-color').trim()||style.backgroundColor;
       pixelContext.fillStyle=color;pixelContext.fillRect(0,0,1,1);
       const rgb=pixelContext.getImageData(0,0,1,1).data;
       const linear=[...rgb].slice(0,3).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});

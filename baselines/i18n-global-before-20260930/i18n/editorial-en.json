@@ -1,0 +1,5330 @@
+{
+  "629ea49a5d93f9979ae3": {
+    "source": "常用工具",
+    "text": "Essentials"
+  },
+  "1cb539293ae0350a22e0": {
+    "source": "本机存储不可用，本次修改仅在当前页面保留",
+    "text": "Storage unavailable. Changes last only for this session."
+  },
+  "e369180d1c13449e8813": {
+    "source": "网页搜索",
+    "text": "Web Search"
+  },
+  "455ece81de5605d85e54": {
+    "source": "百度",
+    "text": "Baidu"
+  },
+  "4e6f64bce8018ad84459": {
+    "source": "必应",
+    "text": "Bing"
+  },
+  "74a835731349ec58ac4f": {
+    "source": "图片搜索",
+    "text": "Image Search"
+  },
+  "17b0f1f39945a813e4b3": {
+    "source": "Google 图片",
+    "text": "Google Images"
+  },
+  "95fd67cf1c98dee18a72": {
+    "source": "百度图片",
+    "text": "Baidu Images"
+  },
+  "44b7cc13719f64699f23": {
+    "source": "必应图片",
+    "text": "Bing Images"
+  },
+  "80a2a54441077650aa80": {
+    "source": "搜狗图片",
+    "text": "Sogou Images"
+  },
+  "c4d0cd18f7b868321fd2": {
+    "source": "设计灵感",
+    "text": "Design Ideas"
+  },
+  "9428536c690e31d40d35": {
+    "source": "花瓣",
+    "text": "Huaban"
+  },
+  "bc0b7d4766b43b1ec4cd": {
+    "source": "站酷",
+    "text": "Zcool"
+  },
+  "faf3902e1e29be1b55d3": {
+    "source": "摄影图库",
+    "text": "Stock Photos"
+  },
+  "f0c6317e1c8ecc5f8c65": {
+    "source": "搜网页",
+    "text": "Web"
+  },
+  "92403c44b2b0639061d3": {
+    "source": "搜收藏",
+    "text": "Bookmarks"
+  },
+  "44ce7ae909bbb28bbbe3": {
+    "source": "搜索",
+    "text": "Search"
+  },
+  "82cbe72ab9d93e0af520": {
+    "source": "搜索引擎",
+    "text": "Search Engine"
+  },
+  "01aeaf3f0fdef73f26fd": {
+    "source": "搜索网页",
+    "text": "Search Web"
+  },
+  "7148df4ec13fea0fd260": {
+    "source": "搜索全部收藏",
+    "text": "Search Bookmarks"
+  },
+  "3386e6b004d572dc2047": {
+    "source": "从一个问题，开始探索",
+    "text": "Search the web"
+  },
+  "745f26c5f1e3f8dd26ba": {
+    "source": "寻找你收藏过的好东西",
+    "text": "Find a saved link"
+  },
+  "b9a4d8890ef65a1c5d63": {
+    "source": "还没有找到这个收藏，换个关键词试试。",
+    "text": "No bookmarks found. Try another keyword."
+  },
+  "07e1829e57a68a6e66f3": {
+    "source": "已自定义",
+    "text": "Custom"
+  },
+  "bba7ef6ba26fbca53d13": {
+    "source": "跟随全局",
+    "text": "Use Global"
+  },
+  "356b2ac86818b583384c": {
+    "source": "请输入以 http 或 https 开头的网址",
+    "text": "Enter an http or https URL"
+  },
+  "2b4035bf2c0be629ba2e": {
+    "source": "请填写收藏名称",
+    "text": "Enter a bookmark name"
+  },
+  "ef31c5c796a46439d5e4": {
+    "source": "当前使用本机体验身份，尚未连接真实账号",
+    "text": "Local demo. No account connected."
+  },
+  "03113024e7a2f1080cb5": {
+    "source": "已进入本机体验空间",
+    "text": "Demo Ready"
+  },
+  "432c49836cf2b389a2cd": {
+    "source": "从体验空间删除「__SHIYU_VAR_0__」？",
+    "text": "Delete “__SHIYU_VAR_0__” from this demo?"
+  },
+  "f97d32b898edac914f64": {
+    "source": "已从本机体验空间移除",
+    "text": "Removed"
+  },
+  "ec850d99f175d00c2cc8": {
+    "source": "灵感流体",
+    "text": "Flow"
+  },
+  "09b4405c75c77c27bb21": {
+    "source": "在浮游与涌流之间，让灵感自在变化。",
+    "text": "Let your ideas flow."
+  },
+  "8eaecdbe733f13bd8238": {
+    "source": "静读书房",
+    "text": "Reading Room"
+  },
+  "b509ed7f85492ff8fab5": {
+    "source": "翻开喜欢，自有天地。",
+    "text": "Open a book. Find your world."
+  },
+  "1be968f1252409695347": {
+    "source": "书",
+    "text": "Book"
+  },
+  "def0af7d3147e187ef57": {
+    "source": "棱光拾景",
+    "text": "Prism"
+  },
+  "dec32c31ca9bdd8eb8e2": {
+    "source": "以三角切面，收藏一片自己的风景。",
+    "text": "Your view, in facets."
+  },
+  "5b4950a41a167749c2dd": {
+    "source": "基础风格",
+    "text": "Minimal"
+  },
+  "8fb636f129e75a5b8192": {
+    "source": "留白之间，轻松开始。",
+    "text": "A little space to begin."
+  },
+  "037eff2c14c29ce71f37": {
+    "source": "拾 隅",
+    "text": "Shiyu"
+  },
+  "0648013ddba2cd8baec7": {
+    "source": "报纸风",
+    "text": "Newspaper"
+  },
+  "dae544be0831051aa9b3": {
+    "source": "把你的收藏，编成今日头条。",
+    "text": "Your finds, today's headlines."
+  },
+  "352634dbcdf0618ace3a": {
+    "source": "拾隅日报",
+    "text": "Shiyu Daily"
+  },
+  "67b7f93cbfe3bcba7eca": {
+    "source": "音乐风",
+    "text": "Music"
+  },
+  "17372b0a5ec5b852d751": {
+    "source": "让每一刻，都有自己的节奏。",
+    "text": "Find your rhythm."
+  },
+  "f759bfb1e62b3923f935": {
+    "source": "电影风",
+    "text": "Cinema"
+  },
+  "bb9086dac76dccac5a0d": {
+    "source": "今天这部电影，由你主演。",
+    "text": "Make today your story."
+  },
+  "41413bd3c792d6fbc067": {
+    "source": "此刻",
+    "text": "Now"
+  },
+  "e588f0e7086e21095dce": {
+    "source": "宇宙风",
+    "text": "Cosmos"
+  },
+  "c7a6c52d2ca5d774ca82": {
+    "source": "在浩瀚里，找到自己的坐标。",
+    "text": "Find your place among the stars."
+  },
+  "7978cf987eae9debe57d": {
+    "source": "翻页时钟",
+    "text": "Flip Clock"
+  },
+  "e450e5f00c4f8ce6dc7a": {
+    "source": "看时间翻过，也让心慢下来。",
+    "text": "Watch time unfold."
+  },
+  "06c04bf020e9420442e2": {
+    "source": "数字雨",
+    "text": "Digital Rain"
+  },
+  "6e5ca69aed0506d05231": {
+    "source": "让流动的时间，落在眼前。",
+    "text": "Time in motion."
+  },
+  "e13d2a8dd2e64a036ccd": {
+    "source": "苔绿",
+    "text": "Moss"
+  },
+  "708c97df7becc4a0dbe1": {
+    "source": "石墨",
+    "text": "Graphite"
+  },
+  "ee3891e95f69c2fc069c": {
+    "source": "香槟",
+    "text": "Champagne"
+  },
+  "30bf1604b07bfc1bdbdb": {
+    "source": "湖蓝",
+    "text": "Lake"
+  },
+  "826eee2e4a897504671a": {
+    "source": "星紫",
+    "text": "Violet"
+  },
+  "905de747234fc548f064": {
+    "source": "落日",
+    "text": "Sunset"
+  },
+  "a6664df1efc880c7fc1c": {
+    "source": "玫瑰",
+    "text": "Rose"
+  },
+  "70dad7a37b55591690e8": {
+    "source": "松弛",
+    "text": "Unwind"
+  },
+  "5261a0a6c9708eafbf1c": {
+    "source": "体验中",
+    "text": "Demo"
+  },
+  "1e2df9c3075ae9e48a96": {
+    "source": "登录",
+    "text": "Sign In"
+  },
+  "5845f56e323cdd075112": {
+    "source": "原创几何风景：山谷、落日与通向远方的道路",
+    "text": "Geometric landscape with a valley, sunset, and distant road"
+  },
+  "75745ef93bb16b80b44d": {
+    "source": "和 AI 聊聊",
+    "text": "Ask AI"
+  },
+  "f64660efbe61dd28d596": {
+    "source": "豆包",
+    "text": "Doubao"
+  },
+  "8bc0ff588cb7359107dc": {
+    "source": "当前时间",
+    "text": "Time"
+  },
+  "c6a9b3756fd88d456e47": {
+    "source": "你的喜欢，自有归处",
+    "text": "A place for what you love"
+  },
+  "767d6f82bb1e40546ffd": {
+    "source": "收下喜欢的，随时再相逢。",
+    "text": "Save it. Find it again."
+  },
+  "26046e1102d2d496f9f0": {
+    "source": "一部关于今天的电影",
+    "text": "Today's feature: you"
+  },
+  "43501f1cabf08df3ea8c": {
+    "source": "NOW SHOWING / 正在热映",
+    "text": "NOW SHOWING"
+  },
+  "cb0d6e97437aaa022cd6": {
+    "source": "此刻，",
+    "text": "Right now,"
+  },
+  "33e533ba37b5db700c8b": {
+    "source": "即是好时光。",
+    "text": "life is good."
+  },
+  "2be27c650a010a20a18c": {
+    "source": "每一个平凡的日子，都值得成为主角。",
+    "text": "Every day deserves a spotlight."
+  },
+  "0fe40e96e0a2247bbc8c": {
+    "source": "由你执导 · 不设剧本",
+    "text": "Your direction · No script"
+  },
+  "ff53fda00656c4ffeb82": {
+    "source": "今日上映",
+    "text": "Today"
+  },
+  "2f0d0cb3e8f221346cb3": {
+    "source": "无限可能",
+    "text": "Anything is possible"
+  },
+  "d87cb88c68c9fef1bfbb": {
+    "source": "ADMIT ONE · 今日入场券",
+    "text": "ADMIT ONE"
+  },
+  "9aab07b3639e0e4e4fc7": {
+    "source": "进入你的故事 ↗",
+    "text": "Your Story ↗"
+  },
+  "67dd25b1f78e5c062fc8": {
+    "source": "私人珍藏 · 每日一刊",
+    "text": "Your collection · Daily edition"
+  },
+  "aa26907fa712c6d8fc1d": {
+    "source": "THE SHIYU DAILY · 你的世界，自成一版",
+    "text": "THE SHIYU DAILY · Your world in print"
+  },
+  "a6420d4f6514227a62f6": {
+    "source": "今日封面 / EDITOR",
+    "text": "COVER / EDITOR"
+  },
+  "1a45ad20a057b77f26ae": {
+    "source": "好奇心不打烊。",
+    "text": "Stay curious."
+  },
+  "1165faf163a6164faf5f": {
+    "source": "好东西，慢慢收藏。",
+    "text": "Keep the good things."
+  },
+  "7806cd07f742e946008e": {
+    "source": "把散落在互联网的灵感，整理成属于自己的风景。",
+    "text": "Turn your finds into a world of your own."
+  },
+  "a491e2606f1139fe0ada": {
+    "source": "你的收藏 / COLLECTION",
+    "text": "YOUR COLLECTION"
+  },
+  "3bcb2608555be7cf56da": {
+    "source": "版面索引",
+    "text": "Contents"
+  },
+  "f61b90fa273a3768d719": {
+    "source": "“让值得留下的，",
+    "text": "“Keep what matters,"
+  },
+  "409309415c66656aab3c": {
+    "source": "都有一个归处。”",
+    "text": "give it a home.”"
+  },
+  "c024962300d43ab89659": {
+    "source": "独立编辑 · 长期珍藏",
+    "text": "Curated by you · Kept for later"
+  },
+  "1e729c2be3b883896470": {
+    "source": "__SHIYU_VAR_3__ 条收藏 ↗",
+    "text": "__SHIYU_VAR_3__ bookmarks ↗"
+  },
+  "837522cd686016f6f36e": {
+    "source": "专注模式",
+    "text": "Focus Mode"
+  },
+  "7e0a4b1c2272e1b71c27": {
+    "source": "重置 25 分钟",
+    "text": "Reset 25 Min"
+  },
+  "cf0f9d8ab16469d20c2a": {
+    "source": "一次，只做一件事。",
+    "text": "One thing at a time."
+  },
+  "1332cdf7b412ff0883ca": {
+    "source": "暂停专注",
+    "text": "Pause"
+  },
+  "033df8fb6e36a55d41f2": {
+    "source": "开始专注",
+    "text": "Start Focus"
+  },
+  "78d59781d5f4aa854c3b": {
+    "source": "每一秒，都算数。",
+    "text": "Every second counts."
+  },
+  "d3a2ad6cdb54f55cc167": {
+    "source": "时间在流动，你在此刻。",
+    "text": "Time moves. Be here."
+  },
+  "c25d825b80183e2b45d0": {
+    "source": "连续向下滑动，进入我的空间",
+    "text": "Scroll down twice to open your space"
+  },
+  "a9df3735ecb177b049c2": {
+    "source": "向下滑动，进入我的空间",
+    "text": "Scroll down to open your space"
+  },
+  "5e9e915d6fbaa0a2535f": {
+    "source": "打开搜索",
+    "text": "Open Search"
+  },
+  "24ce7f344f719fe91fbb": {
+    "source": "搜索网页或收藏",
+    "text": "Search web or bookmarks"
+  },
+  "e2a17a075548001bef70": {
+    "source": "主题风格",
+    "text": "Themes"
+  },
+  "8b0c472be5f9a639f765": {
+    "source": "选一种风格，开启你的日常。",
+    "text": "Choose your everyday look."
+  },
+  "06b929d5ceb98c6f3a25": {
+    "source": "明暗模式__SHIYU_VAR_3__",
+    "text": "Appearance__SHIYU_VAR_3__"
+  },
+  "dfce684680fcda56f5c8": {
+    "source": "主色__SHIYU_VAR_5__",
+    "text": "Color__SHIYU_VAR_5__"
+  },
+  "86efcaec86cb5db003f8": {
+    "source": "字体与页面宽度",
+    "text": "Font & Width"
+  },
+  "86ce8dfe864b8ea738a4": {
+    "source": "字体__SHIYU_VAR_7__",
+    "text": "Font__SHIYU_VAR_7__"
+  },
+  "1f087f54983d5569d62e": {
+    "source": "空间页宽度__SHIYU_VAR_9__",
+    "text": "Space Width__SHIYU_VAR_9__"
+  },
+  "26df012d17e68035804f": {
+    "source": "即时预览 · 自动保存在本机",
+    "text": "Live preview · Saved locally"
+  },
+  "e4f605174daf07d33e69": {
+    "source": "全局主题",
+    "text": "Global Theme"
+  },
+  "60912cb15e307c53f690": {
+    "source": "当前场景",
+    "text": "This Scene"
+  },
+  "9cac3b95b742e1913010": {
+    "source": "仅设置「__SHIYU_VAR_0__」，其他场景不受影响。",
+    "text": "Only changes “__SHIYU_VAR_0__”."
+  },
+  "d58f378c6ac8985099dd": {
+    "source": "应用到首页与空间；已自定义的场景保留自己的设置。",
+    "text": "Applies to home and spaces. Custom scenes keep their settings."
+  },
+  "aa0819dfc4d8d78280b8": {
+    "source": "浅色",
+    "text": "Light"
+  },
+  "a6b75d0680322a61f4d4": {
+    "source": "深色",
+    "text": "Dark"
+  },
+  "217cfe7db1e3d10a734f": {
+    "source": "跟随系统",
+    "text": "System"
+  },
+  "82baa8d6e7a43613df59": {
+    "source": "清晰现代",
+    "text": "Modern"
+  },
+  "6eda8120f8c485a083bc": {
+    "source": "人文书写",
+    "text": "Handwritten"
+  },
+  "7d9886333bffbb98730a": {
+    "source": "舒适留白",
+    "text": "Comfortable"
+  },
+  "a8425bee05bb529c8737": {
+    "source": "横向铺开",
+    "text": "Wide"
+  },
+  "4385d6821e19ee36bcdd": {
+    "source": "全部恢复跟随全局",
+    "text": "Reset to Global"
+  },
+  "48e79fa83753fe429c55": {
+    "source": "日 报",
+    "text": "DAILY"
+  },
+  "d048f1fa2c03db806322": {
+    "source": "展开空间入口",
+    "text": "Open Spaces"
+  },
+  "d7064f0a7c3218dc5342": {
+    "source": "我的空间",
+    "text": "My Space"
+  },
+  "8f886b95734dbb0f53a9": {
+    "source": "↑ 返回封面",
+    "text": "↑ Home"
+  },
+  "f6a35af81163c2577e27": {
+    "source": "这一段专注完成了，休息一下吧。",
+    "text": "Focus complete. Take a break."
+  },
+  "855a29f226a3f72b9dec": {
+    "source": "再向下滑动一次，进入我的空间",
+    "text": "Scroll down again to open your space"
+  },
+  "744a425d300a48448fe1": {
+    "source": "再向上滑一次，回到封面",
+    "text": "Scroll up again to go home"
+  },
+  "0baf07bca4e63587478e": {
+    "source": "开始探索",
+    "text": "Explore"
+  },
+  "ab008ef18dac8f830cfd": {
+    "source": "关闭搜索",
+    "text": "Close Search"
+  },
+  "41d42ade41e87ef57805": {
+    "source": "专注",
+    "text": "Focus"
+  },
+  "8da25c958f9d37383912": {
+    "source": "轻快",
+    "text": "Upbeat"
+  },
+  "62a4ef9af5cc1512faf9": {
+    "source": "放空",
+    "text": "Daydream"
+  },
+  "ec0c1ec2a4568104dec6": {
+    "source": "晨雾",
+    "text": "Morning Mist"
+  },
+  "bb610284c6999730b68a": {
+    "source": "微光",
+    "text": "Glimmer"
+  },
+  "3e5a6a0f6ebf1fa73c05": {
+    "source": "晚风",
+    "text": "Evening Breeze"
+  },
+  "5e3fc9fda48386cd68cc": {
+    "source": "当前浏览器无法播放，请再试一次",
+    "text": "Playback failed. Try again."
+  },
+  "989f5daf8b5c63adbf3c": {
+    "source": "暂停音乐",
+    "text": "Pause Music"
+  },
+  "d57e68807b92fef01308": {
+    "source": "播放音乐",
+    "text": "Play Music"
+  },
+  "7db2e189ecb010659eee": {
+    "source": "静音",
+    "text": "Mute"
+  },
+  "473400815c0f687da9d5": {
+    "source": "声音",
+    "text": "Sound"
+  },
+  "8d01732e7477851b1aeb": {
+    "source": "取消静音",
+    "text": "Unmute"
+  },
+  "1cc0f807f3f0f67a9adf": {
+    "source": "__SHIYU_VAR_0__ · __SHIYU_VAR_1__ · 原创轻音乐",
+    "text": "__SHIYU_VAR_0__ · __SHIYU_VAR_1__ · Original music"
+  },
+  "f017d6c9f247c42d1e43": {
+    "source": "静音中",
+    "text": "Muted"
+  },
+  "e6666b2eb3327899a00d": {
+    "source": "正在播放",
+    "text": "Playing"
+  },
+  "864ead58a317e0d7daf9": {
+    "source": "点击播放",
+    "text": "Play"
+  },
+  "cc9d839cf3429705cb3f": {
+    "source": "把此刻，",
+    "text": "Tune in,"
+  },
+  "4d7312d26caa6294f7ee": {
+    "source": "调到喜欢的频率。",
+    "text": "find your rhythm."
+  },
+  "abe802fde42c0f48b292": {
+    "source": "选择轻音乐",
+    "text": "Choose Music"
+  },
+  "89b78554ac5e7355f481": {
+    "source": "__SHIYU_VAR_10__ · __SHIYU_VAR_11__ · 原创轻音乐",
+    "text": "__SHIYU_VAR_10__ · __SHIYU_VAR_11__ · Original music"
+  },
+  "5664e9b1c01da051be36": {
+    "source": "静音 ×",
+    "text": "Mute ×"
+  },
+  "88a43c908896033d52a3": {
+    "source": "声音 ♪",
+    "text": "Sound ♪"
+  },
+  "491a3887aa36c05f19a7": {
+    "source": "紫星",
+    "text": "Violet Star"
+  },
+  "a8cc9d70c2fd454380be": {
+    "source": "海蓝星",
+    "text": "Ocean Star"
+  },
+  "3ed86b1692130a28e8b5": {
+    "source": "沙金星",
+    "text": "Golden Star"
+  },
+  "79b70e19c2914a663567": {
+    "source": "青岚星",
+    "text": "Jade Star"
+  },
+  "9814c67932944f8a86ce": {
+    "source": "赤砂星",
+    "text": "Red Star"
+  },
+  "11d6f2b20ea8e37c70e8": {
+    "source": "月白星",
+    "text": "Lunar Star"
+  },
+  "58fe5920ab204567e003": {
+    "source": "环绕星球，点击可切换中心",
+    "text": "Click a planet to center it"
+  },
+  "52e128d75cec990178d1": {
+    "source": "点击星球，切换中心",
+    "text": "Center Planet"
+  },
+  "cfe5824527a2e0df7a54": {
+    "source": "PERSONAL OBSERVATORY / 个人观测站",
+    "text": "PERSONAL OBSERVATORY"
+  },
+  "e7a1f623994df2505108": {
+    "source": "漫游宇宙，",
+    "text": "Explore the cosmos,"
+  },
+  "c26e0e0f57853e115f42": {
+    "source": "也回到自己。",
+    "text": "find yourself."
+  },
+  "66314ff23dc0ad16c997": {
+    "source": "宇宙很大，这里属于你。",
+    "text": "A little corner of the universe, yours."
+  },
+  "788f3634d09939a4f49f": {
+    "source": "，当前中心",
+    "text": ", centered"
+  },
+  "7eb71450c3db5f56fe52": {
+    "source": "，设为中心",
+    "text": ", center this"
+  },
+  "3b6fefc50febace44723": {
+    "source": "小时",
+    "text": "Hours"
+  },
+  "bd957bc497aa1a4101b1": {
+    "source": "分钟",
+    "text": "Minutes"
+  },
+  "42ded621c353fbcbaaf0": {
+    "source": "查看会员方案",
+    "text": "View Plans"
+  },
+  "bc62d1b6b936c78dbbd0": {
+    "source": "工作",
+    "text": "Work"
+  },
+  "ce9b12499c47175931fb": {
+    "source": "阅读",
+    "text": "Reading"
+  },
+  "15d208d1b4c98aae0cba": {
+    "source": "生活",
+    "text": "Life"
+  },
+  "749528de0125f73a52ee": {
+    "source": "日光",
+    "text": "Sunlight"
+  },
+  "2118cbc109880ac8bda9": {
+    "source": "学习",
+    "text": "Learning"
+  },
+  "da7efa96d4ffeaf896ac": {
+    "source": "唱片",
+    "text": "Record"
+  },
+  "c05f7cd6ed3587a2e538": {
+    "source": "飞机",
+    "text": "Plane"
+  },
+  "eeef861b87676f3f2f6f": {
+    "source": "地球",
+    "text": "Earth"
+  },
+  "8738812f1d3f29f105da": {
+    "source": "银河",
+    "text": "Galaxy"
+  },
+  "0b8526780a1b8256504b": {
+    "source": "帆船",
+    "text": "Sailboat"
+  },
+  "3fd47edce45b3603d419": {
+    "source": "关闭",
+    "text": "Close"
+  },
+  "01f4846788c7f054ed67": {
+    "source": "已切换为",
+    "text": "Switched to"
+  },
+  "3f4ebc4aad9793b6c696": {
+    "source": "已选择",
+    "text": "Selected"
+  },
+  "4cabaad3579bdbdd7f2e": {
+    "source": "全选本页",
+    "text": "Select Page"
+  },
+  "7ecf1cde648680d2e477": {
+    "source": "已选",
+    "text": "Selected"
+  },
+  "3347e052c0f174347526": {
+    "source": "空间",
+    "text": "Space"
+  },
+  "7f72f06a88779b5a0067": {
+    "source": "场景",
+    "text": "Scene"
+  },
+  "399ee69347726cee0129": {
+    "source": "分组",
+    "text": "Group"
+  },
+  "cb37b054ec37c8b2fdb6": {
+    "source": "想要的功能",
+    "text": "Request Feature"
+  },
+  "fc64be7a11a627a86012": {
+    "source": "一个想法，让这里更好用",
+    "text": "Help shape Shiyu"
+  },
+  "5f4217ac596dceab347a": {
+    "source": "期望功能描述",
+    "text": "Your Idea"
+  },
+  "7a8ca2fb961f70023f85": {
+    "source": "你希望拾隅增加什么功能，或怎样改进？\n可以说说使用场景，以及你期待的效果。",
+    "text": "What would you like to add or improve? Tell us how you would use it."
+  },
+  "898c8f338333e7e06164": {
+    "source": "使用遇到的问题",
+    "text": "Report Issue"
+  },
+  "8825e6cc47d2830a0181": {
+    "source": "告诉我们，哪里不太顺手",
+    "text": "What went wrong?"
+  },
+  "6a11331de9003411d52b": {
+    "source": "问题描述",
+    "text": "Issue Details"
+  },
+  "2b20f52cd876f82cc142": {
+    "source": "你在哪一步遇到了问题？\n可以告诉我们操作步骤、期望的结果，以及实际发生的情况。",
+    "text": "Describe the steps, what you expected, and what happened."
+  },
+  "6d76baa3eaefc8b5205c": {
+    "source": "感谢与鼓励",
+    "text": "Say Thanks"
+  },
+  "66a26eb63248419c7cec": {
+    "source": "把一份暖意，捎给拾隅",
+    "text": "Send a little kindness"
+  },
+  "6790f6c44b0033142b4a": {
+    "source": "想对我们说的话",
+    "text": "Your Message"
+  },
+  "c231f74987bca385c8e3": {
+    "source": "哪一个细节，让你觉得被照顾到了？\n谢谢你愿意把这份暖意分享给我们。",
+    "text": "What made your day? We'd love to hear it."
+  },
+  "cde2f0cfc2af3cf01ccf": {
+    "source": "使用心得",
+    "text": "Share Experience"
+  },
+  "fd753256f404c5010b47": {
+    "source": "聊聊拾隅陪伴你的日常",
+    "text": "Shiyu in your everyday life"
+  },
+  "7ba3c2ea7559dd6fcf7b": {
+    "source": "你平时怎样使用拾隅？\n欢迎聊聊你的使用习惯、感受，或一个想分享的小故事。",
+    "text": "How do you use Shiyu? Share a habit, a tip, or a story."
+  },
+  "39a34e6bd55e06d35e0c": {
+    "source": "捎来回音",
+    "text": "Feedback"
+  },
+  "a7aa73da93503b90e68e": {
+    "source": "关闭反馈",
+    "text": "Close Feedback"
+  },
+  "77aaa100c9fd61ef6980": {
+    "source": "把想说的，捎给拾隅。",
+    "text": "We're listening."
+  },
+  "a48b6dcb16ef218b8acf": {
+    "source": "一个灵感，一处不便，我们都愿意听。",
+    "text": "Ideas, issues, or a quick hello."
+  },
+  "dd3620a968e9fb0cda4b": {
+    "source": "这次想说",
+    "text": "Feedback Type"
+  },
+  "f125f9e053dcf8695d8d": {
+    "source": "必选",
+    "text": "Required"
+  },
+  "6b6cde10fd0fb7d23fb6": {
+    "source": "问题分类",
+    "text": "Category"
+  },
+  "04652a6c280cf2609ada": {
+    "source": "选择遇到问题的部分",
+    "text": "Choose a category"
+  },
+  "df7392cc96bedc517080": {
+    "source": "重新读取",
+    "text": "Reload"
+  },
+  "0879720937206721ede2": {
+    "source": "内容描述",
+    "text": "Details"
+  },
+  "11da9dc4428537c43ec2": {
+    "source": "必填",
+    "text": "Required"
+  },
+  "70161674c004288a02fb": {
+    "source": "你希望怎样改进，或遇到了什么问题？&#10;可以告诉我们操作步骤、期望的结果，以及实际发生的情况。",
+    "text": "What could be better?&#10;Share the steps, expected result, and what happened."
+  },
+  "37ca31be735b149ed12e": {
+    "source": "补充图片",
+    "text": "Add Images"
+  },
+  "ebdcbdcf9c998d72cb1e": {
+    "source": "选填",
+    "text": "Optional"
+  },
+  "5505f2cf3c5b37f5e574": {
+    "source": "已添加的图片",
+    "text": "Added Images"
+  },
+  "92ef6cdca68293a3ec8d": {
+    "source": "点选图片，也可拖到这里或直接粘贴",
+    "text": "Choose, drop, or paste images"
+  },
+  "9767c50562bc51886ce8": {
+    "source": "最多 5 张，每张不超过 5 MB · PNG / JPG / WebP / GIF",
+    "text": "Up to 5 images · 5 MB each · PNG / JPG / WebP / GIF"
+  },
+  "323a881ebd474ae0373e": {
+    "source": "联系方式",
+    "text": "Contact"
+  },
+  "349edcc936b664ad63e2": {
+    "source": "选填，方便我们进一步联系你",
+    "text": "Optional, in case we need to follow up"
+  },
+  "bc5e0abdc402ec913b80": {
+    "source": "联系电话或邮箱",
+    "text": "Phone or email"
+  },
+  "1fcea5b50e3f9c71aa91": {
+    "source": "每一份回音，都会被认真收下。",
+    "text": "Every message matters."
+  },
+  "9a1c3e9a1823814693e4": {
+    "source": "寄出反馈 __SHIYU_VAR_5__",
+    "text": "Send Feedback __SHIYU_VAR_5__"
+  },
+  "2495f3141c6c8a22b0ac": {
+    "source": "你的回音，已经收到。",
+    "text": "Message Received"
+  },
+  "fed696dfcab13de4bc8a": {
+    "source": "谢谢你，愿意让拾隅变得更好。",
+    "text": "Thanks for helping us improve Shiyu."
+  },
+  "a28fc311f553dc9f79d4": {
+    "source": "我们会认真阅读，必要时通过你留下的方式联系。",
+    "text": "We'll read your feedback and follow up if needed."
+  },
+  "99c2bc58d3420ec73e3b": {
+    "source": "回到拾隅",
+    "text": "Back Home"
+  },
+  "1af8110ed83a28c19307": {
+    "source": "正在寄出…",
+    "text": "Sending…"
+  },
+  "0ecc16e7fa2cccf472ea": {
+    "source": "正在读取图片…",
+    "text": "Loading images…"
+  },
+  "c9e2b00610b4e9df0b0c": {
+    "source": "寄出反馈 __SHIYU_VAR_0__",
+    "text": "Send Feedback __SHIYU_VAR_0__"
+  },
+  "b356455037f8421289dd": {
+    "source": "暂时无法读取分类",
+    "text": "Categories Unavailable"
+  },
+  "74222eeec09d5879de73": {
+    "source": "分类暂时无法读取，请重试。",
+    "text": "Couldn't load categories. Try again."
+  },
+  "f93c59e703b4ddbf89d4": {
+    "source": "正在读取分类…",
+    "text": "Loading categories…"
+  },
+  "6f01dee72c124da26797": {
+    "source": "暂无可用分类，请稍后再试。",
+    "text": "No categories available. Try later."
+  },
+  "e26f68130b4f8a2dd93d": {
+    "source": "最多添加 5 张图片，可移除后再添加。",
+    "text": "5-image limit. Remove one to add another."
+  },
+  "14282c55586f0c929250": {
+    "source": "仅支持 PNG、JPG、WebP 和 GIF 图片。",
+    "text": "Use PNG, JPG, WebP, or GIF."
+  },
+  "560f6eb4a4d9d29f2893": {
+    "source": "有图片超过 5 MB，请缩小后再添加。",
+    "text": "Image exceeds 5 MB. Resize it first."
+  },
+  "799bb044cf41b1e2975a": {
+    "source": "图片尺寸过大，请缩小后再添加。",
+    "text": "Image dimensions are too large. Resize it first."
+  },
+  "c692bf2bc2453462f491": {
+    "source": "粘贴图片-__SHIYU_VAR_0__.png",
+    "text": "Pasted-image-__SHIYU_VAR_0__.png"
+  },
+  "a754554f106740a61c01": {
+    "source": "有图片无法读取，请换一张试试。",
+    "text": "Couldn't read an image. Try another."
+  },
+  "6bc45435b32f99bdc296": {
+    "source": "预览图片 __SHIYU_VAR_0__",
+    "text": "Preview image __SHIYU_VAR_0__"
+  },
+  "f68b00d6adcd8d40ae6c": {
+    "source": "移除图片 __SHIYU_VAR_0__",
+    "text": "Remove image __SHIYU_VAR_0__"
+  },
+  "d65e705b67463c6a3992": {
+    "source": "已添加 5 张图片，可移除后替换",
+    "text": "5 images added. Remove one to replace it."
+  },
+  "360a3ef4358abcbc329b": {
+    "source": "继续添加图片，或直接粘贴",
+    "text": "Add or paste more images"
+  },
+  "b0bf48ec78787541f9f9": {
+    "source": "反馈图片预览",
+    "text": "Image Preview"
+  },
+  "b097f500ba2b0c508d18": {
+    "source": "关闭图片预览",
+    "text": "Close Preview"
+  },
+  "b70bb4acc0484cf040de": {
+    "source": "我",
+    "text": "Me"
+  },
+  "415347c78c7ce6843d3e": {
+    "source": "账号已切换，请使用当前账号重新填写。",
+    "text": "Account changed. Please fill in the form again."
+  },
+  "561864754f0e92870149": {
+    "source": "先选一类这次想说的内容吧。",
+    "text": "Choose a feedback type."
+  },
+  "574667cafad3bfda0b66": {
+    "source": "请选择遇到问题的部分。",
+    "text": "Choose an issue category."
+  },
+  "ad7ca63a5ba0b3a3aae2": {
+    "source": "请填写__SHIYU_VAR_0__，再寄给我们吧。",
+    "text": "Enter __SHIYU_VAR_0__ before sending."
+  },
+  "7f5187380c9637844a51": {
+    "source": "请填写有效的联系电话或邮箱。",
+    "text": "Enter a valid phone number or email."
+  },
+  "515559957fd3acbdd969": {
+    "source": "分类",
+    "text": "Category"
+  },
+  "14adff55d8545919b3ed": {
+    "source": "暂时未能寄出，请重试。",
+    "text": "Couldn't send. Try again."
+  },
+  "ca3fb76170afb44608c6": {
+    "source": "未收到保存结果，请重试。",
+    "text": "Save not confirmed. Try again."
+  },
+  "99bff53495f21d0c7a00": {
+    "source": "谢谢你，愿意让拾隅变得更好。我们会认真阅读，必要时通过你留下的方式联系。",
+    "text": "Thanks for helping us improve Shiyu. We'll read your feedback and follow up if needed."
+  },
+  "a2a1022be7518ff9bd86": {
+    "source": "谢谢你，愿意把这些话捎给拾隅。每一份心意，我们都会认真收下。",
+    "text": "Thanks for sharing. Your feedback matters."
+  },
+  "2e890717c70805103c69": {
+    "source": "暂时未收到寄出结果，内容已保留，请重试。",
+    "text": "Delivery not confirmed. Your message is saved; try again."
+  },
+  "ffdd5816061010670aac": {
+    "source": "捎来回音 · 问题反馈与建议",
+    "text": "Feedback & Ideas"
+  },
+  "13e6a7188170349435bd": {
+    "source": "__SHIYU_VAR_0__捎来回音",
+    "text": "__SHIYU_VAR_0__Feedback"
+  },
+  "113ce85fd52565492576": {
+    "source": "让灵感\n自在流动",
+    "text": "Let ideas flow"
+  },
+  "fd95ccc4192532e03d08": {
+    "source": "轻轻拨动，让喜欢的事物相遇。",
+    "text": "A gentle touch brings things together."
+  },
+  "f6f854a2bc966f15d7b5": {
+    "source": "城堡",
+    "text": "Castle"
+  },
+  "abc0520b749458139ce3": {
+    "source": "鲨影",
+    "text": "Shark"
+  },
+  "6c73478b406dd4374925": {
+    "source": "远行",
+    "text": "Journey"
+  },
+  "1ee65e6100c5a40412e4": {
+    "source": "太阳系",
+    "text": "Solar System"
+  },
+  "4264bfc3ce455b4deae2": {
+    "source": "奔马",
+    "text": "Horse"
+  },
+  "0205c4fee990cedb4258": {
+    "source": "飞鸟",
+    "text": "Bird"
+  },
+  "1e889b3b436a621dbcee": {
+    "source": "埃菲尔铁塔",
+    "text": "Eiffel Tower"
+  },
+  "09b8847854c9c2d47117": {
+    "source": "上海天际线",
+    "text": "Shanghai Skyline"
+  },
+  "d14995c128f125c1bcb3": {
+    "source": "东方明珠",
+    "text": "Oriental Pearl"
+  },
+  "f35bae3bc45a7e204a5d": {
+    "source": "金字塔",
+    "text": "Pyramid"
+  },
+  "bc236402358a8be302ec": {
+    "source": "蒲公英",
+    "text": "Dandelion"
+  },
+  "b969704234afb6d02b3f": {
+    "source": "混沌漫游",
+    "text": "Drift"
+  },
+  "62896b862c40df0cbc80": {
+    "source": "万象成形",
+    "text": "Formation"
+  },
+  "46905d1dc59912ba713f": {
+    "source": "灵感落雪",
+    "text": "Snowfall"
+  },
+  "aa5e8d681ab443b8d35f": {
+    "source": "潮汐涌动",
+    "text": "Tides"
+  },
+  "5b1d6e46bf9c4e0b47b0": {
+    "source": "散落其间，也自有方向",
+    "text": "Drift with purpose"
+  },
+  "9730f69c6e4497e81398": {
+    "source": "让万象\n缓缓成形",
+    "text": "Watch ideas take shape"
+  },
+  "5db6c0fb69239a84f8e3": {
+    "source": "拨动一次，等待下一种相遇",
+    "text": "Touch once. See what unfolds."
+  },
+  "d1659e65e0e2ad3d4d02": {
+    "source": "让灵感\n缓缓落下",
+    "text": "Let ideas settle"
+  },
+  "5ba8005e26af61c69356": {
+    "source": "落下，积聚，也慢慢消融",
+    "text": "Fall, gather, and fade."
+  },
+  "906ec88f17049cfbcbe1": {
+    "source": "让灵感\n随潮涌动",
+    "text": "Go with the flow"
+  },
+  "c750d286f8a15afe4c22": {
+    "source": "每一次经过，都会掀起新的流向",
+    "text": "Every touch makes a new current."
+  },
+  "214253476036aa8eed6b": {
+    "source": "点击切换为__SHIYU_VAR_2__",
+    "text": "Switch to __SHIYU_VAR_2__"
+  },
+  "cf70d41a605a7189b746": {
+    "source": "当前为__SHIYU_VAR_3__，点击切换为__SHIYU_VAR_4__",
+    "text": "__SHIYU_VAR_3__ · Switch to __SHIYU_VAR_4__"
+  },
+  "10ab5f9a5398ab39c317": {
+    "source": "选择粒子形态",
+    "text": "Particle Shape"
+  },
+  "e73774c760919a7a0745": {
+    "source": "轻触或滑动，让粒子在空间里漫游",
+    "text": "Touch or swipe to move the particles"
+  },
+  "355d51eca028d43772d3": {
+    "source": "轻触或滑动，打乱后等待万象成形",
+    "text": "Touch or swipe to scatter and reshape"
+  },
+  "cb487de2ecda7085ba4c": {
+    "source": "轻触或滑动，拨开一场落雪",
+    "text": "Touch or swipe through the snow"
+  },
+  "cfb50377164ec742721f": {
+    "source": "轻触或滑动，掀起一阵潮汐",
+    "text": "Touch or swipe to stir the tide"
+  },
+  "2fed772091e31e952254": {
+    "source": "点击切换为__SHIYU_VAR_0__",
+    "text": "Switch to __SHIYU_VAR_0__"
+  },
+  "2309b3397d612c51592c": {
+    "source": "当前为__SHIYU_VAR_0__，点击切换为__SHIYU_VAR_1__",
+    "text": "__SHIYU_VAR_0__ · Switch to __SHIYU_VAR_1__"
+  },
+  "40d886acfd912212e455": {
+    "source": "漫游 · 成形 · 落雪 · 涌动",
+    "text": "Drift · Form · Snow · Flow"
+  },
+  "3fca8f336e023a37a417": {
+    "source": "拾隅，切换下一个风格",
+    "text": "Shiyu · Next theme"
+  },
+  "8835d182ce0ffb044b69": {
+    "source": "让这里，更像你。",
+    "text": "Make it yours."
+  },
+  "cea1345fec65efc79c59": {
+    "source": "关闭外观设置",
+    "text": "Close Appearance"
+  },
+  "9fb0aa0085c99cbb5e07": {
+    "source": "收下一点新发现",
+    "text": "Save a Find"
+  },
+  "b24f1fb04a79bb892b82": {
+    "source": "关闭新增收藏",
+    "text": "Close Add Link"
+  },
+  "28f76a9df66b1176ffe9": {
+    "source": "给这个收藏起个名字",
+    "text": "Name this bookmark"
+  },
+  "e31cccd7bba006f53233": {
+    "source": "保存到",
+    "text": "Save To"
+  },
+  "f2756951cc5e36d419b5": {
+    "source": "未登录时，保存会进入登录流程，并保留已填内容。",
+    "text": "Sign in to save. Your entries will be kept."
+  },
+  "63201414b9f23813f9db": {
+    "source": "保存收藏 ↗",
+    "text": "Save Link ↗"
+  },
+  "6eeaa5f5500c27eae7bb": {
+    "source": "把喜欢的，留在这里。",
+    "text": "Keep what you love."
+  },
+  "1987b4004174f271c8be": {
+    "source": "关闭登录",
+    "text": "Close Sign In"
+  },
+  "3cd500dfdd3c97ed0e2f": {
+    "source": "正式版登录后，收藏与个性设置将保存在你的账号下，随时回来，接着探索。",
+    "text": "Sign in to keep bookmarks and settings in your account."
+  },
+  "eed1032f8c82a84612f1": {
+    "source": "当前为交互原型，不收集手机号或密码。体验内容仅保存在本机浏览器，不代表真实账号或云端同步。",
+    "text": "Local demo only. No phone numbers or passwords are collected. Data stays in this browser, with no cloud sync."
+  },
+  "88d4f4d5a84834792eb4": {
+    "source": "体验登录并继续 →",
+    "text": "Try Demo →"
+  },
+  "ab9c9ea814c87a7ae85e": {
+    "source": "支付服务暂时无法连接",
+    "text": "Payment service unavailable"
+  },
+  "3c777e09af0cc096864e": {
+    "source": "免费使用",
+    "text": "Free"
+  },
+  "29d86deecde02a757dab": {
+    "source": "连续订阅暂未开放",
+    "text": "Subscriptions Coming Soon"
+  },
+  "1af375cba40377ab6513": {
+    "source": "支付暂未开放",
+    "text": "Payments Coming Soon"
+  },
+  "de4659c95551c4b931c0": {
+    "source": "正在创建订单…",
+    "text": "Creating order…"
+  },
+  "23fca5e0cf735421d4f4": {
+    "source": "立即支付",
+    "text": "Pay Now"
+  },
+  "3db45185b524e3e9959c": {
+    "source": "联调支付会产生真实扣款",
+    "text": "Test payments incur real charges"
+  },
+  "81d5662777ec8151c1c5": {
+    "source": "会员有效至",
+    "text": "Member Until"
+  },
+  "eac549974957f78e51fe": {
+    "source": "免费账户",
+    "text": "Free Account"
+  },
+  "16c30427973521256044": {
+    "source": "该支付方式暂未开放",
+    "text": "Payment method unavailable"
+  },
+  "412eccb720d58d7dcd23": {
+    "source": "请等待套餐加载完成",
+    "text": "Wait for plans to load"
+  },
+  "d80ae7e6e13f8c16e0d0": {
+    "source": "连续订阅暂未开放，请选择月度或年度会员",
+    "text": "Subscriptions unavailable. Choose a one-time monthly or annual plan."
+  },
+  "cda9d933a9cb379a00ec": {
+    "source": "下单结果尚未确认，请在我的订单中查询，勿重复付款",
+    "text": "Check My Orders before paying again. Your order is not yet confirmed."
+  },
+  "11e3c99639a693eed7f6": {
+    "source": "微信扫码支付",
+    "text": "WeChat Pay"
+  },
+  "6337e0867c002dccd7cc": {
+    "source": "支付宝支付",
+    "text": "Pay with Alipay"
+  },
+  "fb5739b325fc28152fba": {
+    "source": "__SHIYU_VAR_2__ 天 · __SHIYU_VAR_3__",
+    "text": "__SHIYU_VAR_2__ days · __SHIYU_VAR_3__"
+  },
+  "064464bf647781a6021e": {
+    "source": "微信支付",
+    "text": "WeChat Pay"
+  },
+  "276a8bc458036a1afdfc": {
+    "source": "支付宝",
+    "text": "Alipay"
+  },
+  "dc15e33d410556436aa4": {
+    "source": "支付成功",
+    "text": "Payment Complete"
+  },
+  "61a8e3868382ec32965b": {
+    "source": "会员有效期至 __SHIYU_VAR_0__",
+    "text": "Member until __SHIYU_VAR_0__"
+  },
+  "04c99a258750be77ea1e": {
+    "source": "订单已关闭，请返回会员中心重新下单。",
+    "text": "Order closed. Return to Membership to order again."
+  },
+  "1058e0810f545c205cdc": {
+    "source": "支付时间已结束。若你已完成付款，请查询支付结果。",
+    "text": "Payment window expired. Already paid? Check the payment status."
+  },
+  "011b929580e298986086": {
+    "source": "微信支付二维码",
+    "text": "WeChat payment QR code"
+  },
+  "835b221e82aee3487ab2": {
+    "source": "使用微信扫一扫完成付款",
+    "text": "Scan with WeChat to pay"
+  },
+  "166adc854e404a32bf4f": {
+    "source": "前往支付宝付款",
+    "text": "Open Alipay"
+  },
+  "45abea32affb9f2f95a2": {
+    "source": "付款后返回此页查看结果",
+    "text": "Return here after payment"
+  },
+  "1dcbb646861cf265f4fc": {
+    "source": "订单已记录，正在确认支付渠道状态。",
+    "text": "Order saved. Checking payment status."
+  },
+  "704dc0c45cfcf98bad66": {
+    "source": "订单号：__SHIYU_VAR_0__",
+    "text": "Order: __SHIYU_VAR_0__"
+  },
+  "2c332c743d75b990a720": {
+    "source": "查询支付结果",
+    "text": "Check Payment"
+  },
+  "0efb264fdae7b1b7ca2e": {
+    "source": "返回会员中心",
+    "text": "Back to Membership"
+  },
+  "7c7dea47f57597f46fd6": {
+    "source": "我的订单",
+    "text": "My Orders"
+  },
+  "6e3dc8a7989a1705a591": {
+    "source": "正在加载订单…",
+    "text": "Loading orders…"
+  },
+  "25f4ba580022ca199326": {
+    "source": "待支付",
+    "text": "Unpaid"
+  },
+  "400d8fa7bdd9dfb63b57": {
+    "source": "结果待确认",
+    "text": "Pending Confirmation"
+  },
+  "6744b4c6a9aa00381ffe": {
+    "source": "已关闭",
+    "text": "Closed"
+  },
+  "2755c543af347fdfa9ab": {
+    "source": "暂无订单",
+    "text": "No Orders"
+  },
+  "c68807b50ca19e8dd892": {
+    "source": "功能权益",
+    "text": "Benefits"
+  },
+  "7c47469e8f001866c9e9": {
+    "source": "暂无上架套餐",
+    "text": "No Plans Available"
+  },
+  "8f2fa5b8fdcb8e5eb2b7": {
+    "source": "套餐配置暂时无法加载，请稍后重试。",
+    "text": "Couldn't load plans. Try later."
+  },
+  "611a2021c4be77188206": {
+    "source": "那年，海风很轻",
+    "text": "That Sea Breeze"
+  },
+  "2bbd1495b79dfe494b58": {
+    "source": "后来去过很多地方\n还是记得那天，风吹过的声音",
+    "text": "So many places since. That breeze stays with me."
+  },
+  "9e28f03a8e44d05025af": {
+    "source": "去远方的路上",
+    "text": "On the Road"
+  },
+  "1b5b0586fae9e7ec2ce4": {
+    "source": "没有急着抵达\n沿途的光，就已经值得收藏",
+    "text": "No rush to arrive. The light along the way was enough."
+  },
+  "88363bfa1b1b09653781": {
+    "source": "总有一盏灯等你",
+    "text": "A Light for You"
+  },
+  "1da922001a2dd42be093": {
+    "source": "城市慢慢安静下来\n平凡的一天，也有值得记住的瞬间",
+    "text": "The city settles. An ordinary day, worth remembering."
+  },
+  "939ff25173b8245356e9": {
+    "source": "把日子过成风景",
+    "text": "Everyday Beauty"
+  },
+  "d7b076740d424e264e6c": {
+    "source": "走过的每一步\n都藏着后来想念的自己",
+    "text": "Each step holds a version of you worth remembering."
+  },
+  "e3557f83b826bc4db280": {
+    "source": "下次，还来这里",
+    "text": "Until Next Time"
+  },
+  "37fe81552faae8a0cacf": {
+    "source": "海会记得每一次相逢\n我们也会，有新的故事",
+    "text": "The sea remembers. More stories await."
+  },
+  "9359f70162c23267338c": {
+    "source": "无法保存照片",
+    "text": "Couldn't save photo"
+  },
+  "2fbe8253f2c390831947": {
+    "source": "找不到本地照片，请重新选择",
+    "text": "Photo not found. Choose it again."
+  },
+  "2925db915a110eea2780": {
+    "source": "查看第 __SHIYU_VAR_0__ 张照片",
+    "text": "View photo __SHIYU_VAR_0__"
+  },
+  "093181ab0f12fe488774": {
+    "source": "— 人生拾影",
+    "text": "— Moments"
+  },
+  "e1581ae14967367e8310": {
+    "source": "图片暂时无法读取，可在右侧编辑中重新选择",
+    "text": "Photo unavailable. Choose another in the editor."
+  },
+  "1c90faa1c1730008bb30": {
+    "source": "停止音乐",
+    "text": "Stop Music"
+  },
+  "3c7189843a14298ffc29": {
+    "source": "点击切换下一首音乐",
+    "text": "Next Track"
+  },
+  "426908c21f2c8fdede32": {
+    "source": "人生拾影",
+    "text": "Moments"
+  },
+  "e953a65d4d99309a4e81": {
+    "source": "切换下一首音乐",
+    "text": "Next Track"
+  },
+  "2b7fed305c06c44ab7aa": {
+    "source": "翻看下一张照片",
+    "text": "Next Photo"
+  },
+  "0300dc62ab7eae550886": {
+    "source": "编辑回忆照片",
+    "text": "Edit Photo"
+  },
+  "66191f5939f86603ef39": {
+    "source": "编辑照片与文字",
+    "text": "Photo & Text"
+  },
+  "8091e0e64ad5ae61a778": {
+    "source": "点击照片 · 下滑翻看",
+    "text": "Tap a photo · Scroll to browse"
+  },
+  "14a86523174d08328433": {
+    "source": "请选择 JPG、PNG、WebP、GIF 或 AVIF 图片",
+    "text": "Choose JPG, PNG, WebP, GIF, or AVIF"
+  },
+  "0041f9ec04a2c77ab56e": {
+    "source": "编辑状态已变化，请重新选择照片",
+    "text": "Editor changed. Choose the photo again."
+  },
+  "d26090ae53760f1a03d2": {
+    "source": "未能保存图片，请重试",
+    "text": "Couldn't save image. Try again."
+  },
+  "8fdddb4c2473bc096e60": {
+    "source": "编辑人生拾影",
+    "text": "Edit Moments"
+  },
+  "fe44129cff10aa3ca329": {
+    "source": "已选择本地照片 · 原图保存在本机",
+    "text": "Local photo selected · Original kept on this device"
+  },
+  "228d83d0b34ff44f9201": {
+    "source": "默认照片",
+    "text": "Default Photo"
+  },
+  "5a3b455ec9247bb7e584": {
+    "source": "编辑回忆",
+    "text": "Edit Memory"
+  },
+  "64280f0409a655dd8fae": {
+    "source": "关闭编辑",
+    "text": "Close Editor"
+  },
+  "cae3ab4bfdb211938655": {
+    "source": "选择照片",
+    "text": "Choose Photo"
+  },
+  "0996d1dcb2bba7237029": {
+    "source": "照片标题",
+    "text": "Photo Title"
+  },
+  "4786bc5706f27cd7b36b": {
+    "source": "这一张的故事",
+    "text": "The Story"
+  },
+  "22e96bf140d404296f58": {
+    "source": "上传封面图",
+    "text": "Upload Cover"
+  },
+  "aa8350022faf56e60243": {
+    "source": "__SHIYU_VAR_3__点击上传封面图",
+    "text": "__SHIYU_VAR_3__Upload Cover"
+  },
+  "246c4c6695077e135011": {
+    "source": "或使用图片链接",
+    "text": "Or use an image URL"
+  },
+  "a0304d51bd395c82d6fe": {
+    "source": "本地照片保存在当前浏览器，保留原文件。照片框为正方形，居中裁切、等比例铺满。图片链接需联网读取。",
+    "text": "Photos stay in this browser; originals are preserved. Images fill a square with a centered crop. URLs need internet access."
+  },
+  "552ff635e97cacaf6fac": {
+    "source": "自动播放（每 15 秒一张）",
+    "text": "Autoplay (every 15 seconds)"
+  },
+  "c0b3fbff51ccc40b8bf1": {
+    "source": "完成",
+    "text": "Done"
+  },
+  "ba2e93e73037c71e5522": {
+    "source": "恢复默认",
+    "text": "Reset"
+  },
+  "8cbc00ba47dbba3ec88d": {
+    "source": "请输入有效的 HTTP 或 HTTPS 图片链接",
+    "text": "Enter a valid HTTP or HTTPS image URL"
+  },
+  "35b3ef9b43608adab1ba": {
+    "source": "正在读取照片…",
+    "text": "Loading photo…"
+  },
+  "d2ab6c8c05a48674d5f9": {
+    "source": "图片读取超时，请检查链接",
+    "text": "Image timed out. Check the URL."
+  },
+  "d464b8046721bd1d808b": {
+    "source": "链接无法读取为图片，请检查地址",
+    "text": "Couldn't load an image from this URL."
+  },
+  "82ea11fbe843dceca316": {
+    "source": "已更新照片",
+    "text": "Photo Updated"
+  },
+  "169371c9ddf46b9484ef": {
+    "source": "山间来信",
+    "text": "Mountain Letter"
+  },
+  "6ae8929f628288f4e965": {
+    "source": "潮汐之间",
+    "text": "Between Tides"
+  },
+  "c80fc7bf295324abf7a6": {
+    "source": "森林呼吸",
+    "text": "Forest Air"
+  },
+  "e5f4a6067266415712a6": {
+    "source": "沙海流金",
+    "text": "Golden Sands"
+  },
+  "50c36c1569214806de62": {
+    "source": "湖畔清风",
+    "text": "Lakeside Breeze"
+  },
+  "481134a804112e186430": {
+    "source": "雪岭微光",
+    "text": "Alpine Glow"
+  },
+  "634a5c3deb996def966a": {
+    "source": "下一幕 ·",
+    "text": "Next ·"
+  },
+  "939b26b6c4b532c3155d": {
+    "source": "三角切面图像",
+    "text": "Faceted image"
+  },
+  "c739714ea4c319bffb46": {
+    "source": "山岚",
+    "text": "Mountain Mist"
+  },
+  "54d7eb723bdef8d23561": {
+    "source": "把远山，收进日常",
+    "text": "Bring the mountains home"
+  },
+  "e2f38e1d8248de5e4808": {
+    "source": "潮汐",
+    "text": "Tide"
+  },
+  "e7375e99e0b301c4d6df": {
+    "source": "心里有一片海",
+    "text": "A little sea within"
+  },
+  "d9bccdc7c4d79ec6f9ee": {
+    "source": "沙丘",
+    "text": "Dunes"
+  },
+  "55309ebf521ef8d6693c": {
+    "source": "风走过，留下形状",
+    "text": "Shapes left by the wind"
+  },
+  "d38212e659d9a7319156": {
+    "source": "狐影",
+    "text": "Fox"
+  },
+  "997fd2a34fd937fe4fb9": {
+    "source": "与一份灵动相遇",
+    "text": "A glimpse of life"
+  },
+  "4007e98e7bb888fdad25": {
+    "source": "林鹿",
+    "text": "Forest Deer"
+  },
+  "d89d1ffe883314e6b966": {
+    "source": "在安静里，遇见自然",
+    "text": "Meet nature in the quiet"
+  },
+  "15dac004e02762f32904": {
+    "source": "侧影",
+    "text": "Profile"
+  },
+  "f6a5c52fe3e7a9266b76": {
+    "source": "每个人，都有自己的棱角",
+    "text": "We all have our own edges"
+  },
+  "b3f36e3d5e5796723422": {
+    "source": "三角切面的轻量卡片，保留网址图标与名称",
+    "text": "Faceted cards with link icons and names"
+  },
+  "2baf41e49504b1abd77a": {
+    "source": "把喜欢，拾成风景",
+    "text": "Your own little landscape"
+  },
+  "f987675e623b991b4cfa": {
+    "source": "一片山海，一点灵感。让日常有自己的形状。",
+    "text": "A view, an idea, a shape for your day."
+  },
+  "70d7c5d7120b0d7b03ec": {
+    "source": "__SHIYU_VAR_0__，三角切面插画",
+    "text": "__SHIYU_VAR_0__, faceted illustration"
+  },
+  "c1e17b71463818830a94": {
+    "source": "__SHIYU_VAR_0__，全景三角切面壁纸",
+    "text": "__SHIYU_VAR_0__, panoramic faceted wallpaper"
+  },
+  "c8879b60855d67e4787e": {
+    "source": "私藏风景",
+    "text": "My Landscape"
+  },
+  "f0da12c6892c4a97dc95": {
+    "source": "更换壁纸",
+    "text": "Change Wallpaper"
+  },
+  "919bdf9e663f54231526": {
+    "source": "换一幅",
+    "text": "Next Image"
+  },
+  "2669a5542851f015c4b7": {
+    "source": "上传本地图片",
+    "text": "Upload Image"
+  },
+  "86a00cf74253c265263d": {
+    "source": "效果",
+    "text": "Effect"
+  },
+  "ff0cf37ca3b4c19f74f5": {
+    "source": "棱光拾景 · 画面设置",
+    "text": "Prism · Image Settings"
+  },
+  "c0518c03b349ccebdf22": {
+    "source": "棱光拾景效果",
+    "text": "Prism Effect"
+  },
+  "9129afb2b4eabd03e2f6": {
+    "source": "切面细节",
+    "text": "Detail"
+  },
+  "29a2084b76ace563182e": {
+    "source": "画面配色",
+    "text": "Colors"
+  },
+  "da66efb333994abde805": {
+    "source": "删除我的图片",
+    "text": "Delete My Image"
+  },
+  "8ee09f5f1f38db617b51": {
+    "source": "简约",
+    "text": "Simple"
+  },
+  "2588b5b9bacc1df62c25": {
+    "source": "均衡",
+    "text": "Balanced"
+  },
+  "c4191d4913382e3277b1": {
+    "source": "精细",
+    "text": "Detailed"
+  },
+  "242b908845ea2a2f1835": {
+    "source": "接近原图",
+    "text": "Natural"
+  },
+  "67e59e54b714e1643bc8": {
+    "source": "融入主题",
+    "text": "Theme Blend"
+  },
+  "b8c940d64e2d75770284": {
+    "source": "正在处理图片…",
+    "text": "Processing image…"
+  },
+  "f82deaf423491a2703be": {
+    "source": "已换好风景",
+    "text": "Image Updated"
+  },
+  "add3e18736e223e5ba3a": {
+    "source": "图片处理或保存失败，请换一张图片重试",
+    "text": "Couldn't process or save this image. Try another."
+  },
+  "b78cb856c2b990c36a6c": {
+    "source": "请选择 15 MB 以内的 JPG、PNG 或 WebP 图片",
+    "text": "Choose a JPG, PNG, or WebP under 15 MB"
+  },
+  "830184252cd8a1e423b7": {
+    "source": "选择一张本地图片",
+    "text": "Choose a local image"
+  },
+  "6ce229eab7dbe9f7d430": {
+    "source": "已删除我的图片",
+    "text": "Image Deleted"
+  },
+  "0f5293715ed5e5db18e7": {
+    "source": "暂时无法删除图片，请重试",
+    "text": "Couldn't delete image. Try again."
+  },
+  "63f3fca0ec5b4bb09de5": {
+    "source": "翻开喜欢，自有天地",
+    "text": "Open a book. Find your world."
+  },
+  "553734840675ba6b1205": {
+    "source": "留一页空白，给此刻的自己",
+    "text": "A blank page for today"
+  },
+  "62d9c2c1c9669ecdee52": {
+    "source": "藏书架",
+    "text": "Bookshelf"
+  },
+  "513a8525725666535942": {
+    "source": "侧光里，一本翻开的书静静放在叠起的藏书上",
+    "text": "An open book rests on a stack in soft side light"
+  },
+  "86f39e38fe635a11413d": {
+    "source": "日常的诗意",
+    "text": "Everyday Poetry"
+  },
+  "2035427476789c772cb8": {
+    "source": "晴空",
+    "text": "Clear Skies"
+  },
+  "a75e4976cbf1de50f728": {
+    "source": "夜想",
+    "text": "Nocturne"
+  },
+  "c60409fea5cdd1cd9a27": {
+    "source": "页外，一本可以翻动的艺术书",
+    "text": "An interactive art book"
+  },
+  "1c410c2b4ea2040a5906": {
+    "source": "页外",
+    "text": "Beyond Pages"
+  },
+  "45a0dd98435f973661d7": {
+    "source": "翻到下一页",
+    "text": "Next Page"
+  },
+  "1ca105b69982415f97eb": {
+    "source": "翻一页",
+    "text": "Turn Page"
+  },
+  "5ff9b002a6f1b492e04d": {
+    "source": "选择书页",
+    "text": "Choose Page"
+  },
+  "7353b1bbbce6e952f17e": {
+    "source": "页：",
+    "text": "Page:"
+  },
+  "2a889dff9e6214835fb9": {
+    "source": "翻到下一页：",
+    "text": "Next page:"
+  },
+  "b742027b11a28d6d219a": {
+    "source": "书脊朝外，把收藏摞成一架好书",
+    "text": "Your collection, a shelf of books"
+  },
+  "1a953daf340df050afdc": {
+    "source": "，在新标签页打开",
+    "text": ", opens in a new tab"
+  },
+  "5c187a9269137722aae3": {
+    "source": "收一本新书",
+    "text": "Add Book"
+  },
+  "a3048c780f1d028f3028": {
+    "source": "收藏网址",
+    "text": "Add Link"
+  },
+  "3a116815bc9da10d888f": {
+    "source": "个",
+    "text": "items"
+  },
+  "49ccde43a15497914b82": {
+    "source": "项",
+    "text": "items"
+  },
+  "1283df0c17cb5a2d99ed": {
+    "source": "每一个落下的念头，都有停泊之处。",
+    "text": "A place for every idea to land."
+  },
+  "9d7c799f1cd6df54637f": {
+    "source": "点击切换为混沌成形",
+    "text": "Switch to Formation"
+  },
+  "a021e1426efdfcf809e1": {
+    "source": "当前为灵感落雪，点击切换为混沌成形",
+    "text": "Snowfall · Switch to Formation"
+  },
+  "0eac715fa5d9ecc3b4a2": {
+    "source": "轻触或滑动，掀起一阵浪",
+    "text": "Touch or swipe to make a wave"
+  },
+  "185b58c5903abc5f310e": {
+    "source": "个性化设置",
+    "text": "Personalize"
+  },
+  "03d843deb35babd8ede6": {
+    "source": "切换日间模式",
+    "text": "Light Mode"
+  },
+  "78aa0aecd8ecf9b7cfd2": {
+    "source": "切换夜间模式",
+    "text": "Dark Mode"
+  },
+  "0abdcf2c22817bc1c36d": {
+    "source": "__SHIYU_VAR_0__ 年 · 第 __SHIYU_VAR_1__ 期",
+    "text": "__SHIYU_VAR_0__ · Issue __SHIYU_VAR_1__"
+  },
+  "cdd0aba2b951512cb8c6": {
+    "source": "海风来信",
+    "text": "Sea Breeze"
+  },
+  "0c582b30ee5566c268b5": {
+    "source": "有些答案，藏在潮汐之间。",
+    "text": "Some answers come with the tide."
+  },
+  "425b4e44ab11cfa36eaf": {
+    "source": "未眠之城",
+    "text": "Sleepless City"
+  },
+  "71c7288a0a6c1d4f200b": {
+    "source": "在所有灯熄灭之前，与你相遇。",
+    "text": "Meet me before the lights go out."
+  },
+  "b2b014316e562ced7abe": {
+    "source": "一路向远",
+    "text": "Farther On"
+  },
+  "db7e6996dbecfcc5af44": {
+    "source": "走得更远，是为了回到自己。",
+    "text": "Go farther. Come back to yourself."
+  },
+  "9411c6c6cfae4fd874bd": {
+    "source": "__SHIYU_VAR_2__电影海报背景",
+    "text": "__SHIYU_VAR_2__ film poster background"
+  },
+  "ae80eab5e4d823a7e880": {
+    "source": "一部由 __SHIYU_VAR_3__ 创作的日常",
+    "text": "A day by __SHIYU_VAR_3__"
+  },
+  "54af2442f2528cd66926": {
+    "source": "此刻上映",
+    "text": "Now Showing"
+  },
+  "5914513d1cf0792d5922": {
+    "source": "电影海报方案",
+    "text": "Poster Style"
+  },
+  "3918156d101437c96306": {
+    "source": "主编 · __SHIYU_VAR_0__",
+    "text": "Editor · __SHIYU_VAR_0__"
+  },
+  "7fd91a209fd452559822": {
+    "source": "纯音乐",
+    "text": "Instrumental"
+  },
+  "d5193582287a6eeda653": {
+    "source": "继续专注",
+    "text": "Resume"
+  },
+  "cb5d682bac3d1a2d0012": {
+    "source": "重置",
+    "text": "Reset"
+  },
+  "a69d0af26faa9e6172e0": {
+    "source": "明暗模式__SHIYU_VAR_1__",
+    "text": "Appearance__SHIYU_VAR_1__"
+  },
+  "5e880b46e9f3614fe69d": {
+    "source": "整体配色__SHIYU_VAR_3__",
+    "text": "Colors__SHIYU_VAR_3__"
+  },
+  "5907cddb0c0692204ae3": {
+    "source": "字体气质__SHIYU_VAR_0__",
+    "text": "Font__SHIYU_VAR_0__"
+  },
+  "15cb994dee3d5e6ff499": {
+    "source": "空间页宽度__SHIYU_VAR_0__",
+    "text": "Space Width__SHIYU_VAR_0__"
+  },
+  "e7fcdabcf597c9f48d8b": {
+    "source": "个性化分类",
+    "text": "Settings Categories"
+  },
+  "3f754f38a6547e207738": {
+    "source": "全局设置",
+    "text": "Global Settings"
+  },
+  "0d6eaef161738a47f152": {
+    "source": "仅应用于「__SHIYU_VAR_0__」",
+    "text": "Only “__SHIYU_VAR_0__”"
+  },
+  "889201bc66754d23f36f": {
+    "source": "应用于首页与空间，自定义场景保留独立设置。",
+    "text": "Applies to home and spaces. Custom scenes keep their settings."
+  },
+  "cc003e11f3f5f01338f6": {
+    "source": "主题与配色",
+    "text": "Theme & Color"
+  },
+  "078838da4218490b632f": {
+    "source": "字体",
+    "text": "Font"
+  },
+  "faa2f2ed6735784700e2": {
+    "source": "布局",
+    "text": "Layout"
+  },
+  "37f64a4b3e450981b125": {
+    "source": "文案",
+    "text": "Text"
+  },
+  "d58196154fe7981d738a": {
+    "source": "恢复跟随全局",
+    "text": "Use Global"
+  },
+  "da590a8fe3ce4de05e1f": {
+    "source": "请选择",
+    "text": "Select"
+  },
+  "edfa33a3f470ecc57da9": {
+    "source": "选择保存位置",
+    "text": "Save Location"
+  },
+  "abc4929dfaf23ddeb626": {
+    "source": "拾隅游风",
+    "text": "Shiyu Breeze"
+  },
+  "92b8f82215bd91d3dd10": {
+    "source": "拾起喜欢",
+    "text": "Keep what you love"
+  },
+  "7254225621b2df722da3": {
+    "source": "拾隅清雅宋",
+    "text": "Shiyu Serif"
+  },
+  "2195c561b8915f04eeb1": {
+    "source": "拾隅温润楷",
+    "text": "Shiyu Script"
+  },
+  "7e730ce6d217094df482": {
+    "source": "清晰黑体",
+    "text": "Clean Sans"
+  },
+  "8a1740bd7e94c9ef2573": {
+    "source": "清晰，简练",
+    "text": "Clear and simple"
+  },
+  "19770b332966a0f91900": {
+    "source": "经典宋体",
+    "text": "Classic Serif"
+  },
+  "8d70ec388b41dc63ef2e": {
+    "source": "字里行间",
+    "text": "Between the lines"
+  },
+  "0d2d706f3dd7b5d514a4": {
+    "source": "温润楷体",
+    "text": "Warm Script"
+  },
+  "9dfb04a30efabec07fed": {
+    "source": "从容书写",
+    "text": "Unhurried strokes"
+  },
+  "4a4ebfe1cac114d0695d": {
+    "source": "雅致仿宋",
+    "text": "Literary Serif"
+  },
+  "f30b6697ecb75fb273f2": {
+    "source": "旧纸新意",
+    "text": "A fresh page"
+  },
+  "3b05b2f5efdcf7d97f16": {
+    "source": "几何黑体",
+    "text": "Geometric Sans"
+  },
+  "b1313bf284dc70c0d53e": {
+    "source": "简洁有力",
+    "text": "Simple and bold"
+  },
+  "78c8d85cdb44acd3884f": {
+    "source": "等宽科技",
+    "text": "Monospace"
+  },
+  "40234bc34a5ab6cdde4b": {
+    "source": "留白风",
+    "text": "Minimal"
+  },
+  "3321bd5639c572ee6749": {
+    "source": "翻页风",
+    "text": "Flip Clock"
+  },
+  "14c28bc7fe56fa27de29": {
+    "source": "数字风",
+    "text": "Digital"
+  },
+  "435888d5e79ff57a938b": {
+    "source": "日间",
+    "text": "Light"
+  },
+  "df2cedace72a3ebfe427": {
+    "source": "夜间",
+    "text": "Dark"
+  },
+  "dc1138680180d7acc355": {
+    "source": "当前__SHIYU_VAR_4__，切换__SHIYU_VAR_5__",
+    "text": "__SHIYU_VAR_4__ · Switch to __SHIYU_VAR_5__"
+  },
+  "32d3c9183d7a9e89a1b9": {
+    "source": "__SHIYU_VAR_6__ · 点击切换__SHIYU_VAR_7__",
+    "text": "__SHIYU_VAR_6__ · Switch to __SHIYU_VAR_7__"
+  },
+  "0f1505b6ad3fafe48456": {
+    "source": "退出全屏",
+    "text": "Exit Fullscreen"
+  },
+  "ecf3e461f6a2c194eca9": {
+    "source": "进入全屏",
+    "text": "Fullscreen"
+  },
+  "18db38a28c0ef3e02d6b": {
+    "source": "退出全屏 · Esc",
+    "text": "Exit Fullscreen · Esc"
+  },
+  "abeb8e080ffb828d271d": {
+    "source": "全屏欣赏",
+    "text": "Fullscreen"
+  },
+  "6b828d154bd3d82f5d9d": {
+    "source": "选择字体__SHIYU_VAR_0__",
+    "text": "Choose Font__SHIYU_VAR_0__"
+  },
+  "33b2a925918b20ceb183": {
+    "source": "效果示意 · 非操作区域",
+    "text": "Preview only"
+  },
+  "1931a0bac6da659e70df": {
+    "source": "选择空间页宽度__SHIYU_VAR_0__",
+    "text": "Space Width__SHIYU_VAR_0__"
+  },
+  "5579559a4452e3896a6f": {
+    "source": "布局示意 · 非操作区域",
+    "text": "Layout preview only"
+  },
+  "34de1cefe1e75615988a": {
+    "source": "选择即生效并自动保存，「完成」仅关闭面板。",
+    "text": "Changes save automatically. Done closes this panel."
+  },
+  "a0052ea0c223731871e1": {
+    "source": "此浏览器不支持网页全屏，可使用浏览器的全屏功能",
+    "text": "Use your browser's fullscreen option instead."
+  },
+  "a01cf088396e433a8e8a": {
+    "source": "未能进入全屏，请使用浏览器的全屏功能",
+    "text": "Couldn't enter fullscreen. Try your browser's fullscreen option."
+  },
+  "bfc9a547a91db7961ce5": {
+    "source": "月球，进入观星视角",
+    "text": "Moon · Stargazing view"
+  },
+  "2f968e7b64332864e75e": {
+    "source": "，返回太阳系",
+    "text": ", return to solar system"
+  },
+  "362624f6b21b30df43e3": {
+    "source": "，进入观星视角",
+    "text": ", enter stargazing view"
+  },
+  "57616d7b999e3d032620": {
+    "source": "好奇心不打烊。\n好东西，慢慢收藏。",
+    "text": "Stay curious. Keep the good things."
+  },
+  "ba95c69072e4154c16a6": {
+    "source": "把此刻，\n调到喜欢的频率。",
+    "text": "Tune in.\nUnwind."
+  },
+  "781662c5e114a8de166b": {
+    "source": "漫游宇宙，\n也回到自己。",
+    "text": "Explore beyond.\nFind yourself."
+  },
+  "a1668cea293d324f0b35": {
+    "source": "把时间，留给喜欢的事。",
+    "text": "Make time for what you love."
+  },
+  "233cfe1505d7e01c234a": {
+    "source": "你的互联网，自有归处。",
+    "text": "A home for your internet."
+  },
+  "3e8d2fbcc3614edb4411": {
+    "source": "你的喜欢自有归处",
+    "text": "A place for what you love"
+  },
+  "db11b66c9598c25a1bd1": {
+    "source": "主标题",
+    "text": "Headline"
+  },
+  "8131eafd02396e6a2482": {
+    "source": "简介",
+    "text": "Description"
+  },
+  "e2b0f6dec9abacefaa70": {
+    "source": "分别设置每种风格的首页文案，修改不会影响其他风格。",
+    "text": "Set home text for each theme independently."
+  },
+  "ae8a12bc436b808ad784": {
+    "source": "选择文案所属风格",
+    "text": "Choose Theme"
+  },
+  "c29da89dd0fdff667654": {
+    "source": "使用默认文案",
+    "text": "Default Text"
+  },
+  "66819827177834b32a13": {
+    "source": "自定义编辑",
+    "text": "Custom Text"
+  },
+  "23357efc83766399421e": {
+    "source": "__SHIYU_VAR_6__ · 文案示意",
+    "text": "__SHIYU_VAR_6__ · Text Preview"
+  },
+  "1a86b0c613d6aa013f03": {
+    "source": "选择和输入即时保存。__SHIYU_VAR_9__",
+    "text": "Changes save automatically. __SHIYU_VAR_9__"
+  },
+  "3333f7faafbe00808f2b": {
+    "source": "最多 __SHIYU_VAR_12__ 字、__SHIYU_VAR_13__ 行；支持回车换行",
+    "text": "Up to __SHIYU_VAR_12__ characters and __SHIYU_VAR_13__ lines"
+  },
+  "6ddd8fa3ec61710592bf": {
+    "source": "默认文案随所选电影海报变化。",
+    "text": "Default text follows the selected poster."
+  },
+  "c974aa2eab0c0e045419": {
+    "source": "更多收藏版面",
+    "text": "More Layouts"
+  },
+  "e417e31213a9d1e31a50": {
+    "source": "全局文案 · 按首页风格分别保存，不受场景外观设置影响。",
+    "text": "Saved per home theme, independent of scene settings."
+  },
+  "2f6163017f3e6ebcf222": {
+    "source": "按首页风格分别设置文案。",
+    "text": "Set text for each home theme."
+  },
+  "2d05593c61edff31780f": {
+    "source": "应用于首页和所有空间、场景。",
+    "text": "Applies to home, all spaces, and scenes."
+  },
+  "27bef1d8b315c66c88d3": {
+    "source": "管理__SHIYU_VAR_0__",
+    "text": "Manage __SHIYU_VAR_0__"
+  },
+  "df43d4a2e782e4cd89bc": {
+    "source": "＋ 新建__SHIYU_VAR_3__",
+    "text": "＋ New __SHIYU_VAR_3__"
+  },
+  "f2e027111c702ae9f260": {
+    "source": "删除__SHIYU_VAR_5__",
+    "text": "Delete __SHIYU_VAR_5__"
+  },
+  "a728855726bd5e43a2e7": {
+    "source": "给它起个名字",
+    "text": "Enter a name"
+  },
+  "3382347b0b59b5274966": {
+    "source": "最多 24 字",
+    "text": "Up to 24 characters"
+  },
+  "7a37ddb0cfb68c202b8a": {
+    "source": "已有同名",
+    "text": "Name Taken"
+  },
+  "414389337a5230d5e98c": {
+    "source": "至少保留一个",
+    "text": "Keep at least one"
+  },
+  "d1c228d6d0d848fd14d5": {
+    "source": "删除__SHIYU_VAR_0__",
+    "text": "Delete __SHIYU_VAR_0__"
+  },
+  "b64d376b2ca08cf6c2e8": {
+    "source": "删除「__SHIYU_VAR_1__」及其中的所有收藏？此操作无法撤销。",
+    "text": "Delete “__SHIYU_VAR_1__” and all its bookmarks? This cannot be undone."
+  },
+  "ce9e8c6174c80a4be51a": {
+    "source": "向左滚动空间",
+    "text": "Scroll Spaces Left"
+  },
+  "a0331b731201a68a0df4": {
+    "source": "向右滚动空间",
+    "text": "Scroll Spaces Right"
+  },
+  "afd2c8342c287969c4db": {
+    "source": "新__SHIYU_VAR_0__名称",
+    "text": "New __SHIYU_VAR_0__ Name"
+  },
+  "e44bb7326451df48dd3d": {
+    "source": "输入__SHIYU_VAR_1__名称",
+    "text": "Enter __SHIYU_VAR_1__ name"
+  },
+  "379648e3f11320b026ff": {
+    "source": "移开自动保存",
+    "text": "Saves when you leave"
+  },
+  "b1100a13bba8310dc106": {
+    "source": "名称已存在，请换一个",
+    "text": "Name taken. Try another."
+  },
+  "7c7802d8adaed72ea860": {
+    "source": "文件夹",
+    "text": "Folder"
+  },
+  "dbe53bfc4320d60108d6": {
+    "source": "休闲",
+    "text": "Leisure"
+  },
+  "1e4ea600006500fa77c0": {
+    "source": "选择__SHIYU_VAR_2__图标",
+    "text": "__SHIYU_VAR_2__ Icon"
+  },
+  "6d8adad124d0987fc716": {
+    "source": "选择图标",
+    "text": "Choose Icon"
+  },
+  "a76f13ce8c22afccfe78": {
+    "source": "关闭图标选择",
+    "text": "Close Icons"
+  },
+  "d68a8f2484f5d80bd49c": {
+    "source": "设置下次专注时长",
+    "text": "Set next focus session"
+  },
+  "38f6803ef73208ee011e": {
+    "source": "专注时长",
+    "text": "Focus Duration"
+  },
+  "9c01acb1a4db20753896": {
+    "source": "专注时长（分钟）",
+    "text": "Duration (minutes)"
+  },
+  "83795c3c67b24af9136f": {
+    "source": "时长可设置为 1–180 分钟",
+    "text": "Choose 1–180 minutes"
+  },
+  "9dcdc2b289b9d23314e8": {
+    "source": "秒",
+    "text": "Seconds"
+  },
+  "255841faf5082cbcbd34": {
+    "source": "界面设计",
+    "text": "UI Design"
+  },
+  "079219e3a567719efab9": {
+    "source": "品牌视觉",
+    "text": "Branding"
+  },
+  "4c40f0a72754b865f5c8": {
+    "source": "排版参考",
+    "text": "Typography"
+  },
+  "06fd6e06def0d7a4418e": {
+    "source": "配色方案",
+    "text": "Color Palettes"
+  },
+  "43d4fda134907c99b252": {
+    "source": "交互动效",
+    "text": "Motion Design"
+  },
+  "55ac4231221c1688a670": {
+    "source": "AI 创作",
+    "text": "AI Creation"
+  },
+  "e09dc260474bad07c06c": {
+    "source": "对话助手",
+    "text": "AI Chat"
+  },
+  "481acc2c1413db388896": {
+    "source": "图像生成",
+    "text": "Image Generation"
+  },
+  "39ee71261b67d5bd939d": {
+    "source": "视频创作",
+    "text": "Video Creation"
+  },
+  "d38903928e35289b019c": {
+    "source": "音乐生成",
+    "text": "Music Generation"
+  },
+  "254eb32b14c9c5a2a8e8": {
+    "source": "提示词库",
+    "text": "Prompt Library"
+  },
+  "cafa420bc50b0ac82e15": {
+    "source": "自动化工具",
+    "text": "Automation"
+  },
+  "cca5b9265062ff1edf52": {
+    "source": "产品研究",
+    "text": "Product Research"
+  },
+  "eba180059a944e2a287f": {
+    "source": "用户研究",
+    "text": "User Research"
+  },
+  "7dbd68d62137565846b6": {
+    "source": "产品案例",
+    "text": "Product Examples"
+  },
+  "d1e8f62da854c6ccf213": {
+    "source": "增长策略",
+    "text": "Growth"
+  },
+  "5d8ec6f62009eef7358d": {
+    "source": "数据分析",
+    "text": "Analytics"
+  },
+  "101518287aa51f67c605": {
+    "source": "行业观察",
+    "text": "Industry Insights"
+  },
+  "828df32fd70bae8af958": {
+    "source": "开发资源",
+    "text": "Dev Resources"
+  },
+  "c75cbfa53a44c5411c4c": {
+    "source": "前端组件",
+    "text": "UI Components"
+  },
+  "d2c3bbe5366acef7c7ab": {
+    "source": "后端服务",
+    "text": "Backend Services"
+  },
+  "50b3ce31646573c1ab0e": {
+    "source": "性能优化",
+    "text": "Performance"
+  },
+  "373febf03109b098fe4e": {
+    "source": "开发工具",
+    "text": "Dev Tools"
+  },
+  "816693bebb001168f0ba": {
+    "source": "创意生活",
+    "text": "Creative Living"
+  },
+  "828dbac8eff8be43ee59": {
+    "source": "摄影灵感",
+    "text": "Photo Inspiration"
+  },
+  "7392e16f5654fe2c9e6e": {
+    "source": "建筑空间",
+    "text": "Architecture"
+  },
+  "d22f80961f65ff743b84": {
+    "source": "艺术展览",
+    "text": "Art Exhibitions"
+  },
+  "fcdfeeb288db1c785952": {
+    "source": "旅行记录",
+    "text": "Travel Journal"
+  },
+  "d2d577aeedb7c724327b": {
+    "source": "生活美学",
+    "text": "Everyday Beauty"
+  },
+  "df06a9efee8970b2c3b5": {
+    "source": "模拟内容 · 用于体验大量收藏的浏览与管理",
+    "text": "Demo content for browsing large collections"
+  },
+  "745b32105905748226d6": {
+    "source": "探索场景",
+    "text": "Demo Scene"
+  },
+  "c1a8def18c02f66c7137": {
+    "source": "MOCK · 场景与分组容量体验",
+    "text": "MOCK · Scenes and groups demo"
+  },
+  "e2a16a6f4dc989e03983": {
+    "source": "资料分组",
+    "text": "Demo Group"
+  },
+  "514f3b582b6161fba79c": {
+    "source": "模拟资料",
+    "text": "Demo Link"
+  },
+  "ddb950f2600c9cd70670": {
+    "source": "MOCK · 用于大容量界面演示",
+    "text": "MOCK · Large collection demo"
+  },
+  "73d76d77b57b99d48e8c": {
+    "source": "把笔记、计划与知识放在一起",
+    "text": "Notes, plans, and knowledge together"
+  },
+  "6e5eb78e7a1f6c677a9b": {
+    "source": "协作、文档与团队沟通",
+    "text": "Team chat, documents, and collaboration"
+  },
+  "9c4528610ab3fe374ce7": {
+    "source": "在线完成界面与产品设计",
+    "text": "Design interfaces and products online"
+  },
+  "34708fbee06fd2350a95": {
+    "source": "收集并连接灵感素材",
+    "text": "Collect and connect inspiration"
+  },
+  "d6f3546dec9534f78c03": {
+    "source": "浏览世界各地的设计作品",
+    "text": "Discover design from around the world"
+  },
+  "23807a87089931f46197": {
+    "source": "发现并整理视觉灵感",
+    "text": "Find and organize visual ideas"
+  },
+  "21605940d82d23fa6759": {
+    "source": "开放网络开发参考资料",
+    "text": "Open web development references"
+  },
+  "0561c279dc483f3f2154": {
+    "source": "发现、管理并协作开发项目",
+    "text": "Find, manage, and build projects together"
+  },
+  "69c5068e6ef73b867b67": {
+    "source": "掘金",
+    "text": "Juejin"
+  },
+  "f8cba95e7a5dacfab273": {
+    "source": "阅读与分享技术内容",
+    "text": "Read and share tech insights"
+  },
+  "1bfefe0febb227479016": {
+    "source": "知乎",
+    "text": "Zhihu"
+  },
+  "a9b37db689ec8f9b60ff": {
+    "source": "发现问题背后的经验与见解",
+    "text": "Explore questions and perspectives"
+  },
+  "5be1e5b0f56a5231f28c": {
+    "source": "看见有趣的视频与创作",
+    "text": "Discover videos and creators"
+  },
+  "ad26dae9e2ca0d4e88c1": {
+    "source": "记录书影音与生活片刻",
+    "text": "Books, films, music, and life"
+  },
+  "d26c6a08a591011a3bf6": {
+    "source": "小红书",
+    "text": "RedNote"
+  },
+  "6ff5b625f44650e3c4a2": {
+    "source": "发现真实的生活经验",
+    "text": "Real experiences, everyday inspiration"
+  },
+  "9294c6e9a9b8cc579a0b": {
+    "source": "寻找高质量摄影图片",
+    "text": "Find quality photos"
+  },
+  "6028c817b69db03ab8ed": {
+    "source": "观看来自世界各地的视频",
+    "text": "Watch videos from around the world"
+  },
+  "7c72b21f6fb30e3d28d1": {
+    "source": "发现音乐、播客与声音",
+    "text": "Discover music and podcasts"
+  },
+  "4cd2ea8b09deacab9ce8": {
+    "source": "浏览 Apple 产品与服务",
+    "text": "Explore Apple products and services"
+  },
+  "487c74839106531fb1e1": {
+    "source": "维基百科",
+    "text": "Wikipedia"
+  },
+  "9aefa40aa7f1ba919742": {
+    "source": "从一个词条继续认识世界",
+    "text": "Follow your curiosity, one article at a time"
+  },
+  "98380c423fb8ec4d133b": {
+    "source": "查找程序开发问题与答案",
+    "text": "Find programming answers"
+  },
+  "a153b21f5c4a827f0b0e": {
+    "source": "和 AI 一起思考与探索",
+    "text": "Think and explore with AI"
+  },
+  "eb4be55d22f81c972eda": {
+    "source": "搜索网页与中文信息",
+    "text": "Search the Chinese web"
+  },
+  "463ddec26de76e1fbfa5": {
+    "source": "连续向上滑动，也可回到封面",
+    "text": "Scroll up twice to go home"
+  },
+  "61a4332d1d88ff46a863": {
+    "source": "每行展示数量",
+    "text": "Items per Row"
+  },
+  "1ee4e22b2e6e2db88151": {
+    "source": "书籍",
+    "text": "Books"
+  },
+  "e3c5f4c93febd3986cdb": {
+    "source": "便签",
+    "text": "Sticky Notes"
+  },
+  "85217f7aff7784143843": {
+    "source": "日",
+    "text": "Day"
+  },
+  "a3030bf8f16dc63c6b27": {
+    "source": "保存",
+    "text": "Save"
+  },
+  "80dc191d5fc0d8c58eb6": {
+    "source": "自动识别或手动命名",
+    "text": "Auto-detect or enter a name"
+  },
+  "df832b7cee05ac4814dd": {
+    "source": "网址 Logo",
+    "text": "Site Logo"
+  },
+  "3fbe2aafde27f3ee8244": {
+    "source": "从图标库替换 Logo",
+    "text": "Choose a Logo"
+  },
+  "5c3ab780f7ad1ac9ccf8": {
+    "source": "Logo 图片链接（自动识别或输入 https://…）",
+    "text": "Logo URL (auto-detect or https://…)"
+  },
+  "daede9881787abe74c94": {
+    "source": "备注",
+    "text": "Note"
+  },
+  "10c6be7d55ed23b54f67": {
+    "source": "记下收藏它的理由",
+    "text": "Why save this?"
+  },
+  "5186ad042d884d0af032": {
+    "source": "选择 Logo",
+    "text": "Choose Logo"
+  },
+  "20057da383bdf485ca84": {
+    "source": "请输入有效的 http / https 网址",
+    "text": "Enter a valid http or https URL"
+  },
+  "e996b79e1a124ea64c9c": {
+    "source": "请输入有效的 http / https 图片链接",
+    "text": "Enter a valid http or https image URL"
+  },
+  "a0739c629eb2c5a4ae3d": {
+    "source": "__SHIYU_VAR_0__ · 不改变首页主题",
+    "text": "__SHIYU_VAR_0__ · Home theme unchanged"
+  },
+  "2b5854449f933f0cb379": {
+    "source": "全空间统一",
+    "text": "All Spaces"
+  },
+  "36220c5666b523b13703": {
+    "source": "所有场景、分组使用同一种网址样式",
+    "text": "One link style for all scenes and groups"
+  },
+  "a35926b12b451eff8dd1": {
+    "source": "按场景统一",
+    "text": "Per Scene"
+  },
+  "d2ca23a00f83a59d4e55": {
+    "source": "每个场景独立设置，组内保持一致",
+    "text": "One style per scene"
+  },
+  "130f917805b6e06f17bb": {
+    "source": "按分组独立",
+    "text": "Per Group"
+  },
+  "8f3bd3af8cfc77a967af": {
+    "source": "每个分组自由选择网址样式",
+    "text": "Choose a style for each group"
+  },
+  "0bda3041407e2a3f7e69": {
+    "source": "密码访问",
+    "text": "Password Access"
+  },
+  "f4f712d5be91721a35df": {
+    "source": "访问密码",
+    "text": "Password"
+  },
+  "37b630592cef598c5fb8": {
+    "source": "输入 8–64 位密码",
+    "text": "8–64 characters"
+  },
+  "47b50c143865269335cc": {
+    "source": "随机生成",
+    "text": "Generate"
+  },
+  "9c0c3bd47786503119b3": {
+    "source": "导出当前内容的只读网页快照，可发送给他人。当前为网页文件分享，尚未生成互联网链接；后续修改不会同步到已导出的文件。",
+    "text": "Export a read-only webpage to share. This creates a file, not a public URL. Later edits will not sync to the exported file."
+  },
+  "a1edf5d6b70400ab8181": {
+    "source": "生成分享网页",
+    "text": "Export Page"
+  },
+  "d68bc3b1dd22327969f3": {
+    "source": "拾隅 · 分享收藏",
+    "text": "Shiyu · Shared Collection"
+  },
+  "2dada03a68d0ad0b4d49": {
+    "source": "输入密码，查看分享内容",
+    "text": "Enter the password to view"
+  },
+  "737109c65e065adbac33": {
+    "source": "打开收藏",
+    "text": "Open Collection"
+  },
+  "cbd598191b22383e1450": {
+    "source": "5–8 位字母或数字",
+    "text": "5–8 letters or numbers"
+  },
+  "a3714b2aebd18cd6c860": {
+    "source": "继续向上滑动返回首页",
+    "text": "Scroll up to go home"
+  },
+  "9c2a28e8f98fb5dfce29": {
+    "source": "有效期",
+    "text": "Expires"
+  },
+  "a892ac8bf6340bc7a2f8": {
+    "source": "无需密码",
+    "text": "No Password"
+  },
+  "69216fec303d454bf79f": {
+    "source": "收藏每一份灵感",
+    "text": "Keep every spark of inspiration"
+  },
+  "2949a5b296b8cff52ef7": {
+    "source": "__SHIYU_VAR_0__设置范围",
+    "text": "__SHIYU_VAR_0__ Scope"
+  },
+  "57b3d0c5d705156634a7": {
+    "source": "所有空间统一",
+    "text": "All Spaces"
+  },
+  "152ef023ca708ed8b492": {
+    "source": "每个空间独立",
+    "text": "Per Space"
+  },
+  "9e8d4b7ca8a3e9ff14ef": {
+    "source": "在各空间的「空间设置」中配置；首页保留当前字体。",
+    "text": "Set each space in Space Settings. Home keeps its current font."
+  },
+  "61a64d6dface066ed0d2": {
+    "source": "卡片样式 · 统一范围",
+    "text": "Card Style · Scope"
+  },
+  "f778b6327068fbed862b": {
+    "source": "跟随全局__SHIYU_VAR_0__效果",
+    "text": "Use Global __SHIYU_VAR_0__"
+  },
+  "dd3588f84245e9a6fafb": {
+    "source": "空间独立设置",
+    "text": "Per Space"
+  },
+  "5cba14864f49db26836d": {
+    "source": "所有主题共用一套文案。",
+    "text": "Use the same text for all themes."
+  },
+  "d4f8234cfa011f7725eb": {
+    "source": "最多 __SHIYU_VAR_8__ 字、__SHIYU_VAR_9__ 行；支持换行",
+    "text": "Up to __SHIYU_VAR_8__ characters and __SHIYU_VAR_9__ lines"
+  },
+  "c0beabbbaced8f4ec1cf": {
+    "source": "默认或自定义文案应用于所有主题。",
+    "text": "Default or custom text applies to all themes."
+  },
+  "a8b318a52d78bcb51085": {
+    "source": "选择统一范围；具体样式与每行数量在空间页面调整。",
+    "text": "Choose the scope here. Adjust styles and items per row in your space."
+  },
+  "465b9574fa3ede91c68c": {
+    "source": "空间内的场景与分组共用样式",
+    "text": "One style for the whole space"
+  },
+  "21c44aa6eab764336085": {
+    "source": "每个场景独立设置",
+    "text": "Set each scene independently"
+  },
+  "02f68c4971019ece2b16": {
+    "source": "每个分组独立设置",
+    "text": "Set each group independently"
+  },
+  "b49b72ff145818419404": {
+    "source": "自适应宽度",
+    "text": "Auto Width"
+  },
+  "2250d0610833c3e9ffa6": {
+    "source": "__SHIYU_VAR_0__返回首页",
+    "text": "__SHIYU_VAR_0__Home"
+  },
+  "a31ba2d322efd745b5eb": {
+    "source": "不同主题的文案不同",
+    "text": "Text varies by theme"
+  },
+  "1009c0b2f24093e6ebd3": {
+    "source": "配色设置范围",
+    "text": "Color Scope"
+  },
+  "189701380add63182352": {
+    "source": "在各空间的「空间设置」中配置配色。",
+    "text": "Set colors in each space's settings."
+  },
+  "2ae75e16812360be66b6": {
+    "source": "配色",
+    "text": "Colors"
+  },
+  "8d27f10b4c6dee2a27c3": {
+    "source": "自定义文案应用于所有主题。",
+    "text": "Custom text applies to all themes."
+  },
+  "ab557707093b30302c8a": {
+    "source": "使用各主题原有的默认文案。",
+    "text": "Use each theme's default text."
+  },
+  "eea50f4175bf5349265e": {
+    "source": "按",
+    "text": "Press"
+  },
+  "5ee87e65261b3ab7882f": {
+    "source": "退出搜索",
+    "text": "Close Search"
+  },
+  "3c8b3c203c1882b4d66c": {
+    "source": "腾讯元宝",
+    "text": "Tencent Yuanbao"
+  },
+  "157768de565138ae5367": {
+    "source": "智谱清言",
+    "text": "Zhipu AI"
+  },
+  "3ea2d23c902cfa31238e": {
+    "source": "头像",
+    "text": "Avatar"
+  },
+  "5a2cac68fd2d63f9573f": {
+    "source": "个人中心",
+    "text": "Account"
+  },
+  "123b6ee6e4001fc6b097": {
+    "source": "欢迎回到拾隅",
+    "text": "Welcome Back"
+  },
+  "6d890975cda80f5d109b": {
+    "source": "无需登录即可浏览，登录后管理属于你的收藏。",
+    "text": "Browse freely. Sign in to manage your bookmarks."
+  },
+  "983e4cb99c60305ea63f": {
+    "source": "华为账号",
+    "text": "Huawei Account"
+  },
+  "76283aa6e4fbbe4ce3a0": {
+    "source": "小米账号",
+    "text": "Xiaomi Account"
+  },
+  "a53248f3addc3d643ba8": {
+    "source": "认证服务待接入，本页不会发送或保存手机号、邮箱及密码。",
+    "text": "Authentication is not connected. No phone numbers, emails, or passwords are sent or saved."
+  },
+  "da6e0ae1dc7ec7eb0e20": {
+    "source": "体验个人中心（仅本机）",
+    "text": "Try Account Demo"
+  },
+  "fe5af3dd75ffa94ea4f3": {
+    "source": "手机验证码",
+    "text": "SMS Code"
+  },
+  "7bc96f0ded6264ed00b2": {
+    "source": "密码登录",
+    "text": "Password"
+  },
+  "788b131a9a0ab06e2832": {
+    "source": "邮箱登录",
+    "text": "Email"
+  },
+  "81b430b69643518018b5": {
+    "source": "微信",
+    "text": "WeChat"
+  },
+  "9e0181f35fc50bf55169": {
+    "source": "微信扫码登录",
+    "text": "Sign in with WeChat"
+  },
+  "7a79fb5c1df2f69496fa": {
+    "source": "接通微信开放平台后显示授权二维码",
+    "text": "QR code appears once WeChat is connected"
+  },
+  "023dc393e3bce59f9dde": {
+    "source": "微信授权成功后，需验证手机号才能完成关联。",
+    "text": "Verify your phone number after WeChat authorization."
+  },
+  "e5533fd28356f3ecec04": {
+    "source": "登录 / 注册",
+    "text": "Sign In / Join"
+  },
+  "73075237fd0f05f024df": {
+    "source": "邮箱",
+    "text": "Email"
+  },
+  "6f52cc94db652bab0e18": {
+    "source": "手机号",
+    "text": "Phone"
+  },
+  "ae3a6b9f14aed6d7c43e": {
+    "source": "手机号或邮箱",
+    "text": "Phone or Email"
+  },
+  "3aa3040b5f899705e30d": {
+    "source": "请输入账号",
+    "text": "Enter your account"
+  },
+  "bb015c60bafc8a96801e": {
+    "source": "验证码",
+    "text": "Code"
+  },
+  "a621ab606db2a11f63ed": {
+    "source": "密码",
+    "text": "Password"
+  },
+  "ba9192e1bb7a232a837c": {
+    "source": "请输入验证码",
+    "text": "Enter code"
+  },
+  "728a7b601c56bdf8b35a": {
+    "source": "请输入密码",
+    "text": "Enter password"
+  },
+  "3b91d186d44ec881a076": {
+    "source": "获取验证码",
+    "text": "Send Code"
+  },
+  "6dcc0e2a1093aa29a591": {
+    "source": "关闭个人中心",
+    "text": "Close Account"
+  },
+  "ae960c4b980b155d68a9": {
+    "source": "本机体验身份 · 非云端账号",
+    "text": "Local demo · No cloud account"
+  },
+  "7a1e2b964b67224c75ff": {
+    "source": "昵称",
+    "text": "Nickname"
+  },
+  "9c0d902c196d7f0c8d06": {
+    "source": "给自己起个名字",
+    "text": "Choose a name"
+  },
+  "e3cfc03028c9d8222261": {
+    "source": "选择头像",
+    "text": "Choose Avatar"
+  },
+  "d7d2344d545dd10fbbf3": {
+    "source": "上传头像",
+    "text": "Upload Avatar"
+  },
+  "c5a962fd8d8c3d14ce83": {
+    "source": "正方形 1:1 · 128–2048 像素 · PNG/JPG/WebP · 不超过 2 MB",
+    "text": "Square · 128–2048 px · PNG/JPG/WebP · Up to 2 MB"
+  },
+  "e96f562ba789f85def74": {
+    "source": "体验 ID：__SHIYU_VAR_4__",
+    "text": "Demo ID: __SHIYU_VAR_4__"
+  },
+  "62c6f01c71f7743bed01": {
+    "source": "退出体验账号",
+    "text": "Exit Demo"
+  },
+  "53b650d6606ef8b937f9": {
+    "source": "尚未建立",
+    "text": "Not Set"
+  },
+  "82e5a4b06ac6f8739cc5": {
+    "source": "请选择 2 MB 以内的 PNG、JPG 或 WebP 图片",
+    "text": "Choose PNG, JPG, or WebP under 2 MB"
+  },
+  "d7e738c94c827fb8381c": {
+    "source": "请选择 128–2048 像素的 1:1 正方形图片",
+    "text": "Choose a square image, 128–2048 px"
+  },
+  "29d5ded2bbf8886d9c2a": {
+    "source": "无法读取该图片，请更换",
+    "text": "Couldn't read image. Try another."
+  },
+  "6fe90e2a5c67ba3c1f06": {
+    "source": "此登录方式尚未接通认证服务，请使用下方本机体验入口。",
+    "text": "This sign-in method is unavailable. Try the local demo below."
+  },
+  "3a37cbfb898d93982c00": {
+    "source": "拾隅日报 · 读者入口",
+    "text": "Shiyu Daily · Reader Sign In"
+  },
+  "9984a680f9b419f309b5": {
+    "source": "当前为体验预览，登录服务尚未接通。",
+    "text": "Demo preview. Sign-in service not connected."
+  },
+  "8c53c30ae71ba3239e36": {
+    "source": "温雅",
+    "text": "Graceful"
+  },
+  "4b2fb312cb2cc79be51d": {
+    "source": "健朗",
+    "text": "Bold"
+  },
+  "b31c04d135c9e3df4d98": {
+    "source": "灵动",
+    "text": "Playful"
+  },
+  "59dde6608d1a47174c65": {
+    "source": "活力",
+    "text": "Lively"
+  },
+  "8b358d0f97427aa2f2ce": {
+    "source": "访客",
+    "text": "Guest"
+  },
+  "e3fd5c1cb1c7f503da5d": {
+    "source": "本机体验账号",
+    "text": "Local Demo"
+  },
+  "47647adbeff5ff932cc8": {
+    "source": "登录后，管理自己的收藏",
+    "text": "Sign in to manage bookmarks"
+  },
+  "3549bd1a152329a6d15e": {
+    "source": "选择一个喜欢的自己",
+    "text": "Find your look"
+  },
+  "3ab8cc15939f3b5c56d8": {
+    "source": "退出登录",
+    "text": "Sign Out"
+  },
+  "3a69e3206fab99db0faf": {
+    "source": "需要去登录",
+    "text": "Sign In Required"
+  },
+  "82eaaba81d9dcc54deab": {
+    "source": "华为",
+    "text": "Huawei"
+  },
+  "522d3edeb64a7ca45f5e": {
+    "source": "小米",
+    "text": "Xiaomi"
+  },
+  "6c746f427c641881a6d0": {
+    "source": "欢迎来到",
+    "text": "Welcome to "
+  },
+  "960026f665e86adf574e": {
+    "source": "「拾隅」",
+    "text": "Shiyu"
+  },
+  "0321d61b421ee33d8b39": {
+    "source": "以一封信，或一则讯息，开启你的收藏。",
+    "text": "Start your collection with an email or a text."
+  },
+  "644e43ac7cacda068a5b": {
+    "source": "首次验证成功，即可拥有账号。",
+    "text": "Your first verification creates an account."
+  },
+  "ad9864f8c5f621af2d9d": {
+    "source": "__SHIYU_VAR_2__密码登录",
+    "text": "__SHIYU_VAR_2__Password"
+  },
+  "290233a08473dc4720b5": {
+    "source": "__SHIYU_VAR_3__微信登录",
+    "text": "__SHIYU_VAR_3__WeChat"
+  },
+  "df28b460ce800face5ba": {
+    "source": "当前为体验预览，验证码与密码认证尚未接通。",
+    "text": "Demo preview. Code and password authentication are not connected."
+  },
+  "0bfed30c092d42a70041": {
+    "source": "体验首次登录流程（仅本机）",
+    "text": "Try First Sign-In"
+  },
+  "3acdd163e67a08cf6cb3": {
+    "source": "邮箱验证码",
+    "text": "Email Code"
+  },
+  "4cca17814eecc62e6a3c": {
+    "source": "授权服务接通后显示二维码",
+    "text": "QR code appears once authorization is connected"
+  },
+  "ebae12060018c423e5fe": {
+    "source": "微信授权后，需要验证手机号完成关联。",
+    "text": "Verify your phone number to link WeChat."
+  },
+  "0045affcd33b13fb28be": {
+    "source": "请输入手机号或邮箱",
+    "text": "Enter phone or email"
+  },
+  "2f74a3ffc8067286bc34": {
+    "source": "请输入手机号",
+    "text": "Enter phone number"
+  },
+  "ef96a8f7dffcf64bd3ac": {
+    "source": "请输入已设置的密码",
+    "text": "Enter your password"
+  },
+  "3eb01e9e6283795b13b4": {
+    "source": "验证并开启拾隅",
+    "text": "Verify & Continue"
+  },
+  "40ff7d13317c88bfe486": {
+    "source": "__SHIYU_VAR_0____SHIYU_VAR_1__账号",
+    "text": "__SHIYU_VAR_0____SHIYU_VAR_1__ Account"
+  },
+  "d353cf2a684e1f277825": {
+    "source": "设置登录密码",
+    "text": "Set Password"
+  },
+  "002babd1451d6bd73662": {
+    "source": "设置密码后，下次也能用密码登录。你可以稍后再设置。",
+    "text": "Use a password next time, or set it up later."
+  },
+  "083e0682f73fb35d2433": {
+    "source": "至少 8 位，且包含两类字符",
+    "text": "At least 8 characters, using two character types"
+  },
+  "81b17bc0c362dfe532d6": {
+    "source": "确认密码",
+    "text": "Confirm Password"
+  },
+  "d0c9a0e81079a7b2450e": {
+    "source": "再次输入密码",
+    "text": "Enter password again"
+  },
+  "f0a567b0e533a45b84dd": {
+    "source": "当前仅预览流程，不保存或验证真实密码。",
+    "text": "Preview only. Real passwords are not saved or checked."
+  },
+  "5c68ddafd380ee741038": {
+    "source": "继续完善资料",
+    "text": "Complete Profile"
+  },
+  "44ea05e0051d4aa3a36c": {
+    "source": "暂不设置",
+    "text": "Skip"
+  },
+  "e49181ca3977dd28367a": {
+    "source": "登录，让喜欢有归处",
+    "text": "Sign in. Keep what you love."
+  },
+  "e69575845971d0e91411": {
+    "source": "开启我的拾隅",
+    "text": "Get Started"
+  },
+  "680d8b93b25a885ba461": {
+    "source": "请填写至少 8 位且两次一致的密码",
+    "text": "Passwords must match and contain at least 8 characters"
+  },
+  "f37b87d590fc4c9f02f0": {
+    "source": "把散落的灵感，收藏成自己的世界。",
+    "text": "Your finds. Your world."
+  },
+  "739d1cc26c3055200029": {
+    "source": "输入登录密码",
+    "text": "Enter sign-in password"
+  },
+  "d4371ded171af0d1b355": {
+    "source": "8–64 位；中文、英文字母、数字、符号中至少两类。英文支持大小写，且区分大小写。",
+    "text": "8–64 characters. Use at least two types: Chinese, Latin letters, numbers, or symbols. Case-sensitive."
+  },
+  "35bd838050ba8d88b912": {
+    "source": "8–20 位，数字、字符至少两种，区分大小写",
+    "text": "8–20 characters, using at least two character types. Case-sensitive."
+  },
+  "13d61fea9f1749051d11": {
+    "source": "预览",
+    "text": "Preview"
+  },
+  "2e9f4819e064ce12e085": {
+    "source": "保存密码",
+    "text": "Save Password"
+  },
+  "a752a7d8c127ff1554a7": {
+    "source": "性别",
+    "text": "Gender"
+  },
+  "8f5ecd9fc26937ef19dc": {
+    "source": "生日",
+    "text": "Birthday"
+  },
+  "4e79758a990062236c2f": {
+    "source": "男",
+    "text": "Male"
+  },
+  "0ab4610b9257c2985566": {
+    "source": "女",
+    "text": "Female"
+  },
+  "dddb9adf5751d0017aa7": {
+    "source": "暂不透露",
+    "text": "Prefer Not to Say"
+  },
+  "4e34537e5d0c9d970c34": {
+    "source": "验证并登录",
+    "text": "Verify & Sign In"
+  },
+  "9b1afb078f3afb2be5dc": {
+    "source": "体验账号：13800138000；密码或验证码：123456。手机号验证码首次登录会创建对应后台用户。",
+    "text": "Demo account: 13800138000. Password or code: 123456. First SMS sign-in creates a backend user."
+  },
+  "d8712b0d82e63a46a5bd": {
+    "source": "正在登录…",
+    "text": "Signing in…"
+  },
+  "00c9ff140fe138c6b865": {
+    "source": "任伟",
+    "text": "Ren Wei"
+  },
+  "e4343921c928a8563517": {
+    "source": "登录失败",
+    "text": "Sign-In Failed"
+  },
+  "645b934deb86c302114c": {
+    "source": "登录成功",
+    "text": "Signed In"
+  },
+  "fb5bbea8d049c01da8ab": {
+    "source": "登录密码",
+    "text": "Sign-In Password"
+  },
+  "7673702e6ff6214482b0": {
+    "source": "输入密码",
+    "text": "Enter password"
+  },
+  "55e9d563bc9a9f38f4b1": {
+    "source": "选择主题风格",
+    "text": "Choose Theme"
+  },
+  "31f5c04f6e33208964c1": {
+    "source": "关闭风格引导",
+    "text": "Close Guide"
+  },
+  "e0cc399c560fa64f2fba": {
+    "source": "换个风格，遇见另一种拾隅",
+    "text": "A fresh look for your day"
+  },
+  "62aa4890402c82fd0b8f": {
+    "source": "点击左上角切换风格，悬停可展开全部主题。",
+    "text": "Click the logo for the next theme. Hover to see all themes."
+  },
+  "0cb3972009b4d9759781": {
+    "source": "选择出生年月日",
+    "text": "Choose your birth date"
+  },
+  "1ef3de06b32e521bd524": {
+    "source": "清空",
+    "text": "Clear"
+  },
+  "fac2a67ad87807c4112a": {
+    "source": "确定",
+    "text": "Confirm"
+  },
+  "62ef900a8f5d5bff6407": {
+    "source": "年",
+    "text": "Year"
+  },
+  "1625179badc027f0d0a2": {
+    "source": "月",
+    "text": "Month"
+  },
+  "68b4edf954a2fc831e7f": {
+    "source": "生日不能晚于今天",
+    "text": "Birthday cannot be in the future"
+  },
+  "85c24e9540c37eb47fd0": {
+    "source": "选择生日",
+    "text": "Choose Birthday"
+  },
+  "968220f08c9b21ff1cee": {
+    "source": "关闭生日选择",
+    "text": "Close Birthday"
+  },
+  "637acd6229b22335c617": {
+    "source": "选择出生年月日，也可以留空。",
+    "text": "Choose your birth date, or leave it blank."
+  },
+  "aa3557d8ae28213cebdb": {
+    "source": "留空",
+    "text": "Leave Blank"
+  },
+  "ca8d3c1e00fa965284b2": {
+    "source": "确认生日",
+    "text": "Confirm Birthday"
+  },
+  "38e2a23d046d51fe3c4d": {
+    "source": "今日小记 · 把日子过成值得收藏的篇章",
+    "text": "Today's Notes · A day worth keeping"
+  },
+  "81fec6234807203eb02a": {
+    "source": "不必追赶所有热闹，留住让你心动的那一种。",
+    "text": "Keep what moves you. Let the rest pass."
+  },
+  "a734384d04b575b74c40": {
+    "source": "编辑版面 ↗",
+    "text": "Edit Layout ↗"
+  },
+  "17cebca8c086b769d5b5": {
+    "source": "日报封面",
+    "text": "Daily Cover"
+  },
+  "f1b2bc5749cb357b632a": {
+    "source": "常用网址 / DAILY PICKS",
+    "text": "DAILY PICKS"
+  },
+  "1047503d2f4d405f0626": {
+    "source": "值得常来的地方",
+    "text": "Places worth returning to"
+  },
+  "9fc072e250927a877a40": {
+    "source": "精选空间 / YOUR SECTIONS",
+    "text": "YOUR SECTIONS"
+  },
+  "734c3479b5ffbb515ab5": {
+    "source": "__SHIYU_VAR_3__ 个场景 · 打开这一版 ↗",
+    "text": "__SHIYU_VAR_3__ scenes · Read more ↗"
+  },
+  "cbd03274b11be8b17651": {
+    "source": "编辑日报版面",
+    "text": "Edit Daily"
+  },
+  "cd999e0f2d4a2e0f786a": {
+    "source": "细头条",
+    "text": "Kicker"
+  },
+  "57e00a8bb0a591bfedfb": {
+    "source": "大头条",
+    "text": "Headline"
+  },
+  "e9cac4838f16907c3212": {
+    "source": "封面简介",
+    "text": "Cover Summary"
+  },
+  "5421a0e3a71e6c1fce69": {
+    "source": "封面图",
+    "text": "Cover Image"
+  },
+  "f077372701c9ee46d9e9": {
+    "source": "选择一张横向图片，最大 3 MB。",
+    "text": "Choose a landscape image under 3 MB."
+  },
+  "3ef54598d3e8fcf0e6ad": {
+    "source": "页边小记",
+    "text": "Margin Note"
+  },
+  "e69fece8685b400654dc": {
+    "source": "常用网址 · 最多 4 个",
+    "text": "Daily Picks · Up to 4"
+  },
+  "5c336c2419df1df1800b": {
+    "source": "精选空间 · 最多 3 个",
+    "text": "Featured Spaces · Up to 3"
+  },
+  "650a085b9a002743b063": {
+    "source": "请选择 3 MB 以内的图片",
+    "text": "Choose an image under 3 MB"
+  },
+  "92ddf5bdb42feeeb95b2": {
+    "source": "最多选择 __SHIYU_VAR_0__ 个",
+    "text": "Select up to __SHIYU_VAR_0__"
+  },
+  "1f4f60aaecf8258bef03": {
+    "source": "留白日常",
+    "text": "Minimal"
+  },
+  "406d4b84c11a8c4f0b62": {
+    "source": "黑胶时光",
+    "text": "Vinyl"
+  },
+  "58d53972ca47f2221790": {
+    "source": "人生影院",
+    "text": "Cinema"
+  },
+  "5c57081d960177369a0d": {
+    "source": "星际漫游",
+    "text": "Cosmos"
+  },
+  "763907291b657fdfc921": {
+    "source": "翻页光阴",
+    "text": "Flip Clock"
+  },
+  "ac1a5a795e5e59eab7cb": {
+    "source": "时间之雨",
+    "text": "Digital Rain"
+  },
+  "104eac3240ea7d7bbc79": {
+    "source": "苔径青绿",
+    "text": "Moss"
+  },
+  "6b0072cc4f3abb9f2403": {
+    "source": "山岩石墨",
+    "text": "Graphite"
+  },
+  "62f6052a34e01a683c9e": {
+    "source": "麦田暖金",
+    "text": "Warm Gold"
+  },
+  "8325c948f87fd3d1a34b": {
+    "source": "远山雾蓝",
+    "text": "Mist Blue"
+  },
+  "cc3c2902d3316545e060": {
+    "source": "暮色浅紫",
+    "text": "Soft Violet"
+  },
+  "52d42d1cfe26f94c71f4": {
+    "source": "陶土暖橙",
+    "text": "Terracotta"
+  },
+  "7b04b4400b595408d8a6": {
+    "source": "干枯玫瑰",
+    "text": "Dusty Rose"
+  },
+  "c44871b7ff2fb50b1742": {
+    "source": "点击「拾隅」切换下一个主题",
+    "text": "Click Shiyu for the next theme"
+  },
+  "b6bf685e7a95fb2965e9": {
+    "source": "悬停展开，选择喜欢的主题",
+    "text": "Hover to choose a theme"
+  },
+  "e75e9c0f9a06d964a2d0": {
+    "source": "点击「拾隅」可直接切换下一个主题，鼠标悬停也可展开选择。",
+    "text": "Click Shiyu for the next theme, or hover to choose."
+  },
+  "95627013d3f4557ccf64": {
+    "source": "点击切换下一个主题，悬停展开主题列表",
+    "text": "Click for next theme · Hover to choose"
+  },
+  "788db1cfec2a3db586e7": {
+    "source": "主题",
+    "text": "Theme"
+  },
+  "7f831961c0c6658f354e": {
+    "source": "从这里，再看见世界",
+    "text": "A new way to see the world"
+  },
+  "8d2bc047cf6ad5f19503": {
+    "source": "关闭主题指引",
+    "text": "Close Guide"
+  },
+  "80d7d498946e6f980787": {
+    "source": "从这里，换一种日常",
+    "text": "A fresh look starts here"
+  },
+  "cdfa44b9580126132ac3": {
+    "source": "点击左上角「拾隅」，即可切换主题。",
+    "text": "Click Shiyu at the top left to switch themes."
+  },
+  "91415af8fea363b96e38": {
+    "source": "自定义配色",
+    "text": "Custom Color"
+  },
+  "6134218dd8bf5d3c5879": {
+    "source": "选择喜欢的颜色",
+    "text": "Choose a color"
+  },
+  "e65c45a05191096ee568": {
+    "source": "选择自定义颜色",
+    "text": "Choose Custom Color"
+  },
+  "bc4b1b538dae0262b205": {
+    "source": "确认配色",
+    "text": "Apply Color"
+  },
+  "f6892d72c8d5ece94dcc": {
+    "source": "自定义色板",
+    "text": "Custom Palette"
+  },
+  "85cf2c9c81c138640343": {
+    "source": "选择饱和度与明度",
+    "text": "Saturation & Brightness"
+  },
+  "3ff6d1c07cfcb35ad0c2": {
+    "source": "色相",
+    "text": "Hue"
+  },
+  "a1c2723caa06e307d9fe": {
+    "source": "十六进制颜色",
+    "text": "Hex Color"
+  },
+  "1bfde6b7ea27c9b842be": {
+    "source": "风格",
+    "text": "Style"
+  },
+  "cf43df73f728318c9820": {
+    "source": "胶片放映",
+    "text": "Screening"
+  },
+  "4089ed3efe6159d1ae43": {
+    "source": "让日常，缓缓上映。",
+    "text": "Let your day unfold."
+  },
+  "c76991f335857123242d": {
+    "source": "把日常，拍成电影。",
+    "text": "Make your day a film."
+  },
+  "50b0e00babfd412c1683": {
+    "source": "每一个平凡的片刻，都值得被珍藏。",
+    "text": "Ordinary moments, worth keeping."
+  },
+  "f7edc01fe9310e692dca": {
+    "source": "SHIYU PICTURES / 私人放映室",
+    "text": "SHIYU PICTURES / PRIVATE SCREENING"
+  },
+  "f3556d28e612fdbe2551": {
+    "source": "一部由 __SHIYU_VAR_11__ 珍藏的日常",
+    "text": "A day kept by __SHIYU_VAR_11__"
+  },
+  "d9599f5036508fb4fea9": {
+    "source": "换一幕 →",
+    "text": "Next Scene →"
+  },
+  "53b40bb0f369a6b8e094": {
+    "source": "暂停放映",
+    "text": "Pause"
+  },
+  "bcc8819ef31d6e2561d3": {
+    "source": "开始放映",
+    "text": "Play"
+  },
+  "0f60575675ddb984a095": {
+    "source": "换一幕",
+    "text": "Next Scene"
+  },
+  "fb180843d088b89971f2": {
+    "source": "下一幕",
+    "text": "Up Next"
+  },
+  "71abb681ccc2379b6b44": {
+    "source": "CHAPTER 01 / 山间来信",
+    "text": "CHAPTER 01 / MOUNTAIN LETTER"
+  },
+  "9ede9d42a1aaa72a82d1": {
+    "source": "CHAPTER 02 / 黄昏未央",
+    "text": "CHAPTER 02 / LAST LIGHT"
+  },
+  "bcab1ee64c3bd19b2d23": {
+    "source": "CHAPTER 03 / 潮汐之间",
+    "text": "CHAPTER 03 / BETWEEN TIDES"
+  },
+  "835577ee0983823c839c": {
+    "source": "继续放映",
+    "text": "Resume"
+  },
+  "197925bfbcc3f190f3e4": {
+    "source": "NOW SHOWING / 此刻正在上映",
+    "text": "NOW SHOWING"
+  },
+  "bf1c30e109e77cae5f47": {
+    "source": "INTERMISSION / 让这一刻，停留一下",
+    "text": "INTERMISSION / Stay a moment"
+  },
+  "e635b0b8e2578246ff5f": {
+    "source": "NOW SHOWING / 让日常，缓缓上映",
+    "text": "NOW SHOWING / Let your day unfold"
+  },
+  "e92dd9b63bf1d80aa85b": {
+    "source": "留一帧光阴，等下一次心动",
+    "text": "Keep a frame. Make a memory."
+  },
+  "9c59d7e7cd0d4050c270": {
+    "source": "关闭放映音乐",
+    "text": "Music Off"
+  },
+  "42cb98acdf4acb829889": {
+    "source": "开启放映音乐",
+    "text": "Music On"
+  },
+  "8a2edaac33b1ad76d83c": {
+    "source": "全幕光影",
+    "text": "Immersive"
+  },
+  "8c1a387e698665e2e7a1": {
+    "source": "转换角度",
+    "text": "Change Angle"
+  },
+  "c5010f2f3e8e6d0794ee": {
+    "source": "全目光影",
+    "text": "Immersive"
+  },
+  "6aff2433a9e6b9e4de7f": {
+    "source": "拾光日报",
+    "text": "Shiyu Daily"
+  },
+  "ef936289bfaf68e613d0": {
+    "source": "THE SHIGUANG DAILY · 你的世界，自成一版",
+    "text": "THE SHIYU DAILY · Your world in print"
+  },
+  "d08dff418f5442388b57": {
+    "source": "拾光日报 · 读者入口",
+    "text": "Shiyu Daily · Reader Sign In"
+  },
+  "e97307541fa78add4f52": {
+    "source": "半月漫游",
+    "text": "15 Days"
+  },
+  "c3864b6858b489bec8c4": {
+    "source": "月度珍藏",
+    "text": "Monthly"
+  },
+  "f680a47b4ea7f2d2136e": {
+    "source": "年度相伴",
+    "text": "Annual"
+  },
+  "645f1dc4c087a5d86288": {
+    "source": "更多空间",
+    "text": "More Spaces"
+  },
+  "f75eff4e1f348fdc48eb": {
+    "source": "让工作、生活与灵感，各有归处。",
+    "text": "Room for work, life, and ideas."
+  },
+  "67e5b7212c330562af31": {
+    "source": "1 个空间",
+    "text": "1 space"
+  },
+  "d38134ce832e4e529e76": {
+    "source": "20 个空间",
+    "text": "20 spaces"
+  },
+  "18bb7403c1932f735dad": {
+    "source": "更多场景",
+    "text": "More Scenes"
+  },
+  "aad695bb840e6c3ab317": {
+    "source": "给每一种日常，留一个专属场景。",
+    "text": "A scene for every part of your day."
+  },
+  "bb5a0225fb67c3c71614": {
+    "source": "每空间 3 个",
+    "text": "3 per space"
+  },
+  "a2b249b98c5fed453a5e": {
+    "source": "每空间 20 个",
+    "text": "20 per space"
+  },
+  "97004446928e8051254e": {
+    "source": "更多分组",
+    "text": "More Groups"
+  },
+  "fe9c8fe355b6349526ff": {
+    "source": "把纷繁的收藏，整理成清晰的章节。",
+    "text": "Organize your finds into clear chapters."
+  },
+  "e8ebb6667698afbd0dcc": {
+    "source": "每场景 3 个",
+    "text": "3 per scene"
+  },
+  "d475f7447fbd077a933f": {
+    "source": "每场景 20 个",
+    "text": "20 per scene"
+  },
+  "349d6a2aac99c5e83918": {
+    "source": "空间独立外观",
+    "text": "Custom Spaces"
+  },
+  "56585bc56af503a437d5": {
+    "source": "不同的空间，也可以有不同的气质。",
+    "text": "A different feel for every space."
+  },
+  "5c9efc67e698107645fe": {
+    "source": "独立字体、布局、配色和样式",
+    "text": "Independent fonts, layouts, colors, and styles"
+  },
+  "d436a434385366d7209c": {
+    "source": "分享保护",
+    "text": "Protected Sharing"
+  },
+  "1e19ac034ad5494850b7": {
+    "source": "分享对所有人开放，重要内容可以多一层保护。",
+    "text": "Public sharing is free. Add protection for private content."
+  },
+  "cc0b0bca3d60ad8de190": {
+    "source": "公开分享",
+    "text": "Public Sharing"
+  },
+  "7039bc54d8e73a5de886": {
+    "source": "密码与有效期",
+    "text": "Password & Expiry"
+  },
+  "956e2d572c669c916a3b": {
+    "source": "给喜欢的，多一点空间。",
+    "text": "More room for what you love."
+  },
+  "7a013b1ccc5a3890ae55": {
+    "source": "当前功能需要会员",
+    "text": "Membership Required"
+  },
+  "b88f02974ea01f4a6f9e": {
+    "source": "上一项",
+    "text": "Previous"
+  },
+  "2e59b6f82de828465612": {
+    "source": "左右滑动，发现更多权益",
+    "text": "Swipe to explore benefits"
+  },
+  "f8baad25a05174807b72": {
+    "source": "下一项",
+    "text": "Next"
+  },
+  "c55eebdcbd41b2e4773b": {
+    "source": "免费用户",
+    "text": "Free"
+  },
+  "0efb3a20951d2d3ff2f6": {
+    "source": "会员",
+    "text": "Member"
+  },
+  "b983b9657212b8a67dba": {
+    "source": "为热爱，留一席之地。",
+    "text": "Room for your passions."
+  },
+  "bf530ff61744484f256f": {
+    "source": "更从容地收藏，更自由地表达。",
+    "text": "Save more. Make it yours."
+  },
+  "8107f102a7d51bc42174": {
+    "source": "所有套餐权益一致，仅有效期不同",
+    "text": "Same benefits, different durations"
+  },
+  "20ff512c250e0e6fd551": {
+    "source": "权益，一目了然",
+    "text": "Compare Benefits"
+  },
+  "25f5ce57a1909740c1f2": {
+    "source": "功能",
+    "text": "Feature"
+  },
+  "22fb28463114a2ebb305": {
+    "source": "会员 · 全部套餐",
+    "text": "All Member Plans"
+  },
+  "6df2c739a92ac6644394": {
+    "source": "现有风格 / 数据导出",
+    "text": "Existing Themes / Data Export"
+  },
+  "c14c915da5fbec642a87": {
+    "source": "开放",
+    "text": "Available"
+  },
+  "d4c35528e97f98faa550": {
+    "source": "会员到期后，已有空间、场景、分组和收藏仍可编辑、排序与移动；网址可继续收藏。新增空间、场景和分组按免费版额度执行。",
+    "text": "After membership expires, you can still edit, sort, and move existing content and save links. New spaces, scenes, and groups follow free-plan limits."
+  },
+  "3524c56e8e35551b07d4": {
+    "source": "邀请同频的人",
+    "text": "Invite Friends"
+  },
+  "1a0dc4d59e1934d8a198": {
+    "source": "一起收藏生活里的好东西",
+    "text": "Share the good things"
+  },
+  "437d5b17870907f5f4f7": {
+    "source": "查看奖励与明细 ↗",
+    "text": "View Rewards ↗"
+  },
+  "8d23ffd9000272b21a07": {
+    "source": "__SHIYU_VAR_3__ · __SHIYU_VAR_4__ 天",
+    "text": "__SHIYU_VAR_3__ · __SHIYU_VAR_4__ days"
+  },
+  "d8527241bd88933e1ba4": {
+    "source": "价格公布后开放购买",
+    "text": "Purchases open when pricing is announced"
+  },
+  "7546a59d0f687a83513f": {
+    "source": "查看订单",
+    "text": "View Orders"
+  },
+  "49da61ceeea2f2714263": {
+    "source": "天",
+    "text": "days"
+  },
+  "65483f170a2322993f02": {
+    "source": "价格待公布",
+    "text": "Price Coming Soon"
+  },
+  "137c58cbb0f9384d8a79": {
+    "source": "选择套餐",
+    "text": "Choose Plan"
+  },
+  "b6658cbd0172451d0b2a": {
+    "source": "确认你的相伴时光",
+    "text": "Confirm Your Plan"
+  },
+  "01b0535c96607901b09b": {
+    "source": "有效期 __SHIYU_VAR_1__ 天 · 全部会员权益",
+    "text": "__SHIYU_VAR_1__ days · All member benefits"
+  },
+  "ca7223717fa6f6810a21": {
+    "source": "支付方式",
+    "text": "Payment Method"
+  },
+  "cca3e619508278e9fdeb": {
+    "source": "暂未开通",
+    "text": "Unavailable"
+  },
+  "33a921a0b8585ca261b2": {
+    "source": "套餐定价和支付服务确认后开放购买。当前不会创建扣款或开通会员。",
+    "text": "Purchases open once pricing and payments are ready. No charge or membership activation now."
+  },
+  "5cede30ad8b35301042f": {
+    "source": "暂未开放购买",
+    "text": "Coming Soon"
+  },
+  "d8bccf9359106462bb51": {
+    "source": "把好东西，分享给同频的人。",
+    "text": "Share what you love."
+  },
+  "f6baa09eee14e16310d9": {
+    "source": "邀请奖励 · 即将开启",
+    "text": "Referral Rewards · Coming Soon"
+  },
+  "f6fc214f79bf1fe52c38": {
+    "source": "有效邀请",
+    "text": "Valid Referrals"
+  },
+  "22a72c606c81915007e0": {
+    "source": "累计奖励",
+    "text": "Total Rewards"
+  },
+  "232576d8e8c923f87df7": {
+    "source": "可用奖励",
+    "text": "Available Rewards"
+  },
+  "f2c8b3d8e53fc1496cc7": {
+    "source": "活动规则",
+    "text": "Rules"
+  },
+  "1aa4b5096b3be54af64b": {
+    "source": "好友通过专属链接注册并完成活动要求后，邀请才计为有效。",
+    "text": "A referral counts when a friend registers through your link and meets the campaign requirements."
+  },
+  "5ad3da5d094b4894d0ed": {
+    "source": "每位好友仅计奖一次。奖励金额、到账时间及使用方式将在活动开放时公布。",
+    "text": "Each friend earns rewards once. Reward amounts, delivery, and usage will be announced at launch."
+  },
+  "07ae19881ae5afc07250": {
+    "source": "活动开放后获取邀请链接",
+    "text": "Invite links available at launch"
+  },
+  "cd9667e7e99039dab1d7": {
+    "source": "邀请明细",
+    "text": "Referral History"
+  },
+  "9deddae8eb970446f6af": {
+    "source": "还没有邀请记录。",
+    "text": "No referrals yet."
+  },
+  "746dccb30a63394beec5": {
+    "source": "有效邀请、达标进度与奖励到账状态将在这里展示。",
+    "text": "Referral progress and rewards will appear here."
+  },
+  "8b9e24c480554c2629fb": {
+    "source": "✧ 会员中心",
+    "text": "✧ Membership"
+  },
+  "cad39e828de3e540f7c9": {
+    "source": "给喜欢的，多一点空间 ↗",
+    "text": "More Room ↗"
+  },
+  "eb6bfc53b719e9af62f0": {
+    "source": "已达到当前数量上限",
+    "text": "Limit Reached"
+  },
+  "92318d01bee548c22559": {
+    "source": "会员可享更多额度与权益",
+    "text": "Membership unlocks higher limits and more benefits"
+  },
+  "c0eaac83a856da834740": {
+    "source": "__SHIYU_VAR_0__个人资料",
+    "text": "__SHIYU_VAR_0__Profile"
+  },
+  "4518a160e1c40f3ba56f": {
+    "source": "__SHIYU_VAR_1__会员中心",
+    "text": "__SHIYU_VAR_1__Membership"
+  },
+  "1182ff0452c83c3016ec": {
+    "source": "会员中心",
+    "text": "Membership"
+  },
+  "51b588085835065f6783": {
+    "source": "拾隅 / 会员中心",
+    "text": "Shiyu / Membership"
+  },
+  "3a14a3c2be4d89e099af": {
+    "source": "← 返回",
+    "text": "← Back"
+  },
+  "58c3e0fde3456f2de753": {
+    "source": "返回原页面",
+    "text": "Go Back"
+  },
+  "9d13abd9b08fbbf77ff9": {
+    "source": "去发现，更多会员可能",
+    "text": "Explore Benefits"
+  },
+  "8b344d465ad7f522a2cd": {
+    "source": "月度会员",
+    "text": "Monthly"
+  },
+  "53414b1e4607ef56e33e": {
+    "source": "按月购买，一年 ¥120",
+    "text": "Monthly purchases total ¥120 a year"
+  },
+  "b87904d6df72040f3e14": {
+    "source": "连续包月",
+    "text": "Monthly Subscription"
+  },
+  "6c625dea17e026e69448": {
+    "source": "每月省 ¥2，一年省 ¥24",
+    "text": "Save ¥2 a month, ¥24 a year"
+  },
+  "e977616ea96780f1d9c0": {
+    "source": "年度会员",
+    "text": "Annual"
+  },
+  "944079096b093d48eb36": {
+    "source": "比按月购买一年省 ¥21",
+    "text": "Save ¥21 over 12 monthly purchases"
+  },
+  "eb42d5eb05d1bb9c0882": {
+    "source": "连续包年",
+    "text": "Annual Subscription"
+  },
+  "6936a1f477eafccccdd2": {
+    "source": "比按月购买一年省 ¥41；比年度省 ¥20",
+    "text": "Save ¥41 over monthly purchases, or ¥20 over the annual plan"
+  },
+  "2c6d076a3b702e67b19b": {
+    "source": "未绑定手机号",
+    "text": "Phone Not Linked"
+  },
+  "063a5cacfad7eedbbfa2": {
+    "source": "登录后收藏你的世界",
+    "text": "Sign in to save your world"
+  },
+  "d36100e4d33b596c805e": {
+    "source": "支付完成后，可在这里查询套餐、金额及订单状态。",
+    "text": "View your plan, amount, and order status here after payment."
+  },
+  "d68fb9aa3e58c1dc272c": {
+    "source": "可编辑空间",
+    "text": "Editable Spaces"
+  },
+  "46683ec02966997f89ad": {
+    "source": "查看与打开收藏",
+    "text": "View & Open Links"
+  },
+  "3611a177902182ecd587": {
+    "source": "空间分享",
+    "text": "Share Spaces"
+  },
+  "1df0fc469a214670831e": {
+    "source": "每空间场景",
+    "text": "Scenes per Space"
+  },
+  "4e1c1e301f977ec0890f": {
+    "source": "场景图标与描述",
+    "text": "Scene Icons & Descriptions"
+  },
+  "6de1f691eb9c9a49abf6": {
+    "source": "每场景分组",
+    "text": "Groups per Scene"
+  },
+  "16341c78b3f2a0d752d7": {
+    "source": "分组切换与搜索",
+    "text": "Switch & Search Groups"
+  },
+  "af1fc9d6e3a4e11b2ca3": {
+    "source": "风格与个性化",
+    "text": "Themes & Personalization"
+  },
+  "44e936c77c3d2bfef5ff": {
+    "source": "全局字体、布局、配色",
+    "text": "Global Fonts, Layout & Colors"
+  },
+  "c5b58fef333d8477fd9a": {
+    "source": "让每一份喜欢，都有余地。",
+    "text": "Room for every favorite."
+  },
+  "e457136661fddb6bb8b1": {
+    "source": "一种会员，全部权益。选择适合你的相伴方式。",
+    "text": "One membership, all benefits. Choose your plan."
+  },
+  "ca3fe54de2b0b5befa39": {
+    "source": "邀请奖励",
+    "text": "Referral Rewards"
+  },
+  "e11038965a930fe56b69": {
+    "source": "好友注册 +3 天 · 首次购买 +7 天",
+    "text": "Friend joins: +3 days · First purchase: +7 days"
+  },
+  "e46b6af6bf2f251c4d9f": {
+    "source": "拟定活动，开放后生效",
+    "text": "Proposed offer · Available at launch"
+  },
+  "4f3370df136098dd64b6": {
+    "source": "去看看 ↗",
+    "text": "View More ↗"
+  },
+  "f86c542d7dbffc9705cb": {
+    "source": "每一种日常，都被照顾",
+    "text": "Made for every day"
+  },
+  "ac85153a219af75075ca": {
+    "source": "四种套餐权益完全一致，以下对比免费账户与全部会员套餐。",
+    "text": "All four member plans share the same benefits. Compare with Free below."
+  },
+  "84c9ad4797634ee09697": {
+    "source": "全部会员套餐",
+    "text": "All Member Plans"
+  },
+  "250ca6cef184932fbf47": {
+    "source": "__SHIYU_VAR_5__ 天 · __SHIYU_VAR_6__",
+    "text": "__SHIYU_VAR_5__ days · __SHIYU_VAR_6__"
+  },
+  "d133a0fab1094410a4c4": {
+    "source": "订阅更优惠",
+    "text": "Save with Subscription"
+  },
+  "093ce145ced259ed3444": {
+    "source": "灵活购买",
+    "text": "One-Time Purchase"
+  },
+  "d2f5277505a4abae5cd4": {
+    "source": "✓ 已选择",
+    "text": "✓ Selected"
+  },
+  "3a2b1e7d787487f1a5cc": {
+    "source": "订阅方案：到期按所选周期续费，可取消后续续费。当前支付未开放，不会自动扣款。",
+    "text": "Subscriptions renew each billing period; future renewals can be canceled. Payments are not open yet, so no automatic charges apply."
+  },
+  "fa209ea5fd2d9144c203": {
+    "source": "一次购买，到期不自动续费。",
+    "text": "One-time purchase. No automatic renewal."
+  },
+  "920a7c9d2e36c425261b": {
+    "source": "邀请同频的人，让喜欢延续。",
+    "text": "Invite friends. Keep the good things going."
+  },
+  "8827dbeb246996419081": {
+    "source": "邀请奖励 · 活动待开放",
+    "text": "Referral Rewards · Coming Soon"
+  },
+  "fa936c8cfa1b5b2a36c5": {
+    "source": "好友首次注册成功",
+    "text": "Friend's First Registration"
+  },
+  "fd772542d56758b4dd66": {
+    "source": "天会员",
+    "text": "membership days"
+  },
+  "7f652029c56ce4be35ee": {
+    "source": "好友首次购买会员",
+    "text": "Friend's First Purchase"
+  },
+  "d7380ae33ceb4c5ffef2": {
+    "source": "累计邀请",
+    "text": "Total Referrals"
+  },
+  "2e878ca6410e77112aff": {
+    "source": "0 天",
+    "text": "0 days"
+  },
+  "f841c3feb722a8d2fe54": {
+    "source": "已获奖励",
+    "text": "Rewards Earned"
+  },
+  "e68545f7378582674c83": {
+    "source": "活动开放后，获取邀请链接",
+    "text": "Get your invite link at launch"
+  },
+  "65ad9eb991bb3591cebb": {
+    "source": "好友、注册时间、购买状态及奖励到账进度将在这里展示。",
+    "text": "Friends, registration dates, purchases, and reward status will appear here."
+  },
+  "d65b07c551d65ebbf687": {
+    "source": "1. 活动开放后，好友通过你的专属链接首次注册并验证账号，奖励 3 天会员。",
+    "text": "1. Once live, earn 3 membership days when a new friend registers through your link and verifies their account."
+  },
+  "d04ef8a25859b30a3687": {
+    "source": "2. 同一好友首次购买会员且订单确认有效，再奖励 7 天，可累计获得 10 天。",
+    "text": "2. Earn 7 more days on that friend's first valid membership purchase, for a total of 10 days."
+  },
+  "3d20c7644220fba4e5ad": {
+    "source": "3. 每位好友每阶段仅计奖一次，自邀和重复账号不计入。退款订单不计购买奖励。",
+    "text": "3. Each friend earns each reward once. Self-referrals, duplicate accounts, and refunded purchases do not qualify."
+  },
+  "0edd4521683b8a4ec7bd": {
+    "source": "4. 奖励为会员时长，不是现金；有效会员顺延到期日，非会员从奖励到账时起计算。",
+    "text": "4. Rewards are membership time, not cash. They extend active membership or start when credited if you are not a member."
+  },
+  "782d9bc296dc73505221": {
+    "source": "5. 当前为拟定方案，奖励到账时间和具体规则以活动正式上线公布为准。",
+    "text": "5. This is a proposed offer. Final rules and reward timing will be announced at launch."
+  },
+  "448f4f6f58ef1649c141": {
+    "source": "自动续费协议",
+    "text": "Auto-Renewal Terms"
+  },
+  "9d652e41d08d56f0ab2d": {
+    "source": "会员服务协议",
+    "text": "Membership Terms"
+  },
+  "1f6969701834aa176256": {
+    "source": "协议正文待正式发布，当前页面不能提交购买或授权扣款。",
+    "text": "Terms are not yet published. Purchases and payment authorization are unavailable."
+  },
+  "2aa91ebf59b909d9d6bd": {
+    "source": "连续包月／连续包年为周期续费方案，正式开通前将明确扣款周期、续费金额及取消方式。",
+    "text": "Monthly and annual subscriptions renew periodically. Billing cycles, renewal prices, and cancellation details will be provided before launch."
+  },
+  "a742f950669873a6db2f": {
+    "source": "会员服务的权益范围、有效期、售后和退款规则将在正式支付开放前公布。",
+    "text": "Benefits, validity, support, and refund terms will be published before payments open."
+  },
+  "1f4e5c37bd076419890a": {
+    "source": "关闭会员页",
+    "text": "Close Membership"
+  },
+  "60cb5f5cc3e4ba2ef1f0": {
+    "source": "让喜欢，为你延续",
+    "text": "Keep what you love going"
+  },
+  "0f8c6966a6fba206a7bc": {
+    "source": "选择相伴方式",
+    "text": "Choose Plan"
+  },
+  "2f3b185c59a9b91b47e8": {
+    "source": "全部会员权益一致",
+    "text": "Same benefits on every member plan"
+  },
+  "49d10473ef5016a4ae25": {
+    "source": "自由开始",
+    "text": "Start Free"
+  },
+  "2229a42fbcfa600bc8ba": {
+    "source": "免费版",
+    "text": "Free"
+  },
+  "81a1d4b4b18abab361a3": {
+    "source": "基础收藏，轻松使用",
+    "text": "Everyday bookmarking, free"
+  },
+  "d7ce794d0b865b91fa02": {
+    "source": "我已阅读并同意",
+    "text": "I agree to"
+  },
+  "967ab0f9a1df351e47ad": {
+    "source": "支付 ¥",
+    "text": "Pay ¥"
+  },
+  "4c94558e96074f1de866": {
+    "source": "及",
+    "text": "and"
+  },
+  "afae0dc752be3ce54de4": {
+    "source": "__SHIYU_VAR_0__协议",
+    "text": "__SHIYU_VAR_0__ Terms"
+  },
+  "aa7d8152ea3868e5b0b6": {
+    "source": "当前免费权益",
+    "text": "Free Benefits"
+  },
+  "7c240f3a546ddcbde721": {
+    "source": "请先阅读并勾选协议",
+    "text": "Read and accept the terms first"
+  },
+  "857d3417066bce23b0a6": {
+    "source": "支付流程演示",
+    "text": "Payment Demo"
+  },
+  "f341c24aafaa48ffb352": {
+    "source": "仅模拟页面状态，不会扣款或开通真实会员。",
+    "text": "Demo only. No charge or real membership activation."
+  },
+  "0a1934006ede04907a86": {
+    "source": "模拟支付成功",
+    "text": "Simulate Success"
+  },
+  "679dd8f04d150b508929": {
+    "source": "模拟支付失败",
+    "text": "Simulate Failure"
+  },
+  "177cda05ef1a9166aa67": {
+    "source": "DEMO / 模拟订单",
+    "text": "DEMO ORDER"
+  },
+  "d8bb0e201334f68de32d": {
+    "source": "支付成功，喜欢有了更多空间。",
+    "text": "Paid. More room for your favorites."
+  },
+  "bfa46402061499cfde32": {
+    "source": "支付未完成，稍后再试也没关系。",
+    "text": "Payment incomplete. Try again later."
+  },
+  "0b9231e301b48194fda7": {
+    "source": "已完成模拟流程，真实会员状态未改变。",
+    "text": "Demo complete. Real membership is unchanged."
+  },
+  "488ffcaf20ec64bc524a": {
+    "source": "模拟失败：支付渠道暂时未响应，未产生扣款。",
+    "text": "Demo failed: payment service unavailable. No charge made."
+  },
+  "81665ce3be3e39e80ace": {
+    "source": "重新支付",
+    "text": "Retry Payment"
+  },
+  "8cc3d4570f96b8c5294d": {
+    "source": "暂不支付",
+    "text": "Not Now"
+  },
+  "ea04af9f9de3ed061a59": {
+    "source": "模拟成功",
+    "text": "Demo Success"
+  },
+  "3d818f6d9b6fa960413a": {
+    "source": "模拟失败",
+    "text": "Demo Failed"
+  },
+  "c7ad4059ab62d95f7565": {
+    "source": "__SHIYU_VAR_3__ · 演示记录，非真实订单",
+    "text": "__SHIYU_VAR_3__ · Demo, not a real order"
+  },
+  "bbd56c7261b28cdcd4b2": {
+    "source": "邀请好友，领取会员时光",
+    "text": "Invite Friends, Earn Days"
+  },
+  "dce6d886f2b76edd9e5b": {
+    "source": "注册得 3 天 · 首购再得 7 天",
+    "text": "Registration: +3 days · First purchase: +7 days"
+  },
+  "8bea1d62d9f4d70aa536": {
+    "source": "支付办理 · 模拟",
+    "text": "Payment Demo"
+  },
+  "31388ca99688bb5744c7": {
+    "source": "不产生真实扣款",
+    "text": "No real charge"
+  },
+  "9425964fa3348c985d29": {
+    "source": "模拟购买",
+    "text": "Demo Purchase"
+  },
+  "1bed129c15844de81468": {
+    "source": "模拟会员已开通，仅在本机体验生效，不产生扣款。",
+    "text": "Demo membership activated locally. No charge made."
+  },
+  "849b498f4fc4e896b679": {
+    "source": "支付成功时间：__SHIYU_VAR_0__",
+    "text": "Paid at: __SHIYU_VAR_0__"
+  },
+  "97222e014c72d5cbc513": {
+    "source": "会员有效期至：__SHIYU_VAR_1__",
+    "text": "Member until: __SHIYU_VAR_1__"
+  },
+  "73ca15281fa4d47c6f62": {
+    "source": "再次购买或活动奖励到账，均从当前有效期往后累加。",
+    "text": "Purchases and rewards extend your current expiry date."
+  },
+  "af2ed04ba247f1dee9cf": {
+    "source": "订单详情 / 演示",
+    "text": "Order Details / Demo"
+  },
+  "7cbb39c353f15bd858f7": {
+    "source": "此订单仅为本机演示记录，未实际扣款。",
+    "text": "Local demo order. No charge made."
+  },
+  "fbcefbb4c11a8abb500f": {
+    "source": "订单编号",
+    "text": "Order Number"
+  },
+  "d28d05f623e4cbcc3009": {
+    "source": "历史演示订单",
+    "text": "Past Demo Orders"
+  },
+  "f827fdb95782969a6127": {
+    "source": "订单金额",
+    "text": "Amount"
+  },
+  "07ec86e0f1d44f910543": {
+    "source": "创建时间",
+    "text": "Created"
+  },
+  "35ff02be2a370b5f07b2": {
+    "source": "支付成功时间",
+    "text": "Paid At"
+  },
+  "8102dbbff59d1a927b23": {
+    "source": "会员时长",
+    "text": "Membership Duration"
+  },
+  "4874fa5d4b3af61c8af7": {
+    "source": "有效期至",
+    "text": "Valid Until"
+  },
+  "4ee7200f17263717f712": {
+    "source": "续费方式",
+    "text": "Renewal"
+  },
+  "c0a6635f791e9a3fb61e": {
+    "source": "按周期续费（模拟）",
+    "text": "Recurring (Demo)"
+  },
+  "33eae3a9e56365973ca8": {
+    "source": "单次购买",
+    "text": "One-Time"
+  },
+  "d0c44dc05874761139fc": {
+    "source": "会员权益",
+    "text": "Member Benefits"
+  },
+  "7138adcbca9deac3cffc": {
+    "source": "让喜欢，拥有更多可能。",
+    "text": "More possibilities for what you love."
+  },
+  "2e0a139b99c8a95b380f": {
+    "source": "演示奖励到账 +3 天",
+    "text": "Demo Reward: +3 Days"
+  },
+  "47cad1a55f8e26d3987e": {
+    "source": "模拟邀请奖励",
+    "text": "Demo Referral Reward"
+  },
+  "9aec93edc7e3b7f7f773": {
+    "source": "模拟奖励已累加，有效期至",
+    "text": "Demo reward added. Valid until"
+  },
+  "36094f09a10ed1337401": {
+    "source": "连续包月服务协议",
+    "text": "Monthly Renewal Terms"
+  },
+  "335951fa24de61862887": {
+    "source": "连续包月为按月续费方案，正式开通前将明确扣款周期、续费金额及取消方式。",
+    "text": "Monthly subscriptions renew every month. Billing, pricing, and cancellation details will be provided before launch."
+  },
+  "13e4983d0f5efdc06721": {
+    "source": "连续包年服务协议",
+    "text": "Annual Renewal Terms"
+  },
+  "4d28babb7de0ef920373": {
+    "source": "连续包年为按年续费方案，正式开通前将明确扣款周期、续费金额及取消方式。",
+    "text": "Annual subscriptions renew every year. Billing, pricing, and cancellation details will be provided before launch."
+  },
+  "7cf8ce68d990435dec30": {
+    "source": "一年365天",
+    "text": "365 days"
+  },
+  "0550a5475af67327c34b": {
+    "source": "一个月30天",
+    "text": "30 days"
+  },
+  "9a2ee3b8eeb7d6208553": {
+    "source": "《连续包月服务协议》",
+    "text": "Monthly Renewal Terms"
+  },
+  "b406a3bb8f00f44b8b54": {
+    "source": "《连续包年服务协议》",
+    "text": "Annual Renewal Terms"
+  },
+  "8bc2db3e03235ea68e6f": {
+    "source": "《会员服务协议》",
+    "text": "Membership Terms"
+  },
+  "e6fdc0ddf6b4ba2aaf4d": {
+    "source": "有效期至 __SHIYU_VAR_2__",
+    "text": "Valid until __SHIYU_VAR_2__"
+  },
+  "0e3cafe297a8a8129753": {
+    "source": "体验会员",
+    "text": "Demo Member"
+  },
+  "563f198120cdb1b08e10": {
+    "source": "可选套餐",
+    "text": "Available Plans"
+  },
+  "81dd3575bb1bc294d2e6": {
+    "source": "选择与你相伴的时光",
+    "text": "Choose your plan"
+  },
+  "b94d13a45ea21152fd63": {
+    "source": "个人资料",
+    "text": "Profile"
+  },
+  "1bdd189b52a955692429": {
+    "source": "请先阅读并同意协议",
+    "text": "Accept the terms first"
+  },
+  "f9d0d4d2fea479eb35bd": {
+    "source": "勾选《会员服务协议》及所选套餐对应的续费协议后，才能继续支付。",
+    "text": "Accept the Membership Terms and your plan's renewal terms to pay."
+  },
+  "2b96fae6cfe093428a49": {
+    "source": "返回查看协议",
+    "text": "Read Terms"
+  },
+  "b17e542d707aef4d8ccf": {
+    "source": "免费版仅作权益对比，无需购买",
+    "text": "Free is shown for comparison. No purchase needed."
+  },
+  "9e81afdac80eaa6f77a6": {
+    "source": "林间",
+    "text": "Forest"
+  },
+  "a18e1d5053a25b668178": {
+    "source": "小满",
+    "text": "Summer"
+  },
+  "fad55058ad8901ea5439": {
+    "source": "远山",
+    "text": "Mountains"
+  },
+  "75e18af01469d95c8a9f": {
+    "source": "听雨",
+    "text": "Rain"
+  },
+  "6561b35e1852082b690e": {
+    "source": "南风",
+    "text": "Breeze"
+  },
+  "c2f6eae63e2072ac08d7": {
+    "source": "邀请奖励 · 以下明细为模拟数据，不计入实际会员时长",
+    "text": "Referral Rewards · Demo data, not real membership time"
+  },
+  "b3f7b8ba38120ea33207": {
+    "source": "每位好友首次注册成功",
+    "text": "Friend's First Registration"
+  },
+  "563c78dd979be642cf54": {
+    "source": "每位好友首次付费成功",
+    "text": "Friend's First Payment"
+  },
+  "257d9a23104ab38fd81f": {
+    "source": "同一好友可累计奖励 10 天，每个阶段仅计奖一次。奖励到账后顺延会员有效期；自邀、重复账号及退款订单不计入。活动尚未开放。",
+    "text": "Earn up to 10 days per friend, once per stage. Rewards extend membership. Self-referrals, duplicates, and refunds do not qualify. Offer not yet live."
+  },
+  "eab7185db6aacc6aafac": {
+    "source": "注册成功",
+    "text": "Registered"
+  },
+  "50f5d65d57290f754220": {
+    "source": "人",
+    "text": "people"
+  },
+  "c7cb124dfd61f5a14040": {
+    "source": "奖励 __SHIYU_VAR_2__ 天",
+    "text": "Reward: __SHIYU_VAR_2__ days"
+  },
+  "e83a297bb8d635e86696": {
+    "source": "付费成功",
+    "text": "Paid"
+  },
+  "0a1b7c6fb06928e96f20": {
+    "source": "奖励 __SHIYU_VAR_4__ 天",
+    "text": "Reward: __SHIYU_VAR_4__ days"
+  },
+  "12f5c657d057498b0aa0": {
+    "source": "受邀好友",
+    "text": "Invited Friends"
+  },
+  "3026d2f66689c7fa79dd": {
+    "source": "注册奖励",
+    "text": "Registration Reward"
+  },
+  "d989327dc4a823b57d21": {
+    "source": "付费奖励",
+    "text": "Purchase Reward"
+  },
+  "23585a20337f61848e5b": {
+    "source": "累计",
+    "text": "Total"
+  },
+  "1f4273cab15177298842": {
+    "source": "已注册",
+    "text": "Registered"
+  },
+  "bfc0654533567b3f37ab": {
+    "source": "+3 天",
+    "text": "+3 days"
+  },
+  "8efc87f1a58ae601b67b": {
+    "source": "__SHIYU_VAR_3__ 天",
+    "text": "__SHIYU_VAR_3__ days"
+  },
+  "94edc487fd9d8dc23518": {
+    "source": "已付费",
+    "text": "Paid"
+  },
+  "102a7240c40a58db08cc": {
+    "source": "+7 天",
+    "text": "+7 days"
+  },
+  "5499519647b8079efd0c": {
+    "source": "未付费",
+    "text": "Unpaid"
+  },
+  "51ba8eb3f127fc2458cb": {
+    "source": "请阅读以下协议",
+    "text": "Read the terms below"
+  },
+  "5b62b512fb38ca010da2": {
+    "source": "《__SHIYU_VAR_0__服务协议》",
+    "text": "__SHIYU_VAR_0__ Terms"
+  },
+  "47add74e7890e81a3b45": {
+    "source": "我已确认并同意，继续支付",
+    "text": "Accept & Pay"
+  },
+  "fb6cfde5602eadeaf368": {
+    "source": "让首页，有不同的心情",
+    "text": "A mood for your home"
+  },
+  "bc85d626ee6d3473d8af": {
+    "source": "风格封面一览，找到喜欢的那一款。",
+    "text": "Browse themes and find your favorite."
+  },
+  "78915355bef4df363f02": {
+    "source": "现有风格均可使用，会员还可为空间独立搭配外观。",
+    "text": "All existing themes are available. Members can also style each space independently."
+  },
+  "704d8da5a638b6f90fb3": {
+    "source": "给喜欢，多一些空间",
+    "text": "More room for your favorites"
+  },
+  "8f7b7fcc096871e52d1d": {
+    "source": "工作、生活与灵感，各有自己的归处。",
+    "text": "A place for work, life, and ideas."
+  },
+  "59dae95aba13b0001ff8": {
+    "source": "会员可创建 __SHIYU_VAR_0__ 个空间，并独立设置字体、布局和配色。",
+    "text": "Members can create __SHIYU_VAR_0__ spaces with independent fonts, layouts, and colors."
+  },
+  "e1853d63ade1ea10795d": {
+    "source": "把日常，分成不同场景",
+    "text": "A scene for every day"
+  },
+  "633135d588e12ee6a48f": {
+    "source": "阅读、工作、学习、生活，按场景整理，也能搭配网址样式。",
+    "text": "Organize reading, work, study, and life with scenes and link styles."
+  },
+  "ec2562ce79976fddb053": {
+    "source": "会员每个空间可创建 __SHIYU_VAR_0__ 个场景。",
+    "text": "Members get __SHIYU_VAR_0__ scenes per space."
+  },
+  "aa35c4e6999dc03dbdd3": {
+    "source": "让收藏，有条不紊",
+    "text": "Keep things organized"
+  },
+  "010404fcbeb3b8703755": {
+    "source": "把同一类网址放在一起，让每次寻找更从容。",
+    "text": "Group similar links for easy access."
+  },
+  "db543d2b8a7377936a83": {
+    "source": "会员每个场景可创建 __SHIYU_VAR_0__ 个分组。",
+    "text": "Members get __SHIYU_VAR_0__ groups per scene."
+  },
+  "14f06314612d306e8dd1": {
+    "source": "让样式，贴合你的喜好",
+    "text": "Make it yours"
+  },
+  "318ced90bcb55b2718d4": {
+    "source": "唱片、便签与简约卡片，让收藏有自己的模样。",
+    "text": "Records, notes, or simple cards. Choose your look."
+  },
+  "5718db62dfcb349857eb": {
+    "source": "在空间中独立搭配样式、字体、布局与配色。",
+    "text": "Style each space with its own cards, font, layout, and colors."
+  },
+  "e52291c0eae6394a62e5": {
+    "source": "把珍藏，分享给同频的人",
+    "text": "Share your favorites"
+  },
+  "98573c930249c30345fd": {
+    "source": "从一份收藏，到一整个空间。",
+    "text": "From a single collection to a whole space."
+  },
+  "f23bdfa3f265c0385808": {
+    "source": "支持空间与场景分享，并设置访问密码和有效期。",
+    "text": "Share spaces and scenes with optional passwords and expiry dates."
+  },
+  "f08a20c8ba6d991ed1e3": {
+    "source": "灵感收藏",
+    "text": "Inspiration"
+  },
+  "9757ba38456cd5b293c1": {
+    "source": "待阅读",
+    "text": "Read Later"
+  },
+  "cf3350ba5a6d1d166b4b": {
+    "source": "灵感便签",
+    "text": "Idea Notes"
+  },
+  "1bf65255e0c47e9b4319": {
+    "source": "空间与场景",
+    "text": "Spaces & Scenes"
+  },
+  "9ecde202fcb708f4005e": {
+    "source": "让喜欢，再多一点余地",
+    "text": "A little more room"
+  },
+  "db821ad1a698ea8a5ffe": {
+    "source": "· 左右切换，也可滚动浏览",
+    "text": "· Use arrows or scroll to browse"
+  },
+  "69c3f8a8032e3b7dbf7f": {
+    "source": "静心",
+    "text": "Stillness"
+  },
+  "a561b2791987f0db0477": {
+    "source": "星河",
+    "text": "Starlight"
+  },
+  "39a8ddb3788903c094b4": {
+    "source": "悠远",
+    "text": "Far Away"
+  },
+  "8d12fc0d4eb26021d93d": {
+    "source": "暂停",
+    "text": "Pause"
+  },
+  "80ac19b13354a6c71948": {
+    "source": "点击黑胶区域，切换下一首",
+    "text": "Click the record for the next track"
+  },
+  "f03e2b5312a86349c6db": {
+    "source": "播放 / 暂停",
+    "text": "Play / Pause"
+  },
+  "255753f34e29cadbc801": {
+    "source": "太阳 · 把漫长岁月燃成光，照亮每一次出发。",
+    "text": "Sun · Turning time into light for every journey."
+  },
+  "5f46da3a672a3b8db87e": {
+    "source": "水星 · 离光最近的旅人，在寂静里走过晨昏。",
+    "text": "Mercury · A quiet traveler, closest to the light."
+  },
+  "03e1bc3135ab7ee6b0b8": {
+    "source": "金星 · 披着云的面纱，把温柔留给遥望的人。",
+    "text": "Venus · Soft light behind a veil of clouds."
+  },
+  "3672539da80d77da8a6c": {
+    "source": "地球 · 在无垠的黑暗里，这一抹蓝，叫作家。",
+    "text": "Earth · A little blue in the dark. Home."
+  },
+  "7bfde422590a16142db7": {
+    "source": "火星 · 风吹过赤色旷野，等待下一双远行的脚步。",
+    "text": "Mars · Red plains await the next explorer."
+  },
+  "2f9bcb269cb52c9eb16d": {
+    "source": "木星 · 将风暴藏进纹理，在辽阔里守候岁月。",
+    "text": "Jupiter · Storms etched into a giant's sky."
+  },
+  "b1be8c61c6802f857cb1": {
+    "source": "土星 · 把星尘围成一枚指环，寄给漫长的时光。",
+    "text": "Saturn · A ring of stardust around time."
+  },
+  "4c0a7e8dc1fbace5379a": {
+    "source": "天王星 · 侧身走过幽蓝长夜，自有安静的方向。",
+    "text": "Uranus · A quiet path through the blue night."
+  },
+  "f95432568a514016a5f5": {
+    "source": "海王星 · 在遥远的蓝色深处，风替星空写信。",
+    "text": "Neptune · Distant winds in a deep blue sky."
+  },
+  "e0a8bebefb6ce2ff6c45": {
+    "source": "点击地平线，返回太阳系",
+    "text": "Click the horizon to return to the solar system"
+  },
+  "fb381aeaa934ade54e1e": {
+    "source": "月球 · 把无声的陪伴，写进地球每一个夜晚",
+    "text": "Moon · Quiet company for Earth's nights"
+  },
+  "02e7677e3d76fee7c398": {
+    "source": "返回太阳系",
+    "text": "Solar System"
+  },
+  "ae6261e98bd65b7c44c4": {
+    "source": "阅读空间",
+    "text": "Reading Space"
+  },
+  "fe49f8ea32e01aa7506e": {
+    "source": "音乐空间",
+    "text": "Music Space"
+  },
+  "9fec3478cbf73e26bb44": {
+    "source": "电影空间",
+    "text": "Film Space"
+  },
+  "122dfa199702ceb43331": {
+    "source": "旅行空间",
+    "text": "Travel Space"
+  },
+  "1a8e1fc578df02016952": {
+    "source": "学习空间",
+    "text": "Study Space"
+  },
+  "b9ea23b4f2e964dd0412": {
+    "source": "设计空间",
+    "text": "Design Space"
+  },
+  "f9f47f8ebad3d2c95916": {
+    "source": "探索空间",
+    "text": "Explore Space"
+  },
+  "7f5e5dffe6c302508d8e": {
+    "source": "日常空间",
+    "text": "Daily Space"
+  },
+  "acb0778fe8d8ada5413f": {
+    "source": "收藏空间",
+    "text": "Collection Space"
+  },
+  "12a29ff586ca245d8ffa": {
+    "source": "远方空间",
+    "text": "Distant Space"
+  },
+  "cadf7f870b9fcdcb0d12": {
+    "source": "时光空间",
+    "text": "Time Space"
+  },
+  "c1a0400cf7307bbdafde": {
+    "source": "星光空间",
+    "text": "Starlight Space"
+  },
+  "26688145efd663dc7570": {
+    "source": "条收藏",
+    "text": "bookmarks"
+  },
+  "c398134d7d1f58e7c31c": {
+    "source": "星期",
+    "text": "Day"
+  },
+  "006148fb62531bc827e6": {
+    "source": "日一二三四五六",
+    "text": "Sun Mon Tue Wed Thu Fri Sat"
+  },
+  "7d58b6422cacedbcdf5e": {
+    "source": "时",
+    "text": "h"
+  },
+  "b6a993c256ef577abb04": {
+    "source": "分",
+    "text": "min"
+  },
+  "f9df712d417e921ec292": {
+    "source": "点击或下拉，切换为",
+    "text": "Click or pull to switch to"
+  },
+  "b1d330f6300ff6ae08c8": {
+    "source": "；双击打开配色设置",
+    "text": "; double-click for colors"
+  },
+  "df3d58c7d84b85f2037c": {
+    "source": "设置",
+    "text": "Settings"
+  },
+  "d93186fd1fec6f382a5e": {
+    "source": "前往全局",
+    "text": "Global Settings"
+  },
+  "76ee6378ead1fc9e0279": {
+    "source": "＋ 点击上传封面图",
+    "text": "＋ Upload Cover"
+  },
+  "2dda1992d3320ff616fd": {
+    "source": "横向图片 · 3 MB 以内",
+    "text": "Landscape image · Up to 3 MB"
+  },
+  "19ef1b6110eae14dccaf": {
+    "source": "删除图片",
+    "text": "Delete Image"
+  },
+  "c11330b85234f9c0ad40": {
+    "source": "选择",
+    "text": "Select"
+  },
+  "0a6e28723203d7c9280e": {
+    "source": "常用网址",
+    "text": "Daily Picks"
+  },
+  "b3c942bc767b066c3c99": {
+    "source": "精选空间",
+    "text": "Featured Spaces"
+  },
+  "91e24e29c451bfc896e3": {
+    "source": "· 最多",
+    "text": "· Up to"
+  },
+  "473903d2359341ce97e0": {
+    "source": "最多选择",
+    "text": "Select up to"
+  },
+  "ecdf91c11e7be915cce4": {
+    "source": "保存版面",
+    "text": "Save Layout"
+  },
+  "fd117c558f2ee0008710": {
+    "source": "版面已保存",
+    "text": "Layout Saved"
+  },
+  "4508572cb79e9382578b": {
+    "source": "THE EVERYDAY EDITION · 把寻常日子，过成自己的头条",
+    "text": "THE EVERYDAY EDITION · Your day, your headlines"
+  },
+  "c528318cd194e733e0df": {
+    "source": "今日特别报道 · 好好生活，就是今天最重要的事",
+    "text": "TODAY'S SPECIAL · A day well lived"
+  },
+  "ae25999f72ea12922a6e": {
+    "source": "重磅消息：\n今天也值得好好过",
+    "text": "Breaking news: Today matters"
+  },
+  "dadf04fa7355fe23cf03": {
+    "source": "不用等一个特别的日子。吃一顿热饭，做完手边的一件小事，给自己留一点发呆的时间。生活的好消息，常常就藏在这些小事里。",
+    "text": "No special occasion needed. A warm meal, a small task done, a moment to daydream. Good days start small."
+  },
+  "a079c9fb02ca19b7a242": {
+    "source": "今日社论\n允许自己慢一点，也别忘了向前走。",
+    "text": "EDITORIAL · Take it slow. Keep moving."
+  },
+  "4d5e63e72ec6f1327e65": {
+    "source": "今日头条 / FRONT PAGE",
+    "text": "FRONT PAGE"
+  },
+  "ccb996a400aec4ca6cdd": {
+    "source": "生活快讯 / DAILY NOTES",
+    "text": "DAILY NOTES"
+  },
+  "5469bbf3b10dd6d61c7b": {
+    "source": "给自己的话 / PERSONAL COLUMN",
+    "text": "PERSONAL COLUMN"
+  },
+  "d54028703fa37c74b2cf": {
+    "source": "记得吃饭，比什么都重要",
+    "text": "Make time for lunch"
+  },
+  "de2a4101a658f5eb6b15": {
+    "source": "再忙也留一段午餐时间。热腾腾的一餐，是今天给自己最朴素的照顾。",
+    "text": "Even on busy days, take a lunch break. A warm meal is a little care for yourself."
+  },
+  "3c2118f628a97be3617a": {
+    "source": "工作中，也请为自己加油",
+    "text": "One step counts"
+  },
+  "9926bb008af79caa68d3": {
+    "source": "把大任务拆成一小步。先做完眼前这一件，今天就已经有了进展。",
+    "text": "Break a big task into a small step. Finish that, and you've made progress."
+  },
+  "90320af038ef8705caf8": {
+    "source": "紧急提醒：该起来走走了",
+    "text": "Time to stretch"
+  },
+  "d6db1b582d2c43a27676": {
+    "source": "把视线移向窗外，接一杯水，伸个懒腰。好状态也需要短暂的休息。",
+    "text": "Look outside, get some water, stretch. A short break goes a long way."
+  },
+  "d98ae3f27b80a5241b0b": {
+    "source": "今晚，把时间还给生活",
+    "text": "This evening is yours"
+  },
+  "623d92c29a5e6102a498": {
+    "source": "听一首喜欢的歌，或者和朋友聊聊天。不必每一分钟都拿来赶路。",
+    "text": "Play a favorite song or call a friend. Not every minute needs a purpose."
+  },
+  "2c28c97b4eb1f87c518c": {
+    "source": "今日允许",
+    "text": "Permission Granted"
+  },
+  "9ecc2278e6a7605d529e": {
+    "source": "允许计划有变化\n允许偶尔不在状态\n允许快乐没有理由",
+    "text": "Change your plans. Have an off day. Be happy for no reason."
+  },
+  "ac0aa519fa9a106b8b1c": {
+    "source": "一件小事",
+    "text": "One Small Thing"
+  },
+  "66ea1dd1cbc2d135ff14": {
+    "source": "给在意的人发一句问候。\n有时候，一句话就能让一天变得不一样。",
+    "text": "Say hello to someone you care about. A few words can change a day."
+  },
+  "f187e75acf61126c393b": {
+    "source": "明日预告",
+    "text": "Tomorrow"
+  },
+  "d86c0c9e8812265d60b1": {
+    "source": "愿明天有新的好消息。\n今晚先好好睡一觉。",
+    "text": "Good news can wait until morning. Sleep well tonight."
+  },
+  "84a94e3ee00a43a1509e": {
+    "source": "报纸名称",
+    "text": "Newspaper Name"
+  },
+  "a881f5cb97243ae20485": {
+    "source": "生活快讯标题",
+    "text": "Notes Headline"
+  },
+  "282a2a57413c344e676f": {
+    "source": "生活快讯正文",
+    "text": "Notes Text"
+  },
+  "4245bed89f7eba64ccb7": {
+    "source": "专栏标题",
+    "text": "Column Heading"
+  },
+  "5ae4106a371fb949518f": {
+    "source": "专栏正文",
+    "text": "Column Text"
+  },
+  "64b212a555ef5404eb12": {
+    "source": "栏目文字",
+    "text": "Section Text"
+  },
+  "f0b7e51f1eb105504aa6": {
+    "source": "更换报纸封面图",
+    "text": "Change Cover"
+  },
+  "7af299ece2604979c3f8": {
+    "source": "点击更换封面图",
+    "text": "Change Cover"
+  },
+  "100b9a742e7983f87b65": {
+    "source": "恢复默认图片",
+    "text": "Default Image"
+  },
+  "7a5379dd7b00ef8d6029": {
+    "source": "封面预览",
+    "text": "Cover Preview"
+  },
+  "fa63928d3116037e555c": {
+    "source": "请选择 3 MB 以内的 JPG、PNG 或 WebP 图片",
+    "text": "Choose a JPG, PNG, or WebP under 3 MB"
+  },
+  "46c7007cc001957fcdd7": {
+    "source": "图片读取失败，请重新选择",
+    "text": "Couldn't read image. Choose it again."
+  },
+  "6c0e75bd446aaf8dce44": {
+    "source": "图片无法读取，请更换图片",
+    "text": "Couldn't read image. Try another."
+  },
+  "dd41b901109a29844be5": {
+    "source": "把日常的小事，编成自己的头条。",
+    "text": "Your everyday moments, your headlines."
+  },
+  "28ab6c4a45974539bfa5": {
+    "source": "从空间开始整理",
+    "text": "Start with Spaces"
+  },
+  "e5081c24d73efb1e7bbb": {
+    "source": "左上角是当前空间。你可以切换空间，把工作、学习和生活分开管理。",
+    "text": "Switch spaces at the top left to keep work, study, and life separate."
+  },
+  "45c39b38cc68488c023d": {
+    "source": "用场景和分组分类",
+    "text": "Scenes & Groups"
+  },
+  "c076b5302c93a1fd339f": {
+    "source": "左侧选择场景，上方切换分组。空间里可以有多个场景，每个场景再用分组整理网址。",
+    "text": "Choose scenes on the left and groups at the top. Each space has scenes, and each scene has groups for your links."
+  },
+  "fae8dfd7ed6953cb1c7b": {
+    "source": "切换视图与样式",
+    "text": "Views & Styles"
+  },
+  "8852d1aba8c864eca599": {
+    "source": "右下角的小按钮可以切换常规视图与图谱视图，包括 3D 结构；旁边的椭圆按钮用来选择当前视图的样式。",
+    "text": "Use the small button at the bottom right for regular or graph views, including 3D. The pill beside it selects a style."
+  },
+  "1d3df37a561dee9e54de": {
+    "source": "收藏网址，稍后再整理",
+    "text": "Save Now, Sort Later"
+  },
+  "15a115581d35d99a29a4": {
+    "source": "点击「收藏网址」手动添加。通过浏览器插件收下的网址会进入「稍后整理」，回来后再归类；插件可以从头像菜单中的「浏览器插件」入口了解和获取。",
+    "text": "Use Add Link to save manually. The browser extension sends links to Inbox for sorting later. Find the extension in your account menu."
+  },
+  "4553f8cfe3d2462ac8e9": {
+    "source": "连续上滑两次，回到首页",
+    "text": "Scroll Up Twice"
+  },
+  "8b877bc233b41e782309": {
+    "source": "没有网址，或网址列表已经滑到顶部时，鼠标连续向上滑动两次，就可以返回主首页。第一次会出现返回提示。",
+    "text": "When the list is empty or at the top, scroll up twice to go home. The first scroll shows a hint."
+  },
+  "de32e20193ad104208b7": {
+    "source": "知道了",
+    "text": "Got It"
+  },
+  "483dc2130bccfe41efb4": {
+    "source": "敬请期待",
+    "text": "Coming Soon"
+  },
+  "009eb74012efdbbda185": {
+    "source": "服务公告",
+    "text": "Service Notice"
+  },
+  "5f76b2bf82dd2c5d820c": {
+    "source": "版本",
+    "text": "Version"
+  },
+  "348f1cf1243e74bc40ca": {
+    "source": "我知道了",
+    "text": "Got It"
+  },
+  "e07d14e12aaf92a32586": {
+    "source": "开始体验",
+    "text": "Try It"
+  },
+  "4cfc2a36de5a8b4f65f8": {
+    "source": "消息通知",
+    "text": "Notifications"
+  },
+  "f9066025d7e55e51cb83": {
+    "source": "全局公告",
+    "text": "Announcement"
+  },
+  "42e40f432b6da0e0d595": {
+    "source": "版本更新",
+    "text": "What's New"
+  },
+  "6cf522cf927c9df0edfe": {
+    "source": "· 已读",
+    "text": "· Read"
+  },
+  "0fe64b9db21499db5e65": {
+    "source": "· 未读",
+    "text": "· Unread"
+  },
+  "edc4534169d9f157abc8": {
+    "source": "暂时没有新消息，安心享受你的一隅。",
+    "text": "You're all caught up."
+  },
+  "ada4751bc73f5aceb98e": {
+    "source": "版本更新通知",
+    "text": "Update Notice"
+  },
+  "8cd51915453a2264c4c2": {
+    "source": "有新版本 ·",
+    "text": "New version ·"
+  },
+  "a9d13a0281b8b40ca5a5": {
+    "source": "查看更新 →",
+    "text": "View Update →"
+  },
+  "879d8543c3f342a236ef": {
+    "source": "稍后提醒",
+    "text": "Remind Later"
+  },
+  "b91496e63aefefd5b8a6": {
+    "source": "配置加载失败",
+    "text": "Couldn't load settings"
+  },
+  "e831b64fabc46d5101c3": {
+    "source": "浏览器插件",
+    "text": "Browser Extension"
+  },
+  "8481cbe9e10d2aee7289": {
+    "source": "稍后整理",
+    "text": "Inbox"
+  },
+  "b10c83a2d9ec20da37be": {
+    "source": "稍后管理",
+    "text": "Manage Inbox"
+  },
+  "22ef8f27833bbe246fa2": {
+    "source": "留存类型",
+    "text": "Save Type"
+  },
+  "f00439a23128d53d24cf": {
+    "source": "关闭稍后管理",
+    "text": "Close Inbox"
+  },
+  "b3b01da184518a35c7f4": {
+    "source": "选择归档位置",
+    "text": "Choose Destination"
+  },
+  "7850c90df42f60d6b3bd": {
+    "source": "确认归档",
+    "text": "File Away"
+  },
+  "4067597dfa56ad294bd9": {
+    "source": "已选 __SHIYU_VAR_6__ 项",
+    "text": "__SHIYU_VAR_6__ selected"
+  },
+  "bce2377283c2455ab8b1": {
+    "source": "清除",
+    "text": "Clear"
+  },
+  "1e50abad42e1c97d769c": {
+    "source": "归档到…",
+    "text": "File to…"
+  },
+  "302da57d077b5abc45d8": {
+    "source": "待整理",
+    "text": "To Sort"
+  },
+  "28a141d08fa5c1bc9e55": {
+    "source": "暂时收纳",
+    "text": "Temporary"
+  },
+  "1e116c448f895bfb41c0": {
+    "source": "随时查看，用完可清除",
+    "text": "Keep handy. Clear when done."
+  },
+  "59f8a3cfc6b559cd1c44": {
+    "source": "留到有空，再安放到合适的分组",
+    "text": "Save now, organize later"
+  },
+  "eb6aa682a56c0c645aa7": {
+    "source": "选择 __SHIYU_VAR_1__",
+    "text": "Select __SHIYU_VAR_1__"
+  },
+  "24b96da88f1f659cf766": {
+    "source": "移至待整理",
+    "text": "Move to Unsorted"
+  },
+  "f214f4ebcc1b650b28bc": {
+    "source": "移至暂时收纳",
+    "text": "Move to Temporary"
+  },
+  "cdaf044357b7154b0bd6": {
+    "source": "暂时没有留存的网址",
+    "text": "No saved links yet"
+  },
+  "5dc663bfa08e13f6e964": {
+    "source": "还没有待整理的网址",
+    "text": "Nothing to sort"
+  },
+  "9689012c765874bc0e0a": {
+    "source": "已归档到",
+    "text": "Filed to"
+  },
+  "2672bad412477f9399ef": {
+    "source": "已清除",
+    "text": "Cleared"
+  },
+  "22cec886ddd3c26c8872": {
+    "source": "已移至",
+    "text": "Moved to"
+  },
+  "a5da1dd8fd92c55fcc0b": {
+    "source": "确认清除",
+    "text": "Confirm Clear"
+  },
+  "e7ea47d581ff7ea392f3": {
+    "source": "暂无可选位置",
+    "text": "No destinations available"
+  },
+  "88ec79ceacb248efc429": {
+    "source": "不支持的插件操作。",
+    "text": "Unsupported extension action."
+  },
+  "dc5a98e4c0d0e5d2a64d": {
+    "source": "无法读取拾隅数据，请先打开拾隅。",
+    "text": "Couldn't read Shiyu data. Open Shiyu first."
+  },
+  "602560e86f035a3a4b32": {
+    "source": "请先登录拾隅，再保存收藏。",
+    "text": "Sign in to Shiyu before saving."
+  },
+  "375c451b45876b523068": {
+    "source": "登录账号已变化，请刷新后重新收藏。",
+    "text": "Account changed. Refresh and save again."
+  },
+  "dbe849e0f6815307a537": {
+    "source": "网址过长或无效。",
+    "text": "URL is invalid or too long."
+  },
+  "316b0077edf11611e303": {
+    "source": "请输入有效的网址。",
+    "text": "Enter a valid URL."
+  },
+  "6533b23c2cc213fa6c0f": {
+    "source": "仅支持不含账号密码的 HTTP / HTTPS 网页。",
+    "text": "Use an HTTP or HTTPS URL without embedded credentials."
+  },
+  "ec0d31a229c9c84ed88d": {
+    "source": "名称需为 1–100 字，备注不超过 300 字。",
+    "text": "Name: 1–100 characters. Note: up to 300 characters."
+  },
+  "fd9ffdd3890da78a2db5": {
+    "source": "该分组已变更，请刷新后重新选择。",
+    "text": "Group changed. Refresh and select it again."
+  },
+  "bc21b7613d2dfa40af0f": {
+    "source": "本机存储空间不足，尚未保存，请清理后重试。",
+    "text": "Local storage is full. Free some space and try again."
+  },
+  "a5f7229144ebeac24d3a": {
+    "source": "请选择收藏方式。",
+    "text": "Choose how to save."
+  },
+  "df7c542837e386bae687": {
+    "source": "这条待整理收藏已变更，请刷新。",
+    "text": "This inbox item changed. Refresh."
+  },
+  "6691c0e813e956afa30b": {
+    "source": "所选内容已变更，请重新选择。",
+    "text": "Selected items changed. Select them again."
+  },
+  "c1a7c67a6c141abb505c": {
+    "source": "不支持的整理操作。",
+    "text": "Unsupported action."
+  },
+  "c03d069f3d21ac981a94": {
+    "source": "哔哩哔哩 · 随手看看",
+    "text": "Bilibili · Videos"
+  },
+  "5a0375d69d7bbdba8211": {
+    "source": "豆瓣 · 电影与阅读",
+    "text": "Douban · Books & Films"
+  },
+  "7c1bc2609400ba4fa668": {
+    "source": "维基百科 · 随意探索",
+    "text": "Wikipedia · Explore"
+  },
+  "bcedef3e93f468fe4c77": {
+    "source": "MDN · 开发文档",
+    "text": "MDN · Web Docs"
+  },
+  "53611165e9bb0407eabf": {
+    "source": "Figma · 设计工具",
+    "text": "Figma · Design"
+  },
+  "f5faf12c7c0ef780b7d4": {
+    "source": "GitHub · 开源项目",
+    "text": "GitHub · Open Source"
+  },
+  "91822c931588014cb0c4": {
+    "source": "演示网址，可归档或清除",
+    "text": "Demo link. File or clear it."
+  },
+  "d270c1f2cd743417ec40": {
+    "source": "我的一隅",
+    "text": "Quick Links"
+  },
+  "0080a91d5b723755111f": {
+    "source": "点击切换主题",
+    "text": "Next Theme"
+  },
+  "8ecf644e205bad8ed085": {
+    "source": "我的一隅，点击切换下一个主题",
+    "text": "Quick Links · Next theme"
+  },
+  "3b1830214d65a2fd247f": {
+    "source": "打开我的一隅",
+    "text": "Open Quick Links"
+  },
+  "eb0da27cbb9a8adf884e": {
+    "source": "拾隅",
+    "text": "Shiyu"
+  },
+  "b1bd8664abfbe7654e06": {
+    "source": "发现世界",
+    "text": "Explore"
+  },
+  "b92cde34f93967bd96fc": {
+    "source": "· 拾隅",
+    "text": "· Shiyu"
+  },
+  "6774a77de4da950cc149": {
+    "source": "回到首页",
+    "text": "Home"
+  },
+  "5c313602f7beb4858f16": {
+    "source": "太阳",
+    "text": "Sun"
+  },
+  "527470ca5fe55c3e01b1": {
+    "source": "水星",
+    "text": "Mercury"
+  },
+  "160647a8149a6c9a424e": {
+    "source": "金星",
+    "text": "Venus"
+  },
+  "eff21949e88fa5bb4ab2": {
+    "source": "月球",
+    "text": "Moon"
+  },
+  "dfbd8b22727ac5f4f7a8": {
+    "source": "火星",
+    "text": "Mars"
+  },
+  "c0d200ca3611c90891d6": {
+    "source": "木星",
+    "text": "Jupiter"
+  },
+  "7783a2d42d1664a59ff6": {
+    "source": "土星",
+    "text": "Saturn"
+  },
+  "bb63d6c248692cb0fc80": {
+    "source": "天王星",
+    "text": "Uranus"
+  },
+  "ff87cacb05ad1d2d3733": {
+    "source": "海王星",
+    "text": "Neptune"
+  },
+  "9cd3162ce8ce011d0bbb": {
+    "source": "冥王星",
+    "text": "Pluto"
+  },
+  "24992a558a5173324c69": {
+    "source": "参天大树",
+    "text": "Great Tree"
+  },
+  "77f363633ae6f371d8b5": {
+    "source": "蒙娜丽莎",
+    "text": "Mona Lisa"
+  },
+  "723021f66ca14ba1c002": {
+    "source": "成形 · 落雪 · 涌动 · 漫游",
+    "text": "Form · Snow · Flow · Drift"
+  },
+  "a0be3384ec0a1e65c71c": {
+    "source": "一字雁阵",
+    "text": "Geese in Line"
+  },
+  "dac024ad3952db5a5903": {
+    "source": "人字雁阵",
+    "text": "Geese in V"
+  },
+  "0ad0cd22b5ee5edf8788": {
+    "source": "落下，积聚，等一场清扫",
+    "text": "Snow falls. A little help clears the way."
+  },
+  "ff39d60fdfc955242383": {
+    "source": "万象缓缓成形",
+    "text": "Ideas take shape"
+  },
+  "e1ce2301b3f58bbeefaa": {
+    "source": "天鹅左岸",
+    "text": "Swan · Left"
+  },
+  "50fd788614d05ec8396c": {
+    "source": "天鹅右岸",
+    "text": "Swan · Right"
+  }
+}

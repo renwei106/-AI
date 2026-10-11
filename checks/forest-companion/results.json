@@ -1,0 +1,23 @@
+{
+  "flags": {
+    "paused": true,
+    "muted": true,
+    "inline": true,
+    "autoplay": false,
+    "loop": false,
+    "controls": false,
+    "preload": "auto"
+  },
+  "burstSeeks": 1,
+  "viewportSuspension": true,
+  "visibilitySuspension": true,
+  "sharedCornerSearch": true,
+  "cleanup": true,
+  "savedSelection": true,
+  "mobileStatic": true,
+  "delayedMetadata": true,
+  "failurePoster": true,
+  "backendDisable": true,
+  "realCatalog": true,
+  "byteRanges": true
+}

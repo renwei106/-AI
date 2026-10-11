@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark"><title>涌现 · 自由生长的风景</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M6 24 16 5 26 24 16 19Z' fill='%2348614c'/%3E%3C/svg%3E">
+  <script src="/theme-colors.js"></script>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <canvas id="world" aria-label="涌现场景动态画面"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <header class="page-header">
+    <div class="brand"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="m4 20 9-16 2 11Z"/><path d="m14 22 7-13 3 15Z"/></svg><span>涌现</span><span class="brand-divider"></span><span class="brand-en">EMERGENCE</span></div>
+    <div class="page-actions"><button id="appearance" class="icon-button" aria-label="切换深色外观" title="切换外观"></button><button id="open-panel" class="open-panel" aria-controls="settings" aria-expanded="true"><span data-icon="sliders"></span>调节风景</button></div>
+  </header>
+  <main>
+    <div class="intro"><div class="eyebrow"><span class="status-dot"></span><span id="scene-en">FLOCK</span><span class="intro-divider">/</span><span>简单规则，自然发生</span></div><h1 id="scene-title"></h1><p id="scene-description"></p></div>
+    <div class="scene-caption"><div class="caption-heading"><span id="scene-number">01</span><h2 id="scene-name">鸟群</h2><span id="scene-subtitle"></span></div><ol id="rules"></ol></div>
+    <div class="playback" aria-label="播放控制"><button id="pause" class="icon-button" aria-label="暂停动画" title="暂停"></button><span class="playback-line"></span><button id="restart" class="icon-button" aria-label="重新播种" title="重新播种"><span data-icon="restart"></span></button><span class="live-label" id="live-label">正在自然演化</span></div>
+    <span id="pointer-hint" class="pointer-hint">移动鼠标，轻轻拨动鸟群</span>
+  </main>
+  <aside id="settings" class="settings open" aria-labelledby="panel-title">
+    <div class="panel-header"><div><span class="panel-eyebrow">属于你的风景</span><h2 id="panel-title">调节涌现</h2></div><button id="close-panel" class="icon-button" aria-label="收起调节面板"><span data-icon="close"></span></button></div>
+    <div class="panel-scroll">
+      <section class="scene-section" aria-labelledby="scene-select-title"><div class="section-heading"><h3 id="scene-select-title">选择场景</h3><span>从一种秩序开始</span></div><div id="scene-options" class="scene-options" role="group" aria-label="场景"></div></section>
+      <section class="parameter-section" aria-labelledby="parameter-title"><div class="section-heading"><h3 id="parameter-title">日常调节</h3><span>拖动，即刻发生</span></div><div id="basic-controls"></div></section>
+      <details id="advanced" class="advanced"><summary><span><span data-icon="tune"></span>探索规则</span><span class="advanced-label">进阶 <span data-icon="chevron"></span></span></summary><p class="advanced-note">小幅调整，观察变化。随时可以恢复这片风景。</p><div id="advanced-controls"></div><p id="model-note" class="model-note"></p></details>
+    </div>
+    <footer class="panel-footer"><span id="save-status"><i></i>已保存在此浏览器</span><button id="reset" class="reset-button"><span data-icon="restart"></span>恢复场景</button></footer>
+  </aside>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
