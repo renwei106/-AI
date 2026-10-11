@@ -1,0 +1,19 @@
+{
+  "id": "3fed1db6-f9fc-4072-9402-8c36a26abbc7",
+  "backup": "D:/拾隅发布永久备份/V1.3.0-20261011190104",
+  "target": "website",
+  "version": "V1.3.0",
+  "previousVersion": "V1.2.15",
+  "runningPreviousVersion": "V1.2.14",
+  "confirmedMinorIncrement": true,
+  "releasedAt": "2026-10-11T19:02:24.962Z",
+  "createdAt": "2026-10-11T19:02:24.962Z",
+  "changeType": "change",
+  "operator": "Codex（用户明确确认第二位加一及上线）",
+  "frontCommit": "2833d81fa021c93afd0f29458b88b22a692a3159",
+  "adminCommit": "dfa3616239dc649cbbbbe64605988ad2f99af265",
+  "timeCommit": "60c7bc60b03fc8f2e89fb8d937d5d1f296eaf57f",
+  "commit": "2833d81fa021c93afd0f29458b88b22a692a3159",
+  "summary": "统一纯色和双色渐变的主题取值与文字对比度，完善配色增删、命名、排序及编辑；修正主题背景和内容可读性；拾隅、聚合及轻时间后台全页面响应式适配；聚合入口统一管理主按钮、前台次按钮与头像退出菜单。保留线上账号及配置，不更新插件、轻间和工具服务。",
+  "releaseId": "20261011190104"
+}
