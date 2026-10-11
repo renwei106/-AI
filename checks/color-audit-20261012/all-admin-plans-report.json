@@ -1,0 +1,110 @@
+[
+  {
+    "width": 1440,
+    "mode": "light",
+    "state": "page",
+    "outside": []
+  },
+  {
+    "width": 1440,
+    "mode": "light",
+    "state": "drawer",
+    "outside": []
+  },
+  {
+    "width": 1440,
+    "mode": "light",
+    "state": "benefits",
+    "outside": []
+  },
+  {
+    "width": 1440,
+    "mode": "dark",
+    "state": "page",
+    "outside": []
+  },
+  {
+    "width": 1440,
+    "mode": "dark",
+    "state": "drawer",
+    "outside": []
+  },
+  {
+    "width": 1440,
+    "mode": "dark",
+    "state": "benefits",
+    "outside": []
+  },
+  {
+    "width": 600,
+    "mode": "light",
+    "state": "page",
+    "outside": []
+  },
+  {
+    "width": 600,
+    "mode": "light",
+    "state": "drawer",
+    "outside": []
+  },
+  {
+    "width": 600,
+    "mode": "light",
+    "state": "benefits",
+    "outside": []
+  },
+  {
+    "width": 600,
+    "mode": "dark",
+    "state": "page",
+    "outside": []
+  },
+  {
+    "width": 600,
+    "mode": "dark",
+    "state": "drawer",
+    "outside": []
+  },
+  {
+    "width": 600,
+    "mode": "dark",
+    "state": "benefits",
+    "outside": []
+  },
+  {
+    "width": 400,
+    "mode": "light",
+    "state": "page",
+    "outside": []
+  },
+  {
+    "width": 400,
+    "mode": "light",
+    "state": "drawer",
+    "outside": []
+  },
+  {
+    "width": 400,
+    "mode": "light",
+    "state": "benefits",
+    "outside": []
+  },
+  {
+    "width": 400,
+    "mode": "dark",
+    "state": "page",
+    "outside": []
+  },
+  {
+    "width": 400,
+    "mode": "dark",
+    "state": "drawer",
+    "outside": []
+  },
+  {
+    "width": 400,
+    "mode": "dark",
+    "state": "benefits",
+    "outside": []
+  }
+]

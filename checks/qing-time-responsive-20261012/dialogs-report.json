@@ -1,0 +1,100 @@
+[
+  {
+    "width": 600,
+    "path": "configuration/member-benefits",
+    "label": "新增套餐",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "content/agreements",
+    "label": "新建版本",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "configuration/categories",
+    "label": "新建分类场景",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "configuration/themes",
+    "label": "新建主题",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "configuration/colors-icons",
+    "label": "新建颜色组",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "configuration/colors-icons",
+    "label": "添加颜色",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "configuration/colors-icons",
+    "label": "上传图标",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "configuration/member-benefits",
+    "label": "新增套餐",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "content/agreements",
+    "label": "新建版本",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "configuration/categories",
+    "label": "新建分类场景",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "configuration/themes",
+    "label": "新建主题",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "configuration/colors-icons",
+    "label": "新建颜色组",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "configuration/colors-icons",
+    "label": "添加颜色",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "configuration/colors-icons",
+    "label": "上传图标",
+    "open": 1,
+    "outside": []
+  }
+]

@@ -1,0 +1,418 @@
+[
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/dashboard",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1144,
+    "collapsed": false
+  },
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/users",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136,
+    "collapsed": false
+  },
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/members",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136,
+    "collapsed": false
+  },
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/feedback",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136,
+    "collapsed": false
+  },
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/orders",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136,
+    "collapsed": false
+  },
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/content/knowledge",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136,
+    "collapsed": false
+  },
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/content/agreements",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136,
+    "collapsed": false
+  },
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/configuration/categories",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136,
+    "collapsed": false
+  },
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/configuration/member-benefits",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136,
+    "collapsed": false
+  },
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/configuration/themes",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136,
+    "collapsed": false
+  },
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/configuration/colors-icons",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136,
+    "collapsed": false
+  },
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/global/brand-logos",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1144,
+    "collapsed": false
+  },
+  {
+    "width": 1440,
+    "path": "/apps/qing-time/global/home-visual",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136,
+    "collapsed": false
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/dashboard",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 909,
+    "collapsed": true
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/users",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901,
+    "collapsed": true
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/members",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901,
+    "collapsed": true
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/feedback",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901,
+    "collapsed": true
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/orders",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901,
+    "collapsed": true
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/content/knowledge",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901,
+    "collapsed": true
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/content/agreements",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901,
+    "collapsed": true
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/configuration/categories",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901,
+    "collapsed": true
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/configuration/member-benefits",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901,
+    "collapsed": true
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/configuration/themes",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901,
+    "collapsed": true
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/configuration/colors-icons",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901,
+    "collapsed": true
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/global/brand-logos",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 909,
+    "collapsed": true
+  },
+  {
+    "width": 1033,
+    "path": "/apps/qing-time/global/home-visual",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/dashboard",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 476,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/users",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 468,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/members",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 468,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/feedback",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 468,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/orders",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 468,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/content/knowledge",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 468,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/content/agreements",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 468,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/configuration/categories",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 468,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/configuration/member-benefits",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 468,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/configuration/themes",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 468,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/configuration/colors-icons",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 468,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/global/brand-logos",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 476,
+    "collapsed": true
+  },
+  {
+    "width": 600,
+    "path": "/apps/qing-time/global/home-visual",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 468,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/dashboard",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 276,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/users",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 268,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/members",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 268,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/feedback",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 268,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/orders",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 268,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/content/knowledge",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 268,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/content/agreements",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 268,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/configuration/categories",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 268,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/configuration/member-benefits",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 268,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/configuration/themes",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 268,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/configuration/colors-icons",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 268,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/global/brand-logos",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 276,
+    "collapsed": true
+  },
+  {
+    "width": 400,
+    "path": "/apps/qing-time/global/home-visual",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 268,
+    "collapsed": true
+  }
+]

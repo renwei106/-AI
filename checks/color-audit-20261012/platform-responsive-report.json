@@ -1,0 +1,198 @@
+[
+  {
+    "width": 1440,
+    "path": "/applications",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1440
+  },
+  {
+    "width": 1440,
+    "path": "/system/roles",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136
+  },
+  {
+    "width": 1440,
+    "path": "/system/admins",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136
+  },
+  {
+    "width": 1440,
+    "path": "/system/applications",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136
+  },
+  {
+    "width": 1440,
+    "path": "/system/experience-tests",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136
+  },
+  {
+    "width": 1440,
+    "path": "/system/audits",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136
+  },
+  {
+    "width": 1440,
+    "path": "/system/feedback",
+    "outside": [],
+    "bodyWidth": 1440,
+    "contentWidth": 1136
+  },
+  {
+    "width": 1033,
+    "path": "/applications",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 1033
+  },
+  {
+    "width": 1033,
+    "path": "/system/roles",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901
+  },
+  {
+    "width": 1033,
+    "path": "/system/admins",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901
+  },
+  {
+    "width": 1033,
+    "path": "/system/applications",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901
+  },
+  {
+    "width": 1033,
+    "path": "/system/experience-tests",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901
+  },
+  {
+    "width": 1033,
+    "path": "/system/audits",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901
+  },
+  {
+    "width": 1033,
+    "path": "/system/feedback",
+    "outside": [],
+    "bodyWidth": 1033,
+    "contentWidth": 901
+  },
+  {
+    "width": 600,
+    "path": "/applications",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 600
+  },
+  {
+    "width": 600,
+    "path": "/system/roles",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 500
+  },
+  {
+    "width": 600,
+    "path": "/system/admins",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 500
+  },
+  {
+    "width": 600,
+    "path": "/system/applications",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 500
+  },
+  {
+    "width": 600,
+    "path": "/system/experience-tests",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 500
+  },
+  {
+    "width": 600,
+    "path": "/system/audits",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 500
+  },
+  {
+    "width": 600,
+    "path": "/system/feedback",
+    "outside": [],
+    "bodyWidth": 600,
+    "contentWidth": 500
+  },
+  {
+    "width": 400,
+    "path": "/applications",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 400
+  },
+  {
+    "width": 400,
+    "path": "/system/roles",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/system/admins",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/system/applications",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/system/experience-tests",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/system/audits",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/system/feedback",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  }
+]

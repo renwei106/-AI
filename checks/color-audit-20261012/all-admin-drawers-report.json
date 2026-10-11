@@ -1,0 +1,134 @@
+[
+  {
+    "width": 600,
+    "path": "login-and-verification",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "notices",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "agreements",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "activities",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "sharing",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "resource-monitoring/quotas",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "resource-monitoring/servers",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "resource-monitoring/expiries",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "resource-monitoring/notifications",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "release-history",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 600,
+    "path": "personalization/colors",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "login-and-verification",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "notices",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "agreements",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "activities",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "sharing",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "resource-monitoring/quotas",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "resource-monitoring/servers",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "resource-monitoring/expiries",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "resource-monitoring/notifications",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "release-history",
+    "open": 1,
+    "outside": []
+  },
+  {
+    "width": 400,
+    "path": "personalization/colors",
+    "open": 1,
+    "outside": []
+  }
+]

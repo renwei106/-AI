@@ -1,0 +1,338 @@
+[
+  {
+    "width": 400,
+    "path": "/apps/shiyu/users",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/members",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/plans",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/orders",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/onboarding",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 292
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/personalization/themes",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 312
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/personalization/colors",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 312
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/personalization/fonts",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 312
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/personalization/pet",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 312
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/music",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/avatars",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/library",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/link-styles",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 308
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/world/discover",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 292
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/world/resources",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 292
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/world/learning",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 292
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/world/materials",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 292
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/world/creators",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 292
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/world/collaboration",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 292
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/tools",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 308
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/page-colors/colors",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 312
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/page-colors/fonts",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 312
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/login-and-verification",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/languages",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/release-control",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/release-history",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/notices",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/agreements",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/copy",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/filing",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/baidu-index",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/activities",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/sharing",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/registration-rewards",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/resource-monitoring/quotas",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/resource-monitoring/servers",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/resource-monitoring/expiries",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/resource-monitoring/notifications",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/resource-monitoring/alerts",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/analytics/users",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/analytics/transactions",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/analytics/profiles",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/analytics/preferences",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/analytics/devices",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/analytics/behavior",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/analytics/alerts",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/analytics/quality",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  },
+  {
+    "width": 400,
+    "path": "/apps/shiyu/dashboard",
+    "outside": [],
+    "bodyWidth": 400,
+    "contentWidth": 300
+  }
+]

@@ -24,7 +24,8 @@ if(action==='prepare'){
  const extension=record.extensionRecord;
  if(extension&&(!extension.id||extension.target!=='extension'||!/^V\d+\.\d+\.\d+$/.test(extension.version)||!['feature','fix','change'].includes(extension.changeType)||!extension.summary||extension.summary.length>500||!Number.isFinite(Date.parse(extension.releasedAt))))throw Error('Invalid extension release record');
  const parts=last.version.slice(1).split('.').map(Number);parts[2]++;
- const approvedMinor=(record.previousVersion==='V1.0.14'&&last.version==='V1.0.14'&&record.version==='V1.1.0')||(record.previousVersion==='V1.1.2'&&last.version==='V1.1.2'&&record.version==='V1.2.0');
+ const explicitMinor=record.confirmedMinorIncrement===true&&record.previousVersion===last.version&&(()=>{const next=record.version.slice(1).split('.').map(Number),previous=last.version.slice(1).split('.').map(Number);return next[0]===previous[0]&&next[1]===previous[1]+1&&next[2]===0})();
+ const approvedMinor=explicitMinor||(record.previousVersion==='V1.0.14'&&last.version==='V1.0.14'&&record.version==='V1.1.0')||(record.previousVersion==='V1.1.2'&&last.version==='V1.1.2'&&record.version==='V1.2.0');
  const requestedJump=record.confirmedVersionJump===true&&record.previousVersion===last.version&&(()=>{const next=record.version.slice(1).split('.').map(Number),previous=last.version.slice(1).split('.').map(Number);return next[0]===previous[0]&&next[1]===previous[1]&&next[2]===previous[2]+2})();
  if((record.version!=='V'+parts.join('.')&&!approvedMinor&&!requestedJump)||state.items.some(x=>x.id===record.id||x.target==='website'&&x.version===record.version)||extension&&state.items.some(x=>x.id===extension.id||x.target==='extension'&&x.version===extension.version))throw Error('Release version conflicts with current history');
  fs.mkdirSync(root,{mode:0o700});
