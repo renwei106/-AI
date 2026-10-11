@@ -40,22 +40,24 @@ export const SCENES = {
     id: 'cosmos', name: '宇宙', en: 'COSMOS', subtitle: '引力之间，各循其轨', model: 'gravity',
     title: '彼此牵引，\n各自闪耀。', description: '在相遇与碰撞之间，让星体慢慢聚集。',
     rules: ['引力：彼此吸引', '惯性：保持原有运动', '融合：相撞合并，逐渐长大'],
-    basic: [range('speed','运行速度',.025,10,.005,1,'×','1× 为标准演化节奏，可慢放或加快；长按临时加倍。'), range('count', '初始星体数量', 100, 4000, 50, 2500, '颗', '调整数量会重新生成星体；碰撞会改变当前数量。'), choice('pointer', '鼠标互动', [['none', '无'], ['repel', '推开'], ['attract', '牵引']], 'none'), depth(), edgeWrap()],
+    basic: [range('speed','运行速度',.025,10,.005,1,'×','1× 为标准演化节奏，可慢放或加快；长按临时加速至当前速度的 3 倍。'), range('count', '初始星体数量', 100, 4000, 50, 2500, '颗', '调整数量会重新生成星体；碰撞会改变当前数量。'), choice('pointer', '鼠标互动', [['none', '无'], ['repel', '推开'], ['attract', '牵引']], 'none'), depth(), {...edgeWrap(),value:'yes'}],
     physics: [
-      { title: '星体引力', fields: [range('mutualGravity', '星体间引力', 0, 2, .05, .7, '×', '质量越大，牵引越强、范围越大；普通星体范围最多 8 m，黑洞最多 12 m；以质量的立方根增长；尘埃与碎片仅在内侧三分之一范围直接吸附。'), choice('blackHoles', '黑洞演化', [['yes', '开启'], ['no', '关闭']], 'yes')] },
-      { title: '质量等级', fields: [range('fragmentMass','碎片',2,4,1,2,'kg'),range('rockMass','碎石',8,16,1,8,'kg'),range('satelliteMass','小行星',32,64,1,32,'kg'),range('planetMass','行星',128,256,1,128,'kg'),range('sourceMass','星系源',4096,32768,1024,4096,'kg'),range('blackHoleMass','黑洞',65536,524288,16384,65536,'kg','低于碎片门槛为尘埃；达到门槛晋级，颜色和尺寸随等级变化。')] },
+      { title: '星体引力', fields: [range('mutualGravity', '星体间引力', 0, 7, .07, .7, '×', '质量越大，牵引越强、范围越大；普通星体范围最多 8 m，恒星至少 12 m、星系源至少 20 m，黑洞逐渐扩大至 36 m；以质量的立方根增长；尘埃、碎片与碎石同样参与双向引力，速度和方向随受力逐渐改变。'), choice('blackHoles', '黑洞演化', [['yes', '开启'], ['no', '关闭']], 'yes')] },
+      { title: '星体质量倍率', fields: [range('fragmentMass','碎片基础质量',.1,100,.1,2,'kg'),range('rockRatio','碎石',1.1,64,.1,4,'倍'),range('satelliteRatio','小行星',1.1,64,.1,4,'倍'),range('planetRatio','行星',1.1,64,.1,4,'倍'),range('starRatio','恒星',1.1,64,.1,4,'倍'),range('sourceRatio','星系源',1.1,64,.1,8,'倍'),range('blackHoleRatio','黑洞',1.1,64,.1,16,'倍')] },
       { title: '碰撞演化', fields: [choice('collisions', '碰撞融合', [['auto', '开启'], ['off', '关闭']], 'auto','两个黑洞碰撞合并后，在原地爆发并释放碎粒。')] },
       { title: '星尘补给', fields: [choice('influx', '外来星尘', [['yes', '开启'], ['no', '关闭']], 'yes'), range('influxInterval', '补给周期', 1, 30, 1, 3, '秒'), range('influxBatch', '每周期星尘', 1, 120, 1, 24, '颗', '开场释放完成后持续补给，以背景渐显为主，少量从四周流入；达到初始数量时暂停补给，最多保留 4000 颗。')] },
     ],
-    advanced: [range('orbit', '初始运动速度', .5, 1.4, .05, 1, '×', '画面宽度为 100 m（3D 以中心平面为准），质量单位为 kg。1× 基准初速为 0.15 m/s，粒子速度有随机差异。运行速度控制时间播放倍率。调整后重新开始生效。'), range('trail', '轨迹长度', 0, 24, 1, 10)],
-    note: '中心蓄能后爆发，开场初速平滑减弱并保留漂移；剩余星尘在背景中带着初速度逐渐显现，初始以尘埃为主，含少量碎片、碎石与更少的小行星，不直接生成行星或星系。质量等级：尘埃、碎片、碎石、小行星、行星、星系源、黑洞；这是主题的演化分级。碰撞累加质量；吸附尘埃与碎片不改变宿主速度，其他融合按质量合成速度。两个黑洞合并后原地爆发，质量重新分配给碎粒。引力仍会逐渐改变轨迹，颜色和尺寸随等级变化。不预设聚集中心、系统数量或最终形态。',
+    advanced: [range('orbit', '初始运动速度', .5, 1.4, .05, 1, '×', '画面宽度为 100 m（3D 以中心平面为准），质量单位为 kg。1× 基准初速为 0.15 m/s，粒子速度有随机差异。运行速度控制时间播放倍率。调整后重新开始生效。'), range('trailSeconds', '轨迹保留时间', 1, 20, 1, 8, '秒', '保留最近 1–20 秒的轨迹；暂停时冻结，调整无需重新开始。')],
+    note: '中心蓄能后爆发，开场初速平滑减弱并保留漂移；剩余星尘在背景中带着初速度逐渐显现，初始以尘埃为主，含少量碎片、碎石与更少的小行星，不直接生成行星或星系。质量等级：尘埃、碎片、碎石、小行星、行星、恒星、星系源、黑洞；这是主题的演化分级。碰撞累加质量；吸附尘埃与碎片不改变宿主速度，其他融合按质量合成速度。黑洞合并后继续长大，达到黑洞初始质量门槛的 4 倍才爆发，质量分批随机分配给碎片、碎石和小行星。引力仍会逐渐改变轨迹，颜色和尺寸随等级变化。不预设聚集中心、系统数量或最终形态。',
   },
+
+
 };
 
 export function migrateSelection(saved = {}) {
   const configs={...saved.configs};
-  delete configs.stars;delete configs.gravity;
-  saved={...saved,scene:['stars','gravity'].includes(saved.scene)?'birds':saved.scene,configs};
+  delete configs.stars;delete configs.gravity;delete configs.accretion;
+  saved={...saved,scene:['stars','gravity','accretion'].includes(saved.scene)?'birds':saved.scene,configs};
   if(saved.configs?.cosmos&&saved.configs.cosmos.timeScale!==10){
     saved={...saved,configs:{...saved.configs,cosmos:sanitize('cosmos',saved.configs.cosmos)}};
   }
@@ -80,6 +82,13 @@ export function rulesFor(id,config) {
 }
 export const defaultsFor = id => ({...Object.fromEntries(fieldsFor(id).map(field => [field.key, field.value])),...(id==='cosmos'?{timeScale:10}:{})});
 export function sanitize(id, raw = {}) {
+  if(id==='cosmos'){
+    raw={...raw};if(raw.starRatio===undefined&&raw.starMass===undefined&&raw.sourceRatio!==undefined)raw.sourceRatio=raw.sourceRatio/4;let previous=raw.fragmentMass??2;
+    for(const [ratio,mass,fallback] of [['rockRatio','rockMass',8],['satelliteRatio','satelliteMass',32],['planetRatio','planetMass',128],['starRatio','starMass',(raw.planetMass??128)*4],['sourceRatio','sourceMass',4096],['blackHoleRatio','blackHoleMass',65536]]){
+      if(raw[ratio]===undefined&&Number.isFinite(raw[mass]))raw[ratio]=raw[mass]/previous;
+      previous=raw[mass]??fallback;
+    }
+  }
   if(id==='cosmos'&&raw?.timeScale!==10&&typeof raw?.speed==='number')raw={...raw,speed:raw.speed===.8?1:raw.speed/10};
   const safe = {};
   for (const field of fieldsFor(id)) {
@@ -94,8 +103,9 @@ export function sanitize(id, raw = {}) {
     safe.populationCap = Math.max(safe.count, safe.populationCap);
     safe.predatorCap = Math.max(safe.predators, safe.predatorCap);
   }
-  if(id==='cosmos')safe.timeScale=10;
+  if(id==='cosmos'){
+    safe.timeScale=10;let mass=safe.fragmentMass;
+    for(const [ratio,key] of [['rockRatio','rockMass'],['satelliteRatio','satelliteMass'],['planetRatio','planetMass'],['starRatio','starMass'],['sourceRatio','sourceMass'],['blackHoleRatio','blackHoleMass']]){mass*=safe[ratio];safe[key]=Number(mass.toPrecision(12));}
+  }
   return safe;
 }
-
-

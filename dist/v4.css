@@ -392,7 +392,7 @@ body[data-dark=true] .home-rain .rain-date-piece:nth-child(4){color:#c6a5f2}
 /* Keep both time units quiet and extend the shared physical ground. */
 .home-rain .rain-value .rain-time-unit{font-weight:400;color:var(--muted);opacity:.55}
 .home-rain .rain-composition{width:min(1240px,100%)}
-.home-rain .rain-field,.home-rain .rain-landed{bottom:-24px}
+.home-rain .rain-field,.home-rain .rain-landed{bottom:-56px}
 .mode-pull-cord{position:fixed;top:0;right:22px;width:32px;height:139px;padding:0;z-index:25;color:var(--ink);background:none;border:0;touch-action:none;cursor:grab;display:flex;align-items:center;flex-direction:column;transform-origin:top center}
 .mode-pull-cord:active{cursor:grabbing}.mode-cord-line{position:absolute;bottom:31px;width:1px;height:calc(108px + var(--pull,0px));background:currentColor;opacity:.35;pointer-events:none}
 .mode-cord-handle{position:absolute;bottom:0;display:grid;place-items:center;width:28px;height:34px;border-radius:14px;background:var(--surface);box-shadow:0 2px 7px #00000012;pointer-events:none}.mode-cord-handle svg{width:19px;height:19px}.mode-pull-cord:hover .mode-cord-handle{background:var(--soft)}
@@ -1310,6 +1310,8 @@ body[data-view=home]:not(.world-active) header .brand-theme-caption>b{flex:1;fon
 body[data-view=home]:not(.world-active) header .brand-theme-caption>span:empty{flex:none;width:13px;text-align:center}
 body[data-view=home]:not(.world-active) header [data-brand-theme][aria-pressed=true]>.brand-theme-caption>span:empty::after{content:'✓';color:var(--accent)}
 body[data-view=home]:not(.world-active) header .brand-theme-menu>.brand-origin-link{margin-top:8px}
+body[data-view=home]:not(.world-active) header .brand-shortcut-hint{margin:0;padding:8px 4px;color:var(--muted);font:10px/16px var(--font);text-align:center;white-space:nowrap;pointer-events:none}
+body[data-view=home]:not(.world-active) header .brand-theme-list{max-height:calc(var(--brand-menu-height,100dvh - 88px) - 108px)}
 
 body[data-view=home]:not(.world-active) header .brand-theme-list::-webkit-scrollbar{width:1px}
 body[data-view=home]:not(.world-active) header .brand-theme-list::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--muted) 12%,transparent);border-radius:1px}

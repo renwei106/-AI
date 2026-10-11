@@ -126,10 +126,11 @@ export function mountEmergence(root, {color, predatorColor = () => undefined, ow
     panelMotion=motion;
     motion.finished.then(()=>{if(dead||panelMotion!==motion)return;if(!panelOpen)panel.hidePopover();panel.hidden=!panelOpen;panelMotion=null;motion.cancel();}).catch(()=>{});
   }
+  function fieldValue(f,value){return f.key==='mutualGravity'?Number((value/.7).toFixed(2))+' 倍':value+(f.unit||'');}
   function fieldHTML(f) {
     const value=configs[scene][f.key], id='emergence-'+f.key;
     if(f.type==='choice')return `<div class="emergence-field"><span>${f.label}</span><div class="emergence-segments ${f.key==='shape'?'emergence-shapes':''}" role="group" aria-label="${f.label}">${f.options.map(([v,label])=>`<button type="button" data-emergence-field="${f.key}" data-emergence-value="${v}" aria-pressed="${v===value}">${f.key==='shape'?glyph(v):''}<span>${label}</span></button>`).join('')}</div></div>`;
-    return `<div class="emergence-field"><div><label for="${id}">${f.label}</label><output for="${id}">${value}${f.unit||''}</output></div><input id="${id}" type="range" data-emergence-field="${f.key}" min="${f.min}" max="${f.max}" step="${f.step}" value="${value}" style="--fill:${(value-f.min)/(f.max-f.min)*100}%">${f.hint?`<small>${f.hint}</small>`:''}</div>`;
+    return `<div class="emergence-field"><div><label for="${id}">${f.label}</label><output for="${id}">${fieldValue(f,value)}</output></div><input id="${id}" type="range" data-emergence-field="${f.key}" min="${f.min}" max="${f.max}" step="${f.step}" value="${value}" aria-valuetext="${fieldValue(f,value)}" style="--fill:${(value-f.min)/(f.max-f.min)*100}%">${f.hint?`<small>${f.hint}</small>`:''}</div>`;
   }
   function draw() {
     const s=SCENES[scene];
@@ -156,11 +157,11 @@ export function mountEmergence(root, {color, predatorColor = () => undefined, ow
         roleDisclosure('predator','探索规则',[field('captureRadius'),field('huntRest')])+`</div>`;
       rules=`<section class="emergence-role-settings" aria-label="群游对象规则">${rules}</section>`;
     }else{
-      const hidden=new Set(['blackHoles','influx','trail']);
+      const hidden=new Set(['blackHoles','influx']);
       const compact=f=>({...f,hint:f.key==='mutualGravity'?'质量越大，牵引力越大，范围越大':f.key==='orbit'||f.key==='influxBatch'?'':f.hint});
-      rules=group('运动节奏',s.basic.filter(f=>!appearance.has(f.key)))+(s.physics||[]).filter(g=>!['质量等级','碰撞演化'].includes(g.title)).map(g=>disclosure(g.title,g.fields.filter(f=>!hidden.has(f.key)).map(compact))).join('')+disclosure('探索规则',s.advanced.filter(f=>!hidden.has(f.key)).map(compact));
+      rules=disclosure('运动节奏',s.basic.filter(f=>!appearance.has(f.key)),'','',{open:true})+(s.physics||[]).filter(g=>!['质量等级','碰撞演化'].includes(g.title)).map(g=>disclosure(g.title,g.fields.filter(f=>!hidden.has(f.key)).map(compact),g.title==='星体质量倍率'?'<p>倍数相对上一级，后续等级自动累乘；低于碎片门槛为尘埃。</p>':'')).join('')+disclosure('探索规则',s.advanced.filter(f=>!hidden.has(f.key)).map(compact));
     }
-    $('.emergence-fields').innerHTML=config.allowCustomize?group('形态与互动',appearanceFields)+rules:'<p class="emergence-managed">此场景使用平台预设参数。</p>';
+    $('.emergence-fields').innerHTML=config.allowCustomize?(appearanceFields.length?group('形态与互动',appearanceFields):'')+rules:'<p class="emergence-managed">此场景使用平台预设参数。</p>';
     $('[data-emergence-action="reset"]').hidden=!config.allowCustomize;
     canvas.setAttribute('aria-label',s.name+'动态场景');
     root.dataset.emergenceScene=scene;
@@ -195,12 +196,13 @@ export function mountEmergence(root, {color, predatorColor = () => undefined, ow
     if(threeD)panel.querySelector('[data-emergence-field="depth"]')?.closest('.emergence-field').insertAdjacentHTML('beforeend',`<small class="emergence-orbit-note">${scene==='cosmos'?'移动鼠标牵引或推开 · 拖动时仅环绕观察':'拖动环绕观察 · 3D 模式不启用鼠标驱散与长按加速'}</small>`);
     const current=panel.querySelector('#emergence-current');if(current)current.closest('.emergence-field').hidden=configs[scene].shape!=='fish';
   }
+
   function updateField(key,value) {
     if(!config.allowCustomize||!fieldsFor(scene).some(f=>f.key===key))return;
     if(key==='depth'||key==='pointer')stopHold();
     configs[scene]=sanitize(scene,{...configs[scene],[key]:value});engine.setConfig(configs[scene]);
     // Preserve the active slider and open disclosures while synchronizing linked caps.
-    for(const input of panel.querySelectorAll('input[data-emergence-field]')){input.value=configs[scene][input.dataset.emergenceField];const f=fieldsFor(scene).find(f=>f.key===input.dataset.emergenceField);input.style.setProperty('--fill',`${(Number(input.value)-f.min)/(f.max-f.min)*100}%`);input.previousElementSibling.querySelector('output').textContent=input.value+(f.unit||'');}
+    for(const input of panel.querySelectorAll('input[data-emergence-field]')){input.value=configs[scene][input.dataset.emergenceField];const f=fieldsFor(scene).find(f=>f.key===input.dataset.emergenceField);input.style.setProperty('--fill',`${(Number(input.value)-f.min)/(f.max-f.min)*100}%`);input.previousElementSibling.querySelector('output').innerHTML=fieldValue(f,Number(input.value));input.setAttribute('aria-valuetext',fieldValue(f,Number(input.value)));}
     for(const button of panel.querySelectorAll('button[data-emergence-field]'))button.setAttribute('aria-pressed',String(configs[scene][button.dataset.emergenceField]===button.dataset.emergenceValue));
     dimensionControls();
     const rules=rulesFor(scene,configs[scene]);

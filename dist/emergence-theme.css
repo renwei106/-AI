@@ -11,7 +11,7 @@ body[data-theme=emergence][data-view=home] .home-emergence {position:relative;is
 .home-emergence .scroll-invitation {pointer-events:auto;}
 .home-emergence .emergence-open {position:fixed;right:24px;top:calc(50% - 20px);width:40px;height:40px;display:grid;place-items:center;border:0;border-radius:50%;background:color-mix(in srgb,var(--bg) 75%,transparent);color:var(--muted);backdrop-filter:blur(16px);pointer-events:auto;cursor:pointer;}
 .emergence-open svg {width:19px;height:19px;}
-.home-emergence .emergence-panel {position:fixed;z-index:10;top:96px;right:20px;bottom:116px;width:min(352px,calc(100vw - 32px));display:flex;flex-direction:column;background:color-mix(in srgb,var(--bg) 87%,transparent);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid color-mix(in srgb,var(--ink) 8%,transparent);box-shadow:0 16px 64px #0000000c;border-radius:20px;color:var(--ink);pointer-events:auto;text-align:left;}
+.home-emergence .emergence-panel {position:fixed;z-index:10;top:0;right:20px;bottom:0;width:min(352px,calc(100vw - 32px));display:flex;flex-direction:column;background:color-mix(in srgb,var(--bg) 87%,transparent);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid color-mix(in srgb,var(--ink) 8%,transparent);box-shadow:0 16px 64px #0000000c;border-radius:20px;color:var(--ink);pointer-events:auto;text-align:left;}
 .home-emergence [hidden] {display:none!important;}
 .emergence-panel button {font:inherit;cursor:pointer;color:inherit;border:0;background:transparent;}
 .emergence-panel-head {display:flex;justify-content:space-between;align-items:center;padding:18px 22px 10px;font-size:15px;}
@@ -39,7 +39,7 @@ body[data-theme=emergence][data-view=home] .home-emergence {position:relative;is
 .emergence-panel button:disabled {opacity:.35;cursor:default;}
 .emergence-open:focus-visible,.emergence-panel :focus-visible {outline:2px solid var(--panel-accent,var(--accent));outline-offset:3px;}
 .home-emergence .emergence-panel {right:20px;}
-.home-emergence .emergence-panel[popover] {left:auto;height:auto;margin:0;padding:0;max-height:none;}
+.home-emergence .emergence-panel[popover] {left:auto;height:100dvh;box-sizing:border-box;margin:0;padding:0;max-height:none;}
 body[data-theme=emergence][data-view=home]>header {position:relative;z-index:20;}
 /* Theme-local panel composition: soft surfaces, native scrolling, fine tracks. */
 body[data-theme=emergence][data-view=home] .home-emergence .emergence-copy {position:fixed;top:clamp(140px,17vh,190px);left:clamp(38px,5vw,86px);width:min(440px,38vw);max-width:none;transform:none;margin:0;text-align:left;}
@@ -123,7 +123,7 @@ body[data-theme=emergence][data-view=home] .home-emergence .emergence-copy {posi
  .home-emergence .emergence-copy h1 {font-size:26px;}
  .home-emergence .emergence-copy .intro {font-size:12px;}
  .home-emergence .emergence-open {right:12px;}
- .home-emergence .emergence-panel {top:86px;bottom:200px;right:16px;}
+ .home-emergence .emergence-panel {top:0;bottom:0;right:16px;}
  body[data-theme=emergence][data-view=home] .home-emergence .emergence-copy {top:150px;left:26px;width:calc(100vw - 80px);}
  .home-emergence .emergence-caption {left:26px;bottom:150px;max-width:calc(100vw - 80px);}
  .home-emergence .emergence-caption-heading h2 {font-size:17px;}

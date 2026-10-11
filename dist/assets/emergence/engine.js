@@ -191,13 +191,14 @@ const COSMIC_STAGES = [
   {name:'碎石',key:'rockMass',mass:8,radius:1.5225,color:6},
   {name:'小行星',key:'satelliteMass',mass:32,radius:3.045,color:9},
   {name:'行星',key:'planetMass',mass:128,radius:6.09,color:12},
+  {name:'恒星',key:'starMass',mass:512,radius:8.61,color:13},
   {name:'星系源',key:'sourceMass',mass:4096,radius:12.18,color:14},
   {name:'黑洞',key:'blackHoleMass',mass:65536,radius:3.4,color:16},
 ];
 const cosmicStage = (e,p) => {
   let stage=0;
   for(let i=1;i<COSMIC_STAGES.length;i++){
-    if(i===6&&e.config.blackHoles==='no')break;
+    if(i===7&&e.config.blackHoles==='no')break;
     if(p.mass>=(e.config[COSMIC_STAGES[i].key]??COSMIC_STAGES[i].mass))stage=i;
   }
   return stage;
@@ -205,7 +206,7 @@ const cosmicStage = (e,p) => {
 const cosmosRadius = (p = {}) => COSMIC_STAGES[p.stage??0].radius;
 const cosmicVisualRadius = p => cosmosRadius(p);
 // Visual tier sizes are independent of contact distances and force softening.
-const cosmicContactRadius = p => [1,1.25,1.5,1.8,2.1,2.45,2.8][p.stage??0];
+const cosmicContactRadius = p => [1,1.25,1.5,1.8,2.1,2.27,2.45,2.8][p.stage??0];
 const COSMIC_GRAVITY = .0001, COSMIC_RATE = .15, COSMIC_LIMIT = 4000;
 const cosmicVisibleSpan = e => Math.min(e.width,e.height)/(e.is3D?e.projection3.focal/e.projection3.distance:e.scale);
 // Express gravity, contact distances and seed velocities in the same spatial units.
@@ -235,8 +236,10 @@ const cosmicLensRadius = e => Math.min(150,e.width*.23,e.height*.23);
 const cosmicViewScale = e => e.is3D?e.projection3.focal/e.projection3.distance:e.scale;
 // Equal radius bands for successive mass doublings: 1, 2, 4 ... 512 unit masses.
 const cosmicReach = (e,mass,blackHoleLevel=0) => {
-  const ordinary=Math.min(8,.8*Math.cbrt(Math.max(.001,mass)));
-  return (ordinary+(12-ordinary)*clamp(blackHoleLevel,0,1))/cosmicMetersPerUnit(e);
+  let ordinary=Math.min(8,.8*Math.cbrt(Math.max(.001,mass)));
+  if(mass>=(e.config.sourceMass??4096))ordinary=Math.max(20,Math.min(28,.8*Math.cbrt(mass)));
+  else if(mass>=(e.config.starMass??512))ordinary=Math.max(12,Math.min(18,.8*Math.cbrt(mass)));
+  return (ordinary+(36-ordinary)*clamp(blackHoleLevel,0,1))/cosmicMetersPerUnit(e);
 };
 // Sparse local queries for dense star fields. Flock neighbourhoods stay independent.
 class CosmicIndex {
@@ -279,22 +282,30 @@ function cosmicPointer(e,p,threeD) {
     p.ax+=cy*ax+sy*sp*ay;p.ay+=cp*ay;p.az+=sy*ax-cy*sp*ay;
   }else {p.ax+=ax;p.ay+=ay;}
 }
+function assignCosmicFormation(e,p){
+  const stage=cosmicStage(e,p);
+  if(stage<4){delete p.formationStage;delete p.formationNumber;return;}
+  if(p.formationStage!==stage||!p.formationNumber){
+    e.formationCounts??={};p.formationStage=stage;
+    p.formationNumber=e.formationCounts[stage]=(e.formationCounts[stage]||0)+1;
+  }
+}
 function evolveBlackHoles(e,step) {
   const enabled=e.config.blackHoles==='yes';
   for(const p of e.particles){
     // A theme rule based on the mass currently present, including incoming dust.
     // Once formed, a hole stays one until reset or the rule is switched off.
-    p.stage=cosmicStage(e,p);
-    p.blackHole=enabled&&p.stage===6;
+    p.stage=cosmicStage(e,p);assignCosmicFormation(e,p);
+    p.blackHole=enabled&&p.stage===7;
     const target=p.blackHole?1:0;
     p.blackHoleLevel=enabled?(p.blackHoleLevel||0)+(target-(p.blackHoleLevel||0))*(1-Math.exp(-step/45)):0;
   }
 }
-// Keep the existing trail setting; each increment retains 25 ms of playback time.
-const cosmicTrailDuration = e => e.config.trail / 40;
+// Trail history uses visible elapsed seconds, independent of playback speed.
+const cosmicTrailDuration = e => e.config.trailSeconds ?? 8;
 function recordCosmicTrail(e,p) {
   const duration=cosmicTrailDuration(e);
-  if(!duration||p.mass<e.config.fragmentMass){p.trail.length=0;return;}
+  if(!duration||cosmicStage(e,p)<3||cosmicStage(e,p)===7){p.trail.length=0;return;}
   if(!p.trail.length||e.trailTime-p.trail.at(-1)[3]>=1/60)p.trail.push([p.x,p.y,p.z3,e.trailTime]);
   const cutoff=e.trailTime-duration;
   // Retain one older sample to interpolate the exact start of the time window.
@@ -302,12 +313,13 @@ function recordCosmicTrail(e,p) {
 }
 function drawCosmicTrails(e,ctx,project,world,threeD=false) {
   // Batch similar opacities: a soft fade without thousands of gradient objects.
-  const bands=Array.from({length:24},()=>[]),opacityStep=.26/bands.length;
+  const bands=Array.from({length:24},()=>[]),opacityStep=.34/bands.length;
   const minLength=.35/(Math.abs(ctx.getTransform().a)/e.dpr);
   for(const p of e.particles){
     if(p.releaseAt>e.time)continue;
     const duration=cosmicTrailDuration(e);
-    if(!duration||!p.trail.length)continue;
+    const stage=cosmicStage(e,p);
+    if(!duration||stage<3||stage===7||!p.trail.length)continue;
     const cutoff=e.trailTime-duration;
     const history=[...p.trail,[p.x,p.y,p.z3,e.trailTime]];
     const points=history.map(([x,y,z3,time])=>{const point=project({x,y,z3});point.time=time;return point;});
@@ -329,7 +341,8 @@ function drawCosmicTrails(e,ctx,project,world,threeD=false) {
       const t1=tangent((b.x-before.x)/6,(b.y-before.y)/6),t2=tangent((after.x-a.x)/6,(after.y-a.y)/6);
       const fade=clamp(((a.time+b.time)/2-cutoff)/duration,0,1)**1.6;
       const reveal=p.revealAt===undefined?1:smooth(clamp((e.time-p.revealAt)/1.6,0,1));
-      const alpha=.18*fade*(threeD?.95-(a.depth+b.depth)*.3:.72)*reveal;
+      const brightness=[0,0,0,.09,.15,.23,.34,0][stage];
+      const alpha=brightness*fade*(threeD?.95-(a.depth+b.depth)*.3:.72)*reveal;
       const band=Math.round(alpha/opacityStep)-1;
       if(band<0)continue;
       const midpoint={incoming:p.incoming,x:world.bounded||p.incoming?(a.x+b.x)/2:wrap((a.x+b.x)/2,world.width),y:world.bounded||p.incoming?(a.y+b.y)/2:wrap((a.y+b.y)/2,world.height)};
@@ -349,7 +362,7 @@ function drawCosmicBody(e,ctx,p,x,y,k=1,alpha=.8) {
   if(p.releaseAt>e.time)return;
   alpha*=p.revealAt===undefined?1:smooth(clamp((e.time-p.revealAt)/1.6,0,1));
   p.stage=cosmicStage(e,p);
-  const level=p.stage/6,color=e.particleTint(p,e.palette.mass[COSMIC_STAGES[p.stage].color]);
+  const level=p.stage/7,color=e.particleTint(p,e.palette.mass[COSMIC_STAGES[p.stage].color]);
   const radius=Math.max(.2,(p.visualRadius ?? cosmicVisualRadius(p))*k);
   ctx.save();
   if(p.mass>1.5){
@@ -358,7 +371,7 @@ function drawCosmicBody(e,ctx,p,x,y,k=1,alpha=.8) {
   }
   ctx.globalAlpha=alpha*(.75+level*.25);ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.fill();ctx.restore();
   if(p.blackHoleLevel>.001){
-    const t=p.blackHoleLevel,r=Math.max(.55,COSMIC_STAGES[6].radius*k)+Math.min(4,3*k);
+    const t=p.blackHoleLevel,r=Math.max(.55,COSMIC_STAGES[7].radius*k)+Math.min(4,3*k);
     const growth=clamp(Math.log2(Math.max(1,p.mass/(e.config.blackHoleMass||65536)))/5,0,1);
     const core=r*(.65+.32*growth);
     ctx.save();ctx.globalAlpha=alpha*t;
@@ -375,16 +388,17 @@ function drawCosmicBody(e,ctx,p,x,y,k=1,alpha=.8) {
 }
 function drawCosmicImpact(e,ctx,p,x,y,k=1) {
   const t=1-p.life,major=p.impact==='burst',quiet=p.impact==='absorb';
-  const radius=(major?5+t*22:quiet?2+t*4:2+t*7)*k;
+  const power=major?(p.impactPower??1):1;
+  const radius=(major?(5+t*22)*power:quiet?2+t*4:2+t*7)*k;
   ctx.save();
   const glow=ctx.createRadialGradient(x,y,0,x,y,radius);
   glow.addColorStop(0,e.palette.center);glow.addColorStop(.25,e.palette.impact);glow.addColorStop(1,'transparent');
-  ctx.globalAlpha=p.life*p.life*(major?.85:quiet?.16:.3);ctx.fillStyle=glow;
+  ctx.globalAlpha=p.life*p.life*(major?Math.min(1,.5+.18*power):quiet?.16:.3);ctx.fillStyle=glow;
   ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.fill();
   if(major){
-    ctx.globalAlpha=p.life*p.life*.9;ctx.fillStyle=e.palette.center;
-    ctx.beginPath();ctx.arc(x,y,Math.max(.2,(1-t)*3*k),0,TAU);ctx.fill();
-    ctx.globalAlpha=p.life*.24;ctx.strokeStyle=e.palette.impact;ctx.lineWidth=.7*k;
+    ctx.globalAlpha=p.life*p.life*Math.min(1,.6+.15*power);ctx.fillStyle=e.palette.center;
+    ctx.beginPath();ctx.arc(x,y,Math.max(.2,(1-t)*3*k*Math.sqrt(power)),0,TAU);ctx.fill();
+    ctx.globalAlpha=p.life*Math.min(.48,.18+.08*power);ctx.strokeStyle=e.palette.impact;ctx.lineWidth=.7*k;
     ctx.beginPath();ctx.arc(x,y,radius*.8,0,TAU);ctx.stroke();
   }
   ctx.restore();
@@ -402,7 +416,7 @@ function collideCosmos(e,step,threeD) {
       const b=particles[j];if(used.has(b)||b.collisionAt>e.time)continue;
       // Planets entering a black hole are disrupted before accretion, even
       // when the particle budget temporarily has no room for new debris.
-      if(!a.tidalDebris&&!b.tidalDebris&&((cosmicStage(e,a)===6&&cosmicStage(e,b)===4)||(cosmicStage(e,b)===6&&cosmicStage(e,a)===4)))continue;
+      if(!a.tidalDebris&&!b.tidalDebris&&((cosmicStage(e,a)===7&&cosmicStage(e,b)===4)||(cosmicStage(e,b)===7&&cosmicStage(e,a)===4)))continue;
       const dx=axisDelta(b.px-a.px,w.width,threeD||w.bounded),dy=axisDelta(b.py-a.py,w.height,threeD||w.bounded),dz=threeD?b.pz-a.pz:0;
       const vx=b.vx-a.vx,vy=b.vy-a.vy,vz=threeD?b.vz-a.vz:0,contact=a.radius+b.radius;
       const v2=vx*vx+vy*vy+vz*vz,t=v2?clamp(-(dx*vx+dy*vy+dz*vz)/v2,0,step):0;
@@ -411,42 +425,50 @@ function collideCosmos(e,step,threeD) {
       // Passive dust/fragment accretion adds mass without kicking the host.
       const passive=cosmicStage(e,large)>=3&&cosmicStage(e,large===a?b:a)<=1;
       const velocity=key=>passive?large[key]:(a.mass*a[key]+b.mass*b[key])/mass;
-      const remnant={...large,mass,vx:velocity('vx'),vy:velocity('vy'),vz:threeD?velocity('vz'):0,trail:[],collisionAt:0,mergeAt:0};
-      remnant.stage=cosmicStage(e,remnant);remnant.blackHole=e.config.blackHoles==='yes'&&remnant.stage===6;
-      if(cosmicStage(e,a)===6&&cosmicStage(e,b)===6){
+      const remnant={...large,mass,vx:velocity('vx'),vy:velocity('vy'),vz:threeD?velocity('vz'):0,trail:large.trail.map(sample=>sample.slice()),collisionAt:0,mergeAt:0};
+      remnant.stage=cosmicStage(e,remnant);assignCosmicFormation(e,remnant);remnant.blackHole=e.config.blackHoles==='yes'&&remnant.stage===7;
+      if(remnant.blackHole&&mass>=e.config.blackHoleMass*4){
         const capacity=Math.min(COSMIC_LIMIT,Math.max(100,e.config.count));
         const slots=capacity-(particles.length-used.size+born.length-2);
-        const debris=explodeBlackHole(e,remnant,Math.max(1,Math.min(256,slots)),threeD);
+        const debris=explodeBlackHole(e,remnant,Math.max(0,Math.min(128,slots)),threeD);
         born.push(...debris);used.add(a);used.add(b);e.merged++;
         if(e.followTarget===a||e.followTarget===b)e.followTarget=debris[0];
-        e.fades.push({x:large.x,y:large.y,z3:large.z3,life:1,impact:'burst',duration:1.2});break;
+        e.fades.push({x:large.x,y:large.y,z3:large.z3,life:1,impact:'burst',impactPower:2.8,duration:1.2});break;
       }
       born.push(remnant);used.add(a);used.add(b);e.merged++;
       if(e.followTarget===a||e.followTarget===b)e.followTarget=remnant;
       const low=Math.min(cosmicStage(e,a),cosmicStage(e,b)),high=Math.max(cosmicStage(e,a),cosmicStage(e,b));
-      const impact=low>=4?'burst':low===0&&high>0?'absorb':'dust';
-      e.fades.push({x:large.x,y:large.y,z3:large.z3,life:1,impact,duration:impact==='burst'?.85:.45});break;
+      const impact=low>=3?'burst':'absorb';
+      const impactPower=impact==='burst'?1+((low-3)+(high-3))*.2:1;
+      e.fades.push({x:large.x,y:large.y,z3:large.z3,life:1,impact,impactPower,duration:impact==='burst'?.7+.15*impactPower:.45});break;
     }
   }
   if(used.size)e.particles=particles.filter(p=>!used.has(p)).concat(born);
   if(e.fades.length>80)e.fades=e.fades.slice(-80);
 }
 function explodeBlackHole(e,center,count,threeD) {
-  const debris=[],unit=cosmicUnit(e),speed=cosmicSeedSpeed(e)*5;
-  // Paired opposite impulses conserve the merged body's vector momentum.
-  for(let i=0;i<count;i++){
-    const paired=i%2===1,previous=debris[i-1];
-    const angle=Math.random()*TAU,z=threeD?Math.random()*2-1:0,r=Math.sqrt(1-z*z);
-    const d=paired?previous.blastDirection.map(v=>-v):[Math.cos(angle)*r,Math.sin(angle)*r,z];
-    if(i===count-1&&count%2)d.fill(0);
-    const p={...center,mass:center.mass/count,blackHole:false,blackHoleLevel:0,trail:[],collisionAt:e.time+1.2,blastDirection:d};
-    delete p.captureTarget;delete p.captureDistance2;delete p.burstFloor;
+  // Keep undispatched mass in a compact reservoir instead of creating thousands
+  // of bodies in one frame or promoting oversized debris to a higher tier.
+  const reservoir={center:{...center,trail:[]},remaining:center.mass,threeD,index:0};
+  (e.debrisReservoirs??=[]).push(reservoir);
+  return releaseBlackHoleDebris(e,reservoir,count);
+}
+function releaseBlackHoleDebris(e,reservoir,count){
+  const debris=[],{center,threeD}=reservoir,unit=cosmicUnit(e),speed=cosmicSeedSpeed(e)*5;
+  for(let i=0;i<count&&reservoir.remaining>1e-10;i++){
+    // Ten-slot shuffled cycles ensure fragments > rocks > asteroids by count.
+    if(reservoir.index%10===0)reservoir.types=[0,0,0,0,0,0,1,1,1,2].sort(()=>Math.random()-.5);
+    const type=reservoir.types[reservoir.index++%10],low=[e.config.fragmentMass,e.config.rockMass,e.config.satelliteMass][type],high=[e.config.rockMass,e.config.satelliteMass,e.config.planetMass][type];
+    const mass=Math.min(reservoir.remaining,low+Math.random()*(high-low)*.9);reservoir.remaining-=mass;
+    const angle=Math.random()*TAU,z=threeD?Math.random()*2-1:0,r=Math.sqrt(1-z*z),d=[Math.cos(angle)*r,Math.sin(angle)*r,z];
+    const p={...center,mass,blackHole:false,blackHoleLevel:0,trail:[],collisionAt:e.time+1.2};
+    delete p.burstFloor;delete p.burstStart;
     p.x=center.x+d[0]*unit*3;p.y=center.y+d[1]*unit*3;p.z3=center.z3+d[2]*unit*3;
     p.vx=center.vx+d[0]*speed;p.vy=center.vy+d[1]*speed;p.vz=threeD?center.vz+d[2]*speed:0;
-    p.px=p.x;p.py=p.y;p.pz=p.z3;p.stage=cosmicStage(e,p);p.visualRadius=cosmicVisualRadius(p);
-    debris.push(p);
+    p.px=p.x;p.py=p.y;p.pz=p.z3;p.stage=cosmicStage(e,p);p.visualRadius=cosmicVisualRadius(p);debris.push(p);
   }
-  for(const p of debris)delete p.blastDirection;
+  const total=debris.reduce((sum,p)=>sum+p.mass,0);
+  if(total)for(const key of ['vx','vy','vz']){const drift=debris.reduce((sum,p)=>sum+p.mass*(p[key]-center[key]),0)/total;for(const p of debris)p[key]-=drift;}
   return debris;
 }
 function attractPair(a,b,w,strength,threeD,reach,softening) {
@@ -465,43 +487,17 @@ function mutualAttraction(e,threeD) {
   const softening=3.6*cosmicUnit(e),grid=new CosmicIndex(e,threeD,18*cosmicUnit(e));
   const items=e.particles.map((p,index)=>({p,index,stage:cosmicStage(e,p),reach:cosmicReach(e,p.mass,p.blackHoleLevel||0)}));
   for(const item of items)grid.add(item.p,item);
-  for(const a of items)if(a.stage>1)grid.visit(a.p,a.reach,b=>{
+  for(const a of items)grid.visit(a.p,a.reach,b=>{
     // Let newly emitted debris leave the tiny emission core before self-gravity.
     if(a.p.collisionAt>e.time&&b.p.collisionAt>e.time)return;
-    if(b.stage<=1&&!b.p.tidalDebris){
-      if(a.stage<3)return;
-      const dx=axisDelta(a.p.x-b.p.x,w.width,threeD||w.bounded),dy=axisDelta(a.p.y-b.p.y,w.height,threeD||w.bounded),dz=threeD?a.p.z3-b.p.z3:0;
-      const distance2=dx*dx+dy*dy+dz*dz;
-      if(distance2<a.reach*a.reach&&distance2<(b.p.captureDistance2??Infinity)){
-        b.p.captureTarget=a.p;b.p.captureDistance2=distance2;
-      }
-      return;
-    }
     if(a===b||b.reach>a.reach||b.reach===a.reach&&b.index<a.index)return;
     attractPair(a.p,b.p,w,strength,threeD,a.reach,softening);
   });
 }
 
-function captureLightMatter(e,p,h,threeD) {
-  const target=p.captureTarget;if(!target)return;
-  const w=e.world,dx=axisDelta(target.x-p.x,w.width,threeD||w.bounded),dy=axisDelta(target.y-p.y,w.height,threeD||w.bounded),dz=threeD?target.z3-p.z3:0;
-  const distance=Math.hypot(dx,dy,dz);if(!distance)return;
-  // Passive matter drifts toward the nearest host across the outer zone,
-  // smoothly joining the existing direct accretion inside one third radius.
-  const reach=cosmicReach(e,target.mass,target.blackHoleLevel||0);
-  const approach=smooth(clamp((1-distance/reach)*1.5,0,1));
-  const speed=Math.max(cosmicSeedSpeed(e)*2,distance/18)*Math.sqrt(e.config.mutualGravity/.7)*(.12+.88*approach);
-  const dust=cosmicStage(e,p)===0;
-  const blend=dust&&approach===1?1:1-Math.exp(-h/(9*((dust?.08:.35)+(1-approach)*1.2)));
-  p.vx+=(target.vx+dx/distance*speed-p.vx)*blend;
-  p.vy+=(target.vy+dy/distance*speed-p.vy)*blend;
-  p.vz=threeD?p.vz+(target.vz+dz/distance*speed-p.vz)*blend:0;
-  delete p.burstFloor;
-}
-
 function disruptPlanets(e,threeD) {
   if(e.config.collisions==='off'||e.config.mutualGravity<=0)return;
-  const holes=e.particles.filter(p=>cosmicStage(e,p)===6);
+  const holes=e.particles.filter(p=>cosmicStage(e,p)===7);
   if(!holes.length)return;
   const w=e.world,unit=cosmicUnit(e),born=[],removed=new Set();
   let slots=Math.min(COSMIC_LIMIT,Math.max(100,e.config.count))-e.particles.length;
@@ -522,7 +518,7 @@ function disruptPlanets(e,threeD) {
     for(let i=0;i<count;i++){
       const offset=(i/(count-1)-.5)*2;
       const q={...p,mass:p.mass/count,tidalDebris:true,trail:[],collisionAt:e.time+2,blackHole:false,blackHoleLevel:0};
-      delete q.captureTarget;delete q.captureDistance2;delete q.burstFloor;
+      delete q.burstFloor;
       // A short stream in the original orbital plane, not a prescribed ring.
       q.x=p.x+tangent[0]/length*offset*spread;q.y=p.y+tangent[1]/length*offset*spread;q.z3=p.z3+tangent[2]/length*offset*spread;
       q.vx=p.vx;q.vy=p.vy;q.vz=threeD?p.vz:0;
@@ -536,6 +532,8 @@ function disruptPlanets(e,threeD) {
 }
 
 function updateCosmos(e,step,threeD=false) {
+  for(const reservoir of e.debrisReservoirs||[]){const slots=Math.max(0,COSMIC_LIMIT-e.particles.length);e.particles.push(...releaseBlackHoleDebris(e,reservoir,Math.min(16,slots)));}
+  if(e.debrisReservoirs)e.debrisReservoirs=e.debrisReservoirs.filter(r=>r.remaining>1e-10);
   const w=e.world,c=e.config,unit=cosmicUnit(e);
   // Only the opening impulse relaxes toward the existing slow drift; there is
   // no radius-triggered stop and no damping on background or later particles.
@@ -550,7 +548,6 @@ function updateCosmos(e,step,threeD=false) {
     for(const p of e.particles){
       p.mass=p.mass||1;p.radius=cosmicContactRadius(p)*.24*unit+3*unit*(p.blackHoleLevel||0);
       p.ax=0;p.ay=0;p.az=0;
-      delete p.captureTarget;delete p.captureDistance2;
       cosmicPointer(e,p,threeD);
     }
     if(c.mutualGravity>0)mutualAttraction(e,threeD);
@@ -566,13 +563,12 @@ function updateCosmos(e,step,threeD=false) {
     const h=Math.min(remaining,.9,.1*Math.sqrt(3.6*unit/acceleration));
     for(const p of e.particles){
       p.px=p.x;p.py=p.y;p.pz=p.z3;
-      captureLightMatter(e,p,h,threeD);
       p.vx+=p.ax*h/2;p.vy+=p.ay*h/2;if(threeD)p.vz+=p.az*h/2;
       if(p.incoming){
         p.x+=p.vx*h;p.y+=p.vy*h;p.z3+=p.vz*h;
         const screen=threeD?volume.project(e,p):{x:p.x*e.scale,y:p.y*e.scale};
         if(screen.x>12&&screen.x<e.width-12&&screen.y>12&&screen.y<e.height-12)p.incoming=false;
-      }else if(threeD?advance3(p,h,w):advance(p,h,w))p.trail.length=0;
+      }else {if(threeD)advance3(p,h,w);else advance(p,h,w);}
     }
     if(c.collisions!=='off')collideCosmos(e,h,threeD);
     forces();
@@ -947,7 +943,7 @@ export class EmergenceEngine {
     this.clearFollow();
     this.endOrbit(); this.canvas.dataset.dimension=this.is3D?'3d':'2d';
     this.setBoost(false);
-    this.time = 0; this.trailTime = 0; this.tick = 0; this.accumulator = 0; this.lastFrame = 0; this.captured = 0;
+    this.formationCounts={};this.debrisReservoirs=[];this.time = 0; this.trailTime = 0; this.tick = 0; this.accumulator = 0; this.lastFrame = 0; this.captured = 0;
     this.predators = []; this.respawns = []; this.fades = [];
     this.cosmicEdgeReached=false;this.merged=0;this.shattered=0;this.deflected=0;this.influxClock=0;this.incomingMass=0;this.arrived=0;
     this.birthClock = 0; this.predatorBirthClock = 0; this.born = 0; this.predatorBorn = 0;
@@ -1155,7 +1151,7 @@ export class EmergenceEngine {
     if((wasActive||this.followTarget)&&this.paused&&(this.pointerMode==='magnify'||this.scene.model==='gravity'))this.draw();
   }
   // Pointer events can cancel a hold every few milliseconds. They must not reset simulation time.
-  setBoost(active) { this.boost = active && !this.paused ? 2 : 1; }
+  setBoost(active) { this.boost = active && !this.paused ? (this.scene.id==='cosmos'?3:2) : 1; }
   get playbackRate() { return this.config.speed*this.boost*(this.scene.model==='gravity'?10:1); }
   setPaused(value) {
     if (this.paused === value) return;
@@ -1228,7 +1224,7 @@ export class EmergenceEngine {
     if(this.scene.model!=='gravity'||this.orbitDrag)return null;
     const target=this.hoverTarget||(this.paused?this.followTarget:null);
     if(!target||!this.hasParticle(target)||target.releaseAt>this.time)return null;
-    if(!this.paused&&cosmicStage(this,target)<4)return null;
+    if(!this.paused&&cosmicStage(this,target)<3)return null;
     return {target,reach:this.config.mutualGravity>0&&cosmicStage(this,target)>1?cosmicReach(this,target.mass,target.blackHoleLevel||0):0,strength:cosmicStage(this,target)>1?target.mass*this.config.mutualGravity/.7:0};
   }
   drawGravityField(ctx,view) {
@@ -1265,13 +1261,15 @@ export class EmergenceEngine {
     const px=inLens?lens.x+(p.x-lens.x)*lens.zoom:p.x,py=inLens?lens.y+(p.y-lens.y)*lens.zoom:p.y;
     const reach=Number((info.reach*cosmicMetersPerUnit(this)).toFixed(2));
     const speed=Math.hypot(info.target.vx,info.target.vy,info.target.vz||0)*cosmicMetersPerUnit(this)*60*COSMIC_RATE;
-    const label=`范围 ${reach} m · 质量 ${info.target.mass.toFixed(1)} kg · 速度 ${speed.toFixed(2)} m/s`;
+    const stage=cosmicStage(this,info.target);
+    const name=COSMIC_STAGES[stage].name+(stage>=4&&info.target.formationNumber?' '+info.target.formationNumber:'');
+    const label=`${name} · ${reach}R · ${info.target.mass.toFixed(1)}M · ${speed.toFixed(2)}V`;
     ctx.save();ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.font='10px system-ui, sans-serif';ctx.textAlign='left';
     const width=ctx.measureText(label).width,x=clamp(px+14,8,Math.max(8,this.width-width-8)),y=clamp(py-18,18,this.height-12);
     ctx.globalAlpha=.8;ctx.fillStyle=this.palette.focus;ctx.fillText(label,x,y);ctx.restore();
   }
   particleTint(p,base) {
-    return (this.pointerMode==='magnify'||this.scene.model==='gravity'&&(this.paused||cosmicStage(this,p)>=4))&&(p===this.hoverTarget||p===this.followTarget)?this.palette.focus:base;
+    return (this.pointerMode==='magnify'||this.scene.model==='gravity'&&(this.paused||cosmicStage(this,p)>=3))&&(p===this.hoverTarget||p===this.followTarget)?this.palette.focus:base;
   }
   hasParticle(p) { return !!p&&(this.particles?.includes(p)||this.predators?.includes(p)); }
   clearFollow() {
@@ -1317,7 +1315,7 @@ export class EmergenceEngine {
     for(const p of [...this.particles,...this.predators]){
       if(p.releaseAt>this.time)continue;
       if(this.scene.model==='gravity'&&cosmicStage(this,p)<2)continue;
-      if(!select&&this.scene.model==='gravity'&&!this.paused&&this.pointerMode!=='magnify'&&cosmicStage(this,p)<4)continue;
+      if(!select&&this.scene.model==='gravity'&&!this.paused&&this.pointerMode!=='magnify'&&cosmicStage(this,p)<3)continue;
       const point=this.particleScreen(p);
       periodicCopies({...point,incoming:p.incoming},world,lens.radius,(px,py)=>{
         const sx=inLens?lens.x+(px-lens.x)*lens.zoom:px,sy=inLens?lens.y+(py-lens.y)*lens.zoom:py;
