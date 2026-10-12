@@ -105,8 +105,16 @@ cd "$new"
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const record=JSON.parse(fs.readFileSync(process.argv[2],'utf8')),root=fs.realpathSync(process.argv[3]);
 if(root!==path.resolve(process.argv[3]))throw Error('Prepared release is a symbolic link');
+const retiredFiles=new Set([
+  'dist/extension/current/account-store.js',
+  'dist/avatar-character-factory.js','dist/avatar-motion-engine.js','dist/avatar-scrub-theme.js',
+  'dist/avatar-theme.js','dist/avatar-video-theme.js','dist/avatar-theme.css',
+  'dist/assets/avatar/azhi-idle.webm',
+  ...Array.from({length:121},(_,i)=>'dist/assets/avatar/timeline/frame-'+String(i).padStart(3,'0')+'.jpg'),
+  ...Array.from({length:17},(_,i)=>'dist/assets/avatar/turn/frame-'+String(i).padStart(2,'0')+'.jpg')
+]);
 for(const item of record.deletedFiles||[]){
-  if(item.path!=='dist/extension/current/account-store.js'||!/^[a-f0-9]{64}$/.test(item.sha256||''))throw Error('Unexpected retired resource');
+  if(!retiredFiles.has(item.path)||!/^[a-f0-9]{64}$/.test(item.sha256||''))throw Error('Unexpected retired resource');
   const target=path.join(root,item.path),parent=fs.realpathSync(path.dirname(target));
   if(!parent.startsWith(root+path.sep))throw Error('Retired resource escapes the prepared release');
   if(!fs.existsSync(target))continue;
