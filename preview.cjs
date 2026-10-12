@@ -90,6 +90,7 @@ http.createServer(async(req,res)=>{
   if(pathname==='/install'){res.writeHead(302,{Location:'/install/'+req.url.slice(pathname.length)});res.end();return}
   if(require('./forest-companion-assets.cjs')(req,res))return
   if(/^\/emergence-theme\.(js|css)$/.test(pathname)||/^\/assets\/emergence\/(engine|scenes|shell)\.js$/.test(pathname)||pathname==='/assets/emergence/cover.svg')routes[pathname]=pathname.slice(1)
+  if(/^\/assets\/poly-flow\/(?:flow\.mjs|ogl\.js)$/.test(pathname))routes[pathname]=pathname.slice(1)
   if(/^\/assets\/playgrounds\/(catalog|models|stage)\.js$/.test(pathname))routes[pathname]=pathname.slice(1)
   if(/^\/three-body-theme\.(js|css)$/.test(pathname)||/^\/assets\/three-body\/(physics\.js|satellites\.mjs|hd-planets\.mjs|satellite-data\.json|textures\/[a-z_]+\.(?:jpg|png)|cover\.svg)$/.test(pathname))routes[pathname]=pathname.slice(1)
   if(pathname==='/forest-companion-theme.js'||pathname==='/forest-companion-theme.css')routes[pathname]=pathname.slice(1)

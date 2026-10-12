@@ -63,7 +63,8 @@ body[data-theme=poly] .poly-dock-gem { display:grid; place-items:center; width:6
 
 
 /* In-place wallpaper controls and their compact effects popover. */
-.poly-tools { position:absolute; right:4.5%; bottom:76px; display:flex; align-items:center; gap:6px; pointer-events:auto; }
+.poly-tools { position:absolute; right:4.5%; bottom:76px; display:flex; align-items:center; gap:6px; pointer-events:auto; transition:opacity .5s,visibility .5s; }
+body[data-view=home].global-chrome-idle .home-poly .poly-tools { opacity:0; visibility:hidden; pointer-events:none; }
 .poly-tools .poly-change { position:static; opacity:.9; background:rgba(16,30,38,.3); }
 .poly-tools .poly-change:hover,.poly-tools .poly-change:focus-visible { opacity:1; background:rgba(16,30,38,.48); }
 .poly-tools .poly-tool-icon { padding:11px; }
@@ -87,3 +88,5 @@ body[data-dark=true] .poly-effects { --ink:color-mix(in srgb,var(--accent) 6%,#f
 @media(max-width:720px) { .poly-tools { bottom:190px; right:5%; }.poly-effects { right:5%; bottom:242px; max-height:calc(100svh - 266px); }[data-poly-caption] { bottom:196px; } }
 
 @media(prefers-reduced-motion:reduce){.poly-art,.poly-dock-gem svg{transition:none}}
+
+.poly-art>.poly-flow { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }

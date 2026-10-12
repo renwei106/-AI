@@ -111,7 +111,11 @@
     svgCache.set(key,result);return result;
   }
   const artBefore=themeArtwork;themeArtwork=function(id){return id==='poly'?artwork('mountain'):artBefore(id);};
+  let flowController=null,flowRun=0;
+  function stopFlow(){flowRun++;flowController?.dispose();flowController=null;}
+  function startFlow(){const run=flowRun,art=document.querySelector('.home-poly [data-poly-art]');if(!art)return;import('/assets/poly-flow/flow.mjs').then(m=>run===flowRun?m.mountFlow(art):null).then(controller=>{if(run!==flowRun)controller?.dispose();else flowController=controller;}).catch(()=>{});}
   function paintArt(){
+    stopFlow();
     const opt=options(),preset=PRESETS.find(p=>p[0]===opt.preset)||PRESETS[0],isCustom=opt.preset==='custom'&&custom;
     document.querySelectorAll('[data-poly-art]').forEach(el=>{
       el.innerHTML=isCustom?custom.svg:artwork(preset[0]);
@@ -119,15 +123,16 @@
       el.classList.toggle('poly-custom-art',!!isCustom);el.classList.toggle('poly-loading',opt.preset==='custom'&&!loadDone);
     });
     document.querySelectorAll('[data-poly-caption]').forEach(el=>el.textContent=isCustom?'私藏风景':preset[1]);
+    startFlow();
   }
   const homeBefore=home;home=function(){
-    homeBefore();if(effective().theme!=='poly')return;const root=$('.home-poly');if(!root)return;
+    stopFlow();homeBefore();if(effective().theme!=='poly')return;const root=$('.home-poly');if(!root)return;
     root.insertAdjacentHTML('afterbegin',`<figure class="poly-wallpaper"><div class="poly-art" data-poly-art></div><figcaption><span data-poly-caption></span><div class="poly-tools"><span class="poly-progress" role="status" aria-live="polite"></span><button class="poly-change" data-poly-next aria-label="更换壁纸">${gem}<span>换一幅</span></button><button class="poly-change poly-tool-icon" data-poly-file aria-label="上传本地图片" title="上传本地图片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5 9.5 3h5L16 5h4a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/><circle cx="12" cy="12" r="4"/></svg></button><button class="poly-change" data-poly-open popovertarget="poly-effects" aria-expanded="false" aria-controls="poly-effects">${icon('settings')}<span>效果</span></button></div></figcaption></figure>`);
     paintArt();
   };
   const applyBefore=apply;apply=function(){applyBefore();if(view==='home'&&effective().theme==='poly')paintArt();};
-  let narrowViewport=innerWidth/innerHeight<.8;
-  window.addEventListener('resize',()=>{const narrow=innerWidth/innerHeight<.8;if(narrow===narrowViewport)return;narrowViewport=narrow;if(view==='home'&&effective().theme==='poly')paintArt();});
+  let flowResize=0;
+  window.addEventListener('resize',()=>{clearTimeout(flowResize);flowResize=setTimeout(()=>{if(view==='home'&&effective().theme==='poly')paintArt();},120);});
   // Only the new theme receives the faceted dock symbol; action and accessible label are unchanged.
   const dockBefore=dock;dock=function(){dockBefore();if(dockTheme()!=='poly')return;const trigger=$('.dock-trigger');if(!trigger)return;const label=trigger.querySelector('.dock-label')?.outerHTML||'<span class="dock-label">我的空间</span>';trigger.innerHTML=`<span class="poly-dock-gem">${gem}</span>${label}`;};
   const settingsBefore=renderSettings;renderSettings=function(){settingsBefore();if(effective().theme!=='poly'||settingsTab!=='themes')return;const panel=$('#settings-body .settings-panel');if(panel&&!panel.querySelector('[data-poly-open]'))panel.insertAdjacentHTML('beforeend',`<button class="poly-settings-entry" data-poly-open popovertarget="poly-effects">${gem}<span>棱光拾景 · 画面设置</span><span>↗</span></button>`);};
