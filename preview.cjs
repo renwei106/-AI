@@ -22,7 +22,7 @@ const routes={
   '/install/shiyu-shortcut.zip':'install/shiyu-shortcut.zip',
   '/onboarding.js':'onboarding.js','/onboarding.css':'onboarding.css','/onboarding-input.js':'onboarding-input.js','/account-security.js':'account-security.js',
   '/todo-calendar.js':'todo-calendar.js','/todo-calendar-core.js':'todo-calendar-core.js','/todo-calendar.css':'todo-calendar.css',
-  '/home-responsive.css':'home-responsive.css','/home-responsive.js':'home-responsive.js',
+  '/home-continuity.js':'home-continuity.js','/home-responsive.css':'home-responsive.css','/home-responsive.js':'home-responsive.js',
   '/analytics.js':'analytics.js','/tool-auth-bridge.js':'tool-auth-bridge.js','/bookmark-logo.js':'bookmark-logo.js',
   '/desktop-pet.js':'desktop-pet.js','/desktop-pet.css':'desktop-pet.css','/desktop-pet-host.js':'desktop-pet-host.js','/feature-config.js':'feature-config.js',
   '/assets/desktop-pet/paper-person.webp':'assets/desktop-pet/paper-person.webp',
@@ -36,8 +36,6 @@ const routes={
   '/memoir-theme.css':'memoir-theme.css','/memoir-theme.js':'memoir-theme.js',
   '/memo-paper.css':'memo-paper.css','/memo-paper.js':'memo-paper.js',
  '/corner.css':'corner.css','/corner.js':'corner.js','/earth-theme.css':'earth-theme.css','/earth-theme.js':'earth-theme.js','/earth-source.js':'earth-source.js',
-  '/avatar-theme.css':'avatar-theme.css','/avatar-theme.js':'avatar-theme.js','/avatar-video-theme.js':'avatar-video-theme.js','/avatar-scrub-theme.js':'avatar-scrub-theme.js','/avatar-character-factory.js':'avatar-character-factory.js','/avatar-motion-engine.js':'avatar-motion-engine.js',
-  '/assets/avatar/azhi-idle.webm':'assets/avatar/azhi-idle.webm',
   '/':'index.html','/index.html':'index.html','/robots.txt':'robots.txt','/sitemap.xml':'sitemap.xml','/style.css':'style.css','/app.js':'app.js','/account-surfaces.js':'account-surfaces.js','/v4.js':'v4.js','/v4.css':'v4.css','/account-access.js':'account-access.js',
   '/space-atlas.js':'space-atlas.js','/space-atlas.css':'space-atlas.css','/assets/reading/valley-closed.webp':'assets/reading/valley-closed.webp','/assets/reading/valley-open.webp':'assets/reading/valley-open.webp',
   '/paper-edition.css':'paper-edition.css','/paper-edition.js':'paper-edition.js',
@@ -87,6 +85,9 @@ http.createServer(async(req,res)=>{
   if(await themeConfigProxy(req,res))return
   if(await shareHandler(req,res))return
   const pathname=req.url.split('?')[0]
+  if(/^\/assets\/brand-motion\/(gsap\.js|MotionPathPlugin\.js|LICENSE)$/.test(pathname))routes[pathname]=pathname.slice(1)
+  if(/^\/brand-demo4\.(js|css)$/.test(pathname))routes[pathname]=pathname.slice(1)
+  if(/^\/starlink-theme\.(js|css)$/.test(pathname)||/^\/assets\/starlink\/(frame\.(html|js)|particles\.js|cover\.svg|LICENSE\.md)$/.test(pathname))routes[pathname]=pathname.slice(1)
   if(pathname==='/install'){res.writeHead(302,{Location:'/install/'+req.url.slice(pathname.length)});res.end();return}
   if(require('./forest-companion-assets.cjs')(req,res))return
   if(/^\/emergence-theme\.(js|css)$/.test(pathname)||/^\/assets\/emergence\/(engine|scenes|shell)\.js$/.test(pathname)||pathname==='/assets/emergence/cover.svg')routes[pathname]=pathname.slice(1)
@@ -98,8 +99,6 @@ http.createServer(async(req,res)=>{
   const fontAsset=/^\/assets\/fonts\/shiyu-(?:youfeng|qingya-song|wenrun-kai)\/[A-Za-z0-9._-]+\.woff2$/i.test(pathname)?pathname.slice(1):''
   let file=routes[pathname]||fontAsset||(/^\/assets\/site-icons\/[a-z0-9._-]+\.(?:svg|ico|png|webp)$/i.test(pathname)?pathname.slice(1):'')
   if(/^\/assets\/memoir\/(?:gulls|cruise|sail|alpine)\.webp$/.test(pathname))file=pathname.slice(1)
-  if(/^\/assets\/avatar\/turn\/frame-\d{2}\.jpg$/.test(pathname))file=pathname.slice(1)
-  if(/^\/assets\/avatar\/timeline\/frame-\d{3}\.jpg$/.test(pathname))file=pathname.slice(1)
   if(/^\/assets\/toolbox\/(?:common|memo|todo|icons|emoji|cutout)\.svg$/.test(pathname))file=pathname.slice(1)
   if(/^\/assets\/memo-paper\/(?:engine\.js|carousel\.js|LICENSE|THIRD_PARTY_NOTICES\.txt|vat\/geo\/vertex_animation_textures1_mesh\.fbx|vat\/tex\/vertex_animation_textures1_pos\.exr)$/.test(pathname))file=pathname.slice(1)
   if(pathname==='/official/')file='official/index.html'

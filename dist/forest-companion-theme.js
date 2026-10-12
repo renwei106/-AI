@@ -268,7 +268,7 @@
     }
   };
   const previousRender = render;
-  render = function(...args) { dispose?.(); return previousRender(...args); };
+  render = function(...args) { if(!window.ShiyuHomeContinuity?.preserving())dispose?.(); return previousRender(...args); };
   const previousCopy = applyHomeCopy;
   applyHomeCopy = function() {
     previousCopy();

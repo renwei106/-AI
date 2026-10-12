@@ -20,7 +20,7 @@ const snapshots=()=>({member:false,permanent:false,expiresAt:null,planId:'free',
 let browser;const errors=[],blocked=[];
 async function fixture(isAdmin=false,baseline=false) {
  const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
- await context.route('**/*',async route=>{const url=new URL(route.request().url());if(['127.0.0.1','localhost'].includes(url.hostname)&&!['/earth-theme.js','/avatar-theme.js'].includes(url.pathname))return route.fallback();return route.fulfill({status:200,contentType:route.request().resourceType()==='script'?'text/javascript':'text/plain',body:''})});
+ await context.route('**/*',async route=>{const url=new URL(route.request().url());if(['127.0.0.1','localhost'].includes(url.hostname)&&!['/earth-theme.js'].includes(url.pathname))return route.fallback();return route.fulfill({status:200,contentType:route.request().resourceType()==='script'?'text/javascript':'text/plain',body:''})});
  if(!isAdmin)await context.addInitScript(({workspace,prefs})=>{localStorage.setItem('yiyu-prototype-v1',JSON.stringify({data:workspace,prefs,signed:true,styles:{},overrides:{}}));},{workspace,prefs});
  if(baseline)await context.route('http://127.0.0.1:4318/**',async route=>{const file=new URL(route.request().url()).pathname.slice(1),original=path.resolve('baselines/limited-free-before-20261007/front/dist',file);if(['v4.js','account-access.js','member-entitlements.js','theme-availability.js'].includes(file))return route.fulfill({contentType:'text/javascript',body:fs.readFileSync(original,'utf8')});return route.fallback()});
  await context.route('**/api/**',async route=>{

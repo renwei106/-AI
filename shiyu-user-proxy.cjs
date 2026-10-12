@@ -5,7 +5,11 @@ module.exports=function shiyuUserProxy(req,res){
   if(!pathname.startsWith('/api/shiyu/auth/')&&pathname!=='/api/shiyu/login-methods'&&pathname!=='/api/shiyu/operations')return false
   const profileRequest=pathname.startsWith('/api/shiyu/auth/wechat/profile')
   const target=new URL(process.env.SHIYU_ADMIN_ORIGIN||'http://127.0.0.1:5175')
-  const upstream=http.request({host:target.hostname,port:target.port||80,path:req.url,method:req.method,headers:{cookie:req.headers.cookie||'','content-type':req.headers['content-type']||'application/json',...((pathname==='/api/shiyu/operations'||pathname==='/api/shiyu/auth/analytics'||pathname==='/api/shiyu/auth/avatar'||pathname==='/api/shiyu/auth/emergence'||profileRequest)&&req.headers.origin?{origin:req.headers.origin}:{})}},response=>{
+  // Only translate a verified same-origin loopback preview request for the avatar endpoint.
+  const origin=req.headers.origin
+  const localAvatarOrigin=pathname==='/api/shiyu/auth/avatar'&&/^http:\/\/(?:127\.0\.0\.1|localhost):\d+$/.test(origin||'')&&origin==='http://'+req.headers.host&&['127.0.0.1','localhost'].includes(target.hostname)
+  const forwardedOrigin=localAvatarOrigin?target.origin:origin
+  const upstream=http.request({host:target.hostname,port:target.port||80,path:req.url,method:req.method,headers:{cookie:req.headers.cookie||'','content-type':req.headers['content-type']||'application/json',...((pathname==='/api/shiyu/operations'||pathname==='/api/shiyu/auth/analytics'||pathname==='/api/shiyu/auth/avatar'||pathname==='/api/shiyu/auth/emergence'||profileRequest)&&req.headers.origin?{origin:forwardedOrigin}:{})}},response=>{
     if(response.headers['set-cookie'])res.setHeader('set-cookie',response.headers['set-cookie'])
     res.writeHead(response.statusCode||502,{'content-type':response.headers['content-type']||'application/json; charset=utf-8','cache-control':'no-store',...(profileRequest?Object.fromEntries(['location','referrer-policy','content-security-policy','x-content-type-options'].filter(key=>response.headers[key]).map(key=>[key,response.headers[key]])):{}),...(response.headers['access-control-allow-origin']?{'access-control-allow-origin':response.headers['access-control-allow-origin'],...(response.headers['access-control-allow-credentials']?{'access-control-allow-credentials':response.headers['access-control-allow-credentials']}:{}),'vary':'Origin'}:{})})
     response.pipe(res)

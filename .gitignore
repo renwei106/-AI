@@ -16,3 +16,6 @@ WXCertUtil/
 
 # Independent landscape prototype lives outside this repository.
 /prototypes/emergence/
+
+# Local preview process output.
+/.local-*.log

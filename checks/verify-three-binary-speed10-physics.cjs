@@ -1,0 +1,41 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const P=require('../dist/assets/three-body/physics.js');
+const output='.local/checks/verify-three-binary-speed10-physics';
+const sandbox=vm.createContext({window:{}});
+for(const file of ['catalog.js','models.js','stage.js'])vm.runInContext(fs.readFileSync('dist/assets/playgrounds/'+file,'utf8'),sandbox);
+const E=sandbox.window.ShiyuPlaygrounds;
+const near=(value,expected,tolerance=1e-8)=>assert.ok(Math.abs(value-expected)<tolerance,`${value} vs ${expected}`);
+assert.equal(P.normalize({speed:10}).speed,10);
+assert.equal(P.normalize({speed:11}).speed,10);
+assert.equal(P.normalize({speed:10},true).speed,3);
+assert.equal(P.normalize({}).speed,1);
+assert.equal(E.normalize('binarySystem',{speed:10}).speed,10);
+assert.equal(E.normalize('binarySystem',{speed:11}).speed,10);
+assert.equal(E.normalize('particleLife',{speed:10}).speed,2);
+assert.equal(E.normalize('elementSandbox',{speed:10}).speed,2);
+for(const elapsed of [1/60,.033])for(const speed of [1,2,10,30]){
+ const state=P.create(P.defaults());
+ near(P.advance(state,elapsed*speed),elapsed*speed);
+ near(state.time,elapsed*speed);
+}
+const multi=P.create(P.multiDefaults());
+near(P.advance(multi,.2),.1);
+const normal=P.create(P.defaults()),fast=P.create(P.defaults());
+const initialEnergy=P.invariants(fast).energy;
+for(let frame=0;frame<180;frame++){P.advance(normal,1/60);P.advance(fast,10/60);}
+near(fast.time/normal.time,10);
+const threeBodyEnergyDrift=Math.abs((P.invariants(fast).energy-initialEnergy)/initialEnergy);
+assert.ok(threeBodyEnergyDrift<.001);
+for(const body of fast.bodies)for(const value of Object.values(body))assert.ok(Number.isFinite(value));
+const config=E.normalize('binarySystem',{speed:10}),binary=sandbox.window.ShiyuPlaygroundModels.create('binarySystem',config);
+const initialBinaryEnergy=binary.stats().energy;
+for(let frame=0;frame<180;frame++)binary.update(1/60,config);
+near(binary.stats().simulationTime,30);
+const binaryEnergyDrift=Math.abs((binary.stats().energy-initialBinaryEnergy)/initialBinaryEnergy);
+assert.ok(binaryEnergyDrift<.001);
+for(const body of binary.stats().bodies)for(const value of Object.values(body))assert.ok(Number.isFinite(value));
+fs.mkdirSync(output,{recursive:true});
+fs.writeFileSync(output+'/results.json',JSON.stringify({threeBody:{normalTime:normal.time,fastTime:fast.time,speedRatio:fast.time/normal.time,energyDrift:threeBodyEnergyDrift},binarySystem:{simulationTime:binary.stats().simulationTime,energyDrift:binaryEnergyDrift},singleFrameSpeeds:[1,2,10,30],otherLimits:{multiBody:3,particleLife:2,elementSandbox:2}},null,2));
+console.log('PASS: 10x simulation time, hold acceleration, bounded settings, default values and energy stability; other scene limits unchanged.');

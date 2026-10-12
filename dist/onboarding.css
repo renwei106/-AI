@@ -50,6 +50,7 @@
 .sy-tour::backdrop{background:transparent}
 .sy-tour-ring{position:fixed;border:1.5px solid color-mix(in srgb,var(--guide-accent) 72%,white);border-radius:12px;box-shadow:0 0 0 150vmax #00000055;pointer-events:none;transition:left .28s,top .28s,width .28s,height .28s}
 .sy-tour-panel{position:fixed;width:min(348px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;border-radius:12px;background:var(--guide-paper);padding:24px;box-shadow:0 16px 55px #00000018;transition:left .2s,top .2s;animation:sy-panel-in .3s both}
+body.sy-tour-theme .sy-tour-ring,body.sy-tour-theme .sy-tour-panel{transition:none}
 .sy-tour-progress{font-size:11px;color:var(--guide-accent);letter-spacing:.09em;display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
 .sy-tour-progress button{font:inherit;color:var(--guide-muted);border:0;background:none;cursor:pointer;padding:3px}
 .sy-tour h2{font-size:20px;font-weight:500;line-height:1.5;margin:0 0 10px}
@@ -61,7 +62,7 @@
 [data-onboarding-entry]{display:flex;align-items:center;gap:10px}
 [data-onboarding-entry] svg{width:18px;height:18px;flex-shrink:0}
 .sy-tour-active .brand-guide{visibility:hidden}
-.sy-tour-active.sy-tour-theme .brand-theme-menu{display:block;max-height:calc(100dvh - 90px);overflow:auto}
+.sy-tour-active.sy-tour-theme:not(:has(.brand-demo4-stage)) .brand-theme-menu{display:block;max-height:calc(100dvh - 90px);overflow:auto}
 @keyframes sy-envelope-in{from{opacity:0;transform:translateY(38px) rotate(-3deg) scale(.94)}to{opacity:1;transform:none}}
 @keyframes sy-panel-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 @keyframes sy-backdrop-in{from{opacity:0}to{opacity:1}}

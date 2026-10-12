@@ -130,7 +130,7 @@
     root.insertAdjacentHTML('afterbegin',`<figure class="poly-wallpaper"><div class="poly-art" data-poly-art></div><figcaption><span data-poly-caption></span><div class="poly-tools"><span class="poly-progress" role="status" aria-live="polite"></span><button class="poly-change" data-poly-next aria-label="更换壁纸">${gem}<span>换一幅</span></button><button class="poly-change poly-tool-icon" data-poly-file aria-label="上传本地图片" title="上传本地图片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5 9.5 3h5L16 5h4a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/><circle cx="12" cy="12" r="4"/></svg></button><button class="poly-change" data-poly-open popovertarget="poly-effects" aria-expanded="false" aria-controls="poly-effects">${icon('settings')}<span>效果</span></button></div></figcaption></figure>`);
     paintArt();
   };
-  const applyBefore=apply;apply=function(){applyBefore();if(view==='home'&&effective().theme==='poly')paintArt();};
+  const applyBefore=apply;apply=function(){applyBefore();if(view==='home'&&effective().theme==='poly'&&!window.ShiyuHomeContinuity?.restoring()&&!window.ShiyuHomeContinuity?.unchanged())paintArt();};
   let flowResize=0;
   window.addEventListener('resize',()=>{clearTimeout(flowResize);flowResize=setTimeout(()=>{if(view==='home'&&effective().theme==='poly')paintArt();},120);});
   // Only the new theme receives the faceted dock symbol; action and accessible label are unchanged.

@@ -625,6 +625,14 @@
   const earlier = openAccountCenter;
   openAccountCenter = function () {
     earlier();
+    appendCancellationEntry();
+  };
+  const generalCenter = window.openGeneralAccountCenter;
+  window.openGeneralAccountCenter = function () {
+    generalCenter();
+    appendCancellationEntry();
+  };
+  function appendCancellationEntry() {
     const center = document.querySelector('#account-center');
     // The existing profile flow renders a separate setup dialog before the full account center.
     if (!signed || !center?.querySelector('[data-security-item="phone"]') || !center.querySelector('[data-security-item="email"]') || center.querySelector('[data-account-cancel]')) return;
@@ -634,7 +642,7 @@
     const signout = center.querySelector('[data-account-signout]');
     if (signout) signout.after(entry); else center.append(entry);
     entry.addEventListener('click', () => { center.close(); void openCancellation(); });
-  };
+  }
 
   async function openCancellation() {
     let session, agreement;

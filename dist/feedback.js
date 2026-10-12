@@ -357,7 +357,7 @@
     const button = document.createElement('button'); button.type = 'button'; button.dataset.menuFeedback = '';
     button.setAttribute('role', 'menuitem'); button.setAttribute('aria-haspopup', 'dialog'); button.title = '捎来回音 · 问题反馈与建议';
     button.innerHTML = `${letter}捎来回音`; button.onclick = openFeedback;
-    const after = menu.querySelector('[data-menu-extension]') || menu.querySelector('[data-account-signout]'); if (after) after.before(button); else menu.append(button);
+    const after = menu.querySelector('[data-menu-extension]') || menu.querySelector('[data-menu-official]'); if (after) after.before(button); else menu.append(button);
   }
   const headerBeforeFeedback = updateHeader;
   updateHeader = function () { headerBeforeFeedback(); addEntry(); if (dialog && owner !== ownerKey()) reset(); };

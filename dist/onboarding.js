@@ -6,6 +6,8 @@
   let owner = '', state = null, loading = false, queue = Promise.resolve(), welcome = null, tour = null;
   let startTimer = 0, scheduled = 0, pausedArea = '', lastArea = '', stepId = '', signature = '', previousFocus = null;
   let tourStepIds=null;
+  // Saved progress alone must not start a tour after refresh; this page must explicitly start it.
+  let flowActive=false;
   let inertNodes = [], exposed = [], busy = false, stateEpoch = 0, mutationVersion = 0;
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const delay = ms => new Promise(resolve => setTimeout(resolve, reduced() ? 0 : ms));
@@ -50,6 +52,12 @@
     if (rgb) { const n = parseInt(rgb[1],16); el.style.setProperty('--guide-on-accent', ((n>>16)*299+((n>>8)&255)*587+(n&255)*114)/1000 > 158 ? '#182024' : '#fff'); }
   }
   function cache() { try { localStorage.setItem('shiyu-onboarding:'+owner, JSON.stringify(state)); } catch {} }
+  async function skipTour(){
+    if(!state)return;
+    flowActive=false;busy=true;clearTimeout(startTimer);startTimer=0;mutationVersion++;
+    state={...state,status:'skipped',welcome:'handled'};cache();cleanTour();releaseGift();
+    try{await action('skip');}finally{busy=false;schedule();}
+  }
   async function loadState() {
     const id = identity();
     if (!id || loading || busy || !document.documentElement.classList.contains('shiyu-account-ready')) return;
@@ -70,8 +78,8 @@
         const response = await fetch('/api/shiyu/auth/onboarding', {method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:id,action:type,round,...fields})});
         const result = await response.json();
         if (identity() !== id || epoch !== stateEpoch || result.userId && result.userId !== id) return false;
-        if (result.onboarding) { state=result.onboarding;owner=id;cache(); }
         if (!response.ok) throw Error(result.message || '引导进度暂未保存，请重试');
+        if (result.onboarding) { state=result.onboarding;owner=id;cache(); }
         schedule();return true;
       } catch(error) { toast(error.message || '引导进度暂未保存，请重试');return false; }
     });
@@ -85,7 +93,7 @@
     if (!show || menu.querySelector('[data-onboarding-entry]')) return;
     const button = document.createElement('button');button.type='button';button.dataset.onboardingEntry='';button.setAttribute('role','menuitem');
     button.innerHTML=icon+'<span>开启新手引导</span>';
-    const exit=menu.querySelector('[data-account-signout]');exit ? exit.before(button) : menu.append(button);
+    const exit=menu.querySelector('[data-menu-official]');exit ? exit.before(button) : menu.append(button);
     button.onclick=async () => { if (!ready()) await loadState(); if (!ready()) {toast('正在确认登录和引导状态，请稍后重试');return;} $q('.account-menu-wrap')?.classList.remove('menu-pinned');button.blur();openLetter(); };
   }
   function art(kind) {
@@ -107,7 +115,7 @@
     const later=async event => { if(busy)return;const stow=event?.currentTarget?.hasAttribute('data-letter-later');busy=true;if(await action('welcome')){if(stow)await stowLetter(dialog);else await closeLetter();}busy=false; };
     dialog.querySelectorAll('[data-letter-later],.sy-welcome-close').forEach(button=>button.onclick=later);
     dialog.addEventListener('cancel',event=>{event.preventDefault();void later();});
-    dialog.querySelector('[data-letter-start]').onclick=async () => { if(busy)return;busy=true;const button=dialog.querySelector('[data-letter-start]');button.disabled=true;if(await action('start')){pausedArea='';for(const name of ['home','space'])if(!moduleAllowed(name))await action('complete',{module:name});await flyLetter(dialog);if(!moduleAllowed('home')&&moduleAllowed('space'))toast('指引已开启，进入我的空间时继续');}else button.disabled=false;busy=false;schedule(); };
+    dialog.querySelector('[data-letter-start]').onclick=async () => { if(busy)return;busy=true;const button=dialog.querySelector('[data-letter-start]');button.disabled=true;if(await action('start')){flowActive=true;pausedArea='';for(const name of ['home','space'])if(!moduleAllowed(name))await action('complete',{module:name});await flyLetter(dialog);if(!moduleAllowed('home')&&moduleAllowed('space'))toast('指引已开启，进入我的空间时继续');}else button.disabled=false;busy=false;schedule(); };
   }
   async function unsealLetter(dialog) {
     if(dialog.classList.contains('is-opening')||busy)return;
@@ -206,7 +214,9 @@
     // Reveal the existing hover controls without changing preferences or their resting layout.
     for(const selector of ['body>header','.peek-return']) { const el=$q(selector);if(el&&!el.classList.contains(selector.includes('header')?'cords-expanded':'revealed')){const name=selector.includes('header')?'cords-expanded':'revealed';el.classList.add(name);exposed.push([el,name]);} }
   }
+  function themeGuide(show){$q('.brand-demo4-stage')?.dispatchEvent(new CustomEvent('shiyu-theme-guide',{detail:show}));}
   function cleanTour() {
+    themeGuide(false);
     if(document.body.classList.contains('sy-tour-pet'))window.ShiyuDesktopPet?.guide(false);tour?.remove();tour=null;signature='';tourStepIds=null;
     for(const [el,value] of inertNodes)if(el.isConnected)el.inert=value;inertNodes=[];
     for(const [el,name] of exposed)el.classList.remove(name);exposed=[];
@@ -214,7 +224,7 @@
     if(previousFocus?.isConnected)previousFocus.focus({preventScroll:true});
   }
   function startTour() {
-    if(tour||welcome||!ready()||blocking()||state.status!=='active')return;
+    if(tour||welcome||!flowActive||!ready()||blocking()||state.status!=='active')return;
     const name=area();if(!name||!moduleAllowed(name)||state[name]?.status==='done'||pausedArea===name)return;
     exposeTargets();const list=steps(name);
     if(!list.length){for(const [el,cls]of exposed)el.classList.remove(cls);exposed=[];busy=true;void action('complete',{module:name}).then(ok=>{if(ok)toast('当前没有需要介绍的入口，可以自由探索。');busy=false;schedule();});return;}
@@ -225,7 +235,7 @@
     document.body.classList.add('sy-tour-active');renderStep();
   }
   function renderStep() {
-    if(!tour)return;const name=tour.dataset.area,list=steps(name);
+    if(!tour||!flowActive||state?.status!=='active')return;const name=tour.dataset.area,list=steps(name);
     if(!list.length){cleanTour();busy=true;void action('complete',{module:name}).finally(()=>{busy=false;schedule();});return;}
     let index=list.findIndex(step=>step.id===stepId);
     if(index<0){const all=name==='home'?homeSteps:spaceSteps,old=all.findIndex(s=>s.id===stepId);index=list.findIndex(s=>all.indexOf(s)>old);if(index<0)index=list.length-1;stepId=list[index].id;}
@@ -235,8 +245,9 @@
       if(step.id==='pet'||document.body.classList.contains('sy-tour-pet'))window.ShiyuDesktopPet?.guide(step.id==='pet');
       document.body.classList.toggle('sy-tour-pet',step.id==='pet');
       document.body.classList.toggle('sy-tour-theme',step.id==='theme');
+      themeGuide(step.id==='theme');
       const panel=tour.querySelector('.sy-tour-panel');panel.innerHTML='<div class="sy-tour-progress"><span>'+(name==='home'?'首页':'空间')+' · '+(index+1)+' / '+list.length+'</span><button data-tour-skip>跳过引导</button></div><h2 id="sy-tour-title">'+step.title+'</h2><p>'+step.body+'</p><div class="sy-tour-actions"><button data-tour-prev '+(index===0?'disabled':'')+'>上一步</button>'+'<button class="sy-guide-primary" data-tour-next>'+(last?(name==='home'?'开始体验':'完成引导'):'下一步')+'</button></div>';
-      panel.querySelector('[data-tour-skip]').onclick=async()=>{if(busy)return;busy=true;if(await action('skip')){cleanTour();releaseGift();}busy=false;};
+      panel.querySelector('[data-tour-skip]').onclick=skipTour;
       panel.querySelector('[data-tour-prev]').onclick=()=>move(-1);
       panel.querySelector('[data-tour-next]').onclick=()=>last?complete():move(1);
       panel.querySelector('[data-tour-next]').focus({preventScroll:true});
@@ -248,14 +259,19 @@
   function releaseGift() { if(!identity())return;prefs.workspaceGuideDoneV1=true;persist();window.dispatchEvent(new Event('shiyu-workspace-guide-complete')); }
   async function complete() {
     if(busy||!tour)return;busy=true;const name=tour.dataset.area;
-    if(await action('complete',{module:name})){cleanTour();if(name==='space')releaseGift();schedule();}busy=false;
+    if(await action('complete',{module:name})){if(state.status==='complete')flowActive=false;cleanTour();if(name==='space')releaseGift();schedule();}busy=false;
   }
   function position(step) {
-    if(!tour)return;const el=target(step);if(!el)return;
+    if(!tour)return;
+    const cards=$q('.brand-demo4-stage'),waiting=step.id==='theme'&&cards&&!cards.classList.contains('is-settled');
+    tour.querySelector('.sy-tour-ring').style.visibility=waiting?'hidden':'';
+    tour.querySelector('.sy-tour-panel').style.visibility=waiting?'hidden':'';
+    if(waiting)return;
+    const el=target(step);if(!el)return;
     const nodes=step.combine?step.targets.map(selector=>$q(selector)).filter(visible):[el];
     if(step.id==='scenes'){nodes.length=0;nodes.push(...document.querySelectorAll('.sidebar .scene-scroll .scene-button'));}
     if(step.id==='pet')nodes.push(...document.querySelectorAll('#desktop-pet .pet-menu button'));
-    if(step.id==='theme'){const menu=$q('body>header .brand-theme-menu');if(menu)nodes.push(menu);}
+    if(step.id==='theme'){const stage=$q('.brand-demo4-stage');if(stage)nodes.push(...stage.querySelectorAll('.brand-demo4-scroll,.brand-demo4-navigation'));else{const menu=$q('body>header .brand-theme-menu');if(menu)nodes.push(menu);}}
     const boxes=nodes.filter(visible).map(node=>node.getBoundingClientRect());
     const r={left:Math.min(...boxes.map(b=>b.left)),top:Math.min(...boxes.map(b=>b.top)),right:Math.max(...boxes.map(b=>b.right)),bottom:Math.max(...boxes.map(b=>b.bottom))},w=document.documentElement.clientWidth,h=visualViewport?.height||innerHeight;
     const left=Math.max(5,r.left-7),top=Math.max(5,r.top-7),right=Math.min(w-5,r.right+7),bottom=Math.min(h-5,r.bottom+7);
@@ -268,16 +284,17 @@
   }
   function tick() {
     scheduled=0;syncMenu();const id=identity(),currentArea=area();
-    if(owner&&owner!==id){stateEpoch++;owner='';state=null;cleanTour();void closeLetter(true);pausedArea='';}
+    if(owner&&owner!==id){stateEpoch++;owner='';state=null;flowActive=false;cleanTour();void closeLetter(true);pausedArea='';}
     if(currentArea!==lastArea){pausedArea='';lastArea=currentArea;clearTimeout(startTimer);startTimer=0;}
     if(!ready()||blocking()||!currentArea){clearTimeout(startTimer);startTimer=0;if(tour)cleanTour();if(welcome&&(!id||currentArea!=='home'||blocking()||!enabled()))void closeLetter(true);return;}
     if(tour){if(tour.dataset.area!==currentArea||state.status!=='active'||!moduleAllowed(currentArea))cleanTour();else renderStep();return;}
     if(welcome||busy||pausedArea===currentArea)return;
     const shouldWelcome=currentArea==='home'&&config().welcome!==false&&state.welcome==='pending';
-    const shouldGuide=state.status==='active'&&moduleAllowed(currentArea)&&state[currentArea].status!=='done';
+    const shouldGuide=flowActive&&state.status==='active'&&moduleAllowed(currentArea)&&state[currentArea].status!=='done';
     if(!shouldWelcome&&!shouldGuide){clearTimeout(startTimer);startTimer=0;return;}
     if(!startTimer)startTimer=setTimeout(()=>{startTimer=0;if(!ready()||blocking()||area()!==currentArea||pausedArea===currentArea)return;if(shouldWelcome&&state.welcome==='pending')openLetter();else startTour();},1100);
   }
+  window.addEventListener('shiyu-theme-cards-settled',()=>{if(tour&&stepId==='theme')renderStep();});
   function schedule() { if(!scheduled)scheduled=requestAnimationFrame(tick); }
   window.ShiyuOnboarding={ownsWorkspace:()=>true,giftMayShow:()=>!enabled()||!!state&&(state.welcome!=='pending'||config()?.welcome===false)&&!welcome&&!tour&&(state.status!=='active'||state.space.status==='done'||!moduleAllowed('space')),refresh:loadState};
   // Observe only application surfaces; animation changes inside the guide must not restart its timers.
@@ -289,11 +306,11 @@
   document.addEventListener('visibilitychange',()=>{schedule();if(!document.hidden)void loadState();});
   document.addEventListener('close',schedule,true);
   window.addEventListener('shiyu-session-ready',()=>{void loadState();schedule();});
-  window.addEventListener('shiyu-account-state',()=>{stateEpoch++;owner='';state=null;cleanTour();void closeLetter(true);schedule();});
+  window.addEventListener('shiyu-account-state',()=>{stateEpoch++;owner='';state=null;flowActive=false;cleanTour();void closeLetter(true);schedule();});
   window.addEventListener('focus',()=>{if(!tour&&!welcome)void loadState();});
   window.addEventListener('keydown',event=>{
     if(!tour)return;
-    if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();pausedArea=area();cleanTour();}
+    if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();void skipTour();}
     else if(event.key==='Tab'){const buttons=[...tour.querySelectorAll('button:not(:disabled)')],first=buttons[0],last=buttons.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}
   },true);
   window.addEventListener('wheel',event=>{if(tour){event.stopImmediatePropagation();if(!event.target.closest('.sy-tour-panel'))event.preventDefault();}},{capture:true,passive:false});

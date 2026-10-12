@@ -1,0 +1,35 @@
+/* Independent Demo 4 surface; no legacy theme-menu selectors. */
+.brand-demo4-entry{position:relative;cursor:pointer}
+.brand-demo4-entry::before{content:'';position:absolute;inset:-12px -16px;background:transparent}
+.brand-demo4-stage{position:fixed;inset:0;z-index:200;visibility:hidden;pointer-events:none;overflow:hidden;background:transparent}
+.brand-demo4-stage.is-open{visibility:visible}
+.brand-demo4-scroll{position:absolute;left:0;right:0;bottom:0;overflow:visible;pointer-events:none;scrollbar-width:none;overscroll-behavior:contain}
+.brand-demo4-scroll::-webkit-scrollbar{display:none}
+.brand-demo4-stage.is-settled .brand-demo4-scroll{right:auto;width:calc(var(--demo4-width) + 48px);overflow-x:hidden;overflow-y:auto;pointer-events:auto}
+.brand-demo4-canvas{position:relative;width:100%;height:100%;pointer-events:none;counter-reset:brand-theme-number}
+.brand-demo4-card{position:absolute;top:0;left:0;width:var(--demo4-width,240px);height:var(--demo4-height,135px);padding:0;margin:0;border:0;border-radius:0;background:transparent;cursor:pointer;will-change:transform;pointer-events:none;transform-origin:50% 50%;overflow:hidden}
+.brand-demo4-stage.is-settled .brand-demo4-card{pointer-events:auto}
+.brand-demo4-card{counter-increment:brand-theme-number;border-radius:10px;box-shadow:4px 5px 12px rgba(0,0,0,.22),8px 10px 24px rgba(0,0,0,.16)}
+.brand-demo4-card img{display:block;width:100%;height:100%;object-fit:cover}
+.brand-demo4-card>svg{display:none!important}
+.brand-demo4-card .theme-member-badge{position:absolute;right:7px;top:7px;z-index:3;width:auto!important;min-width:22px;height:22px!important;margin:0!important;padding:3px 5px;border-radius:4px;background:rgba(5,12,15,.78);color:#fff;opacity:1!important;font:11px var(--font)}
+.brand-demo4-card .theme-member-badge svg{display:block;width:15px;height:15px}
+.brand-demo4-card .limited-free-badge{color:#fff;background:var(--accent)}
+.brand-demo4-card b{position:absolute;bottom:0;left:0;right:0;z-index:3;padding:12px 5px 5px;font:11px var(--font);color:#fff;background:linear-gradient(transparent,#000b);text-align:left}
+.brand-demo4-card b::before{content:counter(brand-theme-number,decimal-leading-zero) ' · ';font-family:system-ui,sans-serif;font-size:10px;opacity:.85}
+.brand-demo4-card:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.brand-demo4-card[aria-pressed=true]::before{content:'';position:absolute;inset:0;z-index:1;background:rgba(5,12,15,.82);pointer-events:none}
+.brand-demo4-card[aria-pressed=true]::after{content:'';position:absolute;inset:0;z-index:2;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='42' viewBox='0 0 42 42' fill='none'%3E%3Cpath d='M8 22C11 23 14 26 17 30C21 23 27 16 35 11' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:42px 42px;background-position:center;pointer-events:none}
+body[data-view=home] header .brand-demo4-host::after,
+body[data-view=home] header .brand-demo4-host>.brand-guide{display:none!important}
+body:not([data-view=home]) .brand-demo4-stage{display:none}
+@media(pointer:fine){
+  body[data-view=home]:not(.world-active) .brand-demo4-stage{opacity:1;transition:opacity .9s cubic-bezier(.22,.7,.25,1)}
+  body[data-view=home]:not(.world-active).global-chrome-idle .brand-demo4-stage{opacity:.03}
+}
+
+.brand-demo4-navigation{position:absolute;left:5px;width:var(--demo4-width,240px);height:30px;display:flex;justify-content:center;gap:12px;pointer-events:auto}.brand-demo4-navigation button{flex:1;min-width:0;height:30px;display:grid;place-items:center;border-radius:8px;color:var(--ink);background:color-mix(in srgb,var(--surface) 38%,transparent);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 10%,transparent),0 2px 8px #0002;transition:transform .18s ease,background .18s ease,box-shadow .18s ease}.brand-demo4-navigation button:hover{background:color-mix(in srgb,var(--surface) 58%,transparent);transform:translateY(-2px);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 22%,transparent),0 5px 12px #0003}.brand-demo4-navigation svg{width:20px;height:20px;transition:transform .18s ease}
+.brand-demo4-navigation button:first-child:hover svg{transform:translateY(-2px)}
+.brand-demo4-navigation button:last-child:hover svg{transform:translateY(2px)}
+.brand-demo4-navigation button:active{transform:translateY(0) scale(.97)}
+@media(prefers-reduced-motion:reduce){.brand-demo4-navigation button,.brand-demo4-navigation svg{transition:none}.brand-demo4-navigation button:hover,.brand-demo4-navigation button:hover svg,.brand-demo4-navigation button:active{transform:none}}
