@@ -41,6 +41,7 @@ body.global-chrome-idle .three-body-toolbelt{opacity:0;pointer-events:none;}
 .three-body-panel details{margin:16px 0;}.three-body-panel summary{font-size:13px;cursor:pointer;}
 .three-body-panel footer{padding:14px 22px;display:flex;gap:8px;flex-wrap:wrap;}
 .three-body-panel footer button{border:0;border-radius:10px;padding:10px 12px;background:color-mix(in srgb,var(--ink) 6%,transparent);color:var(--ink);font-size:12px;}
+.three-body-panel footer .three-body-reset{width:100%;}
 .three-body-panel footer .three-body-apply{background:var(--accent);color:var(--bg);}
 .three-body-actions{position:fixed;left:6vw;bottom:104px;display:flex;gap:20px;pointer-events:auto;}
 .three-body-actions button{border:0;background:transparent;color:var(--muted);font:12px inherit;cursor:pointer;padding:10px 0;}

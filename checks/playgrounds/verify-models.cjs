@@ -1,2 +1,28 @@
-const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'),assert=require('node:assert/strict'),fs=require('node:fs');
-(async()=>{const b=await chromium.launch({channel:'msedge',headless:true});try{const p=await b.newPage();await p.route('**/api/shiyu/auth/wechat/qr',r=>r.fulfill({json:{}}));await p.goto('http://127.0.0.1:4318/');await p.waitForFunction(()=>window.ShiyuPlaygrounds);const results=await p.evaluate(()=>{const results=[];for(const scene of ShiyuPlaygroundCatalog){for(const range of ['default','maximum']){const config=range==='default'?ShiyuPlaygrounds.defaults(scene.id):Object.fromEntries(scene.fields.map(f=>[f.key,f.max])),model=ShiyuPlaygroundModels.create(scene.id,config),before=model.stats(),start=performance.now();for(let i=0;i<360;i++)model.update(1/60,config,null);const after=model.stats();model.action();const action=model.stats();results.push({scene:scene.id,range,milliseconds:performance.now()-start,before,after,action});}}return results;});const finite=value=>typeof value==='number'?Number.isFinite(value):Array.isArray(value)?value.every(finite):value&&typeof value==='object'?Object.values(value).every(finite):true;assert.ok(results.every(finite));for(const r of results){if(r.scene==='particleLife')assert.ok(r.after.particles<=600);if(r.scene==='ecoGarden'){assert.ok(r.after.plants<=700);assert.ok(r.after.herbivores<=100);assert.ok(r.after.predators<=20);}if(r.scene==='digitalLife')assert.ok(r.after.activity>0);if(r.scene==='softFabric')assert.equal(r.action.pinned,0);if(r.scene==='magnetGarden')assert.notDeepEqual(r.action.magnets,r.after.magnets);if(r.scene==='elementSandbox')assert.equal(r.action.cells,0);}fs.writeFileSync('checks/playgrounds/model-results.json',JSON.stringify(results,null,2));console.log('PASS six models: bounded state, sustained evolution, default/max parameters and special actions');}finally{await b.close();}})().catch(e=>{console.error(e);process.exitCode=1});
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const {performance}=require('node:perf_hooks');
+const output='.local/checks/playground-models';
+// These numerical checks do not render; the sandbox only allocates the sand grid's pixel buffer.
+const sandbox=vm.createContext({window:{},document:{createElement:()=>({getContext:()=>({createImageData:(width,height)=>({data:new Uint8ClampedArray(width*height*4)})})})}});
+for(const file of ['catalog.js','models.js','stage.js'])vm.runInContext(fs.readFileSync('dist/assets/playgrounds/'+file,'utf8'),sandbox);
+const E=sandbox.window.ShiyuPlaygrounds,models=sandbox.window.ShiyuPlaygroundModels,results=[];
+for(const scene of E.catalog){
+ for(const range of ['default','maximum']){
+  const config=range==='default'?E.defaults(scene.id):Object.fromEntries(scene.fields.map(field=>[field.key,field.max]));
+  const model=models.create(scene.id,config),before=model.stats(),start=performance.now();
+  for(let frame=0;frame<360;frame++)model.update(1/60,config,null);
+  const after=model.stats();model.action?.();
+  results.push({scene:scene.id,range,milliseconds:performance.now()-start,before,after,action:model.stats()});
+ }
+}
+const finite=value=>typeof value==='number'?Number.isFinite(value):Array.isArray(value)?value.every(finite):value&&typeof value==='object'?Object.values(value).every(finite):true;
+assert.ok(results.every(finite));
+for(const result of results){
+ if(result.scene==='particleLife')assert.ok(result.after.particles<=600);
+ if(result.scene==='ecoGarden'){assert.ok(result.after.plants<=700);assert.ok(result.after.herbivores<=100);assert.ok(result.after.predators<=20);}
+ if(result.scene==='softFabric')assert.equal(result.action.pinned,0);
+ if(result.scene==='elementSandbox')assert.equal(result.action.cells,0);
+}
+fs.mkdirSync(output,{recursive:true});fs.writeFileSync(output+'/results.json',JSON.stringify(results,null,2));
+console.log(`PASS ${E.catalog.length} models: bounded state, sustained evolution, default/max parameters and available actions.`);

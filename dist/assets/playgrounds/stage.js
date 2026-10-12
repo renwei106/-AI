@@ -12,7 +12,7 @@
   move(x,y){if(!this.pointer?.down)return;const p=this.point(x,y);if(!p)return;this.model.move?.(p);const previous=this.pointer;this.pointer={...p,tool:previous.tool,down:true};if(this.id==='elementSandbox'){const steps=Math.min(100,Math.ceil(Math.hypot(p.x-previous.x,p.y-previous.y)/8));for(let i=1;i<=steps;i++)this.model.interact({x:previous.x+(p.x-previous.x)*i/steps,y:previous.y+(p.y-previous.y)*i/steps},previous.tool,this.config);}else if(this.id==='softFabric'&&previous.tool==='cut')this.model.interact(p,'cut',this.config);}
   up(cancel=false){this.model.release?.(cancel?null:this.pointer);this.pointer=null;}
   set(key,value){this.config=normalize(this.id,{...this.config,[key]:value});if(this.id==='binarySystem'||['count','herbivores','predators'].includes(key))this.model.configure(this.config,key);}
-  action(){this.model.action();}
+  action(){this.model.action?.();}
   draw(ctx,elapsed,colors,paused){if(!paused){this.accumulator+=Math.min(.066,elapsed);for(let i=0;i<4&&this.accumulator>=1/60;i++){this.model.update(1/60,this.config,this.pointer);this.time+=1/60;this.accumulator-=1/60;}}ctx.save();const r=this.rect;ctx.translate(r.x,r.y);ctx.scale(r.width/800,r.height/520);if(this.id!=='binarySystem'){ctx.beginPath();ctx.rect(0,0,800,520);ctx.clip();}this.model.draw(ctx,colors,this.config,this.pointer);ctx.restore();}
   snapshot(){return {scene:this.id,params:{...this.config},region:{...this.rect},time:this.time,...this.model.stats()};}
  }

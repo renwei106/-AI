@@ -1,8 +1,7 @@
-require('node:fs').mkdirSync('.local/checks/three-bubble-angle-1-to-5-20261012',{recursive:true});
 const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
-const output='.local/checks/three-bubble-angle-1-to-5-20261012';
+const output='.local/checks/verify-three-bubble-charge-sync';
 const minimumAngle=1*Math.PI/180,maximumAngle=5*Math.PI/180;
 const near=(value,expected,tolerance=1e-7)=>assert.ok(Math.abs(value-expected)<tolerance,`${value} vs ${expected}`);
 (async()=>{
@@ -12,7 +11,10 @@ const near=(value,expected,tolerance=1e-7)=>assert.ok(Math.abs(value-expected)<t
   const page=await browser.newPage({viewport:{width:2066,height:1070}}),errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   await page.addInitScript(()=>localStorage.setItem('yiyu-prototype-v1',JSON.stringify({prefs:{theme:'base',mode:'dark',color:'linear-gradient(135deg,#7ed6ce,#adb9a5)',brandGuideDismissed:true},signed:false})));
-  await page.route('**/api/**',route=>route.fulfill({json:route.request().url().includes('theme-access')?{items:['base','threeBody'].map(id=>({id,enabled:true,allowed:true,memberOnly:false})),fallback:'base',member:false}:{}}));
+  await page.route('**/api/**',route=>{
+   const path=new URL(route.request().url()).pathname;
+   return route.fulfill({json:path.endsWith('/theme-access')?{items:['base','threeBody'].map(id=>({id,enabled:true,allowed:true,memberOnly:false})),fallback:'base',member:false}:path.endsWith('/operations')?{onboarding:{enabled:false},world:{enabled:false}}:{}});
+  });
   await page.goto('http://127.0.0.1:4349/',{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(1200);
   await page.evaluate(()=>{prefs.theme='threeBody';render();});

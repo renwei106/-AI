@@ -1,7 +1,7 @@
 /* Demo 4 port of Ibaliqbal/codrops-motion-path-transition (MIT).
  * Source: github.com/Ibaliqbal/codrops-motion-path-transition, script4 (MIT).
- * Geometry/timing match script4; host adaptations are the icon, preload,
- * reverse visibility and scroll viewport. Existing theme delegation remains.
+ * Host adaptations are the logo origin, trailing-card-first opening,
+ * preload, reverse visibility and scroll viewport. Theme delegation remains.
  */
 (() => {
   gsap.registerPlugin(MotionPathPlugin);
@@ -20,7 +20,7 @@
     const stage=document.createElement('div');stage.className='brand-demo4-stage';stage.setAttribute('aria-hidden','true');
     const scroll=document.createElement('div');scroll.className='brand-demo4-scroll';scroll.setAttribute('aria-label','主题卡片');
     const canvas=document.createElement('div');canvas.className='brand-demo4-canvas';scroll.append(canvas);stage.append(scroll);document.body.append(stage);
-    function addCard(entry,i){
+    function addCard(entry){
       const button=document.createElement('button');button.type='button';button.className='brand-demo4-card';button.dataset.brandTheme=entry.id;button.setAttribute('aria-pressed',entry.selected||'false');button.tabIndex=-1;
       const img=new Image();img.src=coverFor(entry.id);img.alt='';img.loading='eager';img.decoding='async';
       const label=document.createElement('b');label.textContent=entry.name;button.append(img,label);canvas.append(button);
@@ -45,29 +45,32 @@
     function build(){
       tl?.kill();closing?.kill();stage.classList.remove('is-settled');scroll.scrollTop=0;
       const items=cards();if(!items.length)return;
-      // Demo 4 path and dimensions; the host's icon replaces its resting image strip.
+      // Keep the existing list geometry; cards emerge from the logo one by one.
       const top=brand.getBoundingClientRect().bottom+12;
-      stage.style.setProperty('--demo4-top',top+'px');
       navigation.style.top=top+'px';scroll.style.top=(top+38)+'px';canvas.style.height='100%';
-      const width=Math.min(240,innerWidth-48),height=width/(Math.max(innerWidth,innerHeight)/Math.min(innerWidth,innerHeight));
+      const width=Math.min(216,innerWidth-48),height=width*9/16;
       stage.style.setProperty('--demo4-width',width+'px');stage.style.setProperty('--demo4-height',height+'px');
       const scale=innerWidth<768?.6:1,gap=10;
       const brandRect=brand.getBoundingClientRect(),stackOffset=Math.max(12,brandRect.left+brandRect.width/2-width*scale/2);
       navigation.style.left=stackOffset+'px';navigation.style.width=width*scale+'px';
-      const icon=trigger.getBoundingClientRect();
-      gsap.set(items,{clearProps:'transform',x:icon.left+icon.width/2-width/2,y:icon.top+icon.height/2-top-height/2,scale:0,zIndex:i=>items.length-i});
-      const thumbnailRect={height};
-      const tops=items.map(el=>el.getBoundingClientRect().top-top);
+      const icon=trigger.getBoundingClientRect(),originY=icon.top+icon.height/2-scroll.getBoundingClientRect().top-height/2;
+      // Clear before setting the hidden origin; clearing in the same set erases scale:0.
+      gsap.set(items,{clearProps:'transform,clipPath'});
+      gsap.set(items,{x:icon.left+icon.width/2-width/2,y:originY,scale:0,zIndex:i=>items.length-i});
       const targetX=stackOffset,targetY=stackOffset;
-      tl=gsap.timeline({paused:true,defaults:{duration:reduced?0:.65,ease:'power2.out'},onComplete:()=>{
-        if(!opened)return;canvas.style.height=(targetY+items.length*(thumbnailRect.height*scale+gap)+24)+'px';stage.classList.add('is-settled');items.forEach(el=>el.tabIndex=0);revealSelected();window.dispatchEvent(new Event('shiyu-theme-cards-settled'));
-      },onReverseComplete:()=>{if(!opened){stage.classList.remove('is-open');stage.setAttribute('aria-hidden','true');}}});
+      const scaleSetters=items.map(item=>{
+        const setX=gsap.quickSetter(item,'scaleX'),setY=gsap.quickSetter(item,'scaleY');
+        return value=>{setX(value);setY(value);};
+      });
+      tl=gsap.timeline({paused:true,defaults:{duration:reduced?0:.72,ease:'power1.inOut'},
+        // Reach full size at the first row, then keep it while travelling farther down.
+        onUpdate:()=>items.forEach((item,index)=>scaleSetters[index](scale*Math.max(0,Math.min(1,(Number(gsap.getProperty(item,'y'))-originY)/(targetY-originY))))),
+        onComplete:()=>{
+        if(!opened)return;scaleSetters.forEach(set=>set(scale));canvas.style.height=(targetY+items.length*(height*scale+gap)+24)+'px';stage.classList.add('is-settled');items.forEach(el=>el.tabIndex=0);revealSelected();window.dispatchEvent(new Event('shiyu-theme-cards-settled'));
+      }});
       tl.to(items,{
-        motionPath:index=>{
-          const targetYItem=targetY+index*(thumbnailRect.height*scale+gap);
-          if(index===0)return {path:[{x:targetX,y:targetYItem,scale}]};
-          return {path:[{x:targetX,y:targetYItem>tops[index]?tops[index]+25:tops[index]-25,scale:(1-scale)*.25+scale},{x:targetX,y:targetYItem,scale}],curviness:.25};
-        },stagger:{from:'start',each:reduced?0:.035}
+        motionPath:index=>({path:[{x:targetX,y:targetY+index*(height*scale+gap)}]}),
+        stagger:{from:'end',each:reduced?0:.075}
       });
     }
     async function toggle(){
@@ -80,17 +83,41 @@
     function closeVisual(){
       tl?.pause();closing?.kill();
       const items=cards(),offset=scroll.scrollTop,icon=trigger.getBoundingClientRect();
+      const clipped=stage.classList.contains('is-settled'),viewportTop=scroll.getBoundingClientRect().top;
+      const clips=items.map(item=>{
+        const rect=item.getBoundingClientRect();
+        const clip=clipped&&rect.height?Math.max(0,Math.min(1,(viewportTop-rect.top)/rect.height)):0;
+        if(clip)item.style.clipPath=`inset(${clip*100}% 0 0)`;
+        return clip;
+      });
       stage.classList.remove('is-settled');canvas.style.height='100%';scroll.scrollTop=0;
       items.forEach(el=>{el.tabIndex=-1;gsap.set(el,{y:Number(gsap.getProperty(el,'y'))-offset});});
-      const width=items[0]?.offsetWidth||240,height=items[0]?.offsetHeight||135;
+      const width=parseFloat(stage.style.getPropertyValue('--demo4-width'))||216,height=parseFloat(stage.style.getPropertyValue('--demo4-height'))||121.5;
       const x=icon.left+icon.width/2-width/2,y=icon.top+icon.height/2-scroll.getBoundingClientRect().top-height/2;
-      // Close in forward order: reversing the stagger holds the first card until the end.
-      closing=gsap.timeline({onComplete:()=>{if(!opened){stage.classList.remove('is-open');stage.setAttribute('aria-hidden','true');}}});
-      closing.to(items,{duration:reduced?0:.45,ease:'power2.out',motionPath:{path:[{x,y,scale:0}],curviness:.25},stagger:reduced?0:.02});
+      const firstY=Math.max(12,icon.left+icon.width/2-width*(innerWidth<768?.6:1)/2);
+      const returning=items.map((item,index)=>{
+        const startY=Number(gsap.getProperty(item,'y')),scale=Number(gsap.getProperty(item,'scaleX'));
+        const span=Math.min(firstY,startY)-y;
+        const setX=gsap.quickSetter(item,'scaleX'),setY=gsap.quickSetter(item,'scaleY');
+        if(span<=0||scale===0||clips[index]===1){setX(0);setY(0);return null;}
+        return {item,scale,span,startY,clip:clips[index],setScale:value=>{setX(value);setY(value);}};
+      }).filter(Boolean);
+      const finish=()=>{returning.forEach(card=>card.setScale(0));items.forEach(item=>item.style.clipPath='');if(!opened){stage.classList.remove('is-open');stage.setAttribute('aria-hidden','true');}};
+      if(!returning.length){finish();return;}
+      closing=gsap.timeline({
+        // Retrace the opening path; shrink only after passing the first row.
+        onUpdate:()=>returning.forEach(card=>{
+          const currentY=Number(gsap.getProperty(card.item,'y'));
+          card.setScale(card.scale*Math.max(0,Math.min(1,(currentY-y)/card.span)));
+          if(card.clip)card.item.style.clipPath=`inset(${card.clip*100*Math.max(0,Math.min(1,(currentY-y)/(card.startY-y)))}% 0 0)`;
+        }),
+        onComplete:finish
+      });
+      closing.to(returning.map(card=>card.item),{duration:reduced?0:.72,ease:'power1.inOut',motionPath:{path:[{x,y}]},stagger:{from:'start',each:reduced?0:.075}});
     }
     function close(){if(!opened)return;requestVersion++;opened=false;trigger.setAttribute('aria-expanded','false');closeVisual();}
     // Handle the entire button (including its invisible hit padding) before legacy Logo actions.
-    document.addEventListener('click',event=>{if(brand.contains(event.target)){event.preventDefault();event.stopImmediatePropagation();if(!opened)canvas.style.transform='';toggle();}},{...options,capture:true});
+    document.addEventListener('click',event=>{if(brand.contains(event.target)){event.preventDefault();event.stopImmediatePropagation();toggle();}},{...options,capture:true});
     function outsidePointer(event,clientX=event.clientX,clientY=event.clientY){
       // Keep the guide's button visible from pointer down through its click.
       if(event.target.closest?.('.sy-tour'))return;
@@ -121,7 +148,7 @@
     });
     coverObserver.observe(document.body,{attributes:true,attributeFilter:['data-dark']});
     canvas.addEventListener('click',event=>{if(!stepping&&event.target.closest('[data-brand-theme]'))close();},options);
-    window.addEventListener('resize',()=>{if(!tl)return;const progress=tl.progress();build();if(opened){tl.progress(progress).play();}},options);
+    window.addEventListener('resize',()=>{if(!tl)return;if(!opened){closing?.progress(1);return;}const progress=tl.progress();build();tl.progress(progress).play();},options);
     const observer=new MutationObserver(()=>{if(!source.isConnected)cleanup();});observer.observe(wrapper,{childList:true});
     let guideWasOpen=null;
     stage.addEventListener('shiyu-theme-guide',event=>{if(event.detail){if(guideWasOpen===null)guideWasOpen=opened;if(!opened)void toggle();}else if(guideWasOpen!==null){const restore=guideWasOpen;guideWasOpen=null;if(!restore)close();}},options);
@@ -137,8 +164,8 @@
       source=nextSource;
       brand.removeAttribute('title');brand.dataset.action='brand-name';brand.setAttribute('aria-label','拾隅，展开或收起主题卡片');
       const existing=new Map(cards().map(el=>[el.dataset.brandTheme,el]));
-      nextEntries.forEach((entry,i)=>{
-        const button=existing.get(entry.id)||addCard(entry,i);
+      nextEntries.forEach(entry=>{
+        const button=existing.get(entry.id)||addCard(entry);
         let img=button.querySelector('img');
         if(!img){img=new Image();img.src=coverFor(entry.id);img.alt='';img.loading='eager';img.decoding='async';img.decode().catch(()=>{});}
         const label=button.querySelector('b')||document.createElement('b');label.textContent=entry.name;

@@ -59,7 +59,6 @@
   const orbitPhase=orbit=>state.orbitClock*orbit.speed+(orbit.focusOffset||0);
   let dialog, index=new Map(), root, visible=[], nodeEls=new Map(), edgeEls=[], activeFlow=null, raf=0, lastFrame=0, needsPaint=true, returnFocus, resizeObserver, noticeTimer, compactLayout=false, modeMenu, menuTimer, menuTrigger, viewMenuTimer=0, editorBusy=false, atlasTransitionTimer=0, atlasClosing=false;
   let leavingForHome=false,sharedHeading,sharedModeButton,spaceViewToggle=null;
-  let returnWheelTop=120,returnWheelLast=0,returnWheelTotal=0,returnWheelHandled=false,returnWheelArmed=0,returnWheelTimer=0;
   const get = key => index.get(key);
   const query = s => dialog.querySelector(s);
   const label = kind => ({space:'空间',scene:'场景',group:'分组',link:'网址',bundle:'分支'}[kind]);
@@ -197,7 +196,6 @@
       dialog.addEventListener('dragstart',e=>{if(e.target.closest('.at-node'))e.preventDefault()});
       dialog.addEventListener('input',input);
       dialog.addEventListener('keydown',keydown);
-      dialog.addEventListener('close',resetReturnWheel);
       dialog.addEventListener('close',()=>{const goHome=leavingForHome;leavingForHome=false;atlasClosing=false;clearTimeout(atlasTransitionTimer);atlasTransitionTimer=0;dialog.classList.remove('atlas-ready','atlas-direct-entry');cancelAnimationFrame(raf);resizeObserver?.disconnect();state.hover=null;state.drag=null;clearTimeout(noticeTimer);clearTimeout(viewMenuTimer);hideModeMenu();document.body.classList.remove('atlas-active','atlas-transitioning');const sharedHomeTab=dialog.querySelector('.space-home-tab');if(sharedHomeTab)document.body.append(sharedHomeTab);if(view==='space'&&spaceId===state.sid){rememberPresentation(spaceId,goHome?'atlas':'daily');writeSaved()}if(goHome){if(typeof mountColorCord==='function')mountColorCord();return;}renderAfterAtlasClose()});
       dialog.addEventListener('cancel',e=>{if(!query('.at-drawer').hidden){e.preventDefault();closeDrawer()}else if(document.querySelector('.workspace .global-search-results:not([hidden])')){e.preventDefault();clearSearch()}});
       dialog.addEventListener('wheel',wheel,{passive:false});
@@ -232,7 +230,6 @@
   }
   function renderAtlas() {
     if(!window.ShiyuEntitlements?.allows('atlas-'+state.mode)){if(window.ShiyuEntitlements?.allows('atlas-2d'))state.mode='2d';else{if(dialog?.open)dialog.close();return}}
-    resetReturnWheel();
     if(!classicOrbits&&state.scene3d==='systems')state.scene3d='solar';
     const n=get(state.focus)||root;
     state.hover=null;state.drag=null;state.settling=false;
@@ -268,7 +265,6 @@
     if(heading){dialog.style.setProperty('--chrome-left',heading.left+'px');dialog.style.setProperty('--chrome-top',heading.top+'px')}
     if(actions){buttons.style.left=actions.left+'px';buttons.style.top=actions.top+'px';buttons.style.right='auto';dialog.style.setProperty('--chrome-right',Math.max(24,innerWidth-actions.right)+'px')}else{buttons.style.left='auto';buttons.style.right='18px';buttons.style.top='24px'}
     clearCordOverlap(buttons);
-    returnWheelTop=Math.max(96,heading?.bottom||0,actions?.bottom||0)+24;
   }
   const layoutName=id=>esc(remoteNames['spaceViews.graph.'+(id==='spatial'?'threeD.micro':id==='solar'?'threeD.galaxy':'twoD.'+id)]||({radial:'径向环绕',organization:'层级结构',mindmap:'思维脉络',spatial:'微观结构',solar:classicOrbits?'行星轨道':'银河星系',systems:'场景星系'}[id]));
   const viewOptions=mode=>mode==='2d'?remoteViewOrder.twoD:[...remoteViewOrder.threeD.map(id=>id==='micro'?'spatial':'solar'),...(classicOrbits?['systems']:[])];
@@ -761,7 +757,6 @@
   function closeAtlas(destination='daily',toggleOrigin=null){
     if(!dialog?.open||atlasClosing||(destination==='home'&&Date.now()<transitionUntil))return;atlasClosing=true;leavingForHome=destination==='home';clearTimeout(atlasTransitionTimer);
     spaceViewToggle=toggleOrigin;
-    resetReturnWheel();
     if(leavingForHome){
       rememberPresentation(state.sid,'atlas');writeSaved();
       // Capture the visible graph first. The home render closes it inside the
@@ -785,25 +780,6 @@
   function wheel(e){
     if(!e.target.closest('.at-canvas'))return;e.preventDefault();e.stopPropagation();const box=query('.at-canvas').getBoundingClientRect();if(!state.drag)zoomBy(Math.exp(-e.deltaY*.001),{x:e.clientX-box.left,y:e.clientY-box.top})
   }
-  function resetReturnWheel(){
-    clearTimeout(returnWheelTimer);returnWheelTimer=0;returnWheelLast=0;returnWheelTotal=0;returnWheelHandled=false;returnWheelArmed=0;
-  }
-  // The shared heading/actions sit outside the graph dialog. Capture at window
-  // level so the entire top strip, including its blank areas, uses one gesture.
-  window.addEventListener('wheel',e=>{
-    if(!dialog?.open||view!=='space'||atlasClosing)return;
-    if(prefs.homeEntryGesture!=='double'){resetReturnWheel();return}
-    if(e.clientY>returnWheelTop||state.drag||e.ctrlKey||Math.abs(e.deltaX)>Math.abs(e.deltaY)||document.querySelector('dialog[open]:not(#space-atlas)')||e.target.closest('input,textarea,select,[contenteditable=true],.global-search-results,#corner-space-menu,#space-mode-menu,.at-drawer,.at-layout-menu,.corner-panel')){resetReturnWheel();return}
-    e.preventDefault();e.stopImmediatePropagation();
-    if(e.deltaY>=0||Date.now()<transitionUntil||Date.now()<spaceScrollLockUntil){resetReturnWheel();return}
-    const now=Date.now();if(now-returnWheelLast>160){returnWheelTotal=0;returnWheelHandled=false}returnWheelLast=now;
-    returnWheelTotal+=Math.abs(e.deltaY)*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1);
-    if(returnWheelTotal<=65||returnWheelHandled)return;
-    returnWheelHandled=true;returnWheelTotal=0;
-    if(returnWheelArmed&&now-returnWheelArmed>160&&now-returnWheelArmed<2600){leaveAtlasForHome();return}
-    returnWheelArmed=now;toast('再向上滑一次，回到封面','bottom');
-    clearTimeout(returnWheelTimer);returnWheelTimer=setTimeout(resetReturnWheel,2600);
-  },{capture:true,passive:false});
   function branchKeys(key){const keys=new Set([key]);for(let found=true;found;){found=false;for(const r of visible)if(keys.has(r.parent)&&!keys.has(r.key)){keys.add(r.key);found=true}}return keys}
   function segmentDistance(point,a,b){const dx=b.x-a.x,dy=b.y-a.y,length=dx*dx+dy*dy,t=length?clamp(((point.x-a.x)*dx+(point.y-a.y)*dy)/length,0,1):0;return Math.hypot(point.x-(a.x+dx*t),point.y-(a.y+dy*t))}
   function nearestOrbitTrack(clientX,clientY,source){

@@ -41,7 +41,7 @@
     {id:'groups',title:'用分组整理网址',body:'在这里切换当前场景下的分组，把同一类网址放在一起，查找和使用更方便。',targets:['.group-tab-bar']},
     {id:'views',title:'切换视图与样式',body:'右下角可以切换当前开放的视图；旁边的样式按钮，可以选择自己喜欢的呈现方式。',targets:['.workspace-tools>.group-view-controls'],available:() => allowed('spaceViews')},
     {id:'collect',title:'收藏网址，稍后再整理',body:'点击「收藏网址」手动添加。通过浏览器插件收下的网址会进入「稍后整理」，回来后再归类；插件可以从头像菜单中的「便捷工具」了解和获取。',targets:['.space-top-actions [data-action="add"]','.space-top-actions [data-space-inbox]'],combine:true},
-    {id:'return',title:'随时回到首页',body:'点击上方的返回入口回到首页。网址列表已经在顶部时，也可以连续向上滚动两次返回。',targets:['.space-home-tab','.peek-return']}
+    {id:'return',title:'随时回到首页',body:'点击上方的返回入口回到首页。',targets:['.space-home-tab','.peek-return']}
   ];
   const moduleAllowed = name => config()?.[name] !== false && (name !== 'space' || allowed('space') && allowed('spaceViews'));
   function steps(name) { return moduleAllowed(name) ? (name === 'home' ? homeSteps : spaceSteps).filter(step => (!step.available || step.available()) && (tourStepIds?tourStepIds.has(step.id):step.id==='pet'?!!$q('#desktop-pet'):target(step))) : []; }
