@@ -26,6 +26,7 @@ body.three-body-panel-open :is(.mode-pull-cord,.color-pull-cord,.account-menu-wr
 .three-body-field input[type=range]::-moz-range-thumb{width:10px;height:10px;border:0;border-radius:50%;background:var(--accent);}
 .three-body-field input[type=number]{padding:6px 8px;border:0;background:color-mix(in srgb,var(--ink) 5%,transparent);border-radius:8px;color:var(--ink);font:inherit;}
 .three-body-field output{font-variant-numeric:tabular-nums;min-width:28px;text-align:right;}
+.three-body-field output.is-adjusted{color:var(--accent);font-weight:700;background:color-mix(in srgb,var(--ink) 12%,transparent);box-shadow:0 0 0 4px color-mix(in srgb,var(--ink) 12%,transparent);border-radius:3px;}
 .three-body-scenes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0 24px;}
 .three-body-scenes button{display:flex;align-items:center;gap:10px;min-height:54px;padding:10px 12px;border:0;border-radius:12px;background:color-mix(in srgb,var(--ink) 4%,transparent);color:var(--muted);font-size:12px;text-align:left;}
 .three-body-scenes button.selected{background:color-mix(in srgb,var(--accent) 13%,transparent);color:var(--accent);}
@@ -91,3 +92,9 @@ body[data-theme=cosmos][data-view=home]{background-color:var(--bg);background-im
 body:is([data-theme=threeBody],[data-theme=cosmos])[data-view=home]{background:var(--theme-art-background,var(--bg))!important}
 
 body:is([data-theme=threeBody],[data-theme=cosmos])[data-view=home]{--ink:var(--theme-art-ink);--muted:var(--theme-art-muted)}
+
+.three-body-focus{position:fixed;z-index:2;top:100px;left:50%;transform:translateX(-50%);max-width:calc(100vw - 32px);display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;border-radius:12px;background:color-mix(in srgb,var(--bg) 88%,transparent);color:var(--ink);font-size:12px;pointer-events:auto;}
+.three-body-focus button{border:0;background:transparent;padding:2px 0;color:var(--ink);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+
+.home-threeBody{--planet-equator:#a46a29;--planet-orbit:#357eaa;}
+body[data-dark=true] .home-threeBody{--planet-equator:#dfb06f;--planet-orbit:#78bce5;}

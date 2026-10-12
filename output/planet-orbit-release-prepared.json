@@ -1,0 +1,24 @@
+{
+  "status": "prepared-not-published",
+  "version": "V1.3.1",
+  "versionBasis": "用户确认加0.01；按现有三段版本格式递增补丁位，生产版本待SSH恢复后核实",
+  "previousRecordedVersion": "V1.3.0",
+  "scope": [
+    "dist/three-body-theme.js",
+    "dist/three-body-theme.css",
+    "dist/assets/three-body/physics.js",
+    "dist/assets/three-body/satellites.mjs",
+    "dist/index.html"
+  ],
+  "summary": "星际漫游：太阳质心运动与轨迹采样；统一质量倍率、调整标识和速度排序；五种行星聚焦视角、参考面及稳定标注；自转、引力光流和碎石远近效果；卫星三秒拖尾及尺寸；400ms长按调速防误触；刷新不闪现简易版。",
+  "checks": [
+    "JavaScript syntax and git diff --check",
+    "eight-planet camera geometry",
+    "physics substep callback and collision trail breaks",
+    "400ms drag gesture browser regression",
+    "slow-load refresh regression",
+    "five-view cycling and Escape regression"
+  ],
+  "deployment": "website only; preserve production data and admin configuration; no admin/tools/plugin deployment",
+  "blocker": "SSH banner exchange timeout and external HTTPS timeout from this machine. No production files, services, release records or version links changed."
+}
