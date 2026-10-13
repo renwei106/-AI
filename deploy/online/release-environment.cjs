@@ -43,6 +43,19 @@ function requestWithHost(url, { headers, signal, timeout = 8000, maxBytes = 1024
     req.once('error', reject); req.once('timeout', () => req.destroy(Error('HTTP probe timed out'))); req.end();
   });
 }
+function assertWebsiteHtml(body, source, runtime, publishedState) {
+  assert(publishedState.settings?.languages?.some(language => language.code === 'zh-CN' && language.enabled === true), 'Health probe requires enabled zh-CN; review locale configuration without changing it');
+  const prefix = '<script>window.SHIYU_LOCALE_STATE=', suffix = ';' + runtime + '</script><link rel="stylesheet" href="/i18n-client.css"><script src="/i18n-client.js" defer></script>';
+  const start = body.indexOf(prefix), end = body.indexOf(suffix, start + prefix.length);
+  assert(start >= 0 && end > start && body.indexOf(prefix, start + prefix.length) < 0, 'Published website locale injection differs');
+  const client = JSON.parse(body.slice(start + prefix.length, end));
+  assert(client.country === '' || /^[A-Z]{2}$/.test(client.country), 'Unexpected locale country');
+  const expectedClient = { locale: 'zh-CN', settings: publishedState.settings, country: client.country, dictionary: publishedState.dictionaries?.['zh-CN'] || {} };
+  same(client, expectedClient, 'Published website locale state differs');
+  const injection = prefix + JSON.stringify(expectedClient).replace(/</g, '\\u003c') + suffix;
+  const expected = source.replace('</head>', '<link rel="canonical" href="https://shiyubox.com/"></head>').replace(/<html lang="[^"]*"/, '<html lang="zh-CN"').replace('</head>', injection + '</head>');
+  assert.equal(body, expected, 'Published website HTML differs after exact locale rendering');
+}
 const json = p => JSON.parse(fs.readFileSync(p, 'utf8'));
 const fileState = p => fs.existsSync(p) ? { exists: true, sha256: sha(p) } : { exists: false };
 const same = (a, b, message) => assert.deepEqual(a, b, message);
@@ -239,7 +252,15 @@ function makeRuntime(planPath) {
     await request(spec.public);
     if (name === 'website') {
       for (const url of ['https://space.shiyubox.com/', 'https://world.shiyubox.com/']) await request(url);
-      assert.equal(shaBytes(await request('https://shiyubox.com/')), sha(target + '/dist/index.html'), 'Published website HTML differs');
+      const rendered = await request('https://shiyubox.com/', 200, { Cookie: 'shiyu-language=zh-CN' });
+      const localeState = JSON.parse(await request('http://127.0.0.1:5175/api/shiyu/i18n/public'));
+      assertWebsiteHtml(rendered, fs.readFileSync(target + '/dist/index.html', 'utf8'), fs.readFileSync(target + '/i18n/runtime.js', 'utf8'), localeState);
+      const manifest = validateManifest('website', json(BASE + '/' + loadPlan().modules.website.manifest));
+      for (const row of manifest.files.filter(row => /^dist\/.*\.(?:js|css)$/.test(row.path))) {
+        if (rollback && !fs.existsSync(target + '/' + row.path)) continue; // New assets do not exist in the immutable old release.
+        const expected = rollback ? sha(target + '/' + row.path) : row.sha256;
+        assert.equal(shaBytes(await request('https://shiyubox.com/' + row.path.slice(5))), expected, 'Published website asset differs: ' + row.path);
+      }
       const session = JSON.parse(await request('https://shiyubox.com/api/shiyu/auth/session')); assert.equal(typeof session, 'object');
     }
     if (name === 'admin') {
@@ -274,6 +295,7 @@ function makeRuntime(planPath) {
       baseline.modules[name] = { links: links(spec.old), unitSha256: shaBytes(unit), dropin, versionFile: fileState(spec.old + '/RELEASE_VERSION'), ...(name === 'admin' ? { creatorsSha256: sha(spec.old + '/platform-creators.json') } : {}) };
       await request(spec.local, 200, name === 'tools' ? { Host: 'tool.shiyubox.com' } : {}); await request(spec.public);
     }
+    await health('website', baseline, [], true);
     write(BASE + '/baseline.json', baseline); console.log(JSON.stringify({ status: 'preflight-pass', id: ID, baselineSha256: sha(BASE + '/baseline.json'), resources: baseline.resources }));
   }
   async function prepare() {
@@ -316,22 +338,63 @@ function makeRuntime(planPath) {
     assert.equal(JSON.stringify(json(HISTORY).items.slice(0, -2)), original, 'Existing release history changed');
     write(BASE + '/release-records.json', records);
   }
-  async function publish() {
-    const p = loadPlan(), before = json(BASE + '/baseline.json'), prepared = json(BASE + '/prepared.json'), manifests = payloads(p);
+  function verifyRecordedHistory(p, original) {
+    assert.equal(sha(BASE + '/history-before.json'), original.historySha256, 'Original history snapshot changed');
+    const old = json(BASE + '/history-before.json'), live = json(HISTORY), rows = json(BASE + '/release-records.json');
+    assert.equal(rows.length, 2); same({ ...live, items: old.items }, old, 'History envelope changed');
+    same(live.items.slice(0, -2), old.items, 'Existing release history changed'); same(live.items.slice(-2), rows, 'Appended release records changed');
+    for (const [index, name] of ['website', 'admin'].entries()) {
+      const expected = p.records[name], row = rows[index];
+      same(Object.keys(row).sort(), ['id', 'target', 'version', 'changeType', 'summary', 'releasedAt', 'createdAt', 'operator'].sort());
+      for (const field of ['id', 'target', 'version', 'changeType', 'summary']) assert.equal(row[field], expected[field], 'Recorded release differs: ' + field);
+      assert.equal(row.operator, 'Codex（用户确认）'); assert(Number.isFinite(Date.parse(row.releasedAt)) && Number.isFinite(Date.parse(row.createdAt)));
+    }
+    return { originalCount: old.items.length, count: live.items.length, sha256: sha(HISTORY), releaseRecordsSha256: sha(BASE + '/release-records.json') };
+  }
+  function resumeTag(p) { assert.match(p.resume?.tag || '', /^resume-[1-9]\d*$/); return p.resume.tag; }
+  async function resumePreflight() {
+    const p = loadPlan(), tag = resumeTag(p), original = json(BASE + '/baseline.json'), prepared = json(BASE + '/prepared.json');
     assert.equal(sha(BASE + '/baseline.json'), p.baselineSha256); assert.equal(sha(BASE + '/prepared.json'), p.preparedSha256);
+    assert.equal(sha(BASE + '/failure.json'), p.resume.failureSha256); assert.equal(sha(BASE + '/release-records.json'), p.resume.releaseRecordsSha256);
+    assert(!fs.existsSync(BASE + '/resume-baseline-' + tag + '.json'), 'Resume evidence already exists'); assert(!fs.existsSync(BASE + '/published.json'));
+    const history = verifyRecordedHistory(p, original); assert.equal(history.originalCount, p.resume.expectedOriginalHistoryCount);
+    const state = infrastructure(original, ['website', 'admin']); aliases(); verifyPreserved(original); assertUnits(original, []); const resource = resources(); pendingJobs();
+    const manifests = payloads(p);
+    for (const name of ORDER) {
+      const spec = SPECS[name]; assert.equal(fs.realpathSync(spec.root + '/current'), spec.old);
+      same(links(spec.old), original.modules[name].links); same(fileState(unitPath(spec.service)), original.modules[name].dropin);
+      assert.equal(fs.realpathSync('/proc/' + state[spec.service].MainPID + '/cwd'), spec.old); verifyModule(name, manifests[name], original);
+    }
+    assert.equal(sha(SPECS.admin.old + '/platform-creators.json'), original.modules.admin.creatorsSha256); verifyRuntimeGate();
+    for (const name of ORDER) await health(name, original, ['website', 'admin'], true);
+    same(p.permanentBackupPackages, prepared.packages); assert.equal(p.permanentBackupVerified, true); assert.equal(p.permanentRuntimeDependenciesVerified, true);
+    const evidence = { ...original, services: state, historySha256: history.sha256, id: ID, resumeTag: tag, operationsCommit: p.operationsCommit, resumedAt: new Date().toISOString(), resources: resource, originalBaselineSha256: p.baselineSha256, preparedSha256: p.preparedSha256, failureSha256: p.resume.failureSha256, releaseRecordsSha256: history.releaseRecordsSha256, historyOriginalCount: history.originalCount, firstFailure: json(BASE + '/failure.json'), recovery: 'old pointers, units, shared configuration, public health and unrelated service PIDs verified' };
+    fs.writeFileSync(BASE + '/resume-baseline-' + tag + '.json', JSON.stringify(evidence, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
+    console.log(JSON.stringify({ status: 'resume-preflight-pass', tag, resumeBaselineSha256: sha(BASE + '/resume-baseline-' + tag + '.json'), resources: resource }));
+  }
+  async function publish(resume = false) {
+    const p = loadPlan(), tag = resume ? resumeTag(p) : '', suffix = tag ? '-' + tag : '';
+    const original = json(BASE + '/baseline.json'), before = resume ? json(BASE + '/resume-baseline-' + tag + '.json') : original, prepared = json(BASE + '/prepared.json'), manifests = payloads(p);
+    assert.equal(sha(BASE + '/baseline.json'), p.baselineSha256); assert.equal(sha(BASE + '/prepared.json'), p.preparedSha256);
+    if (resume) {
+      assert.equal(sha(BASE + '/resume-baseline-' + tag + '.json'), p.resume.baselineSha256); assert.equal(before.resumeTag, tag);
+      assert.equal(before.originalBaselineSha256, p.baselineSha256); assert.equal(before.preparedSha256, p.preparedSha256); assert.equal(before.operationsCommit, p.operationsCommit);
+      assert.equal(sha(BASE + '/failure.json'), before.failureSha256); assert.equal(sha(BASE + '/release-records.json'), before.releaseRecordsSha256); verifyRecordedHistory(p, original);
+    }
     assert.equal(p.permanentBackupVerified, true, 'Permanent installation-package backup is required');
     assert.equal(p.permanentRuntimeDependenciesVerified, true, 'Shared runtime dependencies must also have a verified permanent archive');
-    same(p.permanentBackupPackages, prepared.packages, 'Permanent backup hashes differ'); assert(!fs.existsSync(BASE + '/published.json'));
+    same(p.permanentBackupPackages, prepared.packages, 'Permanent backup hashes differ'); assert(!fs.existsSync(BASE + '/published.json')); assert(!fs.existsSync(BASE + '/published' + suffix + '.json'));
+    if (resume) assert(!fs.existsSync(BASE + '/failure' + suffix + '.json'), 'Resume attempt was already used; create fresh independent evidence');
     infrastructure(before); resources(); aliases(); verifyPreserved(before); pendingJobs(); assertUnits(before, []); assert.equal(sha(HISTORY), before.historySha256, 'History changed after preparation');
     for (const name of ORDER) { const spec = SPECS[name]; assert.equal(fs.realpathSync(spec.root + '/current'), spec.old); verifyModule(name, manifests[name], before); }
     assert.equal(sha(SPECS.admin.old + '/platform-creators.json'), before.modules.admin.creatorsSha256, 'Creator data changed after preparation'); verifyRuntimeGate();
     // Online data backup remains private on the server; never restore it automatically over newer user writes.
-    const backupDir = BASE + '/data-backup'; fs.mkdirSync(backupDir, { mode: 0o700 });
+    const backupDir = BASE + '/data-backup' + suffix; fs.mkdirSync(backupDir, { mode: 0o700 });
     for (const [label, dir] of [['admin', '/opt/shiyu-admin/shared/.local'], ['website', '/opt/shiyu/shared/.local']]) {
       fs.mkdirSync(backupDir + '/' + label, { mode: 0o700 });
       for (const item of fs.readdirSync(dir, { withFileTypes: true })) if (item.isFile() && item.name.endsWith('.json')) fs.copyFileSync(path.join(dir, item.name), backupDir + '/' + label + '/' + item.name);
     }
-    fs.copyFileSync(HISTORY, BASE + '/history-before.json');
+    fs.copyFileSync(HISTORY, BASE + (resume ? '/history-snapshot' + suffix + '.json' : '/history-before.json'));
     fs.copyFileSync(SPECS.admin.old + '/platform-creators.json', backupDir + '/admin/platform-creators.json');
     // The consistent SQLite backup API includes WAL writes without stopping payment requests.
     const payment = require(SPECS.website.old + '/payments/config.cjs').loadConfig();
@@ -349,7 +412,7 @@ function makeRuntime(planPath) {
         if (name === 'tools') pendingJobs();
         // Stop only the affected history writer, append both approved records, and
         // restore the old backend before the first website switch. Never undo history.
-        if (name === 'website') {
+        if (name === 'website' && !resume) {
           let historyError;
           try {
             cmd('systemctl', ['stop', 'shiyu-admin'], 45000); assert.equal(services()['shiyu-admin'].MainPID, '0');
@@ -373,7 +436,7 @@ function makeRuntime(planPath) {
         }
         switchTo(name, spec.old, spec.next); if (!touched.includes(name)) touched.push(name);
         restart(name, before, changedUnits); results[name] = await health(name, before, touched); verifyModule(name, manifests[name], before); verifyPreserved(before);
-        write(BASE + '/verified-' + name + '.json', { id: ID, name, version: spec.version || SPECS.website.version + ' tool module patch', current: spec.next, commit: p.modules[name].commit, verifiedAt: new Date().toISOString() });
+        write(BASE + '/verified-' + name + suffix + '.json', { id: ID, name, version: spec.version || SPECS.website.version + ' tool module patch', current: spec.next, commit: p.modules[name].commit, verifiedAt: new Date().toISOString() });
       }, async name => {
         if (!recovering) { recovering = true; deadline = Date.now() + 210000; }
         const spec = SPECS[name], current = fs.realpathSync(spec.root + '/current');
@@ -389,20 +452,24 @@ function makeRuntime(planPath) {
         restart(name, before, changedUnits); await health(name, before, touched, true);
       }, async () => {
         const state = infrastructure(before, ORDER); verifyPreserved(before); aliases(); verifyRuntimeGate();
-        const history = json(HISTORY), original = json(BASE + '/history-before.json'); same(history.items.slice(0, -2), original.items); same(history.items.slice(-2).map(item => item.id), ['website', 'admin'].map(name => p.records[name].id));
+        verifyRecordedHistory(p, original);
         const cleanupReview = Object.fromEntries(ORDER.map(name => [name, { current: SPECS[name].next, previous: SPECS[name].old, olderCandidates: fs.readdirSync(SPECS[name].root + '/releases').filter(n => fs.lstatSync(SPECS[name].root + '/releases/' + n).isDirectory() && ![path.basename(SPECS[name].old), path.basename(SPECS[name].next)].includes(n)), policy: 'Review permanent archive and live dependency references before removing any older directory; this script deletes none.' }]));
-        completed = { status: 'published-verified', id: ID, versions: { website: SPECS.website.version, admin: SPECS.admin.version, tools: 'website ' + SPECS.website.version + ' tool module patch' }, services: state, packages: prepared.packages, cleanupReview, verifiedAt: new Date().toISOString() };
+        completed = { status: 'published-verified', id: ID, attempt: tag || 'initial', operationsCommit: p.operationsCommit, versions: { website: SPECS.website.version, admin: SPECS.admin.version, tools: 'website ' + SPECS.website.version + ' tool module patch' }, services: state, packages: prepared.packages, cleanupReview, verifiedAt: new Date().toISOString() };
       });
-      write(BASE + '/published.json', completed); fs.appendFileSync('/opt/shiyu/backups/runtime-operations.jsonl', JSON.stringify(completed) + '\n', { mode: 0o600 }); console.log(JSON.stringify(completed, null, 2));
-    } catch (error) { write(BASE + '/failure.json', { error: error.message, rollback: error.recoveryErrors?.length ? error.recoveryErrors : recovering ? 'verified' : 'no service touched', at: new Date().toISOString() }); throw error; }
+      write(BASE + '/published' + suffix + '.json', completed); fs.appendFileSync('/opt/shiyu/backups/runtime-operations.jsonl', JSON.stringify(completed) + '\n', { mode: 0o600 }); console.log(JSON.stringify(completed, null, 2));
+    } catch (error) { write(BASE + '/failure' + suffix + '.json', { error: error.message, rollback: error.recoveryErrors?.length ? error.recoveryErrors : recovering ? 'verified' : 'no service touched', at: new Date().toISOString() }); throw error; }
   }
-  return { preflight, prepare, publish, write };
+  return { preflight, prepare, publish, resumePreflight, resumePublish: () => publish(true), write };
 }
-module.exports = { ORDER, DEFAULTS, sha, requestWithHost, safeRelative, validatePlan, validateManifest, assertSafeOverlayDestination, sequentialRelease };
+module.exports = { ORDER, DEFAULTS, sha, requestWithHost, assertWebsiteHtml, safeRelative, validatePlan, validateManifest, assertSafeOverlayDestination, sequentialRelease };
 if (require.main === module) {
   let runtime; const mode = process.argv[2];
-  (async () => { assert(['preflight', 'prepare', 'publish'].includes(mode)); runtime = makeRuntime(process.argv[3]); await runtime[mode](); })().catch(error => {
-    try { runtime?.write(path.posix.dirname(process.argv[3]) + '/last-error.json', { phase: mode, error: error.message, at: new Date().toISOString() }); } catch {}
+  (async () => { const method = { preflight: 'preflight', prepare: 'prepare', publish: 'publish', 'resume-preflight': 'resumePreflight', 'resume-publish': 'resumePublish' }[mode]; assert(method); runtime = makeRuntime(process.argv[3]); await runtime[method](); })().catch(error => {
+    try {
+      const directory = path.posix.dirname(process.argv[3]), extra = mode.startsWith('resume-') ? '-' + resumeTagForError() : '';
+      function resumeTagForError() { const tag = json(process.argv[3]).resume?.tag; return /^resume-[1-9]\d*$/.test(tag) ? tag : 'invalid-resume'; }
+      const target = directory + '/last-error' + extra + '.json'; if (!fs.existsSync(target)) runtime?.write(target, { phase: mode, error: error.message, at: new Date().toISOString() });
+    } catch {}
     console.error('ENVIRONMENT_RELEASE_FAILED; inspect private server evidence'); process.exitCode = 1;
   });
 }

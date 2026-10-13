@@ -3,6 +3,9 @@
 // subprocess, /opt path, production account or provider configuration is touched.
 const test = require('node:test'), assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto'), vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, 'release-environment.cjs'), 'utf8');
+const localizedSource = fs.readFileSync(path.join(__dirname, '../../i18n/frontend-server.cjs'), 'utf8');
+const localeSettings = { languages: [{ code: 'zh-CN', enabled: true, countries: ['CN'] }], fallback: 'zh-CN' };
+const publishedLocale = { settings: localeSettings, dictionaries: { 'zh-CN': { '<fixture>': '假数据' } } };
 const digest = b => crypto.createHash('sha256').update(b).digest('hex');
 function host(failAt = '') {
   const plan = JSON.parse(fs.readFileSync(path.join(__dirname, 'environment-release-plan.example.json')));
@@ -58,8 +61,12 @@ function host(failAt = '') {
     directories.add(roots[name] + '/releases'); directories.add(m.old); directories.add(m.next); links.set(roots[name] + '/current', m.old);
     const shared = name === 'tools' ? roots[name] + '/shared/local' : roots[name] + '/shared/.local'; directories.add(shared);
     for (const root of [m.old, m.next]) { links.set(root + '/.local', shared); put(root + '/RELEASE_ID', root === m.next ? id : '20261001000000'); if (name !== 'tools') put(root + '/RELEASE_VERSION', root === m.next ? m.version : plan.records[name].previousVersion); }
-    const rows = name === 'tools' ? ['dist/library-source.js', 'server/generation-server.mjs'] : ['dist/index.html'];
+    const rows = name === 'tools' ? ['dist/library-source.js', 'server/generation-server.mjs'] : name === 'website' ? ['dist/index.html', 'dist/account-surfaces.js', 'dist/environment-policy-data.js', 'dist/environment.js', 'dist/tool-auth-bridge.js', 'dist/world.js', 'preview.cjs', 'shiyu-user-proxy.cjs'] : ['dist/index.html'];
     for (const rel of rows) { put(m.old + '/' + rel, name + ':' + rel + ':old'); put(m.next + '/' + rel, name + ':' + rel + ':new'); }
+    if (name === 'website') for (const [root, marker] of [[m.old, 'old'], [m.next, 'new']]) {
+      put(root + '/dist/index.html', '<!doctype html><html lang="zh-CN"><head><title>' + marker + '</title></head><body>fixture website</body></html>');
+      put(root + '/i18n/runtime.js', 'window.fixtureLocaleRuntime=true;');
+    }
     if (name === 'admin') {
       const runtime = { releaseId: id, version: m.version, appCommit: m.commit, static: [] }; put(m.next + '/production-runtime-manifest.json', runtime); rows.push('production-runtime-manifest.json');
       for (const root of [m.old, m.next]) put(root + '/platform-creators.json', '{}');
@@ -96,15 +103,25 @@ function host(failAt = '') {
     return '';
   }
   let failed = false;
+  async function renderLocalized() {
+    const module = { exports: {} }, root = current('website');
+    const localContext = { module, require: name => name === 'node:fs' ? fakeFs : name === './service.cjs' ? require('../../i18n/service.cjs') : require(name), __dirname: root + '/i18n', process: { env: {} }, URL, AbortSignal, fetch: async () => ({ ok: true, json: async () => publishedLocale }) };
+    vm.runInNewContext(localizedSource, localContext); let body;
+    await module.exports.localized({ url: '/', headers: { host: 'shiyubox.com', cookie: 'shiyu-language=zh-CN' }, socket: { remoteAddress: '127.0.0.1' } }, { writeHead(status) { assert.equal(status, 200); }, end(value) { body = value; } }, 'index.html', root + '/dist');
+    return body;
+  }
   async function fetch(url) {
-    const u = new URL(url); let body = '{}';
+    const u = new URL(url); let body = '{}'; events.push('GET:' + u.href);
     if (u.pathname === '/api/shiyu/themes') body = JSON.stringify({ items: [{ id: 'base' }] });
     else if (u.pathname === '/api/shiyu/auth/session') body = '{"user":null}';
+    else if (u.pathname === '/api/shiyu/i18n/public') body = JSON.stringify(publishedLocale);
     else if (u.hostname === 'admin.shiyubox.com') body = get(current('admin') + '/dist/index.html').toString();
     else if (u.hostname === 'tool.shiyubox.com' && u.pathname === '/library-source.js') body = get(current('tools') + '/dist/library-source.js').toString();
-    else if (u.hostname === 'shiyubox.com' || u.port === '4318') body = get(current('website') + '/dist/index.html').toString();
+    else if ((u.hostname === 'shiyubox.com' || u.port === '4318') && u.pathname === '/') body = await renderLocalized();
+    else if (u.hostname === 'shiyubox.com' && u.pathname.endsWith('.js')) body = get(current('website') + '/dist' + u.pathname).toString();
     const shouldFail = !failed && failAt === 'admin-health' && current('admin') === plan.modules.admin.next && u.hostname === 'admin.shiyubox.com';
     if (shouldFail) failed = true;
+    if (!failed && failAt === 'website-asset' && current('website') === plan.modules.website.next && u.hostname === 'shiyubox.com' && u.pathname.endsWith('.js')) { body += ':corrupted'; failed = true; }
     return { status: shouldFail ? 500 : 200, text: async () => body };
   }
   const { EventEmitter } = require('node:events');
@@ -120,11 +137,19 @@ function host(failAt = '') {
     return req;
   } };
   const fakeRequire = name => name === 'node:fs' ? fakeFs : name === 'node:http' ? fakeHttp : name === 'node:child_process' ? { execFileSync } : name.endsWith('/payments/config.cjs') ? { loadConfig: () => ({ database: '/fixture/nonexistent-orders.sqlite' }) } : require(name);
-  const module = { exports: {} }; fakeRequire.main = {};
-  const context = { require: fakeRequire, module, process: { env: {}, once() {} }, Buffer, console: { log() {}, error() {} }, AbortController, AbortSignal, URL, setTimeout, clearTimeout, Date };
-  vm.runInNewContext(source + '\nmodule.exports.fixtureRuntime = makeRuntime;', context, { filename: 'release-environment.cjs', timeout: 1000 }); context.fetch = fetch;
-  const runtime = module.exports.fixtureRuntime(base + '/plan.json');
-  return { runtime, current, plan, events, writes, history: () => JSON.parse(get(history)), published: () => JSON.parse(get(base + '/published.json')), failures: () => JSON.parse(get(base + '/failure.json')) };
+  fakeRequire.main = {};
+  function loadRuntime(legacyHtmlCheck = false) {
+    const module = { exports: {} }, context = { require: fakeRequire, module, process: { env: {}, once() {} }, Buffer, console: { log() {}, error() {} }, AbortController, AbortSignal, URL, setTimeout, clearTimeout, Date, fetch };
+    const engine = legacyHtmlCheck ? source.replace("assertWebsiteHtml(rendered, fs.readFileSync(target + '/dist/index.html', 'utf8'), fs.readFileSync(target + '/i18n/runtime.js', 'utf8'), localeState);", "assert.equal(shaBytes(rendered), sha(target + '/dist/index.html'), 'Published website HTML differs');") : source;
+    vm.runInNewContext(engine + '\nmodule.exports.fixtureRuntime = makeRuntime;', context, { filename: 'release-environment.cjs', timeout: 1000 });
+    return module.exports.fixtureRuntime(base + '/plan.json');
+  }
+  function configureResume() {
+    plan.resume = { tag: 'resume-1', expectedOriginalHistoryCount: JSON.parse(get(base + '/history-before.json')).items.length, failureSha256: digest(get(base + '/failure.json')), releaseRecordsSha256: digest(get(base + '/release-records.json')) };
+    put(base + '/plan.json', plan);
+  }
+  function pinResume() { plan.resume.baselineSha256 = digest(get(base + '/resume-baseline-' + plan.resume.tag + '.json')); put(base + '/plan.json', plan); }
+  return { runtime: loadRuntime(), loadRuntime, configureResume, pinResume, renderLocalized, current, plan, events, writes, put, get, mutateService: (name, value) => Object.assign(state[name], value), historyPath: history, base, history: () => JSON.parse(get(history)), published: tag => JSON.parse(get(base + '/published' + (tag ? '-' + tag : '') + '.json')), failures: () => JSON.parse(get(base + '/failure.json')) };
 }
 test('actual engine publishes scoped modules sequentially and leaves data, paused services and old records intact', async () => {
   const h = host(); await h.runtime.publish();
@@ -132,6 +157,45 @@ test('actual engine publishes scoped modules sequentially and leaves data, pause
   for (const name of Object.keys(h.plan.modules)) assert.equal(h.current(name), h.plan.modules[name].next);
   assert.equal(h.history().items.length, 4); assert.equal(h.history().items[0].id, 'old-website'); assert.equal(h.published().status, 'published-verified');
   assert(!h.writes.some(p => /\.local\/(?!shiyu-release-history\.json)/.test(p) && !p.includes('/data-backup/')));
+  for (const asset of ['account-surfaces.js', 'environment-policy-data.js', 'environment.js', 'tool-auth-bridge.js', 'world.js']) assert(h.events.includes('GET:https://shiyubox.com/' + asset));
+  assert(!h.events.some(e => /GET:.*(?:preview|shiyu-user-proxy)\.cjs/.test(e)));
+});
+test('real localized HTML accepts existing injection but rejects core, canonical, locale settings and dictionary edits', async () => {
+  const { assertWebsiteHtml } = require('./release-environment.cjs'), h = host(), body = await h.renderLocalized();
+  const source = h.get(h.plan.modules.website.old + '/dist/index.html').toString(), runtime = h.get(h.plan.modules.website.old + '/i18n/runtime.js').toString();
+  assertWebsiteHtml(body, source, runtime, publishedLocale);
+  for (const changed of [body.replace('fixture website', 'wrong app'), body.replace('https://shiyubox.com/', 'https://wrong.example/'), body.replace('"fallback":"zh-CN"', '"fallback":"en"'), body.replace('假数据', 'changed dictionary')]) assert.throws(() => assertWebsiteHtml(changed, source, runtime, publishedLocale));
+  assert.throws(() => assertWebsiteHtml(body, source, runtime, { settings: { languages: [{ code: 'en', enabled: true }] } }), /requires enabled zh-CN/);
+});
+test('website asset byte mismatch still rolls back even when every HTTP status is 200', async () => {
+  const h = host('website-asset'); await assert.rejects(h.runtime.publish(), /Published website asset differs/);
+  for (const name of Object.keys(h.plan.modules)) assert.equal(h.current(name), h.plan.modules[name].old);
+  assert(!h.events.includes('restart:shiyu-tools'));
+});
+test('actual i18n injection false alarm rolls back, then strict resume succeeds without rewriting history or first evidence', async () => {
+  const h = host(); await assert.rejects(h.loadRuntime(true).publish(), /Published website HTML differs/);
+  for (const name of Object.keys(h.plan.modules)) assert.equal(h.current(name), h.plan.modules[name].old);
+  const saved = Object.fromEntries(['baseline.json', 'prepared.json', 'failure.json', 'history-before.json', 'release-records.json'].map(name => [name, digest(h.get(h.base + '/' + name))])), originalHistory = digest(h.get(h.historyPath));
+  h.configureResume(); await h.loadRuntime().resumePreflight(); h.pinResume(); const eventStart = h.events.length;
+  await h.loadRuntime().resumePublish();
+  assert.deepEqual(h.events.slice(eventStart).filter(e => e.startsWith('stop:')), []);
+  assert.deepEqual(h.events.slice(eventStart).filter(e => e.startsWith('restart:')), ['restart:shiyu-preview', 'restart:shiyu-admin', 'restart:shiyu-tools']);
+  assert.equal(digest(h.get(h.historyPath)), originalHistory); assert.equal(h.history().items.length, 4); assert.equal(h.published('resume-1').status, 'published-verified');
+  for (const [name, hash] of Object.entries(saved)) assert.equal(digest(h.get(h.base + '/' + name)), hash, name + ' must remain immutable');
+});
+test('resume refuses any edited historical or appended field before touching a service', async () => {
+  for (const edit of [rows => rows[0].version = 'V9.9.9', rows => rows.at(-1).createdAt = '2026-01-01T00:00:00Z', rows => rows.push({ id: 'unexpected-record' })]) {
+    const h = host(); await assert.rejects(h.loadRuntime(true).publish()); h.configureResume(); const changed = h.history(); edit(changed.items); h.put(h.historyPath, changed); const eventStart = h.events.length;
+    await assert.rejects(h.loadRuntime().resumePreflight(), /history changed|records changed/);
+    assert(!h.events.slice(eventStart).some(e => /^(?:start|stop|restart):/.test(e)));
+  }
+});
+test('resume refuses unrelated service, unit and shared configuration drift before any service operation', async () => {
+  for (const edit of [h => h.mutateService('shiyu-tools', { MainPID: '999' }), h => h.mutateService('nginx', { MainPID: '999' }), h => h.put('/etc/systemd/system/shiyu-tools.service.d/95-environment-isolation.conf', '[Service]\nEnvironment=UNEXPECTED=1\n'), h => h.put('/opt/shiyu-admin/shared/.local/shiyu-plans.json', '{}')]) {
+    const h = host(); await assert.rejects(h.loadRuntime(true).publish()); h.configureResume(); edit(h); const eventStart = h.events.length;
+    await assert.rejects(h.loadRuntime().resumePreflight(), /Unrelated PID changed|Service unit changed|configuration changed concurrently/);
+    assert(!h.events.slice(eventStart).some(e => /^(?:start|stop|restart):/.test(e)));
+  }
 });
 test('actual admin HTTPS failure restores backend before website and never restarts tools; appended records remain', async () => {
   const h = host('admin-health'); await assert.rejects(h.runtime.publish());

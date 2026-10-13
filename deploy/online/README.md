@@ -49,7 +49,7 @@ timeout --signal=TERM --kill-after=100s 240s bash /tmp/release-front-only.sh '<i
 
 `release-environment.sh` 与 `release-environment.cjs` 用于**网站账户代理、后台来源校验及工具生产小补丁确实同时受影响**的一次配套发布。它不替代单模块流程，不构建、安装依赖、迁移业务配置、发布插件或调整隧道。输入是独立、经过审阅并绑定 SHA256 的计划；ID、旧版本路径、目标路径、commit、版本、两个上线记录和三个增量清单均由计划明确给出。
 
-先在本地以 `node --test deploy/online/release-environment.test.cjs deploy/online/release-environment-vm.test.cjs` 验证计划边界、顺序和失败恢复，VM 测试执行真实引擎对完整虚拟 Linux 主机的成功和失败恢复，不连接任何服务。计划参考 `environment-release-plan.example.json`。将审核后的计划、脚本、三个只含普通文件的增量包及逐文件 SHA256 清单上传至 `/opt/shiyu/backups/environment-isolation-<id>/`，由具有生产操作授权的发布人员依次运行：
+先在本地以 `node --test deploy/online/release-environment.test.cjs deploy/online/release-environment-vm.test.cjs deploy/online/release-environment-host.test.cjs` 验证计划边界、顺序、Host 探针和失败恢复。VM 测试执行真实引擎对完整虚拟 Linux 主机的成功和失败恢复，并调用现有 `i18n/frontend-server.cjs` 验证语言注入，只在内存运行；Host 测试只监听本机随机端口。计划参考 `environment-release-plan.example.json`。将审核后的计划、脚本、三个只含普通文件的增量包及逐文件 SHA256 清单上传至 `/opt/shiyu/backups/environment-isolation-<id>/`，由具有生产操作授权的发布人员依次运行：
 
 ```bash
 bash /opt/shiyu/backups/environment-isolation-<id>/release-environment.sh preflight /opt/shiyu/backups/environment-isolation-<id>/plan.json <plan-sha256>
@@ -71,6 +71,25 @@ bash /opt/shiyu/backups/environment-isolation-<id>/release-environment.sh publis
 工作阶段总预算 660 秒，单服务重启不超过 45 秒，单 HTTP 请求不超过 8 秒，shell 在 720 秒触发 TERM，另留 240 秒 kill-after 保护恢复。失败立即停止后续服务，以独立 210 秒预算按“工具 → 后台 → 网站”的已触及范围逆序恢复，避免旧网站丢失 Origin 与新后台混搭。只恢复本次拥有的版本指针和环境 drop-in；第三方修改不会被覆盖，历史不会删除。回滚仍必须通过 active、本机、外部及 cwd 验证；失败留私有 failure.json，不能宣称上线成功。
 
 发布脚本不删除历史目录。成功证据列出每个模块的当前、上个版本与更早候选；随后按项目要求单独检查永久归档、共享数据/依赖引用和其他服务 cwd/ExecStart，再清理无引用历史。被引用目录继续保留，不将清理失败变成健康发布的回滚理由。工具 AI 服务现有依赖状态必须另行说明；工具首页 HTTP 200 不能证明模型生成正常。
+
+### 已恢复旧版后的安全续发
+
+首页原有语言服务会向静态 HTML 注入 canonical、localeState 与 runtime。健康探针用仅语言 Cookie 的 GET 固定中文，对照公开语言设置与字典、现有 runtime 重建准确 HTML 后逐字节验证；再核对网站增量清单中的公开 JS/CSS 字节。私有 CJS 只在准备目录校验，不通过公网请求。不能把原始 dist/index.html 与注入后的响应直接比较，也不能只检查 HTTP 200。
+
+首轮已追加记录且已恢复旧版时，禁止重复 `publish` 或删除/改写记录。保持原 baseline.json、prepared.json、failure.json、history-before.json、release-records.json、所有包和应用 commit 不变，仅更新独立运维脚本与 operationsCommit。在同一计划中添加：
+
+```json
+"resume": {
+  "tag": "resume-1",
+  "expectedOriginalHistoryCount": 51,
+  "failureSha256": "首轮 failure.json 的 SHA256",
+  "releaseRecordsSha256": "首轮 release-records.json 的 SHA256"
+}
+```
+
+先以新的计划 SHA 调用 `release-environment.sh resume-preflight <plan-path> <plan-sha>`。它验证原历史快照及其恰好两条追加记录的所有字段、原指针/共享链接/配置/units、旧版健康、已准备产物及正式门禁。仅允许首轮曾触及的网站、后台 PID 因恢复改变，工具和 Nginx PID 必须仍与原基线一致，轻时间和轻间继续停用。通过后只新增 `resume-baseline-resume-1.json`，其中保存资源、首轮根因与恢复检查结果；不会覆盖原证据。
+
+把输出的 resumeBaselineSha256 写入 `resume.baselineSha256`，重新核对计划 SHA，再运行 `release-environment.sh resume-publish <plan-path> <plan-sha>`。续发重新检查恢复证明及记录，跳过历史停服和追加，沿原网站→后台→工具顺序执行。它使用独立 `data-backup-resume-1/`、`history-snapshot-resume-1.json`、`verified-*-resume-1.json`、`published-resume-1.json` 或 `failure-resume-1.json`；不会重包或改写原 prepared/packages。一个失败的 resume tag 不能重复使用；再次尝试必须审查前次证据并创建新 tag。
 
 ## 三端历史流程
 

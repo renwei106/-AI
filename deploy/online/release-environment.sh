@@ -4,7 +4,7 @@ if [ "${1:-}" != --within-deadline ]; then
   exec timeout --signal=TERM --kill-after=240s 720s bash "$0" --within-deadline "${1:?mode}" "${2:?plan path}" "${3:?plan SHA}"
 fi
 mode="${2:?mode}"; plan="${3:?plan path}"; expected_sha="${4:?plan SHA}"
-[[ "$mode" = preflight || "$mode" = prepare || "$mode" = publish ]]
+[[ "$mode" = preflight || "$mode" = prepare || "$mode" = publish || "$mode" = resume-preflight || "$mode" = resume-publish ]]
 [[ "$expected_sha" =~ ^[a-f0-9]{64}$ ]]
 [[ "$plan" =~ ^/opt/shiyu/backups/environment-isolation-[0-9]{14}/plan\.json$ ]]
 base="$(dirname "$plan")"
