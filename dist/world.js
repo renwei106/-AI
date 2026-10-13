@@ -1,7 +1,7 @@
 /* Published operations configuration and isolated admin preview. */
 (()=>{
- const token=new URLSearchParams(location.search).get('operations-preview'),key='shiyu-operations-preview-v1';
- const previewAdminOrigin=location.hostname==='shiyubox.com'?'https://admin.shiyubox.com':'http://127.0.0.1:5175';
+ const previewAdminOrigin=window.ShiyuEnvironment?.resolve()?.applicationOrigin('admin');
+ const token=previewAdminOrigin?new URLSearchParams(location.search).get('operations-preview'):null,key='shiyu-operations-preview-v1';
  const worldAppearance={lightBackground:'#eadcc2',lightAccent:'#856544',darkBackground:'#29251f',darkAccent:'#c8a775'};
  const normalizeAppearance=value=>Object.fromEntries(Object.entries(worldAppearance).map(([key,fallback])=>[key,/^#[0-9a-f]{6}$/i.test(value?.[key])?value[key]:fallback]));
  const empty={world:{enabled:false,audience:'all',percentage:100,whitelist:'',blacklist:'',title:'一个值得慢慢探索的世界',description:'发现精选网址、学习路线与创作素材，遇见更多值得收藏的灵感。'},announcement:{enabled:false},update:{enabled:false}};

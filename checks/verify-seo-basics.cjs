@@ -2,6 +2,9 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),http=require('n
 const {spawn,execFileSync}=require('node:child_process');
 const {chromium}=require('C:/Users/任伟的机械革命/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const root=path.resolve(__dirname,'..'),ua='Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)';
+// Legacy SEO comparison has not been migrated to the explicit account-proxy
+// fixture factory. Its random 4396 upstream must not bypass the production gate.
+throw Error('Legacy SEO diagnostic requires an explicit isolated account-proxy fixture; do not loosen SHIYU_ADMIN_ORIGIN to run it');
 const baseline=execFileSync('git',['show','4980b6cae4939e18743f7beed572e5aa297d9b6f:dist/official/v3/index.html'],{cwd:root,encoding:'utf8',windowsHide:true});
 const current=fs.readFileSync(path.join(root,'dist/official/v3/index.html'),'utf8');
 const body=s=>s.slice(s.indexOf('<body>')).replace(/\r\n/g,'\n');

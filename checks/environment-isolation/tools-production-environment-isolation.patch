@@ -1,0 +1,32 @@
+diff --git a/dist/library-source.js b/dist/library-source.js
+index 2443eee..366add8 100644
+--- a/dist/library-source.js
++++ b/dist/library-source.js
+@@ -109,7 +109,10 @@ async function fetchWithTimeout(url){
+ 
+ export async function fetchLibraryData({allowLocalFallback=false}={}) {
+   const hasLocalAdmin = [ '127.0.0.1', 'localhost' ].includes(location.hostname)
+-  const candidates=[ ...ADMIN_ENDPOINTS ]
++  const candidates=ADMIN_ENDPOINTS.filter(endpoint=>{
++    const target=new URL(endpoint,location.href)
++    return target.origin===location.origin || hasLocalAdmin && target.origin==='http://127.0.0.1:5175'
++  })
+   if (allowLocalFallback) candidates.push('./assets/tabler/manifest.json')
+   for(const endpoint of candidates){
+     try{
+diff --git a/server/generation-server.mjs b/server/generation-server.mjs
+index 14ee879..59d4e0b 100644
+--- a/server/generation-server.mjs
++++ b/server/generation-server.mjs
+@@ -62,9 +62,11 @@ const server=http.createServer(async(req,res)=>{try{if(req.headers.host!==new UR
+  if(path==='/api/platform-theme'&&req.method==='GET'){try{const upstream=await fetch(new URL('/api/shiyu/operations',process.env.PLATFORM_CONFIG_ORIGIN||(local?'http://127.0.0.1:5175':'https://shiyubox.com')),{signal:AbortSignal.timeout(5000),headers:{Accept:'application/json'}});if(!upstream.ok)throw Error();const {platformTheme,officialFont}=await upstream.json();if(!platformTheme||!['primary','button'].every(k=>/^#[0-9a-f]{6}$/i.test(platformTheme[k])))throw Error();return send(res,200,{platformTheme,officialFont});}catch{return send(res,503,{message:'平台主题配置暂不可用'});}}
+ 
+  if(path==='/__shiyu_shared_login'&&req.method==='GET'){
++  if(!local||!['127.0.0.1','localhost'].includes(new URL(origin).hostname))return send(res,404,{message:'接口不存在'});
+   const upstream=await fetch('http://127.0.0.1:4318/?tool-login=embed',{headers:{cookie:req.headers.cookie||''},signal:AbortSignal.timeout(8000)});if(!upstream.ok){res.writeHead(upstream.status,{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'});res.end('拾隅登录组件暂时不可用');return}
+   let html=await upstream.text();html=html.replace(/<head([^>]*)>/i,'<head$1><base href="http://127.0.0.1:4318/"><script>(function(){const original=window.fetch.bind(window);window.fetch=function(input,init){const isRequest=input instanceof Request,url=new URL(isRequest?input.url:String(input),location.href);if(url.origin===location.origin&&url.pathname.startsWith("/api/shiyu/"))url.pathname="/__shiyu_auth_proxy"+url.pathname;return original(isRequest?new Request(url,input):url.href,init)}})()</script>');res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(html);return
+  }
++ if(path.startsWith('/__shiyu_auth_proxy/')&&(!local||!['127.0.0.1','localhost'].includes(new URL(origin).hostname)))return send(res,404,{message:'接口不存在'});
+  if(path.startsWith('/__shiyu_auth_proxy/api/shiyu/')||path.startsWith('/api/shiyu/auth/')){
+   if(req.headers.origin&&req.headers.origin!==origin)return send(res,403,{message:'请求来源无效'});if(req.headers['sec-fetch-site']==='cross-site')return send(res,403,{message:'请求来源无效'});
+   const target=new URL(path.replace('/__shiyu_auth_proxy','')+url.search,process.env.AUTH_SESSION_URL?new URL(process.env.AUTH_SESSION_URL).origin:local?'http://127.0.0.1:4318':'http://127.0.0.1:5175');const headers=new Headers(req.headers);headers.delete('host');headers.delete('content-length');const init={method:req.method,headers,redirect:'manual',signal:AbortSignal.timeout(15000)};if(!['GET','HEAD'].includes(req.method))init.body=await new Promise((resolve,reject)=>{const chunks=[];req.on('data',chunk=>chunks.push(chunk));req.on('end',()=>resolve(Buffer.concat(chunks)));req.on('error',reject)});const upstream=await fetch(target,init),responseHeaders={'Cache-Control':upstream.headers.get('cache-control')||'no-store','Content-Type':upstream.headers.get('content-type')||'application/json; charset=utf-8'};const cookies=upstream.headers.getSetCookie?.()||[];if(cookies.length)responseHeaders['Set-Cookie']=cookies;res.writeHead(upstream.status,responseHeaders);res.end(Buffer.from(await upstream.arrayBuffer()));return

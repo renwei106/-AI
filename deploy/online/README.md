@@ -45,7 +45,40 @@ timeout --signal=TERM --kill-after=100s 240s bash /tmp/release-front-only.sh '<i
 
 发现共享账号数据、配置、密钥或依赖仍位于候删版本时，保留该目录，先迁移到稳定 shared 路径、保留权限与内容并校验相关服务，再重新检查。不得强删或跳过引用保护；清理失败不会回滚已经健康的网站，需明确记录清理暂缓原因。
 
+## 配套环境隔离发布
+
+`release-environment.sh` 与 `release-environment.cjs` 用于**网站账户代理、后台来源校验及工具生产小补丁确实同时受影响**的一次配套发布。它不替代单模块流程，不构建、安装依赖、迁移业务配置、发布插件或调整隧道。输入是独立、经过审阅并绑定 SHA256 的计划；ID、旧版本路径、目标路径、commit、版本、两个上线记录和三个增量清单均由计划明确给出。
+
+先在本地以 `node --test deploy/online/release-environment.test.cjs deploy/online/release-environment-vm.test.cjs` 验证计划边界、顺序和失败恢复，VM 测试执行真实引擎对完整虚拟 Linux 主机的成功和失败恢复，不连接任何服务。计划参考 `environment-release-plan.example.json`。将审核后的计划、脚本、三个只含普通文件的增量包及逐文件 SHA256 清单上传至 `/opt/shiyu/backups/environment-isolation-<id>/`，由具有生产操作授权的发布人员依次运行：
+
+```bash
+bash /opt/shiyu/backups/environment-isolation-<id>/release-environment.sh preflight /opt/shiyu/backups/environment-isolation-<id>/plan.json <plan-sha256>
+# 将输出 baselineSha256 写入已审阅计划，再重新计算 plan SHA。
+bash /opt/shiyu/backups/environment-isolation-<id>/release-environment.sh prepare /opt/shiyu/backups/environment-isolation-<id>/plan.json <new-plan-sha256>
+# 将三个完整代码/运行包及依赖永久备份、核对 SHA，然后补齐 preparedSha256、
+# permanentBackupVerified、permanentRuntimeDependenciesVerified、permanentBackupPackages。
+bash /opt/shiyu/backups/environment-isolation-<id>/release-environment.sh publish /opt/shiyu/backups/environment-isolation-<id>/plan.json <final-plan-sha256>
+```
+
+`preflight` 只读线上运行资源、状态、版本、链接、配置指纹与公开健康接口，仅在服务器私有证据目录写入快照；不会切换或重启服务。要求可用内存至少 768 MiB、负载低于 4、磁盘剩余超过 2 GiB、inode 使用低于 90%。网站、后台、工具与 Nginx 必须正常；已暂停的轻时间和轻间必须继续 inactive/disabled。记录当前 PID、unit SHA、Nginx SHA 和配置指纹，后续发现漂移即停止。
+
+`prepare` 从线上各自当前完整版本复制到新目录，再施加审核增量。后台 dist 仅在确认其为准备目录中的真实子目录后替换；`.local`、mocks、依赖及共享链接保留。工具包严格限制为 `dist/library-source.js` 与 `server/generation-server.mjs`，同时核对线上修改前字节指纹。后台使用准备后的后台和网站目录运行正式 `verify-release-gate.mjs`，禁止 candidate/dirty/server-only 包。包内必须包含 manifest、fixture 证明、环境契约、四份捕获 schema、动态 CJS 附件和门禁脚本；网站须包含被证明绑定的代理及 `dist/environment-policy-data.js`。
+
+准备阶段生成完整代码/运行包及 SHA；包不下载真实 `.local`、反馈数据、mocks、`.env`、密钥或 creator 数据。保留的共享依赖链接、私有配置路径和恢复约束进入证据；共享依赖实际内容也必须有永久归档，不能仅备份一个指向服务器的链接。真实账号/业务 JSON 与支付 SQLite 的受保护快照只留服务器，数据库使用 SQLite 在线备份接口并检查完整性。发布和回滚都不会自动用旧业务数据覆盖新的用户写入。
+
+`publish` 在任何版本切换之前，限时短停唯一后台历史写入进程，**一次原子追加网站、后台两条已确认记录**，并在 finally 恢复旧后台及验证健康。随后严格按“网站 → 后台 → 工具”切换，每次仅重启当前服务并验证本机端口、外部 HTTPS、进程 cwd、文件字节、版本及记录后才进入下一步。新网站保留 Origin，兼容旧后台；后台加强校验时新网站已就绪。网站和后台使用最小独立 drop-in 明确 `SHIYU_ENV=production` 与 `NODE_ENV=production`，且核对运行进程实际身份。工具不伪造独立数字版本，以本次网站版本的工具模块补丁记录。
+
+工作阶段总预算 660 秒，单服务重启不超过 45 秒，单 HTTP 请求不超过 8 秒，shell 在 720 秒触发 TERM，另留 240 秒 kill-after 保护恢复。失败立即停止后续服务，以独立 210 秒预算按“工具 → 后台 → 网站”的已触及范围逆序恢复，避免旧网站丢失 Origin 与新后台混搭。只恢复本次拥有的版本指针和环境 drop-in；第三方修改不会被覆盖，历史不会删除。回滚仍必须通过 active、本机、外部及 cwd 验证；失败留私有 failure.json，不能宣称上线成功。
+
+发布脚本不删除历史目录。成功证据列出每个模块的当前、上个版本与更早候选；随后按项目要求单独检查永久归档、共享数据/依赖引用和其他服务 cwd/ExecStart，再清理无引用历史。被引用目录继续保留，不将清理失败变成健康发布的回滚理由。工具 AI 服务现有依赖状态必须另行说明；工具首页 HTTP 200 不能证明模型生成正常。
+
 ## 三端历史流程
+
+旧 `publish.ps1` 与 `release.sh` 已无绕过地退役：入口在读取发布记录、解析仓库、构建、上传、切换版本或操作服务之前直接拒绝。当前文件只保留退役提示与退出；旧实现可查 Git 历史，不能再直接执行，也没有环境变量恢复开关。
+
+后台发布必须使用 `build:production` 产生的完整 bundle 和 `production-verification.json`，执行不带 `--candidate` 的 `verify-release-gate.mjs`。门禁同时绑定后台运行时、动态 CJS 附件、配套网站账户代理及生成环境数据文件的 SHA、两仓 commit 和源码是否已提交。涉及网站代理时必须同时准备并验收配套网站包；网站和后台启动环境显式为 `SHIYU_ENV=production`、`NODE_ENV=production`。不得仅替换后台而漏掉仍会丢失 Origin 的旧网站代理，也不得用只有后台直连的测试替代真实网站代理链验证。
+
+仅网站发布仍按本文件的目标模块流程执行，先核对实际改动与共享接口依赖；本次账户代理与后台来源检查属于配套改动，应一起列入发布清单。任何发布仍需独立的版本确认、上线记录、永久备份、限时逐服务健康验证与回滚保护。
 
 `publish.ps1`、`release.sh` 和 `retain-releases.mjs` 是原三端发布流程，不再作为默认发布入口。原实现会同步切换并同时重启网站、管理后台和工具站，缺少当前规则要求的完整超时与逐服务恢复保护，不能直接沿用。
 

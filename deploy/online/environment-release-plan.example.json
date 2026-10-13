@@ -1,0 +1,61 @@
+{
+  "id": "20261013053257",
+  "environment": "production",
+  "businessDataMigration": false,
+  "modules": {
+    "website": {
+      "service": "shiyu-preview",
+      "old": "/opt/shiyu/releases/20261012151014",
+      "next": "/opt/shiyu/releases/20261013053257",
+      "version": "V1.4.1",
+      "commit": "0000000000000000000000000000000000000000",
+      "overlay": "website-overlay.tgz",
+      "overlaySha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest": "website-payload-manifest.json",
+      "manifestSha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "admin": {
+      "service": "shiyu-admin",
+      "old": "/opt/shiyu-admin/releases/20261013095429-theme-cleanup",
+      "next": "/opt/shiyu-admin/releases/20261013053257-environment-isolation",
+      "version": "V1.4.2",
+      "commit": "0000000000000000000000000000000000000000",
+      "overlay": "admin-overlay.tgz",
+      "overlaySha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest": "admin-payload-manifest.json",
+      "manifestSha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "tools": {
+      "service": "shiyu-tools",
+      "old": "/opt/shiyu-tools/releases/20261007150631",
+      "next": "/opt/shiyu-tools/releases/20261013053257-environment-isolation",
+      "version": null,
+      "commit": "0000000000000000000000000000000000000000",
+      "baseToolsCommit": "7aa22dc47ca6b70c189e3d6441ec07b061bb2ff8",
+      "overlay": "tools-overlay.tgz",
+      "overlaySha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest": "tools-payload-manifest.json",
+      "manifestSha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "records": {
+    "website": {
+      "id": "environment-20261013053257-website",
+      "target": "website",
+      "previousVersion": "V1.4.0",
+      "version": "V1.4.1",
+      "changeType": "fix",
+      "summary": "统一线上与本地环境边界，保留用户请求来源；工具模块仅修复生产接口来源与开发登录边界，保持已有页面、插件与业务配置。"
+    },
+    "admin": {
+      "id": "environment-20261013053257-admin",
+      "target": "admin",
+      "previousVersion": "V1.4.1",
+      "version": "V1.4.2",
+      "changeType": "fix",
+      "summary": "修复反向代理下会员活动等写接口的来源校验，建立统一环境契约、数据及凭据启动校验与配套构建发布门禁；保留原有权限和后台界面。"
+    }
+  },
+  "permanentBackupVerified": false,
+  "permanentRuntimeDependenciesVerified": false
+}

@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "productionRelease": "/opt/shiyu-tools/releases/20261007150631",
+  "scope": "same-environment library requests and development-only login routes",
+  "excludes": [
+    "model configuration",
+    "secrets",
+    "whitelist",
+    "AI dependency migration",
+    "unrelated local tools changes"
+  ],
+  "files": [
+    {
+      "path": "dist/library-source.js",
+      "beforeSha256": "e754f7ba6abac11f8dc4fe04ea51e6b2103508fb3cf69db756631170ed349b42",
+      "afterSha256": "606fa8199d5ce0ae0b761e3a6b852fa752fca4bea0b402fbda3e24273ba49ddb",
+      "beforeBytes": 4149,
+      "afterBytes": 4321
+    },
+    {
+      "path": "server/generation-server.mjs",
+      "beforeSha256": "82a7e7af49499e71e0932c32a5d329e0ebb43e3d9a6660dbae8e468735fcfb13",
+      "afterSha256": "b40e584f6a642e8d389d5489414175616fd0d97cc65b5c588ef6667b3402dc2b",
+      "beforeBytes": 21821,
+      "afterBytes": 22115
+    }
+  ],
+  "patch": {
+    "path": "checks/environment-isolation/tools-production-environment-isolation.patch",
+    "sha256": "2f9f7aeb1b96621634118e43a449a844b44ee388b17841c5a93e09c44e3e4fbe"
+  }
+}

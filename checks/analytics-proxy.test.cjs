@@ -1,10 +1,8 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const http=require('node:http');
-const fs=require('node:fs');
-const path=require('node:path');
-const vm=require('node:vm');
 const {once}=require('node:events');
+const {createShiyuUserProxy}=require('../shiyu-user-proxy.cjs');
 
 test('analytics proxy accepts CORS without a credentials header and preserves existing credential responses',async t=>{
   const origins=[];
@@ -15,11 +13,11 @@ test('analytics proxy accepts CORS without a credentials header and preserves ex
     res.writeHead(202,{'content-type':'application/json'});res.end('{"accepted":true}');
   });
   upstream.listen(0,'127.0.0.1');await once(upstream,'listening');
-  t.after(()=>upstream.close());
-  const mod={exports:{}};
-  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname,'../shiyu-user-proxy.cjs'),'utf8'),{module:mod,require:()=>({request:(options,callback)=>http.request({...options,port:upstream.address().port},callback)})});
-  const proxy=http.createServer((req,res)=>{if(!mod.exports(req,res)){res.writeHead(404);res.end()}});
-  proxy.listen(0,'127.0.0.1');await once(proxy,'listening');t.after(()=>proxy.close());
+  t.after(()=>{upstream.closeAllConnections();upstream.close()});
+  const upstreamOrigin=`http://127.0.0.1:${upstream.address().port}`;
+  const handler=createShiyuUserProxy({environment:'test',upstreamOrigin,allowedUpstreamOrigins:[upstreamOrigin]});
+  const proxy=http.createServer((req,res)=>{if(!handler(req,res)){res.writeHead(404);res.end()}});
+  proxy.listen(0,'127.0.0.1');await once(proxy,'listening');t.after(()=>{proxy.closeAllConnections();proxy.close()});
   for(const credentials of [false,true]){
     const response=await fetch(`http://127.0.0.1:${proxy.address().port}/api/shiyu/auth/analytics${credentials?'?credential=1':''}`,{method:'POST',headers:{origin:'http://127.0.0.1:4341','content-type':'application/json'},body:'{"events":[]}'});
     assert.equal(response.status,202);

@@ -7,7 +7,9 @@ const { chromium } = require(process.env.SHIYU_PLAYWRIGHT_MODULE || 'C:/Users/ไป
 const root = path.resolve(__dirname, '..'), local = path.join(root, '.local');
 fs.mkdirSync(local, { recursive: true });
 const temp = fs.mkdtempSync(path.join(local, 'extension-cold-tls-'));
-const extension = path.resolve(root, process.env.SHIYU_EXTENSION_DIR || 'browser-extension-lab');
+// This fixture exercises formal origins against a private TLS server, so use the
+// production package. Development targets must stay local instead of following it.
+const extension = path.resolve(root, process.env.SHIYU_EXTENSION_DIR || 'dist/extension/current');
 const version = JSON.parse(fs.readFileSync(path.join(extension, 'manifest.json'), 'utf8')).version;
 const resultFile = path.join(local, 'extension-cold-start-browser-result.json');
 const clone = value => JSON.parse(JSON.stringify(value));

@@ -17,6 +17,7 @@ async function handlePayment(req,res){
   }
 }
 const routes={
+  '/environment-policy-data.js':'environment-policy-data.js','/environment.js':'environment.js',
   '/install/':'install/index.html','/install/index.html':'install/index.html','/install/install.js':'install/install.js',
   '/install/manifest.webmanifest':'install/manifest.webmanifest','/install/icon.svg':'install/icon.svg','/install/icon-192.png':'install/icon-192.png','/install/icon-512.png':'install/icon-512.png',
   '/install/shiyu-shortcut.zip':'install/shiyu-shortcut.zip',

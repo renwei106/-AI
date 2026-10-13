@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "mode": "read-only",
+  "approvedVersions": { "website": "V1.4.1", "admin": "V1.4.2", "extensionUnchanged": "1.0.2" },
+  "executionLimits": {
+    "methods": ["GET", "HEAD", "OPTIONS"],
+    "cookies": false,
+    "authorization": false,
+    "businessWrites": false,
+    "requestTimeoutMs": 8000,
+    "totalTimeoutMs": 60000,
+    "failFast": true,
+    "output": "status, content-type, response shape, public artifact hashes; never full account or configuration data"
+  },
+  "cases": [
+    { "url": "https://shiyubox.com/", "method": "GET", "status": 200, "contentType": "text/html", "assert": "shared environment policy precedes the resolver and all bridge consumers" },
+    { "url": "https://space.shiyubox.com/", "method": "GET", "status": 200, "contentType": "text/html" },
+    { "url": "https://world.shiyubox.com/", "method": "GET", "status": 200, "contentType": "text/html" },
+    { "url": "https://admin.shiyubox.com/", "method": "GET", "status": 200, "contentType": "text/html" },
+    { "url": "https://tool.shiyubox.com/", "method": "GET", "status": 200, "contentType": "text/html" },
+    { "url": "https://shiyubox.com/environment-policy-data.js", "method": "GET", "status": 200, "assert": "SHA-256 equals the exact deployed candidate generated artifact, including the canonical contract fingerprint" },
+    { "url": "https://shiyubox.com/environment.js", "method": "GET", "status": 200, "assert": "SHA-256 equals the exact deployed candidate resolver" },
+    { "url": "https://shiyubox.com/api/shiyu/auth/session", "method": "GET", "status": 200, "contentType": "application/json", "assert": "anonymous response; tests the actual website-to-admin proxy transport" },
+    { "url": "https://admin.shiyubox.com/api/platform/session", "method": "GET", "status": 401, "contentType": "application/json", "assert": "missing session remains unauthorized" },
+    { "url": "https://admin.shiyubox.com/api/platform/session", "method": "GET", "headers": { "Origin": "https://admin.shiyubox.com" }, "status": 401, "contentType": "application/json", "assert": "formal admin origin passes the origin gate but never bypasses session authentication" },
+    { "url": "https://admin.shiyubox.com/api/platform/session", "method": "GET", "headers": { "Origin": "http://127.0.0.1:5175" }, "status": 403, "contentType": "application/json" },
+    { "url": "https://admin.shiyubox.com/api/platform/session", "method": "GET", "headers": { "Origin": "https://shiyubox.com" }, "status": 403, "contentType": "application/json", "assert": "a formal user website origin does not acquire administrator scope" },
+    { "url": "https://admin.shiyubox.com/api/platform/session", "method": "GET", "headers": { "Origin": "null" }, "status": 403, "contentType": "application/json" },
+    { "url": "https://admin.shiyubox.com/api/platform/session", "method": "GET", "headers": { "Origin": "https://unknown.example.invalid" }, "status": 403, "contentType": "application/json" },
+    { "url": "https://admin.shiyubox.com/api/platform/session", "method": "OPTIONS", "headers": { "Origin": "https://admin.shiyubox.com", "Access-Control-Request-Method": "POST" }, "status": 204, "assert": "Access-Control-Allow-Origin is exactly the formal admin origin; credentials remain enabled" },
+    { "url": "https://admin.shiyubox.com/api/platform/session", "method": "OPTIONS", "headers": { "Origin": "http://127.0.0.1:5175", "Access-Control-Request-Method": "POST" }, "status": 204, "assert": "no Access-Control-Allow-Origin; an OPTIONS 204 alone does not establish permission" },
+    { "url": "https://admin.shiyubox.com/api/shiyu/activities", "method": "GET", "status": 403, "contentType": "application/json", "assert": "no administrator cookie and no activity creation" },
+    { "url": "https://tool.shiyubox.com/api/platform-theme", "method": "GET", "status": 200, "contentType": "application/json", "assert": "existing theme configuration response shape, without printing configuration contents" },
+    { "url": "https://tool.shiyubox.com/api/tool-features", "method": "GET", "status": 200, "contentType": "application/json" },
+    { "url": "https://tool.shiyubox.com/api/qing-space-admin/public-library", "method": "GET", "status": 200, "contentType": "application/json", "assert": "same-origin public library payload is valid JSON" },
+    { "url": "https://tool.shiyubox.com/__shiyu_shared_login", "method": "GET", "status": 404, "contentType": "application/json", "assert": "development-only iframe login does not execute in production" },
+    { "url": "https://tool.shiyubox.com/__shiyu_auth_proxy/api/shiyu/auth/session", "method": "GET", "status": 404, "contentType": "application/json" },
+    { "url": "https://tool.shiyubox.com/api/shiyu/auth/session", "method": "GET", "status": 200, "contentType": "application/json", "assert": "the existing normal same-origin tool authentication proxy stays available" },
+    { "url": "https://shiyubox.com/extension/release.json", "method": "GET", "status": 200, "contentType": "application/json", "assert": "latest remains 1.0.2" },
+    { "url": "https://shiyubox.com/extension/current/config.js", "method": "GET", "status": 200, "assert": "bytes unchanged from the pre-release formal plugin baseline; only the formal site target" },
+    { "url": "https://shiyubox.com/extension/firefox-release.json", "method": "GET", "status": 200, "contentType": "application/json", "assert": "ready remains false; do not invent a signed Firefox release" }
+  ],
+  "sshReadOnlyChecks": [
+    "website/admin/tools active; time/space remain inactive and disabled; nginx PID and configuration remain unchanged",
+    "website RELEASE_VERSION is V1.4.1 and backend RELEASE_VERSION is V1.4.2; corresponding release records were appended without modifying history",
+    "website and backend effective SHIYU_ENV=production and NODE_ENV=production; backend retains SHIYU_ANALYTICS_ENV=production",
+    "tool candidate is cloned from /opt/shiyu-tools/releases/20261007150631 and changes only the two pinned files plus new immutable release metadata",
+    "formal extension current/download archives/release metadata retain their pre-release hashes",
+    "the actual current links and protected shared data links match the approved release manifest"
+  ],
+  "limits": [
+    "Real auth writes, payment orders, invitation rewards, activity creation, uploads and account creation are never production smoke tests; exercise them only through the isolated release fixture.",
+    "Native ZIP and signed-CRX extension POST compatibility is verified in isolated browser/backend fixtures, not with a real production account.",
+    "HTTP 200 from tool generation does not prove AI availability. The pre-existing stopped model-administration dependency is a separate recorded limitation and is not migrated by this release.",
+    "Public SPA HTTP 200 does not prove a version; verify immutable release metadata over the approved read-only server channel."
+  ]
+}
