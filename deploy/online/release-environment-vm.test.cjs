@@ -107,7 +107,19 @@ function host(failAt = '') {
     if (shouldFail) failed = true;
     return { status: shouldFail ? 500 : 200, text: async () => body };
   }
-  const fakeRequire = name => name === 'node:fs' ? fakeFs : name === 'node:child_process' ? { execFileSync } : name.endsWith('/payments/config.cjs') ? { loadConfig: () => ({ database: '/fixture/nonexistent-orders.sqlite' }) } : require(name);
+  const { EventEmitter } = require('node:events');
+  const fakeHttp = { request(url, options, callback) {
+    assert.equal(url.hostname, '127.0.0.1'); assert.equal(options.headers.Host, 'tool.shiyubox.com');
+    assert(options.signal && options.timeout <= 8000);
+    const req = new EventEmitter(); req.destroy = () => {};
+    req.end = () => Promise.resolve().then(async () => {
+      const r = await fetch(url.href), body = Buffer.from(await r.text()), res = new EventEmitter();
+      res.statusCode = r.status; res.headers = { 'content-length': String(body.length) }; res.destroy = () => {};
+      callback(res); res.emit('data', body); res.emit('end');
+    });
+    return req;
+  } };
+  const fakeRequire = name => name === 'node:fs' ? fakeFs : name === 'node:http' ? fakeHttp : name === 'node:child_process' ? { execFileSync } : name.endsWith('/payments/config.cjs') ? { loadConfig: () => ({ database: '/fixture/nonexistent-orders.sqlite' }) } : require(name);
   const module = { exports: {} }; fakeRequire.main = {};
   const context = { require: fakeRequire, module, process: { env: {}, once() {} }, Buffer, console: { log() {}, error() {} }, AbortController, AbortSignal, URL, setTimeout, clearTimeout, Date };
   vm.runInNewContext(source + '\nmodule.exports.fixtureRuntime = makeRuntime;', context, { filename: 'release-environment.cjs', timeout: 1000 }); context.fetch = fetch;

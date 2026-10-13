@@ -1,7 +1,7 @@
 'use strict';
 // Explicit, sequential website -> admin -> tools release. Never migrates business data.
 // Derived from the verified admin-cleanup and front-only release safety patterns.
-const fs = require('node:fs'), path = require('node:path'), cp = require('node:child_process');
+const fs = require('node:fs'), path = require('node:path'), cp = require('node:child_process'), http = require('node:http');
 const crypto = require('node:crypto'), assert = require('node:assert/strict');
 const ORDER = ['website', 'admin', 'tools'];
 const DEFAULTS = {
@@ -21,6 +21,27 @@ function sha(p, io = fs) {
     while ((bytes = io.readSync(fd, buffer, 0, buffer.length, null)) !== 0) hash.update(buffer.subarray(0, bytes));
     return hash.digest('hex');
   } finally { io.closeSync(fd); }
+}
+function requestWithHost(url, { headers, signal, timeout = 8000, maxBytes = 1024 * 1024 }) {
+  const target = new URL(url);
+  assert(target.protocol === 'http:' && ['127.0.0.1', 'localhost', '[::1]'].includes(target.hostname) && !target.username && !target.password, 'Custom Host probes must target loopback HTTP');
+  assert(Number.isFinite(timeout) && timeout > 0 && timeout <= 8000);
+  assert(Number.isSafeInteger(maxBytes) && maxBytes > 0 && maxBytes <= 4 * 1024 * 1024);
+  return new Promise((resolve, reject) => {
+    const req = http.request(target, { method: 'GET', headers, signal, timeout }, res => {
+      let bytes = 0; const chunks = [];
+      const fail = error => { reject(error); res.destroy(); req.destroy(); };
+      if (Number(res.headers['content-length']) > maxBytes) { fail(Error('HTTP probe response exceeds byte limit')); return; }
+      res.on('data', chunk => {
+        bytes += chunk.length;
+        if (bytes > maxBytes) { fail(Error('HTTP probe response exceeds byte limit')); return; }
+        chunks.push(chunk);
+      });
+      res.once('end', () => resolve({ status: res.statusCode, body: Buffer.concat(chunks, bytes).toString('utf8') }));
+      res.once('error', reject);
+    });
+    req.once('error', reject); req.once('timeout', () => req.destroy(Error('HTTP probe timed out'))); req.end();
+  });
 }
 const json = p => JSON.parse(fs.readFileSync(p, 'utf8'));
 const fileState = p => fs.existsSync(p) ? { exists: true, sha256: sha(p) } : { exists: false };
@@ -195,6 +216,10 @@ function makeRuntime(planPath) {
   async function request(url, expected = 200, headers = {}, until = deadline) {
     assert(!interrupted || recovering); const timeout = Math.min(8000, deadline - Date.now(), until - Date.now()); assert(timeout > 0, 'HTTP deadline expired');
     const signal = recovering ? AbortSignal.timeout(timeout) : AbortSignal.any([AbortSignal.timeout(timeout), controller.signal]);
+    if (Object.keys(headers).some(name => name.toLowerCase() === 'host')) {
+      const r = await requestWithHost(url, { signal, timeout, headers: { Connection: 'close', ...headers } });
+      assert.equal(r.status, expected, url); return r.body;
+    }
     const r = await fetch(url, { signal, headers: { Connection: 'close', ...headers }, redirect: 'error' });
     const body = await r.text(); assert.equal(r.status, expected, url); return body;
   }
@@ -373,7 +398,7 @@ function makeRuntime(planPath) {
   }
   return { preflight, prepare, publish, write };
 }
-module.exports = { ORDER, DEFAULTS, sha, safeRelative, validatePlan, validateManifest, assertSafeOverlayDestination, sequentialRelease };
+module.exports = { ORDER, DEFAULTS, sha, requestWithHost, safeRelative, validatePlan, validateManifest, assertSafeOverlayDestination, sequentialRelease };
 if (require.main === module) {
   let runtime; const mode = process.argv[2];
   (async () => { assert(['preflight', 'prepare', 'publish'].includes(mode)); runtime = makeRuntime(process.argv[3]); await runtime[mode](); })().catch(error => {
