@@ -1,6 +1,28 @@
 'use strict';
-const test = require('node:test'), assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path');
-const { DEFAULTS, ORDER, safeRelative, validatePlan, validateManifest, assertSafeOverlayDestination, sequentialRelease } = require('./release-environment.cjs');
+const test = require('node:test'), assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path'), os = require('node:os'), crypto = require('node:crypto');
+const { DEFAULTS, ORDER, sha, safeRelative, validatePlan, validateManifest, assertSafeOverlayDestination, sequentialRelease } = require('./release-environment.cjs');
+test('large-file SHA256 uses at most a 1 MiB read buffer and never reads the whole file', t => {
+  const filename = path.join(os.tmpdir(), 'shiyu-release-sha-' + crypto.randomUUID() + '.bin');
+  const chunk = Buffer.alloc(1024 * 1024, 0xa5), expected = crypto.createHash('sha256'), writer = fs.openSync(filename, 'wx');
+  t.after(() => fs.unlinkSync(filename));
+  try {
+    for (let i = 0; i < 32; i++) { chunk[0] = i; fs.writeSync(writer, chunk); expected.update(chunk); }
+    const tail = Buffer.from('partial-final-block'); fs.writeSync(writer, tail); expected.update(tail);
+  } finally { fs.closeSync(writer); }
+  let reads = 0, closes = 0, maximumRead = 0;
+  const io = {
+    openSync: fs.openSync,
+    readSync(fd, buffer, offset, length, position) { reads++; maximumRead = Math.max(maximumRead, length); assert(buffer.length <= 1024 * 1024); return fs.readSync(fd, buffer, offset, length, position); },
+    closeSync(fd) { closes++; fs.closeSync(fd); },
+    readFileSync() { throw Error('Whole-file reads are forbidden for package hashing'); },
+  };
+  assert.equal(sha(filename, io), expected.digest('hex')); assert.equal(maximumRead, 1024 * 1024); assert(reads >= 34); assert.equal(closes, 1);
+});
+test('streaming SHA256 closes the file even when a read fails', () => {
+  const closed = [], error = Error('fixture read failure');
+  assert.throws(() => sha('/fixture/archive.tgz', { openSync: () => 42, readSync() { throw error; }, closeSync: fd => closed.push(fd) }), candidate => candidate === error);
+  assert.deepEqual(closed, [42]);
+});
 function plan(id = '20261013053257') {
   return {
     id, environment: 'production', businessDataMigration: false,

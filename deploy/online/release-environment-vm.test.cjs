@@ -33,7 +33,14 @@ function host(failAt = '') {
     p = normalize(p); assert(p.startsWith(base + '/') || p.startsWith('/etc/systemd/system/') || p === history || p.startsWith(history + '.') || p === '/opt/shiyu/backups/runtime-operations.jsonl', 'Unapproved fixture write: ' + p);
     if (options.flag === 'wx') assert(!exists(p)); put(p, b); writes.push(p);
   }
+  const descriptors = new Map(); let nextDescriptor = 1;
   const fakeFs = {
+    openSync(p, mode) { assert.equal(mode, 'r'); const fd = nextDescriptor++; descriptors.set(fd, { bytes: get(p), cursor: 0 }); return fd; },
+    readSync(fd, buffer, offset, length, position) {
+      const file = descriptors.get(fd); assert(file); const cursor = position === null ? file.cursor : position;
+      const size = Math.min(length, file.bytes.length - cursor); file.bytes.copy(buffer, offset, cursor, cursor + size); if (position === null) file.cursor += size; return size;
+    },
+    closeSync(fd) { assert(descriptors.delete(fd)); },
     readFileSync(p, encoding) { const b = get(p); return encoding ? b.toString() : b; }, writeFileSync: write,
     existsSync: exists, statSync: stat, lstatSync: stat, realpathSync: real,
     readlinkSync(p) { assert(links.has(normalize(p))); return links.get(normalize(p)); },

@@ -13,7 +13,15 @@ const HISTORY = '/opt/shiyu-admin/shared/.local/shiyu-release-history.json';
 const DROPIN = '95-environment-isolation.conf';
 const ENV_BYTES = '[Service]\nEnvironment=SHIYU_ENV=production\nEnvironment=NODE_ENV=production\n';
 const shaBytes = b => crypto.createHash('sha256').update(b).digest('hex');
-const sha = p => shaBytes(fs.readFileSync(p));
+function sha(p, io = fs) {
+  const hash = crypto.createHash('sha256'), buffer = Buffer.allocUnsafe(1024 * 1024);
+  const fd = io.openSync(p, 'r');
+  try {
+    let bytes;
+    while ((bytes = io.readSync(fd, buffer, 0, buffer.length, null)) !== 0) hash.update(buffer.subarray(0, bytes));
+    return hash.digest('hex');
+  } finally { io.closeSync(fd); }
+}
 const json = p => JSON.parse(fs.readFileSync(p, 'utf8'));
 const fileState = p => fs.existsSync(p) ? { exists: true, sha256: sha(p) } : { exists: false };
 const same = (a, b, message) => assert.deepEqual(a, b, message);
@@ -365,7 +373,7 @@ function makeRuntime(planPath) {
   }
   return { preflight, prepare, publish, write };
 }
-module.exports = { ORDER, DEFAULTS, safeRelative, validatePlan, validateManifest, assertSafeOverlayDestination, sequentialRelease };
+module.exports = { ORDER, DEFAULTS, sha, safeRelative, validatePlan, validateManifest, assertSafeOverlayDestination, sequentialRelease };
 if (require.main === module) {
   let runtime; const mode = process.argv[2];
   (async () => { assert(['preflight', 'prepare', 'publish'].includes(mode)); runtime = makeRuntime(process.argv[3]); await runtime[mode](); })().catch(error => {
