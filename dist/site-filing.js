@@ -8,7 +8,7 @@
     if (!matchMedia('(pointer: fine)').matches) return;
     document.documentElement.classList.remove('site-filing-idle');
     clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => document.documentElement.classList.add('site-filing-idle'), 3000);
+    idleTimer = setTimeout(() => document.documentElement.classList.add('site-filing-idle'), 10000);
   }
   function footer() {
     const node = document.createElement('footer');
