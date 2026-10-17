@@ -31,8 +31,11 @@ if [ -f "$old/RELEASE_VERSION" ]; then
 fi
 
 services=(nginx shiyu-preview shiyu-admin shiyu-tools)
+# Light time and light space are deliberately paused: the environment release requires
+# them to stay inactive and disabled. Only gate on units that are installed and enabled,
+# so a paused admin surface never blocks a website-only release.
 for service in shiyu-space shiyu-time; do
-  if [ "$(timeout 5s systemctl show --property=LoadState --value "$service")" = loaded ]; then services+=("$service"); fi
+  if [ "$(timeout 5s systemctl show --property=LoadState --value "$service")" = loaded ] && [ "$(timeout 5s systemctl is-enabled "$service" 2>/dev/null || true)" = enabled ]; then services+=("$service"); fi
 done
 check_services(){
   for service in "${services[@]}"; do
