@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101713">
+  <meta name="description" content="拾隅隐私政策，说明我们收集哪些信息、信息用于什么用途、数据保存在哪里，以及你的权利。">
+  <title>隐私政策 - 拾隅</title>
+  <link rel="canonical" href="https://www.shiyubox.com/privacy/">
+  <link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/official.css">
+  <link rel="stylesheet" href="/fidelity.css">
+  <link rel="stylesheet" href="/layout.css">
+</head>
+<body data-legal-key="privacy">
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-brand" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" rx="7"/><path d="M4 18h10a8 8 0 0 0 8-8V4M17 17l11 11"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 18 18 6M6 6h12v12"/></symbol>
+  </defs></svg>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header" data-tone="light">
+    <a class="brand" href="/" aria-label="拾隅官网，回到首页"><svg class="icon"><use href="#i-brand"/></svg><span>拾隅</span><small>SHIYU</small></a>
+    <nav class="main-nav" aria-label="官网导航">
+      <a href="/#themes">主题</a><a href="/#space">空间</a><a href="/#world">世界</a><a href="/#extension">插件</a><a href="/#tools">工具</a><a href="/guide/">使用指南</a>
+    </nav>
+    <a class="header-enter" href="https://shiyubox.com/">进入拾隅<svg class="icon"><use href="#i-up"/></svg></a>
+  </header>
+  <main id="main" class="doc-page">
+    <p class="doc-lead">本页面内容与拾隅登录页展示的隐私政策一致，由同一处维护，改动后两边同步生效。</p>
+    <h1 data-legal-title>隐私政策</h1>
+    <p class="doc-meta" data-legal-meta></p>
+    <div class="legal-body" data-legal-body><p class="legal-loading">正在加载隐私政策…</p></div>
+    <noscript><p class="doc-note">本页面需要浏览器启用 JavaScript 才能显示隐私政策。你也可以在拾隅登录页查看同样的内容。</p></noscript>
+    <nav class="doc-back" aria-label="页面导航">
+      <a href="/">返回官网首页</a>
+      <a href="/terms/">用户服务协议</a>
+      <a href="https://shiyubox.com/">进入拾隅</a>
+    </nav>
+  </main>
+  <footer class="site-footer">
+    <nav class="site-footer-links" aria-label="页脚导航">
+      <a href="/guide/">使用指南</a><a href="/changelog/">更新日志</a><a href="/terms/">用户协议</a><a href="/privacy/">隐私政策</a>
+    </nav>
+    <span class="site-footer-filing">备案号<a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">晋ICP备2026014070号-1</a><a href="https://beian.mps.gov.cn/#/query/webSearch" target="_blank" rel="noopener noreferrer">晋公网安备14010502990799号</a></span>
+  </footer>
+  <script>
+  (async () => {
+    'use strict';
+    const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const key = document.body.dataset.legalKey;
+    const titleEl = document.querySelector('[data-legal-title]');
+    const metaEl = document.querySelector('[data-legal-meta]');
+    const bodyEl = document.querySelector('[data-legal-body]');
+    const fail = message => { if (bodyEl) bodyEl.innerHTML = '<p class="doc-note">' + esc(message) + '</p>'; };
+    try {
+      const response = await fetch('/api/shiyu/agreements', { credentials: 'same-origin', cache: 'no-store' });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || '隐私政策暂时无法加载');
+      const list = result.agreements || [];
+      const item = list.find(x => x.key === key) || list[0];
+      if (!item) throw new Error('隐私政策暂时无法加载');
+      if (titleEl) titleEl.textContent = item.title;
+      document.title = item.title + ' - 拾隅';
+      if (metaEl) {
+        const bits = [];
+        if (item.version) bits.push('版本 ' + item.version);
+        if (item.updatedAt) bits.push('更新于 ' + String(item.updatedAt).slice(0, 10));
+        metaEl.textContent = bits.join(' · ');
+      }
+      if (bodyEl) bodyEl.innerHTML = item.format === 'html' ? item.body : '<p>' + esc(item.body).replace(/\n/g, '</p><p>') + '</p>';
+    } catch (error) {
+      fail(error.message || '隐私政策暂时无法加载，请稍后重试。');
+    }
+  })();
+  </script>
+</body>
+</html>

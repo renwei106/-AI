@@ -107,6 +107,12 @@ http.createServer(async(req,res)=>{
   else if(pathname.startsWith('/official/v2/')){res.writeHead(410,{'Cache-Control':'no-store'});res.end('Gone');return}
   else if(pathname==='/official/v3/'||pathname==='/official/v3')file='official/v3/index.html'
   else if(/^\/official\/(?!.*\.\.)[A-Za-z0-9._/-]+$/.test(pathname))file=pathname.slice(1)
+  // Text pages under the official site live in their own folder, so a trailing
+  // slash resolves to that folder's index file.
+  if(file&&file.endsWith('/'))file+='index.html'
+  // A folder requested without its trailing slash redirects, so the official
+  // text pages never surface a bare 404 for a missing slash.
+  if(file&&fs.existsSync(path.join(root,file))&&fs.statSync(path.join(root,file)).isDirectory()){res.writeHead(301,{Location:pathname+'/'+req.url.slice(pathname.length),'Cache-Control':'no-store'});res.end();return}
   if(!file){res.writeHead(404);res.end('Not found');return}
   if(await localized(req,res,file,root))return
   const fullPath=path.join(root,file)
