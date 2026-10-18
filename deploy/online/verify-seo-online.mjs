@@ -8,8 +8,20 @@ for(const domain of ['shiyubox.com','www.shiyubox.com']){
   assert.match(html,/<title>拾隅官网｜个性化起始页，网址收藏与导航<\/title>/);
   assert.match(html,/content="拾隅是一站式个性化网址收藏与导航平台/);
  }
- const robots=await get(base+'robots.txt');assert.equal(robots.status,200);assert.match(robots.headers.get('content-type'),/text\/plain/);assert((await robots.text()).includes('Sitemap: '+base+'sitemap.xml'));
- const sitemap=await get(base+'sitemap.xml');assert.equal(sitemap.status,200);assert.match(sitemap.headers.get('content-type'),/xml/);assert.deepEqual([...((await sitemap.text()).matchAll(/<loc>(.*?)<\/loc>/g))].map(m=>m[1]),[base]);
+const robots=await get(base+'robots.txt');assert.equal(robots.status,200);assert.match(robots.headers.get('content-type'),/text\/plain/);assert((await robots.text()).includes('Sitemap: '+base+'sitemap.xml'));
+const sitemap=await get(base+'sitemap.xml');assert.equal(sitemap.status,200);assert.match(sitemap.headers.get('content-type'),/xml/);
+// The brand site lists its five text pages; the application domain keeps a single entry.
+const sitemapUrls=[...((await sitemap.text()).matchAll(/<loc>(.*?)<\/loc>/g))].map(m=>m[1]);
+assert.deepEqual(sitemapUrls,domain.startsWith('www.')?[base,base+'guide/',base+'changelog/',base+'terms/',base+'privacy/']:[base]);
+if(domain.startsWith('www.')){
+ // Every published text page answers 200 and names itself as canonical, so the
+ // application domain never competes for the same keywords.
+ for(const page of ['guide/','changelog/','terms/','privacy/']){
+  const response=await get(base+page);assert.equal(response.status,200,base+page);
+  assert.deepEqual(canonical(await response.text()),[base+page]);
+ }
+ assert.equal((await get(base+'guide')).status,301);
+}
 }
 for(const url of ['https://space.shiyubox.com/','https://world.shiyubox.com/','https://shiyubox.com/?page=membership']){const r=await get(url);assert.equal(r.status,200);assert(!canonical(await r.text()).includes('https://shiyubox.com/'),url)}
 const old=await get('https://shiyubox.com/official/v2/?source=baidu');assert.equal(old.status,301);assert.equal(old.headers.get('location'),'https://www.shiyubox.com/?source=baidu');
